@@ -1,0 +1,52 @@
+
+  <button class="nav-link flex-xl-column" role="button" data-bs-toggle="dropdown" data-bs-settings-switcher aria-expanded="false">
+    <span class="material-symbols-outlined">settings</span> <span class="d-xl-none ms-3">{{ 'settings' | t }}</span>
+  </button>
+  <div class="dropdown-menu top-auto bottom-0 ms-xl-3">
+    <!-- Color mode -->
+    <h6 class="dropdown-header">{{ 'color_mode' | t }}</h6>
+    @for (themeOption of themes; track themeOption.name) {
+      <button
+        class="dropdown-item d-flex"
+        data-bs-theme-value="light"
+        role="button"
+        [class.active]="themeOption.name.toLocaleLowerCase() === currentTheme"
+        (click)="setTheme(themeOption.name.toLowerCase())"
+      >
+        <span class="material-symbols-outlined me-2">{{themeOption.icon}}</span> {{themeOption.name}}
+      </button>
+    }
+
+    <!-- Language -->
+    <hr class="dropdown-divider" />
+    <h6 class="dropdown-header">{{ 'language' | t }}</h6>
+    @for (lang of languages; track lang.short) {
+      <button
+        class="dropdown-item d-flex"
+        role="button"
+        [class.active]="lang.short === currentLanguage"
+        (click)="setLanguage(lang.short)"
+      >
+        {{ lang.name }}
+      </button>
+    }
+
+    <!-- Sidenav sizing -->
+    <div class="sidenav-sizing">
+      <hr class="dropdown-divider" />
+      <h6 class="dropdown-header">{{ 'sidenav_sizing' | t }}</h6>
+      @for(sizingOption of sizings; track sizingOption.name) {
+        <button
+          class="dropdown-item d-flex"
+          [attr.data-bs-sidenav-sizing-value]="sizingOption.name.toLocaleLowerCase()"
+          role="button"
+            [class.active]="sizingOption.name.toLocaleLowerCase() === currentSizing"
+            (click)="setSizing(sizingOption.short)"
+        >
+          <span class="material-symbols-outlined me-2">{{sizingOption.icon}}</span> {{ sizingOption.name }}
+        </button>
+      }
+
+    </div>
+  </div>
+

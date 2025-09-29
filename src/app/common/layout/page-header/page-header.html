@@ -1,0 +1,43 @@
+<!-- Page header -->
+<div class="row align-items-center mb-7">
+    <div class="col-auto">
+        <!-- Avatar -->
+        <div class="avatar avatar-xl rounded text-success">
+            <span class="material-symbols-outlined fs-3">{{icon()}}</span>
+        </div>
+    </div>
+    <div class="col">
+        <!-- Breadcrumb -->
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-1">
+                <li class="breadcrumb-item"><a class="text-body-secondary" href="customers.html#">{{breadcrumbs[1]}}</a></li>
+                <li class="breadcrumb-item active" aria-current="page">{{breadcrumbs[2]}}</li>
+            </ol>
+        </nav>
+
+        <!-- Heading -->
+        <h1 class="fs-4 mb-0">{{action()}}</h1>
+    </div>
+    <div class="col-12 col-sm-auto mt-4 mt-sm-0">
+        <ng-content></ng-content>
+    </div>
+</div>
+
+
+
+
+
+
+
+<!--<div class="row align-items-center">-->
+<!--    <div class="col-12 col-md-auto order-md-1 d-flex align-items-center justify-content-center mb-4 mb-md-0">-->
+<!--        <div class="avatar text-info me-2">-->
+<!--            <i class="fs-4" data-duoicon="world"></i>-->
+<!--        </div>-->
+<!--        San Francisco, CA –&nbsp;<span>8:00 PM</span>-->
+<!--    </div>-->
+<!--    <div class="col-12 col-md order-md-0 text-center text-md-start">-->
+<!--        <h1>Hello, John</h1>-->
+<!--        <p class="fs-lg text-body-secondary mb-0">Here's a summary of your account activity for this week.</p>-->
+<!--    </div>-->
+<!--</div>-->

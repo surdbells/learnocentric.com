@@ -1,0 +1,35 @@
+<app-page-header icon="schedule" action="Class Routine">
+    <!-- Action -->
+<!--    <app-learno-button text="Add Class Routine" (clicked)="clickedHandler()" />-->
+  @if(userRole == "admin") {
+    <app-learno-modal [modalId]="'add_time_table'" [modalAction]="'Add Time Table'" >
+      <app-routine-form modalForm />
+    </app-learno-modal>
+  }
+</app-page-header>
+
+
+
+<div class="row">
+    <div class="col-12">
+      <app-dashboard-card title="Time Table">
+        <div class="d-flex flex-column flex-nowrap overflow-auto" body>
+          @for (day of days; track day) {
+            <div class="d-flex py-3 flex-row align-items-center border-bottom me-4 flex-fill">
+              <app-routine-day-card class="mb-3 col-1" day="{{day}}" />
+              <app-routine-card />
+              <app-routine-card />
+              <app-routine-card />
+              <app-routine-card />
+              <app-routine-card />
+              <app-routine-card />
+              <app-routine-card />
+              <app-routine-card />
+              <app-routine-card />
+              <app-routine-card />
+            </div>
+          }
+        </div>
+      </app-dashboard-card>
+    </div>
+</div>

@@ -1,0 +1,89 @@
+<form [formGroup]="form" (ngSubmit)="onSubmit()">
+  <section class="card card-line  border mb-5">
+    <div class="card-body">
+      <h3 class="fs-5 mb-1">General</h3>
+      <p class="text-body-secondary mb-5">General information about the school.</p>
+      <hr />
+      <div class="mb-4" learnoInput [label]="'Name'" [inputType]="'text'" [id]="'name'" [formControlName]="'name'"></div>
+      <div class="mb-4" learnoInput [label]="'Email Address'" [inputType]="'email'" [id]="'email'" [formControlName]="'email'"></div>
+      <div class="mb-4" learnoInput [label]="'Address'" [inputType]="'text'" [id]="'address'" [formControlName]="'address'"></div>
+    </div>
+  </section>
+
+<!--  <section class="card card-line  border mb-5">-->
+<!--    <div class="card-body">-->
+<!--      <h3 class="fs-5 mb-1">General</h3>-->
+<!--      <p class="text-body-secondary mb-5">General information about the school.</p>-->
+<!--      <hr />-->
+<!--      <div class="mb-4" learnoInput [label]="'Name'" [inputType]="'text'" [id]="'name'" [formControlName]="'name'"></div>-->
+<!--      <div class="mb-4" learnoInput [label]="'Email Address'" [inputType]="'email'" [id]="'email'" [formControlName]="'email'"></div>-->
+<!--      <div class="mb-4" learnoInput [label]="'Address'" [inputType]="'text'" [id]="'address'" [formControlName]="'address'"></div>-->
+<!--    </div>-->
+<!--  </section>-->
+
+<!--  <section class="card card-line bg-body-tertiary border-transparent mb-5">-->
+<!--    <div class="card-body">-->
+<!--      <h3 class="fs-5 mb-1">Files</h3>-->
+<!--      <p class="text-body-secondary mb-5">Starting files for the project.</p>-->
+<!--      <hr />-->
+<!--      <div class="mb-0">-->
+<!--        <label for="dropzone">Files</label>-->
+<!--        <div class="form-text mt-0 mb-3">Attach files to this customer.</div>-->
+<!--        <div class="dropzone" id="dropzone"></div>-->
+<!--      </div>-->
+<!--    </div>-->
+<!--  </section>-->
+<!--  <section class="card bg-body-tertiary border-transparent mb-7">-->
+<!--    <div class="card-body">-->
+<!--      <h3 class="fs-5 mb-1">Team</h3>-->
+<!--      <p class="text-body-secondary mb-5">Team members working on the project.</p>-->
+<!--      <hr />-->
+<!--      <div class="mb-4">-->
+<!--        <label class="form-label" for="teamTitle">Team title</label>-->
+<!--        <input class="form-control bg-body" id="teamTitle" type="text" />-->
+<!--      </div>-->
+<!--      <div class="mb-0">-->
+<!--        <label class="form-label" for="teamMembers">Team members</label>-->
+<!--        <select-->
+<!--          class="form-select bg-body"-->
+<!--          id="teamMembers"-->
+<!--          data-choices='{"searchEnabled": false, "choices": [-->
+<!--                {-->
+<!--                  "value": "Emily Thompson",-->
+<!--                  "label": "Emily Thompson",-->
+<!--                  "customProperties": {-->
+<!--                    "avatarSrc": "../assets/img/photos/photo-1.jpg"-->
+<!--                  }-->
+<!--                },-->
+<!--                {-->
+<!--                  "value": "Michael Johnson",-->
+<!--                  "label": "Michael Johnson",-->
+<!--                  "customProperties": {-->
+<!--                    "avatarSrc": "../assets/img/photos/photo-2.jpg"-->
+<!--                  }-->
+<!--                },-->
+<!--                {-->
+<!--                  "value": "Robert Garcia",-->
+<!--                  "label": "Robert Garcia",-->
+<!--                  "customProperties": {-->
+<!--                    "avatarSrc": "../assets/img/photos/photo-3.jpg"-->
+<!--                  }-->
+<!--                },-->
+<!--                {-->
+<!--                  "value": "Jessica Miller",-->
+<!--                  "label": "Jessica Miller",-->
+<!--                  "customProperties": {-->
+<!--                    "avatarSrc": "../assets/img/photos/photo-4.jpg"-->
+<!--                  }-->
+<!--                }-->
+<!--              ]}'-->
+<!--        ></select>-->
+<!--      </div>-->
+<!--    </div>-->
+<!--  </section>-->
+<!--  <button type="submit" class="btn btn-secondary w-100">Save project</button>-->
+<!--  <button type="reset" class="btn btn-link w-100 mt-3">Reset form</button>-->
+</form>
+
+
+<!--<app-grade-form-->

@@ -1,0 +1,9 @@
+<app-page-header icon="book" action="Classes" >
+  <app-learno-modal [modalId]="'add_class'" [modalAction]="'Add Class'" >
+    <app-school-class-form action="Add Class" modalForm />
+  </app-learno-modal>
+<!--  <app-learno-button (clicked)="clickhandker()" [text]="'Add'" />-->
+</app-page-header>
+
+<app-table-search />
+<app-data-table [tableHeads]="['name', 'class', 'subject', 'resource link']" [tableRows]="[]" />

@@ -1,0 +1,9 @@
+<label class="form-label" for="{{id()}}">{{label()}}</label>
+<input
+    class="form-control"
+    id="{{id()}}"
+    type="{{inputType()}}"
+    (input)="onInput($event)"
+    (blur)="onBlur()"
+/>
+

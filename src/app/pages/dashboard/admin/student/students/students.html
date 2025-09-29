@@ -1,0 +1,12 @@
+<app-page-header icon="local_library" action="Students">
+    <app-learno-button text="Add Student" (clicked)="clickedHandler()" />
+</app-page-header>
+
+<!-- Page content -->
+<div class="row">
+    <div class="col-12">
+        <app-table-search />
+        <app-data-table [tableHeads]="['User', 'Company', 'Phone', 'Location']"  [tableRows]="[]"/>
+    </div>
+</div>
+<app-data-table-numbering [tableData]="[]" />

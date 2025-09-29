@@ -1,0 +1,14 @@
+<app-page-header icon="library_books" action="E-Library" >
+
+  @if(userRole == "admin") {
+    <app-learno-modal [modalId]="'add_e_library'" [modalAction]="'Add E-Library'" >
+      <app-e-library-form [action]="'Add E-Library'" modalForm />
+    </app-learno-modal>
+  }
+<!--  <app-learno-button (clicked)="clickhandker()" [text]="'Add'" />-->
+</app-page-header>
+
+<app-table-search />
+<app-data-table [tableHeads]="['name', 'class', 'subject', 'resource link']" [tableRows]="[]" />
+
+

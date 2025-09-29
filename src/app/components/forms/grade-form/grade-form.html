@@ -1,0 +1,146 @@
+<form [formGroup]="form" (ngSubmit)="onSubmit()">
+
+  <div class="modal-body" data-select2-id="83">
+    <section class="card card-line  border mb-5">
+      <div class="card-body">
+        <!--      <h3 class="fs-5 mb-1">General</h3>-->
+        <!--      <p class="text-body-secondary mb-5">General information about the school.</p>-->
+        <!--      <hr />-->
+        <div class="row">
+          <div class="col-xl-4 mb-4" learnoInput [label]="'Student Name'" [inputType]="'text'" [id]="'name'" [formControlName]="'name'"></div>
+          <div class="col-xl-4 mb-4" learnoSelect [label]="'Session'" [id]="'session'" [formControlName]="'session'" [options]="[
+              { label: '2021/2022', value: '2021/2022' },
+              { label: '2022/2023', value: '2022/2023' }
+        ]"></div>
+          <div class="col-xl-4 mb-4" learnoSelect [label]="'Term'" [id]="'term'" [formControlName]="'term'" [options]="[
+              { label: 'First Term', value: '1' },
+              { label: 'Second Term', value: '2' }
+        ]"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="card  border mb-5">
+      <div class="table-responsive">
+        <table class="table gy-4 gs-4 align-middle">
+          <thead class="bg-dark">
+          <tr class="fw-bold fs-6 text-white">
+            <th> SUBJECT </th>
+            <th> CA (40) </th>
+            <th> EXAM (60) </th>
+            <th> TOTAL </th>
+            <th> GRADE </th>
+            <th> REMARKS </th>
+            <th>  </th>
+          </tr>
+          </thead>
+          <tbody>
+
+            @for (subject of subjects; track $index) {
+              <tr>
+                <td>ENGLISH LANGUAGE</td>
+                <td><input class="form-control" type="number" name="ca" placeholder=""></td>
+                <td><input class="form-control" type="number" name="exam" placeholder=""></td>
+                <td>100</td>
+                <td>
+                  <select class="form-control select2-dropdown--above select2-hidden-accessible" data-control="select2" data-placeholder="Select..." data-select2-id="select2-data-7-mpek" tabindex="-1" aria-hidden="true">
+                    <option value="A" data-select2-id="select2-data-9-h5o4">A</option>
+                    <option value="B">B</option>
+                    <option value="C">C</option>
+                    <option value="D">D</option>
+                    <option value="E">E</option>
+                    <option value="F">F</option>
+                  </select>
+
+                  <!--                <span class="select2 select2-container select2-container&#45;&#45;bootstrap5" dir="ltr" data-select2-id="select2-data-8-s3a9" style="width: 100%;"><span class="selection"><span class="select2-selection select2-selection&#45;&#45;single form-control" role="combobox" aria-haspopup="true" aria-expanded="false" tabindex="0" aria-disabled="false" aria-labelledby="select2-7p4d-container" aria-controls="select2-7p4d-container"><span class="select2-selection__rendered" id="select2-7p4d-container" role="textbox" aria-readonly="true" title="A">A</span><span class="select2-selection__arrow" role="presentation"><b role="presentation"></b></span></span></span><span class="dropdown-wrapper" aria-hidden="true"></span></span>-->
+                </td>
+                <td>
+                  <select class="form-control select2-dropdown--above select2-hidden-accessible" data-control="select2" data-placeholder="Select..." data-select2-id="select2-data-10-ig2u" tabindex="-1" aria-hidden="true">
+                    <option value="EXCELLENT" data-select2-id="select2-data-12-pjaq">EXCELLENT</option>
+                    <option value="VERY GOOD">VERY GOOD</option>
+                    <option value="GOOD">GOOD</option>
+                    <option value="PASS">PASS</option>
+                    <option value="FAIR">FAIR</option>
+                    <option value="WEAK">WEAK</option>
+                  </select>
+
+                  <!--                <span class="select2 select2-container select2-container&#45;&#45;bootstrap5" dir="ltr" data-select2-id="select2-data-11-u8ud" style="width: 100%;"><span class="selection"><span class="select2-selection select2-selection&#45;&#45;single form-control" role="combobox" aria-haspopup="true" aria-expanded="false" tabindex="0" aria-disabled="false" aria-labelledby="select2-hw1u-container" aria-controls="select2-hw1u-container"><span class="select2-selection__rendered" id="select2-hw1u-container" role="textbox" aria-readonly="true" title="EXCELLENT">EXCELLENT</span><span class="select2-selection__arrow" role="presentation"><b role="presentation"></b></span></span></span><span class="dropdown-wrapper" aria-hidden="true"></span></span>-->
+                </td>
+                <td><button class="btn btn-dark" name="save_result" id="save_result"><i class="bi bi-check-all fs-5"></i></button></td>
+              </tr>
+            }
+
+
+
+          <!--          <tr>-->
+          <!--            <td>MATHEMATICS</td>-->
+          <!--            <td><input class="form-control" type="number" name="ca" placeholder=""></td>-->
+          <!--            <td><input class="form-control" type="number" name="exam" placeholder=""></td>-->
+          <!--            <td>100</td>-->
+          <!--            <td>-->
+          <!--              <select class="form-control select2-dropdown&#45;&#45;above select2-hidden-accessible" data-control="select2" data-placeholder="Select..." data-select2-id="select2-data-13-o80u" tabindex="-1" aria-hidden="true">-->
+          <!--                <option value="A" data-select2-id="select2-data-15-6mbf">A</option>-->
+          <!--                <option value="B">B</option>-->
+          <!--                <option value="C">C</option>-->
+          <!--                <option value="D">D</option>-->
+          <!--                <option value="E">E</option>-->
+          <!--                <option value="F">F</option>-->
+          <!--              </select><span class="select2 select2-container select2-container&#45;&#45;bootstrap5" dir="ltr" data-select2-id="select2-data-14-fcp7" style="width: 100%;"><span class="selection"><span class="select2-selection select2-selection&#45;&#45;single form-control" role="combobox" aria-haspopup="true" aria-expanded="false" tabindex="0" aria-disabled="false" aria-labelledby="select2-hlda-container" aria-controls="select2-hlda-container"><span class="select2-selection__rendered" id="select2-hlda-container" role="textbox" aria-readonly="true" title="A">A</span><span class="select2-selection__arrow" role="presentation"><b role="presentation"></b></span></span></span><span class="dropdown-wrapper" aria-hidden="true"></span></span>-->
+          <!--            </td>-->
+          <!--            <td>-->
+          <!--              <select class="form-control select2-dropdown&#45;&#45;above select2-hidden-accessible" data-control="select2" data-placeholder="Select..." data-select2-id="select2-data-16-5hc7" tabindex="-1" aria-hidden="true">-->
+          <!--                <option value="EXCELLENT" data-select2-id="select2-data-18-obdd">EXCELLENT</option>-->
+          <!--                <option value="VERY GOOD">VERY GOOD</option>-->
+          <!--                <option value="GOOD">GOOD</option>-->
+          <!--                <option value="PASS">PASS</option>-->
+          <!--                <option value="FAIR">FAIR</option>-->
+          <!--                <option value="WEAK">WEAK</option>-->
+          <!--              </select><span class="select2 select2-container select2-container&#45;&#45;bootstrap5" dir="ltr" data-select2-id="select2-data-17-zcy1" style="width: 100%;"><span class="selection"><span class="select2-selection select2-selection&#45;&#45;single form-control" role="combobox" aria-haspopup="true" aria-expanded="false" tabindex="0" aria-disabled="false" aria-labelledby="select2-x2n7-container" aria-controls="select2-x2n7-container"><span class="select2-selection__rendered" id="select2-x2n7-container" role="textbox" aria-readonly="true" title="EXCELLENT">EXCELLENT</span><span class="select2-selection__arrow" role="presentation"><b role="presentation"></b></span></span></span><span class="dropdown-wrapper" aria-hidden="true"></span></span>-->
+          <!--            </td>-->
+          <!--            <td><button class="btn btn-dark" name="save_result" id="save_result"><i class="bi bi-check-all fs-5"></i></button></td>-->
+          <!--  -->
+          <!--          </tr>-->
+          <!--          <tr>-->
+          <!--            <td>YORUBA LANGUAGE</td>-->
+          <!--            <td><input class="form-control" type="number" name="ca" placeholder=""></td>-->
+          <!--            <td><input class="form-control" type="number" name="exam" placeholder=""></td>-->
+          <!--            <td>100</td>-->
+          <!--            <td>-->
+          <!--              <select class="form-control select2-dropdown&#45;&#45;above select2-hidden-accessible" data-control="select2" data-placeholder="Select..." data-select2-id="select2-data-19-lpuk" tabindex="-1" aria-hidden="true">-->
+          <!--                <option value="A" data-select2-id="select2-data-21-a9g1">A</option>-->
+          <!--                <option value="B">B</option>-->
+          <!--                <option value="C">C</option>-->
+          <!--                <option value="D">D</option>-->
+          <!--                <option value="E">E</option>-->
+          <!--                <option value="F">F</option>-->
+          <!--              </select><span class="select2 select2-container select2-container&#45;&#45;bootstrap5" dir="ltr" data-select2-id="select2-data-20-nezv" style="width: 100%;"><span class="selection"><span class="select2-selection select2-selection&#45;&#45;single form-control" role="combobox" aria-haspopup="true" aria-expanded="false" tabindex="0" aria-disabled="false" aria-labelledby="select2-j0w2-container" aria-controls="select2-j0w2-container"><span class="select2-selection__rendered" id="select2-j0w2-container" role="textbox" aria-readonly="true" title="A">A</span><span class="select2-selection__arrow" role="presentation"><b role="presentation"></b></span></span></span><span class="dropdown-wrapper" aria-hidden="true"></span></span>-->
+          <!--            </td>-->
+          <!--            <td>-->
+          <!--              <select class="form-control select2-dropdown&#45;&#45;above select2-hidden-accessible" data-control="select2" data-placeholder="Select..." data-select2-id="select2-data-22-wsag" tabindex="-1" aria-hidden="true">-->
+          <!--                <option value="EXCELLENT" data-select2-id="select2-data-24-ztj9">EXCELLENT</option>-->
+          <!--                <option value="VERY GOOD">VERY GOOD</option>-->
+          <!--                <option value="GOOD">GOOD</option>-->
+          <!--                <option value="PASS">PASS</option>-->
+          <!--                <option value="FAIR">FAIR</option>-->
+          <!--                <option value="WEAK">WEAK</option>-->
+          <!--              </select><span class="select2 select2-container select2-container&#45;&#45;bootstrap5" dir="ltr" data-select2-id="select2-data-23-potg" style="width: 100%;"><span class="selection"><span class="select2-selection select2-selection&#45;&#45;single form-control" role="combobox" aria-haspopup="true" aria-expanded="false" tabindex="0" aria-disabled="false" aria-labelledby="select2-sol2-container" aria-controls="select2-sol2-container"><span class="select2-selection__rendered" id="select2-sol2-container" role="textbox" aria-readonly="true" title="EXCELLENT">EXCELLENT</span><span class="select2-selection__arrow" role="presentation"><b role="presentation"></b></span></span></span><span class="dropdown-wrapper" aria-hidden="true"></span></span>-->
+          <!--            </td>-->
+          <!--            <td><button class="btn btn-dark" name="save_result" id="save_result"><i class="bi bi-check-all fs-5"></i></button></td>-->
+          <!--  -->
+          <!--          </tr>-->
+
+
+          </tbody>
+
+        </table>
+      </div>
+    </section>
+  </div>
+
+
+
+  <div class="modal-footer">
+    <a href="#" class="btn btn-light me-2" data-bs-dismiss="modal">Cancel</a>
+    <button type="submit" class="btn btn-primary">{{action()}}</button>
+  </div>
+</form>

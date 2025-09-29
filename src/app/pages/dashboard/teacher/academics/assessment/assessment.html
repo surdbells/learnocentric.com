@@ -1,0 +1,8 @@
+<app-page-header action="Assessment" icon="grading">
+  <app-learno-modal [modalId]="'assessment'" [modalAction]="'Add Assessment'" >
+    <app-lesson-plan-form [action]="'Add Assessment'" modalForm />
+  </app-learno-modal>
+</app-page-header>
+
+<app-table-search />
+<app-data-table [tableHeads]="['Assessment', 'Instruction', 'Schedule', 'Duration', '', '']" [tableRows]="[]" />

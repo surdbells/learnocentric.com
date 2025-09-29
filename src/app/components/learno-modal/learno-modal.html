@@ -1,0 +1,22 @@
+<!--Trigger-->
+<button class="btn btn-success d-flex align-items-center" data-bs-toggle="modal" [attr.data-bs-target]="`#${modalId()}`"><i class="mdi mdi-plus-thick me-2"></i>
+  {{modalAction()}}
+</button>
+
+<!--Content -->
+<div class="modal fade" id="{{modalId()}}" style="display: none;" [attr.data-select2-id]="modalId()" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">{{modalAction()}}</h4>
+                <button type="button" class="btn-close custom-btn-close" data-bs-dismiss="modal" aria-label="Close">
+                    <i class="ti ti-x"></i>
+                </button>
+            </div>
+
+
+            <ng-content select="[modalForm]" ></ng-content>
+        </div>
+
+    </div>
+</div>

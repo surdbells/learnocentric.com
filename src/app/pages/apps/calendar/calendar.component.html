@@ -1,0 +1,21 @@
+<!-- Breadcrumb -->
+
+<!-- Calendar -->
+<div class="row">
+    <div class="col-xl-8">
+            <div class="me-3">
+                <full-calendar [options]="calendarOptions"></full-calendar>
+            </div>
+    </div>
+    <div class="col-xl-4 col-lg-5 col-md-12">
+
+      <app-dashboard-card title="Schedules" >
+
+        <h4 class="mb-3" body>Upcoming Events</h4>
+        <app-events-listing [schedules]="schedules" body />
+
+      </app-dashboard-card>
+
+
+    </div>
+</div>

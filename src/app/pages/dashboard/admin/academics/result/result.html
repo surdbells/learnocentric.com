@@ -1,0 +1,14 @@
+<app-page-header icon="local_library" action="Grade Report">
+
+  <app-learno-modal [modalId]="'add_result'" [modalAction]="'Add Result'" >
+    <app-routine-form modalForm />
+  </app-learno-modal>
+</app-page-header>
+
+<!-- Page content -->
+<div class="row">
+    <div class="col-12">
+        <app-table-search />
+        <app-data-table [tableHeads]="['Student Name', 'Subjects Registered', 'Class', 'Pass', 'Fail', 'Action']"  [tableRows]="[]"/>
+    </div>
+</div>
