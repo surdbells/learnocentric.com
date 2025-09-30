@@ -40,6 +40,24 @@ import {Promotion} from './pages/dashboard/teacher/academics/promotion/promotion
 import {Grade} from './pages/dashboard/teacher/academics/grade/grade';
 import {TeacherProfile} from './pages/dashboard/teacher/management/teacher-profile/teacher-profile';
 import {TeacherManagement} from './pages/dashboard/teacher/management/management';
+import {StudentMain} from './pages/dashboard/student/student-main/student-main';
+import {StudentDashboard} from './pages/dashboard/student/student-main/student-dashboard/student-dashboard';
+import {Classmate} from './pages/dashboard/student/student-main/classmate/classmate';
+import {StudentAssessment} from './pages/dashboard/student/academics/student-assessment/student-assessment';
+import {StudentPerformance} from './pages/dashboard/student/academics/student-performance/student-performance';
+import {StudentManagement} from './pages/dashboard/student/management/management';
+import {StudentProfile} from './pages/dashboard/student/management/student-profile/student-profile';
+import {Lesson} from './pages/dashboard/student/lesson/lesson';
+import {StudentLearning} from './pages/dashboard/student/lesson/student-learning/student-learning';
+import {StudentAssignment} from './pages/dashboard/student/lesson/student-assignment/student-assignment';
+import {StudentVirtualClass} from './pages/dashboard/student/lesson/student-virtual-class/student-virtual-class';
+import {StudentResources} from './pages/dashboard/student/lesson/student-resources/student-resources';
+import {StudentDiscussion} from './pages/dashboard/student/lesson/student-discussion/student-discussion';
+import {StudentNotes} from './pages/dashboard/student/lesson/student-notes/student-notes';
+import {StudentAssessment as StudentLessonAssessment} from './pages/dashboard/student/lesson/student-assessment/student-assessment';
+import {
+  StudentChatWithTeacher
+} from './pages/dashboard/student/lesson/student-chat-with-teacher/student-chat-with-teacher';
 // import {CalendarComponent} from './calendar/calendar.component';
 
 export const routes: Routes = [
@@ -161,6 +179,73 @@ export const routes: Routes = [
       ]
     },
 
+
+    {
+      path: "student",
+      component: Dashboard,
+      children: [
+        {
+          path: "main",
+          component:  StudentMain,
+          children: [
+            { path: "", component: StudentDashboard },
+            { path: "message", component: Chat },
+            { path: "notification", component: Notication },
+            { path: "events", component: CalendarComponent },
+            { path: "classmate", component: Classmate },
+            {
+              path: "file-manager",
+              component: FileManager,
+              children: [
+                { path: "", component: MyDrive },
+                { path: "assets", component: Assets },
+                { path: "template", component: Templates },
+                { path: "projects", component: Projects },
+                { path: "documents", component: Documents },
+                { path: "media", component: Media }
+              ]
+            }
+          ]
+
+        },
+        {
+          path: "academics",
+          component: Academics,
+          children: [
+            { path: "class-routine", component: ClassRoutine, data: { user: "student" } },
+            { path: "e-library", component: ELibrary, data: { user: "student" } },
+            { path: "lesson-plans", component: LessonPlans, data: { user: "student" } },
+            { path: "grades", component: Grade },
+            { path: "assignments", component: Assignment },
+            { path: "assessments", component: StudentAssessment },
+            { path: "performance", component: StudentPerformance }
+          ]
+        },
+        {
+          path: "management",
+          component: StudentManagement,
+          children: [
+            { path: "profile", component: StudentProfile },
+          ]
+        },
+
+        {
+          path: "lesson/:subjectId",
+          component: Lesson,
+          children: [
+            { path: "", component: StudentLearning },
+            { path: "assignment", component: StudentAssignment },
+            { path: "virtual-class", component: StudentVirtualClass },
+            { path: "resources", component: StudentResources },
+            { path: "discussion", component: StudentDiscussion },
+            { path: "notes", component: StudentNotes },
+            { path: "assessment", component: StudentLessonAssessment },
+            { path: "chat-with-teacher", component: StudentChatWithTeacher },
+
+          ]
+        }
+      ]
+    },
 
 
   // {

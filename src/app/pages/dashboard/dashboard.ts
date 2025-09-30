@@ -1,4 +1,4 @@
-import {Component, Inject, PLATFORM_ID} from '@angular/core';
+import {Component, Inject, OnInit, PLATFORM_ID} from '@angular/core';
 import {SidenavToolbar} from '../../common/layout/sidenav-toolbar/sidenav-toolbar';
 import {SidenavSm} from '../../common/layout/sidenav-sm/sidenav-sm';
 import {SidenavMd} from '../../common/layout/sidenav-md/sidenav-md';
@@ -24,19 +24,37 @@ import {TopToolbar} from "../../common/layout/top-toolbar/top-toolbar";
 })
 export class Dashboard {
 
-    menu: IMenu[];
+    menu: IMenu[] = [];
 
     constructor(
         @Inject(PLATFORM_ID) private platformId: Object,
         private userPreferenceMenu: UserPreferenceMenu
     ) {
-        if (isPlatformBrowser(platformId)) {
-            const user : { name: string, role: 'school' | 'student' | 'teacher', email: string} = JSON.parse(localStorage.getItem('user-learno') || '{}');
+      if (isPlatformBrowser(platformId)) {
+        const user: {
+          name: string,
+          role: 'school' | 'student' | 'teacher',
+          email: string
+        } = JSON.parse(localStorage.getItem('auth_user') || '{}');
 
-            this.menu = this.userPreferenceMenu[user.role];
-            console.log(this.menu)
-        }
-
-        this.menu = this.userPreferenceMenu.teacher;
+        this.menu = this.userPreferenceMenu[user.role];
+        console.log(this.menu)
+      }
     }
+
+  // ngOnInit(): void {
+  //   if (isPlatformBrowser(this.platformId)) {
+  //     const user: {
+  //       name: string,
+  //       role: 'school' | 'student' | 'teacher',
+  //       email: string
+  //     } = JSON.parse(localStorage.getItem('auth_user') || '{}');
+  //
+  //     this.menu = this.userPreferenceMenu[user.role];
+  //     console.log(this.menu)
+  //   }
+  //       //throw new Error("Method not implemented.");
+  //   }
+      // Remove this line as it's using an undefined user variable
+      // this.menu = this.userPreferenceMenu[user];
 }

@@ -34,16 +34,25 @@ export class SignIn {
          this.form.setValue({email: '', password: ''})
        }
 
-        const user: AuthUser  = {
-          id: "12344",
-          name: "waheed",
-          role: "teacher",
-          email: "xyz@gmail.com",
-        }
+
+       const users = [
+         { id: "12344", name: "waheed", role: "student", email: "stu@gmail.com" },
+         { id: "12345", name: "wede", role: "teacher", email: "teacher@gmail.com" },
+         { id: "12346", name: "wedex", role: "school", email: "school@gmail.com" },
+       ]
+
+        // const user: AuthUser  = {
+        //   id: "12344",
+        //   name: "waheed",
+        //   role: "student",
+        //   email: "xyz@gmail.com",
+        // }
 
         console.log(this.form.value)
 
-      if(this.form.value.email == user.email){
+      const user = users.find(el => el.email == this.form.value.email)
+      if(user){
+
         this.authService.persistLogin({ token: "waitforit", user: user })
 
         switch (user['role']) {
@@ -53,6 +62,10 @@ export class SignIn {
 
           case "teacher":
             this.loginDelay("teacher/main");
+            break;
+
+          case "student":
+            this.loginDelay("student/main");
             break;
 
           default:

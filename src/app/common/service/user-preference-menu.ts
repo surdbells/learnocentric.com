@@ -89,6 +89,35 @@ export class UserPreferenceMenu {
     },
   ]
 
-  student = []
+  student = [
+    { name: "Main", icon: "dashboard", link: "student/main",
+      children: [
+        { name: "Dashboard", link: "/student/main" },
+        { name: "Messenger", link: "/student/main/message" },
+        { name: "Notification", link: "/student/main/notification"},
+        { name: "School Events", link: "/student/main/events"},
+        { name: "Classmates", link: "/student/main/classmate"},
+        // { name: "File Management", link: "/student/main/file-manager" },
+      ]
+    },
+
+    { name: "Academics", icon: "school", link: "/student/academics",
+      children: [
+        { name: "Assignments", link: "/student/academics/assignments" },
+        { name: "Class Routine", link: "/student/academics/class-routine" },
+        { name: "E-Library", link: "/student/academics/e-library" },
+        { name: "Lesson Plans", link: "/student/academics/lesson-plans" },
+        { name: "Performance", link: "/student/academics/performance" },
+        { name: "Assessments", link: "/student/academics/assessments" },
+      ]
+    },
+
+    { name: "Management", icon: "tenancy", link: "student/management",
+      children: [
+        { name: "Profile", link: "/student/management/profile" },
+        // { name: "Payment", link: "/student/management/payment" },
+      ]
+    },
+  ]
 
 }

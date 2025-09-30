@@ -1,0 +1,38 @@
+<div class="row">
+  <div class="col-xxl-4 col-xl-4 col-lg-6 col-md-6 col-sm-6 mb-5 mt-5">
+    <div class="card mb-3 shadow" style="max-width: 540px;">
+      <div class="row g-0">
+        <div class="col-md-4">
+          <img src="/images/lesson/lesson.png" class="img-fluid h-100 rounded-start" alt="...">
+        </div>
+        <div class="col-md-8">
+          <div class="card-body">
+            <h5 class="">ENGLISH LANGUAGE</h5>
+            <p class="card-text">
+              We welcome you to our amazing blended learning platform. We hope you will excel in studies and make your parents proud.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-xxl-8 col-xl-8 col-lg-6 col-md-6 col-sm-6 mb-5 mt-5">
+    <div class="row">
+      <ul class="nav nav-tabs border-0">
+        @for (sn of studentNavigations; track $index) {
+          <li class="nav-item col-3 mb-3 px-2">
+            <a class="nav-link p-0 rounded-3" data-bs-toggle="tab" [routerLink]="`/student/lesson/${subjectId}/${sn.url}`">
+              <div class="card bgi-no-repeat shadow-sm card-xl-stretch" style="background-position: right top; background-size: 30% auto; background-image: url(/images/lesson/abstract-5.svg)">
+                <div class="card-body d-flex align-items-center pt-3 pb-0">
+                  <div class="d-flex flex-column flex-grow-1 py-2 me-2">
+                    <span class="fw-bolder text-muted fs-5 mb-2 text-hover-primary">{{sn.name}}</span>
+                  </div>
+                </div>
+              </div>
+            </a>
+          </li>
+        }
+      </ul>
+    </div>
+  </div>
+</div>
