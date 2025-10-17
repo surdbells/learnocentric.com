@@ -8,6 +8,7 @@ import { provideAnimations } from '@angular/platform-browser/animations';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { authInterceptor } from './common/auth/auth.interceptor';
 import { AuthService } from './common/auth/auth.service';
+import { API_BASE_URL } from "./common/service/api.service";
 
 export function initAuth(auth: AuthService) {
   return () => auth.initFromStorage();
@@ -22,6 +23,7 @@ export const appConfig: ApplicationConfig = {
     provideToastr(),
     provideAnimations(),
     provideHttpClient(withInterceptors([authInterceptor])),
-    { provide: APP_INITIALIZER, useFactory: initAuth, deps: [AuthService], multi: true }
+    { provide: APP_INITIALIZER, useFactory: initAuth, deps: [AuthService], multi: true },
+    { provide: API_BASE_URL, useValue: 'http://localhost:8000' }
   ]
 };

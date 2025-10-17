@@ -8,7 +8,11 @@ import {Component, input} from '@angular/core';
 })
 export class DataTable {
 
-    tableHeads = input.required<string[]>();
+    tableHeads = input<string[]>([]);
 
-    tableRows = input.required<any[]>();
+    tableRows = input<any[]>([]);
+    dataFields = input<any[]>([]);
+
+    shouldShowCheckbox = input<boolean>(true);
+    shouldShowAction = input<boolean>(true);
 }

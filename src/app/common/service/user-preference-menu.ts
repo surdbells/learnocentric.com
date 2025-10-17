@@ -12,7 +12,7 @@ export interface IMenu {
 })
 export class UserPreferenceMenu {
 
-  school: IMenu[]= [
+  school_admin: IMenu[]= [
     { name: "Main", icon: "dashboard", link: "admin/main",
       children: [
         { name: "Dashboard", link: "/admin/main" },
@@ -50,9 +50,56 @@ export class UserPreferenceMenu {
       children: [
         { name: "School Profile", link: "/admin/management/school-profile" },
         { name: "Payment", link: "/admin/management/payment" },
+        { name: "Fees", link: "/admin/management/fees" },
+
       ]
     },
   ]
+
+  tutor_admin: IMenu[]= [
+    { name: "Main", icon: "dashboard", link: "tutor/main",
+      children: [
+        { name: "Dashboard", link: "/tutor/main" },
+        { name: "Messenger", link: "/tutor/main/message" },
+        { name: "File Management", link: "/tutor/main/file-manager" },
+      ]
+    },
+
+    { name: "Student", icon: "local_library", link: "tutor/students",
+      children: [
+        { name: "Students", link: "/tutor/students/" },
+        { name: "New Student", link: "/tutor/students/new" }
+      ]
+    },
+
+    { name: "Teacher", icon: "supervisor_account", link: "tutor/teachers",
+      children: [
+        { name: "Teachers", link: "/tutor/teachers/" },
+        { name: "New Teacher", link: "/tutor/teachers/new" }
+      ]
+    },
+
+    { name: "Academics", icon: "school", link: "/tutor/academics",
+      children: [
+        { name: "Class Routine", link: "/tutor/academics/class-routine" },
+        { name: "E-Library", link: "/tutor/academics/e-library" },
+        { name: "Lesson Plans", link: "/tutor/academics/lesson-plans" },
+        { name: "Class", link: "/tutor/academics/classes" },
+        { name: "Subjects", link: "/tutor/academics/subjects" },
+        { name: "Result", link: "/tutor/academics/results" },
+      ]
+    },
+
+    { name: "Management", icon: "tenancy", link: "tutor/management",
+      children: [
+        { name: "School Profile", link: "/tutor/management/school-profile" },
+        { name: "Payment", link: "/tutor/management/payment" },
+        { name: "Fees", link: "/tutor/management/fees" },
+
+      ]
+    },
+  ]
+
 
   teacher = [
     { name: "Main", icon: "dashboard", link: "teacher/main",
@@ -70,7 +117,7 @@ export class UserPreferenceMenu {
       children: [
         { name: "Pending Task", link: "/teacher/academics/pending-task" },
         { name: "Assignments", link: "/teacher/academics/assignments" },
-        { name: "Class Routine", link: "/teacher/academics/class-routine" },
+        { name: "Teacher Routine", link: "/teacher/academics/class-routine" },
         { name: "Attendance", link: "/teacher/academics/attendance" },
         { name: "E-Library", link: "/teacher/academics/e-library" },
         { name: "Lesson Plans", link: "/teacher/academics/lesson-plans" },
@@ -104,7 +151,7 @@ export class UserPreferenceMenu {
     { name: "Academics", icon: "school", link: "/student/academics",
       children: [
         { name: "Assignments", link: "/student/academics/assignments" },
-        { name: "Class Routine", link: "/student/academics/class-routine" },
+        { name: "Student Routine", link: "/student/academics/class-routine" },
         { name: "E-Library", link: "/student/academics/e-library" },
         { name: "Lesson Plans", link: "/student/academics/lesson-plans" },
         { name: "Performance", link: "/student/academics/performance" },

@@ -15,9 +15,11 @@ import {PdfService} from "../../../../../common/service/pdf-service";
   styleUrl: './payment.css'
 })
 export class Payment {
-    
 
-    orders = signal<IOrder[]>([])
+
+    orders = signal<IOrder[]>([
+      { id: 1, date: "2025-03-05", price: "55", product: "Shoe", status: "Completed" }
+    ])
     constructor(
         private readonly paymentService: PaymentService,
         private readonly pdfService: PdfService

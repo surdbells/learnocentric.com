@@ -1,3 +1,5 @@
+<app-loader [isLoading]="isLoading()" />
+
 <app-page-header icon="book" action="Classes" >
   <app-learno-modal [modalId]="'add_class'" [modalAction]="'Add Class'" >
     <app-school-class-form action="Add Class" modalForm />
@@ -6,4 +8,7 @@
 </app-page-header>
 
 <app-table-search />
-<app-data-table [tableHeads]="['name', 'class', 'subject', 'resource link']" [tableRows]="[]" />
+<app-data-table
+  [tableHeads]="['Class Name', 'Level']"
+  [dataFields]="['name', 'grade_level', 'id', 'institution_id']"  [tableRows]="sclasses()"
+/>

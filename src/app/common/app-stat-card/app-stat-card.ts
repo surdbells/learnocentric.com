@@ -10,6 +10,6 @@ import {Component, input} from '@angular/core';
 export class AppStatCard {
 
   label = input.required<string>();
-  value = input.required<string>();
+  value = input.required<number>();
   icon =  input.required<string>();
 }

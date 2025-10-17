@@ -1,3 +1,4 @@
+<app-loader [isLoading]="isLoading()" />
 <app-page-header icon="supervisor_account" action="Dashboard"/>
 <app-user-intro >
   <div class="d-sm-flex align-items-center justify-content-between row-gap-3">
@@ -7,9 +8,9 @@
       </div>
       <div class="overflow-hidden">
         <span class="badge bg-transparent-primary text-primary mb-1">#T594651</span>
-        <h3 class="mb-1 text-truncate">Henriques Morgan </h3>
+        <h3 class="mb-1 text-truncate">{{getTeacherFullname}} </h3>
         <div class="d-flex align-items-center flex-wrap text-light row-gap-2">
-          <span class="me-2 text-secondary">Classes : I-A, V-B</span>
+          <span class="me-2 text-secondary">Classes : {{getTecherClasses()}}</span>
           <span class="d-flex align-items-center"><i class="ti ti-circle-filled text-warning fs-7 me-1"></i>Physics</span>
         </div>
       </div>
@@ -24,7 +25,7 @@
   <div class="col-xxl-8 col-xl-12">
     <div class="row mb-4">
       <div class="col-xxl-5 col-xl-4">
-        <app-stat-card label="Students" value="20" icon="local_library" />
+        <app-stat-card label="Students" [value]="getTotalStudentsCount()" icon="local_library" />
       </div>
       <div class="col-xxl-7 col-xl-8 d-flex">
         <app-syllabus-stat class="flex-fill" />

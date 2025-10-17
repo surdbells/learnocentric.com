@@ -58,6 +58,8 @@ import {StudentAssessment as StudentLessonAssessment} from './pages/dashboard/st
 import {
   StudentChatWithTeacher
 } from './pages/dashboard/student/lesson/student-chat-with-teacher/student-chat-with-teacher';
+import {authGuard} from './common/auth/auth-guard';
+import {Fees} from './pages/dashboard/admin/management/fees/fees';
 // import {CalendarComponent} from './calendar/calendar.component';
 
 export const routes: Routes = [
@@ -72,6 +74,7 @@ export const routes: Routes = [
     {
         path: "admin",
         component: Dashboard,
+        canActivate: [authGuard],
         children: [
           { path: "students", component: Students },
           { path: "students/new", component: NewStudent },
@@ -102,12 +105,12 @@ export const routes: Routes = [
             path: "academics",
             component: Academics,
             children: [
-              { path: "class-routine", component: ClassRoutine },
-              { path: "e-library", component: ELibrary },
-              { path: "lesson-plans", component: LessonPlans },
-              { path: "classes", component: SchoolClasses },
-              { path: "subjects", component: Subjects },
-              { path: "results", component: Result },
+              { path: "class-routine", component: ClassRoutine, data: { user: "admin" }  },
+              { path: "e-library", component: ELibrary, data: { user: "admin" }  },
+              { path: "lesson-plans", component: LessonPlans, data: { user: "admin" }  },
+              { path: "classes", component: SchoolClasses, data: { user: "admin" }  },
+              { path: "subjects", component: Subjects, data: { user: "admin" }  },
+              { path: "results", component: Result, data: { user: "admin" }  },
             ]
           }
         ]
@@ -120,6 +123,7 @@ export const routes: Routes = [
                 { path: "school-profile", component: SchoolProfile },
                 { path: "payment", component: Payment },
                 { path: "payment/checkout", component: Checkout },
+                { path: "fees", component: Fees },
         ]
     },
 
@@ -149,7 +153,6 @@ export const routes: Routes = [
               ]
             }
           ]
-
         },
         {
           path: "academics",
@@ -162,7 +165,7 @@ export const routes: Routes = [
             { path: "subjects", component: Subjects },
             { path: "results", component: Result },
             { path: "pending-task", component: PendingTask },
-            { path: "assignments", component: Assignment },
+            { path: "assignments", component: Assignment, data: { user: "teacher" } },
             { path: "attendance", component: Attendance },
             { path: "assessments", component: Assessment },
             { path: "virtual-class", component: VirtualClass },
@@ -216,7 +219,7 @@ export const routes: Routes = [
             { path: "e-library", component: ELibrary, data: { user: "student" } },
             { path: "lesson-plans", component: LessonPlans, data: { user: "student" } },
             { path: "grades", component: Grade },
-            { path: "assignments", component: Assignment },
+            { path: "assignments", component: Assignment, data: { user: "student" } },
             { path: "assessments", component: StudentAssessment },
             { path: "performance", component: StudentPerformance }
           ]

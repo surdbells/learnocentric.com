@@ -1,6 +1,9 @@
-import { Injectable, inject } from '@angular/core';
+import { Injectable, InjectionToken, inject } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
+
+// Add: a simple token to provide base URL at runtime (configure in app bootstrap)
+export const API_BASE_URL = new InjectionToken<string>('API_BASE_URL');
 
 export type Primitive = string | number | boolean | null | undefined;
 export type ParamValue = Primitive | ReadonlyArray<Primitive>;
@@ -43,6 +46,7 @@ function toHttpParams(params?: ParamsInput): HttpParams | undefined {
   return hp;
 }
 
+// ... existing code ...
 function toHttpHeaders(headers?: HeadersInput): HttpHeaders | undefined {
   if (!headers) return undefined;
   if (headers instanceof HttpHeaders) return headers;
@@ -59,11 +63,22 @@ function toHttpHeaders(headers?: HeadersInput): HttpHeaders | undefined {
 @Injectable({ providedIn: 'root' })
 export class ApiService {
   private http = inject(HttpClient);
+  // Add: inject base URL (optional). If not provided, defaults to empty string.
+  private baseUrl = inject(API_BASE_URL, { optional: true }) ?? '';
+
+  private resolveUrl(path: string): string {
+    // If path is absolute (http/https), return as-is
+    if (/^https?:\/\//i.test(path)) return path;
+    // Join baseUrl and path safely
+    const a = this.baseUrl?.replace(/\/+$/, '') ?? '';
+    const b = path.replace(/^\/+/, '');
+    return a ? `${a}/${b}` : `/${b}`;
+  }
 
   // Generic request that supports any HTTP method
   request<T = any, TBody = any>(method: string, url: string, options: ApiRequestOptions<TBody> = {}): Observable<T> {
     const { headers, params, body, ...rest } = options;
-    return this.http.request<T>(method, url, {
+    return this.http.request<T>(method, this.resolveUrl(url), {
       headers: toHttpHeaders(headers),
       params: toHttpParams(params),
       body,
@@ -73,7 +88,7 @@ export class ApiService {
 
   get<T = any>(url: string, options: ApiRequestOptions = {}): Observable<T> {
     const { headers, params, ...rest } = options;
-    return this.http.get<T>(url, {
+    return this.http.get<T>(this.resolveUrl(url), {
       headers: toHttpHeaders(headers),
       params: toHttpParams(params),
       ...rest,
@@ -82,7 +97,7 @@ export class ApiService {
 
   post<T = any, TBody = any>(url: string, body?: TBody, options: ApiRequestOptions<TBody> = {}): Observable<T> {
     const { headers, params, ...rest } = options;
-    return this.http.post<T>(url, body, {
+    return this.http.post<T>(this.resolveUrl(url), body, {
       headers: toHttpHeaders(headers),
       params: toHttpParams(params),
       ...rest,
@@ -91,7 +106,7 @@ export class ApiService {
 
   put<T = any, TBody = any>(url: string, body?: TBody, options: ApiRequestOptions<TBody> = {}): Observable<T> {
     const { headers, params, ...rest } = options;
-    return this.http.put<T>(url, body, {
+    return this.http.put<T>(this.resolveUrl(url), body, {
       headers: toHttpHeaders(headers),
       params: toHttpParams(params),
       ...rest,
@@ -100,7 +115,7 @@ export class ApiService {
 
   patch<T = any, TBody = any>(url: string, body?: TBody, options: ApiRequestOptions<TBody> = {}): Observable<T> {
     const { headers, params, ...rest } = options;
-    return this.http.patch<T>(url, body, {
+    return this.http.patch<T>(this.resolveUrl(url), body, {
       headers: toHttpHeaders(headers),
       params: toHttpParams(params),
       ...rest,
@@ -109,7 +124,7 @@ export class ApiService {
 
   // delete<T = any>(url: string, options: ApiRequestOptions = {}): Observable<T> {
   //   const { headers, params, body, ...rest } = options;
-  //   return this.http.delete<T>(url, {
+  //   return this.http.delete<T>(this.resolveUrl(url), {
   //     headers: toHttpHeaders(headers),
   //     params: toHttpParams(params),
   //     body,

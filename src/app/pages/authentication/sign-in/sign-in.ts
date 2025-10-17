@@ -1,20 +1,28 @@
-import { Component } from '@angular/core';
+import {Component, signal} from '@angular/core';
 import {FormControl, FormGroup, ReactiveFormsModule, Validators} from "@angular/forms";
 import {ToastrService} from "ngx-toastr";
 import {Router} from "@angular/router";
-import {AuthUser} from '../../../common/auth/auth.models';
+import {AuthResponse, AuthUser} from '../../../common/auth/auth.models';
 import {AuthService} from '../../../common/auth/auth.service';
+import {ApiService} from '../../../common/service/api.service';
+import {Loader} from '../../../common/loader/loader';
+import {NgIf} from '@angular/common';
 
 @Component({
   selector: 'app-sign-in',
-    imports: [
-        ReactiveFormsModule
-    ],
+  imports: [
+    ReactiveFormsModule,
+    Loader,
+    NgIf
+  ],
   templateUrl: './sign-in.html',
   styleUrl: './sign-in.css'
 })
 export class SignIn {
-    private app = 'learno'
+  private app = 'learno'
+  private auth: AuthResponse | null = null;
+
+  isLoading = signal<boolean>(false)
 
     form = new FormGroup({
         email: new FormControl('', [Validators.email, Validators.required] ),
@@ -25,63 +33,57 @@ export class SignIn {
         private toast: ToastrService,
         private router: Router,
         private authService: AuthService,
+        private apiService: ApiService,
     ) { }
 
     login() {
+
+        this.isLoading.set(true)
 
        if(this.form.invalid) {
          this.toast.error('Invalid email or password');
          this.form.setValue({email: '', password: ''})
        }
 
+      this.apiService.post(`/backend/auth/login`, this.form.value).subscribe(
+        {
+          next: (val: AuthResponse) => {
+            console.log(val);
+            this.auth = val
+            this.authService.persistLogin(this.auth);
+            this.isLoading.set(false)
+            this.form.reset()
+            this.toast.success('Login Successful');
 
-       const users = [
-         { id: "12344", name: "waheed", role: "student", email: "stu@gmail.com" },
-         { id: "12345", name: "wede", role: "teacher", email: "teacher@gmail.com" },
-         { id: "12346", name: "wedex", role: "school", email: "school@gmail.com" },
-       ]
+              const user = val.user as AuthUser;
+              switch (user['role']) {
+                case "school_admin":
+                  this.router.navigate(["admin/main"]);
+                  break;
 
-        // const user: AuthUser  = {
-        //   id: "12344",
-        //   name: "waheed",
-        //   role: "student",
-        //   email: "xyz@gmail.com",
-        // }
+                case "teacher":
+                  this.router.navigate(["teacher/main"]);
+                  break;
 
-        console.log(this.form.value)
+                case "student":
+                  this.router.navigate(["student/main"]);
+                  break;
 
-      const user = users.find(el => el.email == this.form.value.email)
-      if(user){
+                default:
+                  this.router.navigate(["authentication"]);
+              }
 
-        this.authService.persistLogin({ token: "waitforit", user: user })
-
-        switch (user['role']) {
-          case "school":
-            this.loginDelay("admin/main");
-            break;
-
-          case "teacher":
-            this.loginDelay("teacher/main");
-            break;
-
-          case "student":
-            this.loginDelay("student/main");
-            break;
-
-          default:
-            this.loginDelay("authentication");
+          },
+        error: (err) => {
+          console.log(err)
+          this.isLoading.set(false)
+          this.toast.error("Incorrect email or password");
+          return;
+        },
+          complete: () => {
+          this.isLoading.set(false)
+          }
         }
-      }
-
-
-      else {
-        this.toast.error("Incorrect email or password");
-      }
-        // localStorage.setItem(`user-${this.app}`, JSON.stringify(user))
-    }
-
-    private loginDelay (route: string) {
-      this.toast.success('Login Successful')
-      setTimeout(() => this.router.navigate([route]), 3000)
+      );
     }
 }

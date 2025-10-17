@@ -1,15 +1,16 @@
 export interface AuthUser {
   id: string | number;
-  name?: string;
+  firstName?: string;
+  lastName?: string;
   email?: string;
-  roles?: string[];
+  institutionId: string;
+  role: 'school_admin' | 'teacher' | 'student';
   [key: string]: any;
 }
 
 export interface AuthResponse {
-  // Adjust fields according to your backend response
   token?: string; // JWT if backend returns in body
-  user?: AuthUser; // user profile
+  user: AuthUser; // user profile
   // Support common variants
   accessToken?: string;
   data?: { token?: string; user?: AuthUser };

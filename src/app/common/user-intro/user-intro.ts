@@ -1,4 +1,6 @@
-import { Component } from '@angular/core';
+import {Component, signal} from '@angular/core';
+import {AuthService} from '../auth/auth.service';
+import {AuthSession} from '../auth/auth.models';
 
 @Component({
   selector: 'app-user-intro',
@@ -7,6 +9,11 @@ import { Component } from '@angular/core';
   templateUrl: './user-intro.html',
   styleUrl: './user-intro.css'
 })
-export class UserIntro {
+class UserIntro {
+
+
+
 
 }
+
+export default UserIntro

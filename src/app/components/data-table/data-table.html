@@ -1,48 +1,66 @@
 <!-- Table -->
 <div class="table-responsive mb-7">
     <table class="table table-hover table-select table-round align-middle mb-0">
+<!--      && dataFields().length > 0-->
+      @if (tableHeads().length > 0 ) {
         <thead>
-            <tr>
+        <tr>
 
-                <th style="width: 0px">
-                    <div class="form-check">
-                        <input class="form-check-input" type="checkbox" id="tableCheckAll" />
-                        <label class="form-check-label" for="tableCheckAll"></label>
-                    </div>
-                </th>
-                @for (th of tableHeads(); track th) {
-                    <th>{{th}}</th>
-                }
+          @if (shouldShowCheckbox()){
+            <th style="width: 0px">
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="tableCheckAll" />
+                <label class="form-check-label" for="tableCheckAll"></label>
+              </div>
+            </th>
+          }
+          @for (th of tableHeads(); track th) {
+            <th>{{th}}</th>
+          }
 
-            </tr>
+          @if (shouldShowAction()){
+            <th></th>
+          }
+
+        </tr>
         </thead>
-            
+      }
+
+      @if (dataFields().length > 0) {
         <tbody>
-            @for (row of tableRows(); track row.id) {
-                <tr  role="link" tabindex="0">
-                    <td style="width: 0px">
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="tableCheckOne" />
-                            <label class="form-check-label" for="tableCheckOne"></label>
-                        </div>
-                    </td>
-                   
-                    <td>TechPinnacle Solutions</td>
-                    <td>2021-08-12</td>
-                    <td><span class="badge bg-success-subtle text-success">Completed</span></td>
-                    <td style="width: 0px">
-                        <div class="dropdown">
-                            <button class="btn btn-sm btn-link text-body-tertiary" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                <span class="material-symbols-outlined scale-125">more_horiz</span>
-                            </button>
-                            <ul class="dropdown-menu">
-                                <li><button class="dropdown-item" type="button" data-bs-toggle="offcanvas" data-bs-target="#productModal" aria-controls="productModal" >View</button></li>
-                                <li><button class="dropdown-item" >Download</button></li>
-                            </ul>
-                        </div>
-                    </td>
-                </tr>
-            }
+          @for (row of tableRows(); track row.id) {
+            <tr  role="link" tabindex="0">
+              @if(shouldShowCheckbox()){
+                <td style="width: 0px">
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="tableCheckOne" />
+                    <label class="form-check-label" for="tableCheckOne"></label>
+                  </div>
+                </td>
+              }
+
+              @for (head of tableHeads(); track head; let headIndex = $index) {
+                <td>{{ row[dataFields()[headIndex]] }}</td>
+              }
+<!--              <td>TechPinnacle Solutions</td>-->
+<!--              <td>2021-08-12</td>-->
+<!--              <td><span class="badge bg-success-subtle text-success">Completed</span></td>-->
+              @if(shouldShowAction()){
+                <td style="width: 0px">
+                  <div class="dropdown">
+                    <button class="btn btn-sm btn-link text-body-tertiary" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                      <span class="material-symbols-outlined scale-125">more_horiz</span>
+                    </button>
+                    <ul class="dropdown-menu">
+                      <li><button class="dropdown-item" type="button" data-bs-toggle="offcanvas" data-bs-target="#productModal" aria-controls="productModal" >View</button></li>
+                      <li><button class="dropdown-item" >Download</button></li>
+                    </ul>
+                  </div>
+                </td>
+              }
+            </tr>
+          }
         </tbody>
+      }
     </table>
 </div>

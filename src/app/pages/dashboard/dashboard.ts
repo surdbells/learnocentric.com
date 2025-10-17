@@ -7,6 +7,7 @@ import {RouterOutlet} from '@angular/router';
 import {isPlatformBrowser} from "@angular/common";
 import {IMenu, UserPreferenceMenu} from "../../common/service/user-preference-menu";
 import {TopToolbar} from "../../common/layout/top-toolbar/top-toolbar";
+import {AuthUser} from '../../common/auth/auth.models';
 
 @Component({
   selector: 'app-dashboard',
@@ -31,12 +32,7 @@ export class Dashboard {
         private userPreferenceMenu: UserPreferenceMenu
     ) {
       if (isPlatformBrowser(platformId)) {
-        const user: {
-          name: string,
-          role: 'school' | 'student' | 'teacher',
-          email: string
-        } = JSON.parse(localStorage.getItem('auth_user') || '{}');
-
+        const user: AuthUser = JSON.parse(localStorage.getItem('auth_user') || '{}');
         this.menu = this.userPreferenceMenu[user.role];
         console.log(this.menu)
       }

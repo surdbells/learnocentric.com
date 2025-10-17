@@ -1,8 +1,11 @@
+  <app-loader [isLoading]="isLoading()" />
+
+
 <app-user-intro >
   <div class="d-flex align-items-xl-center justify-content-xl-between flex-xl-row flex-column">
     <div class="mb-3 mb-xl-0">
       <div class="d-flex align-items-center flex-wrap mb-2">
-        <h1 class="me-2">Welcome Back, Mr. Herald</h1>
+        <h1 class="me-2">Welcome Back, {{ user()?.user?.firstName  }}</h1>
         <a href="profile.html" class="avatar avatar-sm img-rounded bg-gray-800 dark-hover"><i class="ti ti-edit text-white"></i></a>
       </div>
       <p class="">Have a Good day at work</p>
@@ -14,21 +17,21 @@
 
 <div class="row mb-8">
   <div class="col-12 col-md-6 col-xxl-3 mb-4 mb-xxl-0">
-    <app-stat-card label="Students" value="1000" icon="local_library" />
+    <app-stat-card label="Students" [value]="studentsCount" icon="local_library" />
   </div>
   <div class="col-12 col-md-6 col-xxl-3 mb-4 mb-xxl-0">
-    <app-stat-card label="Teachers" value="30" icon="supervisor_account" />
+    <app-stat-card label="Teachers" [value]="teachersCount" icon="supervisor_account" />
   </div>
   <div class="col-12 col-md-6 col-xxl-3 mb-4 mb-md-0">
-    <app-stat-card label="subject" value="200" icon="subject" />
+    <app-stat-card label="subject" [value]="subjectsCount" icon="subject" />
 
   </div>
   <div class="col-12 col-md-6 col-xxl-3">
-    <app-stat-card label="class" value="40" icon="book" />
+    <app-stat-card label="class" [value]="classesCount" icon="book" />
   </div>
 </div>
 
-<div class="row">
+<div class="row mb-8">
   <div class="col-12 col-xxl-8">
     <app-attendance-stat />
   </div>

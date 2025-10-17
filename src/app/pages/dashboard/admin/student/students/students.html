@@ -1,3 +1,5 @@
+<app-loader [isLoading]="isLoading()" />
+
 <app-page-header icon="local_library" action="Students">
     <app-learno-button text="Add Student" (clicked)="clickedHandler()" />
 </app-page-header>
@@ -6,7 +8,10 @@
 <div class="row">
     <div class="col-12">
         <app-table-search />
-        <app-data-table [tableHeads]="['User', 'Company', 'Phone', 'Location']"  [tableRows]="[]"/>
+        <app-data-table
+          [tableHeads]="['Email', 'Firstname', 'Lastname', 'Phone']"
+          [dataFields]="['email', 'first_name', 'last_name', 'phone', 'id']"  [tableRows]="students()"
+        />
     </div>
 </div>
-<app-data-table-numbering [tableData]="[]" />
+<app-data-table-numbering [tableData]="students()" />

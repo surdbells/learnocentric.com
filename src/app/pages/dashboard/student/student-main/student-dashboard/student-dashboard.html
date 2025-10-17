@@ -1,3 +1,5 @@
+<app-loader [isLoading]="isLoading()" />
+
 <app-page-header icon="supervisor_account" action="Dashboard"/>
 <app-user-intro >
   <div class="d-sm-flex align-items-center justify-content-between row-gap-3">
@@ -7,7 +9,7 @@
       </div>
       <div class="overflow-hidden">
         <span class="badge bg-transparent-primary text-primary mb-1">#T594651</span>
-        <h3 class="mb-1 text-truncate">Henriques Morgan </h3>
+        <h3 class="mb-1 text-truncate">{{getFullName}} </h3>
         <div class="d-flex align-items-center flex-wrap text-light row-gap-2">
           <span class="me-2 text-secondary">Classes : I-A, V-B</span>
           <span class="d-flex align-items-center"><i class="ti ti-circle-filled text-warning fs-7 me-1"></i>Physics</span>
@@ -23,14 +25,14 @@
 <div class="row">
   <div class="col-xxl-8 col-xl-12">
     <div class="row mb-4">
-      @for (schedules of schedules; track $index) {
+      @for (course of studentCourses; track $index) {
       <div class="col-xxl-4 col-xl-4 mb-3">
         <a routerLink="/student/lesson/12345">
             <div class="card h-100  justify-content-center bg-body-tertiary b-0">
               <div class="card-body d-flex flex-column justify-content-center">
                 <div class="row">
                   <!-- Heading -->
-                  <div class="fs-6 fw-semibold mb-2 p-0">English Language</div>
+                  <div class="fs-6 fw-semibold mb-2 p-0">{{course?.subject_name}}</div>
 
                   <h4 class="fs-sm fw-normal text-body-secondary  p-0">27 <span class="text-success">Topics</span> - 3 <span class="text-success">Lessons</span></h4>
 

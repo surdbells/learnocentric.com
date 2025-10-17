@@ -5,6 +5,7 @@ import {DataTable} from '../../../../../components/data-table/data-table';
 import {DataTableNumbering} from '../../../../../components/data-table-numbering/data-table-numbering';
 import {LearnoModal} from '../../../../../components/learno-modal/learno-modal';
 import {SchoolClassForm} from '../../../../../components/forms/school-class-form/school-class-form';
+import {ActivatedRoute} from '@angular/router';
 
 @Component({
   selector: 'app-assignment',
@@ -20,5 +21,11 @@ import {SchoolClassForm} from '../../../../../components/forms/school-class-form
   styleUrl: './assignment.css'
 })
 export class Assignment {
+
+  userRole: string;
+  constructor(private route: ActivatedRoute) {
+    this.userRole = this.route.snapshot.data['user'];
+  }
+
 
 }

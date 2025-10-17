@@ -1,17 +1,23 @@
-<form (submit)="onSubmit()" [formGroup]="formGroup" >
+<app-loader [isLoading]="isLoading()" />
+
+<form (submit)="onSubmit()" [formGroup]="form" >
   <div class="modal-body" data-select2-id="83">
     <div class="row" data-select2-id="82">
 
+      <div learnoInput class="mb-4" [label]="'Class name'" [inputType]="'text'" [id]="'name'" [formControlName]="'name'" ></div>
+      <div learnoInput class="mb-4" [label]="'Grade Level'" [inputType]="'number'" [id]="'gradeLevel'" [formControlName]="'gradeLevel'"></div>
+      <div learnoInput class="mb-4" [label]="'Section'" [inputType]="'text'" [id]="'section'" [formControlName]="'section'"></div>
+      <div learnoInput class="mb-4" [label]="'Academic Year'" [inputType]="'text'" [id]="'academicYear'" [formControlName]="'academicYear'"></div>
 
-      <div class="col-lg-12" data-select2-id="94">
-        <div class="mb-3" learnoSelect id="Classroom" label="Class" [formControlName]="'classroom'"  [options]="[
-                    {label: 'Class 1', value: 'Monday'},
-                    {label: 'Class 2', value: 'Tuesday'},
-                    {label: 'Class 3', value: 'Wednesday'},
-                    {label: 'Class 4', value: 'Thursday'},
-                    {label: 'Class 5', value: 'Friday'},
-        ]"> </div>
-      </div>
+<!--      <div class="col-lg-12" data-select2-id="94">-->
+<!--        <div class="mb-3" learnoSelect id="Classroom" label="Class" [formControlName]="'classroom'"  [options]="[-->
+<!--                    {label: 'Class 1', value: 'Monday'},-->
+<!--                    {label: 'Class 2', value: 'Tuesday'},-->
+<!--                    {label: 'Class 3', value: 'Wednesday'},-->
+<!--                    {label: 'Class 4', value: 'Thursday'},-->
+<!--                    {label: 'Class 5', value: 'Friday'},-->
+<!--        ]"> </div>-->
+<!--      </div>-->
 
     </div>
   </div>

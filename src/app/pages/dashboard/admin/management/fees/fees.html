@@ -1,0 +1,20 @@
+<app-loader [isLoading]="isLoading()" />
+
+
+<app-page-header icon="home_and_garden" action="Fees">
+<!--  @if(userRole == "admin") {-->
+    <app-learno-modal [modalId]="'add_fees'" [modalAction]="'New Fees'" >
+      <app-fees-form modalForm [classes]="classes()" />
+    </app-learno-modal >
+<!--  }-->
+</app-page-header>
+
+
+<app-table-search />
+<app-data-table
+  [tableHeads]="['Name', 'Amount', 'Frequency','Class Name']"
+  [dataFields]="['name', 'amount', 'frequency', 'class_name', 'id']"
+  [tableRows]="fees()"
+/>
+
+<app-data-table-numbering [tableData]="fees()" />

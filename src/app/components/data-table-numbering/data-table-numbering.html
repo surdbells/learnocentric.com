@@ -3,33 +3,33 @@
 
         <div class="col">
         <!-- Text -->
-        <p class="text-body-secondary mb-0">1 – 10 (2550 total)</p>
-    </div>
-    <div class="col-auto">
-        <!-- Pagination -->
-        <nav aria-label="Page navigation example">
-            <ul class="pagination mb-0">
-                <li class="page-item">
-                    <a class="page-link" href="customers.html#" aria-label="Previous">
-                        <span aria-hidden="true">&laquo;</span>
-                    </a>
-                </li>
-                <li class="page-item">
-                    <a class="page-link active" href="customers.html#">1</a>
-                </li>
-                <li class="page-item">
-                    <a class="page-link" href="customers.html#">2</a>
-                </li>
-                <li class="page-item">
-                    <a class="page-link" href="customers.html#">3</a>
-                </li>
-                <li class="page-item">
-                    <a class="page-link" href="customers.html#" aria-label="Next">
-                        <span aria-hidden="true">&raquo;</span>
-                    </a>
-                </li>
-            </ul>
-        </nav>
-    </div>
+        <p class="text-body-secondary mb-0">1 of {{page.length}}</p>
+      </div>
+      <div class="col-auto">
+          <!-- Pagination -->
+          <nav aria-label="Page navigation example">
+              <ul class="pagination mb-0">
+
+                  <li class="page-item">
+                      <a class="page-link" href="customers.html#" aria-label="Previous">
+                          <span aria-hidden="true">&laquo;</span>
+                      </a>
+                  </li>
+
+                @for(count of page; track count) {
+                  <li class="page-item">
+                      <a class="page-link active" href="customers.html#">1</a>
+                  </li>
+                }
+
+
+                  <li class="page-item">
+                      <a class="page-link" href="customers.html#" aria-label="Next">
+                          <span aria-hidden="true">&raquo;</span>
+                      </a>
+                  </li>
+              </ul>
+          </nav>
+      </div>
     }
 </div>

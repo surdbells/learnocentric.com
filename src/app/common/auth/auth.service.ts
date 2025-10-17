@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { AuthResponse, AuthUser } from './auth.models';
+import {AuthResponse, AuthSession, AuthUser} from './auth.models';
 import { AuthStore } from './auth.store';
 
 @Injectable({ providedIn: 'root' })
@@ -25,5 +25,9 @@ export class AuthService {
 
   logoutLocal() {
     this.store.clear();
+  }
+
+  getAuthSession(): AuthSession {
+    return this.store.session();
   }
 }

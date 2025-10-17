@@ -1,12 +1,13 @@
+<app-loader [isLoading]="isLoading()" />
+
 <!-- Form -->
 <form [formGroup]="form" (ngSubmit)="onSubmit()">
     <div learnoInput class="mb-4" [label]="'Email'" [inputType]="'email'" [id]="'email'" [formControlName]="'email'" ></div>
     <div learnoInput class="mb-4" [label]="'Password'" [inputType]="'password'" [id]="'password'" [formControlName]="'password'"></div>
-    <div learnoInput class="mb-4" [label]="'Full name'" [inputType]="'text'" [id]="'name'" [formControlName]="'name'"></div>
-    <div learnoInput class="mb-4" [label]="'Date of Birth'" [inputType]="'date'" [id]="'dob'" [formControlName]="'dob'"></div>
+    <div learnoInput class="mb-4" [label]="'First Name'" [inputType]="'text'" [id]="'firstName'" [formControlName]="'firstName'"></div>
+    <div learnoInput class="mb-4" [label]="'Last Name'" [inputType]="'text'" [id]="'lastName'" [formControlName]="'lastName'"></div>
     <div learnoInput class="mb-4" [label]="'Classroom'" [inputType]="'text'" [id]="'classroom'" [formControlName]="'classroom'"></div>
-    <div learnoSelect class="mb-4"  [label]="'Gender'" [id]="'gender'" [formControlName]="'gender'" [options]="genderOptions"></div>
-   
+
     <app-learno-button class="mt-4" text="Add Student" />
 
 </form>

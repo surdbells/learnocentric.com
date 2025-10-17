@@ -1,37 +1,29 @@
-<form action="class-time-table.html" data-select2-id="84" [formGroup]="formGroup" >
+<app-loader [isLoading]="isLoading()" />
+
+<form (submit)="onSubmit()"  [formGroup]="form" >
     <div class="modal-body" data-select2-id="83">
         <div class="row" data-select2-id="82">
 
             <div class="col-lg-4" data-select2-id="94">
-                <div class="mb-3" learnoSelect id="Classroom" label="Section" [formControlName]="'classroom'"  [options]="[]"> </div>
+                <div class="mb-3" learnoSelect id="Classroom" label="Class" [formControlName]="'classId'"  [options]="classes()"> </div>
             </div>
             <div class="col-lg-4" data-select2-id="81">
-                <div class="mb-3" learnoSelect id="subject" label="Subject" [formControlName]="'subject'"  [options]="[]"> </div>
+                <div class="mb-3" learnoSelect id="subject" label="Subject" [formControlName]="'subjectId'"  [options]="subjects()"> </div>
             </div>
             <div class="col-lg-4" data-select2-id="81">
-                <div class="mb-3" learnoSelect id="teacher" label="Teacher" [formControlName]="'teacher'"  [options]="[]"> </div>
+                <div class="mb-3" learnoSelect id="teacher" label="Teacher" [formControlName]="'teacherId'"  [options]="teachers()"> </div>
             </div>
             <div class="col-lg-4" data-select2-id="81">
-                <div class="mb-3" learnoSelect id="day" label="Day" [formControlName]="'day'"  [options]="[
-                    {label: 'Monday', value: 'Monday'},
-                    {label: 'Tuesday', value: 'Tuesday'},
-                    {label: 'Wednesday', value: 'Wednesday'},
-                    {label: 'Thursday', value: 'Thursday'},
-                    {label: 'Friday', value: 'Friday'},
-                ]"> </div></div>
+                <div class="mb-3" learnoSelect id="day" label="Day" [formControlName]="'dayOfWeek'"  [options]="days()"> </div></div>
             <div class="col-lg-4">
-                <div class="mb-3" learnoInput inputType="text" [formControlName]="'startHour'" id="startHour" label="Start Time"></div>
+                <div class="mb-3" learnoInput inputType="text" [formControlName]="'startTime'" id="startHour" label="Start Time"></div>
             </div>
             <div class="col-lg-4">
-                <div class="mb-3" learnoInput inputType="text" [formControlName]="'startMinute'" id="startMinute" label="Start Minute"></div>
+                <div class="mb-3" learnoInput inputType="text" [formControlName]="'endTime'" id="startMinute" label="Start Minute"></div>
             </div>
             <div class="col-lg-4">
-                <div class="mb-3" learnoInput inputType="text" [formControlName]="'endingHour'" id="endingHour" label="End Time"></div>
+                <div class="mb-3" learnoInput inputType="text" [formControlName]="'room'" id="room" label="Room"></div>
             </div>
-            <div class="col-lg-4">
-                <div class="mb-3" learnoInput inputType="text" [formControlName]="'endingMinute'" id="endingMinute" label="Start Minute"></div>
-            </div>
-
 
         </div>
     </div>

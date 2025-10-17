@@ -9,7 +9,6 @@ import {PageHeader} from '../../common/layout/page-header/page-header';
   imports: [
     RouterOutlet,
     SidebarComponent,
-    LearnoButton,
     PageHeader
   ],
   templateUrl: './file-manager.html',
