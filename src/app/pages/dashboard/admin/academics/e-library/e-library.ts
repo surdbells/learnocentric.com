@@ -54,10 +54,9 @@ export class ELibrary implements OnInit{
     this.userRole = this.route.snapshot.data['user'];
   }
 
-  ngOnInit(): void {
-    this.isLoading.set(true);
-
+  private loadDat() {
     if(isPlatformBrowser(this.platformId)) {
+      this.isLoading.set(true);
 
       const resource$ = forkJoin({
         classes: this.apiService.get('/backend/school/classes'),
@@ -82,6 +81,11 @@ export class ELibrary implements OnInit{
       })
 
     }
+
+  }
+
+  ngOnInit(): void {
+    this.loadDat()
   }
 
   clickhandker() {
@@ -91,5 +95,9 @@ export class ELibrary implements OnInit{
   onPreview(evt: { row: any; anchorSelector: string }) {
     this.selectedElibrary.set(evt.row);
     this.anchorSelector.set(evt.anchorSelector || '');
+  }
+
+  handleSuccessSubmit($event: { success: boolean }) {
+    this.loadDat();
   }
 }

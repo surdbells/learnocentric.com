@@ -1,42 +1,44 @@
-<div class="card">
-  <div class="card-header d-flex align-items-center justify-content-between">
-    <div class="d-flex align-items-center">
-      <h4 class="me-2">Today's Class</h4>
-      <div class="slide-nav2 text-end nav-control">
-        <button type="button" class="owl-prev border-0  " (click)="onPrevToday()">
-          <i class="material-symbols-outlined">chevron_left</i>
-          <!--              <i class="ti ti-chevron-left"></i>-->
-        </button>
-        <button type="button" class="owl-next border-0" (click)="onNextToday()">
-          <i class="material-symbols-outlined">chevron_right</i>
-        </button>
+<!--<app-skeleton-loader [isLoading]="isLoading()" variant="card" >-->
+  <div class="card">
+    <div class="card-header d-flex align-items-center justify-content-between">
+      <div class="d-flex align-items-center">
+        <h4 class="me-2">Today's Class</h4>
+        <div class="slide-nav2 text-end nav-control">
+          <button type="button" class="owl-prev border-0  " (click)="onPrevToday()">
+            <i class="material-symbols-outlined">chevron_left</i>
+            <!--              <i class="ti ti-chevron-left"></i>-->
+          </button>
+          <button type="button" class="owl-next border-0" (click)="onNextToday()">
+            <i class="material-symbols-outlined">chevron_right</i>
+          </button>
+        </div>
       </div>
-    </div>
-    <div class="d-inline-flex align-it
+      <div class="d-inline-flex align-it
     ems-center class-datepick">
 
             <span class="icon">
               <i class="material-symbols-outlined me-2">chevron_left</i>
             </span>
-      <input type="text" class="form-control datetimepicker border-0" placeholder="{{today | date}}">
+        <input type="text" class="form-control datetimepicker border-0" placeholder="{{today | date}}">
 
 
-            <span class="icon"><i class="material-symbols-outlined ms-2">chevron_right</i></span>
+        <span class="icon"><i class="material-symbols-outlined ms-2">chevron_right</i></span>
+      </div>
+    </div>
+
+    <div class="card-body">
+      <owl-carousel-o [options]="todayCarouselOptions" #todayCarousel>
+        @for (s of getTodayTimeTable;  track $index) { //timetable()[todayDayIndex] //class_name
+          <ng-template carouselSlide>
+            <div class="item">
+              <div class="rounded p-3 border bg-dark flex flex-column justify-content-center">
+                <span class="{{s?.badgeClass}} badge mb-2"><i class="material-symbols-outlined me-2">alarm</i>{{s?.time}}</span>
+                <p class="ps-2">{{s?.class}}</p>
+              </div>
+            </div>
+          </ng-template>
+        }
+      </owl-carousel-o>
     </div>
   </div>
-  <div class="card-body">
-    <owl-carousel-o [options]="todayCarouselOptions" #todayCarousel>
-
-      @for (s of todaySlides;  track $index) {
-        <ng-template carouselSlide>
-          <div class="item">
-            <div class="rounded p-3 border bg-dark flex flex-column justify-content-center">
-              <span class="{{s.badgeClass}} badge mb-2"><i class="material-symbols-outlined me-2">alarm</i>{{s.time}}</span>
-              <p class="ps-2">{{s.class}}</p>
-            </div>
-          </div>
-        </ng-template>
-      }
-    </owl-carousel-o>
-  </div>
-</div>
+<!--</app-skeleton-loader>-->

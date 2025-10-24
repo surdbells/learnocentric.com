@@ -1,12 +1,23 @@
+
 <app-page-header icon="local_library" action="Students">
-  <app-learno-button text="Add Student" (clicked)="clickedHandler()" />
+<!--  <app-learno-button text="Add Student" (clicked)="clickedHandler()" />-->
 </app-page-header>
 
 <!-- Page content -->
 <div class="row">
   <div class="col-12">
-    <app-table-search />
-    <app-data-table [tableHeads]="['User', 'Company', 'Phone', 'Location']"  [tableRows]="[]"/>
+    <app-table-search
+      (search)="onSearch($event)"
+    />
+    <app-skeleton-loader [isLoading]="isLoading()" variant="table" [rows]="5" [columns]="4">
+        <app-data-table
+          [shouldShowCheckbox]="false"
+          [shouldShowAction]="false"
+          [tableHeads]="['First Name', 'Last Name', 'Email', 'Class']"
+          [dataFields]="['first_name', 'last_name', 'email', 'class_name', 'id']"
+          [tableRows]="filterStudents()"
+        />
+    </app-skeleton-loader>
   </div>
 </div>
-<app-data-table-numbering [tableData]="[]" />
+<app-data-table-numbering [tableData]="filterStudents()" />

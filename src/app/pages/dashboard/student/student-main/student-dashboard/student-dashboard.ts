@@ -14,6 +14,7 @@ import {AuthUser} from '../../../../../common/auth/auth.models';
 import {AuthService} from '../../../../../common/auth/auth.service';
 import {UtilService} from '../../../../../common/service/util.service';
 import {Loader} from '../../../../../common/loader/loader';
+import {SkeletonLoader} from '../../../../../common/skeleton-loader/skeleton-loader';
 
 declare const $: any;
 
@@ -29,7 +30,8 @@ declare const $: any;
     TodayClass,
     UserIntro,
     RouterLink,
-    Loader
+    Loader,
+    SkeletonLoader
   ],
   templateUrl: './student-dashboard.html',
   styleUrl: './student-dashboard.css'

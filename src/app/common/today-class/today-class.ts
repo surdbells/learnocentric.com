@@ -1,7 +1,21 @@
-import {AfterViewInit, Component, ElementRef, Inject, OnDestroy, OnInit, PLATFORM_ID, ViewChild} from '@angular/core';
+import {
+  AfterViewInit,
+  Component,
+  ElementRef,
+  Inject, input,
+  OnDestroy,
+  OnInit,
+  PLATFORM_ID,
+  signal,
+  ViewChild
+} from '@angular/core';
 import {CarouselComponent, CarouselModule, OwlOptions} from 'ngx-owl-carousel-o';
 import {DatePipe, isPlatformBrowser} from '@angular/common';
 import {ApiService} from '../service/api.service';
+import {AuthService} from '../auth/auth.service';
+import {UtilService} from '../service/util.service';
+import {ToastrService} from 'ngx-toastr';
+import {SkeletonLoader} from '../skeleton-loader/skeleton-loader';
 
 declare const $: any;
 
@@ -9,7 +23,8 @@ declare const $: any;
   selector: 'app-today-class',
   imports: [
     CarouselModule,
-    DatePipe
+    DatePipe,
+    SkeletonLoader
   ],
   templateUrl: './today-class.html',
   styleUrl: './today-class.css'
@@ -17,22 +32,46 @@ declare const $: any;
 export class TodayClass implements OnInit, AfterViewInit, OnDestroy{
 
   @ViewChild('todayCarousel', { static: false }) todayCarousel?: CarouselComponent;
+  isLoading = signal<boolean>(false);
 
   private dpEl: any;
   private isBrowser: boolean;
   today = (new Date(Date.now())).toISOString();
+  todayDayIndex = (new Date(Date.now())).getDay();
+  timetable = signal<{[key:number]: any[]}>({})
 
   constructor(
     private host: ElementRef<HTMLElement>,
-      @Inject(PLATFORM_ID) platformId: Object,
-      private readonly apiSrv: ApiService
+    @Inject(PLATFORM_ID) platformId: Object,
+    private readonly apiSrv: ApiService,
+    private utilSrv: UtilService,
+    private readonly auth: AuthService,
+    private readonly  toastSrv: ToastrService
   ) {
     this.isBrowser = isPlatformBrowser(platformId);
   }
 
   ngOnInit(): void {
         if(this.isBrowser) {
-          // this.apiSrv.get()
+          this.isLoading.set(true);
+          console.log("================in the browser=====")
+          const user = this.auth.getAuthSession().user;
+
+          this.apiSrv.get(`/backend/${user?.role}/timetable/${user?.id}`)
+            .subscribe({
+              next: (res) => {
+                console.log(res, "========= time bale ==============")
+                this.timetable.set(this.utilSrv.groupRoutineToEachDay(res));
+                this.isLoading.set(false);
+              },
+              error: (err) => {
+                this.toastSrv.error(err.error.message, 'Error')
+                this.isLoading.set(false);
+              },
+              complete: () => {
+                // console.log('complete')
+              }
+            })
         }
     }
 
@@ -101,5 +140,14 @@ export class TodayClass implements OnInit, AfterViewInit, OnDestroy{
 
   onNextToday() {
     this.todayCarousel?.next();
+  }
+
+  get getTodayTimeTable() {
+    return this.timetable()[this.todayDayIndex]?.map((routine) => ({
+      time: `${routine.start_time} - ${routine.end_time}`,
+      badgeClass: 'text-bg-danger text-decoration-line-through',
+      class: `${routine.class_name} - ${routine.subject_name}`,
+      isPast: [true, false][Math.floor(Math.random()*2)],
+    }))
   }
 }

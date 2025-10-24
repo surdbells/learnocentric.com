@@ -18,7 +18,7 @@ export class DataTableNumbering implements OnInit {
     // Initialize page array with effect to react to tableData changes
     effect(() => {
       console.log(this.tableData());
-      this.page = new Array(Math.ceil(this.tableData().length/this.count())).fill('o');
+      this.page = new Array(Math.ceil(this.tableData()?.length/this.count())).fill('o');
     });
   }
 

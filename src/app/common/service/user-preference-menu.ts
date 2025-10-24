@@ -108,8 +108,8 @@ export class UserPreferenceMenu {
       children: [
         { name: "Dashboard", link: "/teacher/main" },
         { name: "Messenger", link: "/teacher/main/message" },
-        { name: "Notification", link: "/teacher/main/notification"},
-        { name: "School Events", link: "/teacher/main/events"},
+        // { name: "Notification", link: "/teacher/main/notification"},
+        // { name: "School Events", link: "/teacher/main/events"},
         { name: "Student", link: "/teacher/main/students"},
         // { name: "File Management", link: "/teacher/main/file-manager" },
       ]
@@ -117,16 +117,16 @@ export class UserPreferenceMenu {
 
     { name: "Academics", icon: "school", link: "/teacher/academics",
       children: [
-        { name: "Pending Task", link: "/teacher/academics/pending-task" },
-        { name: "Assignments", link: "/teacher/academics/assignments" },
+        // { name: "Pending Task", link: "/teacher/academics/pending-task" },
+        // { name: "Assignments", link: "/teacher/academics/assignments" },
         { name: "Teacher Routine", link: "/teacher/academics/class-routine" },
-        { name: "Attendance", link: "/teacher/academics/attendance" },
+        // { name: "Attendance", link: "/teacher/academics/attendance" },
         { name: "E-Library", link: "/teacher/academics/e-library" },
-        { name: "Lesson Plans", link: "/teacher/academics/lesson-plans" },
-        { name: "Assessments", link: "/teacher/academics/assessments" },
-        { name: "Virtual Class", link: "/teacher/academics/virtual-class" },
-        { name: "Grades", link: "/teacher/academics/grades" },
-        { name: "Promotion", link: "/teacher/academics/promotion" },
+        // { name: "Lesson Plans", link: "/teacher/academics/lesson-plans" },
+        // { name: "Assessments", link: "/teacher/academics/assessments" },
+        // { name: "Virtual Class", link: "/teacher/academics/virtual-class" },
+        // { name: "Grades", link: "/teacher/academics/grades" },
+        // { name: "Promotion", link: "/teacher/academics/promotion" },
       ]
     },
 
@@ -143,21 +143,21 @@ export class UserPreferenceMenu {
       children: [
         { name: "Dashboard", link: "/student/main" },
         { name: "Messenger", link: "/student/main/message" },
-        { name: "Notification", link: "/student/main/notification"},
-        { name: "School Events", link: "/student/main/events"},
-        { name: "Classmates", link: "/student/main/classmate"},
+        // { name: "Notification", link: "/student/main/notification"},
+        // { name: "School Events", link: "/student/main/events"},
+        // { name: "Classmates", link: "/student/main/classmate"},
         // { name: "File Management", link: "/student/main/file-manager" },
       ]
     },
 
     { name: "Academics", icon: "school", link: "/student/academics",
       children: [
-        { name: "Assignments", link: "/student/academics/assignments" },
+        // { name: "Assignments", link: "/student/academics/assignments" },
         { name: "Student Routine", link: "/student/academics/class-routine" },
         { name: "E-Library", link: "/student/academics/e-library" },
-        { name: "Lesson Plans", link: "/student/academics/lesson-plans" },
+        // { name: "Lesson Plans", link: "/student/academics/lesson-plans" },
         { name: "Performance", link: "/student/academics/performance" },
-        { name: "Assessments", link: "/student/academics/assessments" },
+        // { name: "Assessments", link: "/student/academics/assessments" },
       ]
     },
 

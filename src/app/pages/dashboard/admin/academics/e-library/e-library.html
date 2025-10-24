@@ -1,8 +1,12 @@
 <app-page-header icon="library_books" action="E-Library" >
 
-  @if(userRole == "admin" || userRole == "tutor_admin") {
+  @if(userRole == "admin" || userRole == "tutor_admin" || userRole == "teacher") {
     <app-learno-modal [modalId]="'add_e_library'" [modalAction]="'Add E-Library'" >
-      <app-e-library-form [action]="'Add E-Library'" modalForm [classes]="classes()" [subjects]="subjects()" />
+      <app-e-library-form
+        [action]="'Add E-Library'"
+        modalForm [classes]="classes()" [subjects]="subjects()"
+        (submitted)="handleSuccessSubmit($event)"
+      />
     </app-learno-modal>
   }
 <!--  <app-learno-button (clicked)="clickhandker()" [text]="'Add'" />-->

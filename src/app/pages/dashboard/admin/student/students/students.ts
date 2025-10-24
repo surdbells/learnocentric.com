@@ -12,6 +12,8 @@ import {LearnoOffset} from '../../../../../components/learno-offset/learno-offse
 import {LearnoModal} from '../../../../../components/learno-modal/learno-modal';
 import {EditStudentForm} from '../../../../../components/forms/edit-student-form/edit-student-form';
 import {ToastrService} from 'ngx-toastr';
+import {AuthService} from '../../../../../common/auth/auth.service';
+import {AuthUser} from '../../../../../common/auth/auth.models';
 
 @Component({
   selector: 'app-students',
@@ -50,12 +52,16 @@ export class Students implements OnInit {
   selectedEnrollment = signal<any | null>(null);
   anchorSelector = signal<string>('');
   @ViewChild(LearnoOffset) offsetCmp!: LearnoOffset;
+  user: AuthUser | null = null;
 
   constructor(
     private router: Router,
     private readonly apiSrv: ApiService,
     private readonly toastService: ToastrService,
-    ) { }
+    private auth: AuthService
+    ) {
+    this.user = auth.getAuthSession().user;
+  }
 
   ngOnInit(): void {
     this.isLoading.set(true);
