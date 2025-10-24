@@ -1,73 +1,9 @@
-<!-- Offcanvas: Product -->
-<div class="offcanvas offcanvas-end" tabindex="-1" id="productModal" aria-labelledby="productModalLabel">
+<!-- Offcanvas: Dynamic aligned preview [ngStyle]="offcanvasStyles" -->
+<div class="offcanvas offcanvas-end" tabindex="-1" [id]="modalId" #offcanvasRef aria-labelledby="productModalLabel">
   <div class="offcanvas-header justify-content-end align-items-end">
-    <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    <button #offsetDismiss type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
   </div>
   <div class="offcanvas-body">
-    <div id="invoice" class="card">
-      <div class="card-body">
-        <div class="row align-items-center justify-content-between mb-7">
-          <div class="col-auto">
-            <!-- Icon -->
-            <div class="avatar avatar-xl rounded text-primary">
-              <i class="fs-2" data-duoicon="box-2"></i>
-            </div>
-          </div>
-          <div class="col-auto">
-            <p class="text-end text-body-secondary mb-0">
-              <span class="text-body">Michael Johnson</span> <br />
-              Bill No: #123 <br />
-              Date: 12/12/2021
-            </p>
-          </div>
-        </div>
-        <div class="row justify-content-between mb-7">
-          <div class="col-auto">
-            <p class="text-body-secondary mb-0">
-              <span class="fw-bold text-body">From:</span> <br />
-              <span class="text-body">Quantum Dynamics</span>
-            </p>
-          </div>
-          <div class="col-auto">
-            <p class="text-end text-body-secondary mb-0">
-              <span class="fw-bold text-body">To:</span> <br />
-              <span class="text-body">Michael Johnson</span> <br />
-              1234 Main St. <br />
-              Springfield, IL 62701
-            </p>
-          </div>
-        </div>
-        <div class="list-group mb-7">
-          <div class="list-group-item bg-body">
-            <div class="row">
-              <div class="col">Machine Learning Course</div>
-              <div class="col-auto">$99.99</div>
-            </div>
-          </div>
-          <div class="list-group-item bg-body">
-            <div class="row">
-              <div class="col">Web Development Course</div>
-              <div class="col-auto">$159.99</div>
-            </div>
-          </div>
-          <div class="list-group-item bg-body">
-            <div class="row">
-              <div class="col">
-                <strong>Total</strong>
-              </div>
-              <div class="col-auto">
-                <strong>$259.98</strong>
-              </div>
-            </div>
-          </div>
-        </div>
-        <h3 class="fs-base">Notes:</h3>
-        <p class="text-body-secondary mb-0">
-          Thank you for your purchase!
-        </p>
-      </div>
-    </div>
-
-<!--    <button class="btn btn-success btn-lg mt-5 w-100" (click)="handlePdfDownload()">Download</button>-->
+    <ng-content></ng-content>
   </div>
 </div>

@@ -7,13 +7,15 @@ import {AuthService} from '../../../common/auth/auth.service';
 import {ApiService} from '../../../common/service/api.service';
 import {Loader} from '../../../common/loader/loader';
 import {NgIf} from '@angular/common';
+import {LearnoButton} from '../../../common/learno-button/learno-button';
 
 @Component({
   selector: 'app-sign-in',
   imports: [
     ReactiveFormsModule,
     Loader,
-    NgIf
+    NgIf,
+    LearnoButton
   ],
   templateUrl: './sign-in.html',
   styleUrl: './sign-in.css'
@@ -61,12 +63,20 @@ export class SignIn {
                   this.router.navigate(["admin/main"]);
                   break;
 
+                case "tutor_admin":
+                  this.router.navigate(["tutor/main"]);
+                  break;
+
                 case "teacher":
                   this.router.navigate(["teacher/main"]);
                   break;
 
                 case "student":
                   this.router.navigate(["student/main"]);
+                  break;
+
+                case "parent":
+                  this.router.navigate(["parent/main"]);
                   break;
 
                 default:

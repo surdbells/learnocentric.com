@@ -1,17 +1,74 @@
-<app-loader [isLoading]="isLoading()" />
+<app-learno-offset [anchorSelector]="anchorSelector()" [modalId]="'productModal'" (closeOffset)="handleCloseOffset()">
+  @if(selectedEnrollment()) {
+    <div class="card">
+      <div class="card-body">
+        <div class="row align-items-center justify-content-between mb-4">
+          <div class="col-auto">
+            <div class="avatar avatar-xl rounded text-primary">
+              <i class="fs-2" data-duoicon="receipt"></i>
+            </div>
+          </div>
+          <div class="col-auto">
+            <p class="text-end text-body-secondary mb-0">
+              Name: <span class="text-body">{{ selectedEnrollment()?.first_name }} {{ selectedEnrollment()?.last_name }}</span><br />
+            </p>
+          </div>
+        </div>
+        <div class="list-group mb-4">
+          <div class="list-group-item bg-body">
+            <div class="row">
+              <div class="col">Email</div>
+              <div class="col-auto">{{ selectedEnrollment()?.email }}</div>
+            </div>
+          </div>
+          <div class="list-group-item bg-body">
+            <div class="row">
+              <div class="col">Status</div>
+              <div class="col-auto">{{ selectedEnrollment()?.status }}</div>
+            </div>
+          </div>
+        </div>
+        <!--        <p class="text-body-secondary small mb-0">Previewing fee structure. Click Download to export.</p>-->
+      </div>
+
+      <div class="card-footer">
+
+<!--        <div class="d-flex justify-content-end">-->
+<!--          <app-learno-button text="Edit" (clicked)="editEnrollment()" class="me-2" data-bs-toggle="modal" [attr.data-bs-target]="`#edit_student`" />-->
+<!--          <app-learno-button text="Delete" (clicked)="deleteEnrollment()" btnColor="danger" class="me-2" />-->
+<!--        </div>-->
+
+      </div>
+    </div>
+  }
+
+</app-learno-offset>
+
 
 <app-page-header icon="local_library" action="Students">
     <app-learno-button text="Add Student" (clicked)="clickedHandler()" />
+    <app-learno-modal [modalId]="'edit_student'" modalAction="Edit Student" [showBtn]="false" >
+      <app-edit-student-form
+        [select]="selectedEnrollment()"
+        modalForm
+      />
+    </app-learno-modal>
 </app-page-header>
 
 <!-- Page content -->
 <div class="row">
     <div class="col-12">
-        <app-table-search />
-        <app-data-table
-          [tableHeads]="['Email', 'Firstname', 'Lastname', 'Phone']"
-          [dataFields]="['email', 'first_name', 'last_name', 'phone', 'id']"  [tableRows]="students()"
+        <app-table-search
+          title="student(s)"
+          (search)="onSearch($event)"
         />
+        <app-skeleton-loader [isLoading]="isLoading()" variant="table" [rows]="5" [columns]="4">
+          <app-data-table
+            [tableHeads]="['Email', 'Firstname', 'Lastname']"
+            [dataFields]="['email', 'first_name', 'last_name', 'id']"  [tableRows]="filteredStudents()"
+            (preview)="onPreview($event)"
+          />
+        </app-skeleton-loader>
     </div>
 </div>
-<app-data-table-numbering [tableData]="students()" />
+<app-data-table-numbering [tableData]="filteredStudents()" />

@@ -1,7 +1,7 @@
 <!--Trigger-->
-<button class="btn btn-success d-flex align-items-center" data-bs-toggle="modal" [attr.data-bs-target]="`#${modalId()}`"><i class="mdi mdi-plus-thick me-2"></i>
-  {{modalAction()}}
-</button>
+@if(showBtn()){
+  <app-learno-button text="{{modalAction()}}"  data-bs-toggle="modal" [attr.data-bs-target]="`#${modalId()}`" icon="plus" />
+}
 
 <!--Content -->
 <div class="modal fade" id="{{modalId()}}" style="display: none;" [attr.data-select2-id]="modalId()" aria-hidden="true">

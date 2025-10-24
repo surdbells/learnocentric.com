@@ -5,7 +5,7 @@ import { routes } from './app.routes';
 import { provideClientHydration, withEventReplay } from '@angular/platform-browser';
 import { provideToastr } from 'ngx-toastr';
 import { provideAnimations } from '@angular/platform-browser/animations';
-import { provideHttpClient, withInterceptors } from '@angular/common/http';
+import { provideHttpClient, withInterceptors, withFetch } from '@angular/common/http';
 import { authInterceptor } from './common/auth/auth.interceptor';
 import { AuthService } from './common/auth/auth.service';
 import { API_BASE_URL } from "./common/service/api.service";
@@ -22,8 +22,8 @@ export const appConfig: ApplicationConfig = {
     provideClientHydration(withEventReplay()),
     provideToastr(),
     provideAnimations(),
-    provideHttpClient(withInterceptors([authInterceptor])),
+    provideHttpClient(withFetch(), withInterceptors([authInterceptor])),
     { provide: APP_INITIALIZER, useFactory: initAuth, deps: [AuthService], multi: true },
-    { provide: API_BASE_URL, useValue: 'http://localhost:8000' }
+    { provide: API_BASE_URL, useValue: 'http://localhost:8000' },
   ]
 };

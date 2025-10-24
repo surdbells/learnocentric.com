@@ -1,4 +1,4 @@
-  <app-loader [isLoading]="isLoading()" />
+<!--  <app-loader [isLoading]="isLoading()" />-->
 
 
 <app-user-intro >
@@ -10,83 +10,91 @@
       </div>
       <p class="">Have a Good day at work</p>
     </div>
-    <p class=""><i class="ti ti-refresh me-1"></i>Updated Recently on 15 Jun
-      2024</p>
+    <p class=""><i class="ti ti-refresh me-1"></i>{{ getTodayDate | date  }}</p>
   </div>
 </app-user-intro>
 
 <div class="row mb-8">
   <div class="col-12 col-md-6 col-xxl-3 mb-4 mb-xxl-0">
-    <app-stat-card label="Students" [value]="studentsCount" icon="local_library" />
+    <app-skeleton-loader [isLoading]="isLoading()" variant="card" >
+      <app-stat-card link="/admin/students"  label="Students" [value]="studentsCount" icon="local_library"  />
+    </app-skeleton-loader>
   </div>
   <div class="col-12 col-md-6 col-xxl-3 mb-4 mb-xxl-0">
-    <app-stat-card label="Teachers" [value]="teachersCount" icon="supervisor_account" />
+    <app-skeleton-loader [isLoading]="isLoading()" variant="card">
+      <app-stat-card link="/admin/teachers" label="Teachers" [value]="teachersCount" icon="supervisor_account" />
+    </app-skeleton-loader>
   </div>
-  <div class="col-12 col-md-6 col-xxl-3 mb-4 mb-md-0">
-    <app-stat-card label="subject" [value]="subjectsCount" icon="subject" />
+
+  <div class="col-12 col-md-6 col-xxl-3  mb-4 mb-md-0">
+    <app-skeleton-loader [isLoading]="isLoading()" variant="card">
+      <app-stat-card link="/admin/academics/subjects" label="subject" [value]="subjectsCount" icon="subject" />
+    </app-skeleton-loader>
 
   </div>
   <div class="col-12 col-md-6 col-xxl-3">
-    <app-stat-card label="class" [value]="classesCount" icon="book" />
+    <app-skeleton-loader [isLoading]="isLoading()" variant="card">
+      <app-stat-card  label="class" [value]="classesCount" icon="book" />
+      </app-skeleton-loader>
   </div>
 </div>
 
-<div class="row mb-8">
-  <div class="col-12 col-xxl-8">
-    <app-attendance-stat />
-  </div>
+<!--<div class="row mb-8">-->
+<!--  <div class="col-12 col-xxl-8">-->
+<!--    <app-attendance-stat />-->
+<!--  </div>-->
 
-  <div class="col-12 col-xxl-4">
+<!--  <div class="col-12 col-xxl-4">-->
 
-    <app-dashboard-card title="Recent Activity" >
+<!--    <app-dashboard-card title="Recent Activity" >-->
 
-      <ul class="activity" body>
-        <li data-icon="thumb_up">
-          <div>
-            <h6 class="fs-base mb-1">You <span class="fs-sm fw-normal text-body-secondary ms-1">1hr ago</span></h6>
-            <p class="mb-0">Liked a post by @john_doe</p>
-          </div>
-        </li>
-        <li data-icon="chat_bubble">
-          <div>
-            <h6 class="fs-base mb-1">Jessica Miller <span class="fs-sm fw-normal text-body-secondary ms-1">3hr ago</span></h6>
-            <p class="mb-0">Commented on a photo</p>
-          </div>
-        </li>
-        <li data-icon="share">
-          <div>
-            <h6 class="fs-base mb-1">Emily Thompson <span class="fs-sm fw-normal text-body-secondary ms-1">3hr ago</span></h6>
-            <p class="mb-0">Shared an article: "Top 10 Travel Destinations"</p>
-          </div>
-        </li>
-        <li data-icon="person_add">
-          <div>
-            <h6 class="fs-base mb-1">You <span class="fs-sm fw-normal text-body-secondary ms-1">1 day ago</span></h6>
-            <p class="mb-0">Started following @jane_smith</p>
-          </div>
-        </li>
-        <li data-icon="account_circle">
-          <div>
-            <h6 class="fs-base mb-1">Olivia Davis <span class="fs-sm fw-normal text-body-secondary ms-1">2 days ago</span></h6>
-            <p class="mb-0">Updated profile picture</p>
-          </div>
-        </li>
-      </ul>
+<!--      <ul class="activity" body>-->
+<!--        <li data-icon="thumb_up">-->
+<!--          <div>-->
+<!--            <h6 class="fs-base mb-1">You <span class="fs-sm fw-normal text-body-secondary ms-1">1hr ago</span></h6>-->
+<!--            <p class="mb-0">Liked a post by @john_doe</p>-->
+<!--          </div>-->
+<!--        </li>-->
+<!--        <li data-icon="chat_bubble">-->
+<!--          <div>-->
+<!--            <h6 class="fs-base mb-1">Jessica Miller <span class="fs-sm fw-normal text-body-secondary ms-1">3hr ago</span></h6>-->
+<!--            <p class="mb-0">Commented on a photo</p>-->
+<!--          </div>-->
+<!--        </li>-->
+<!--        <li data-icon="share">-->
+<!--          <div>-->
+<!--            <h6 class="fs-base mb-1">Emily Thompson <span class="fs-sm fw-normal text-body-secondary ms-1">3hr ago</span></h6>-->
+<!--            <p class="mb-0">Shared an article: "Top 10 Travel Destinations"</p>-->
+<!--          </div>-->
+<!--        </li>-->
+<!--        <li data-icon="person_add">-->
+<!--          <div>-->
+<!--            <h6 class="fs-base mb-1">You <span class="fs-sm fw-normal text-body-secondary ms-1">1 day ago</span></h6>-->
+<!--            <p class="mb-0">Started following @jane_smith</p>-->
+<!--          </div>-->
+<!--        </li>-->
+<!--        <li data-icon="account_circle">-->
+<!--          <div>-->
+<!--            <h6 class="fs-base mb-1">Olivia Davis <span class="fs-sm fw-normal text-body-secondary ms-1">2 days ago</span></h6>-->
+<!--            <p class="mb-0">Updated profile picture</p>-->
+<!--          </div>-->
+<!--        </li>-->
+<!--      </ul>-->
 
 
-    </app-dashboard-card>
+<!--    </app-dashboard-card>-->
 
-  </div>
-</div>
+<!--  </div>-->
+<!--</div>-->
 
-<div class="row">
-  <div class="col-12 col-xxl-4">
-    <app-attendance-stat />
-  </div>
-  <div class="col-12 col-xxl-4">
-    <app-attendance-stat />
-  </div>
-  <div class="col-12 col-xxl-4">
-    <app-attendance-stat />
-  </div>
-</div>
+<!--<div class="row">-->
+<!--  <div class="col-12 col-xxl-4">-->
+<!--    <app-attendance-stat />-->
+<!--  </div>-->
+<!--  <div class="col-12 col-xxl-4">-->
+<!--    <app-attendance-stat />-->
+<!--  </div>-->
+<!--  <div class="col-12 col-xxl-4">-->
+<!--    <app-attendance-stat />-->
+<!--  </div>-->
+<!--</div>-->

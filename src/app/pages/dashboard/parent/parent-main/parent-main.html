@@ -1,0 +1,23 @@
+<app-loader [isLoading]="isLoading()" />
+
+<app-page-header [action]="'Dashboard'" [icon]="'person'" />
+<app-user-intro>
+  <div class="d-flex align-items-xl-center justify-content-xl-between flex-xl-row flex-column">
+    <div class="mb-3 mb-xl-0">
+      <div class="d-flex align-items-center flex-wrap mb-2">
+        <h1 class="me-2">Welcome Back, Mr/Mrs {{user()?.firstName}}</h1>
+        <a href="profile.html" class="avatar avatar-sm img-rounded bg-gray-800 dark-hover"><i class="ti ti-edit text-white"></i></a>
+      </div>
+      <p class="">Have a Good day!!!</p>
+    </div>
+    <p class=""><i class="ti ti-refresh me-1"></i>Updated Recently on 15 Jun
+      2024</p>
+  </div>
+</app-user-intro>
+
+
+<app-data-table
+    [tableHeads]="['Name', 'class', 'School']"
+    [dataFields]="['subject', 'teacher', 'class', 'time']"
+    [tableRows]="[]"
+  />

@@ -5,5 +5,6 @@
     type="{{inputType()}}"
     (input)="onInput($event)"
     (blur)="onBlur()"
+    [disabled]="disabled() || cvaDisabled"
 />
 

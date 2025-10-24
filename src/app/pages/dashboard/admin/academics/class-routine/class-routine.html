@@ -1,15 +1,59 @@
-<app-loader [isLoading]="isLoading()" />
+<app-learno-offset [anchorSelector]="anchorSelector()" [modalId]="'productModal'" (closeOffset)="handleCloseOffset()">
+  @if(selectedRoutine()) {
+    <div class="card">
+      <div class="card-body">
+        <div class="row align-items-center justify-content-between mb-4">
+          <div class="col-auto">
+            <div class="avatar avatar-xl rounded text-primary">
+              <i class="fs-2" data-duoicon="receipt"></i>
+            </div>
+          </div>
+          <div class="col-auto">
+            <p class="text-end text-body-secondary mb-0">
+              Name: <span class="text-body">{{ selectedRoutine()?.first_name }} {{ selectedRoutine()?.last_name }}</span><br />
+            </p>
+          </div>
+        </div>
+        <div class="list-group mb-4">
+          <div class="list-group-item bg-body">
+            <div class="row">
+              <div class="col">Email</div>
+              <div class="col-auto">{{ selectedRoutine()?.email }}</div>
+            </div>
+          </div>
+          <div class="list-group-item bg-body">
+            <div class="row">
+              <div class="col">Status</div>
+              <div class="col-auto">{{ selectedRoutine()?.status }}</div>
+            </div>
+          </div>
+        </div>
+        <!--        <p class="text-body-secondary small mb-0">Previewing fee structure. Click Download to export.</p>-->
+      </div>
 
+      <div class="card-footer">
+
+                <div class="d-flex justify-content-end">
+                  <app-learno-button text="Edit"  class="me-2" data-bs-toggle="modal" [attr.data-bs-target]="`#add_time_table`" />
+                  <app-learno-button text="Delete" (clicked)="deleteEnrollment()" btnColor="danger" class="me-2" />
+                </div>
+
+      </div>
+    </div>
+  }
+
+</app-learno-offset>
 <app-page-header icon="schedule" action="Class Routine">
     <!-- Action -->
 <!--    <app-learno-button text="Add Class Routine" (clicked)="clickedHandler()" />-->
-  @if(userRole == "admin") {
+  @if(userRole == "admin" || userRole == "tutor_admin") {
     <app-learno-modal [modalId]="'add_time_table'" [modalAction]="'Add Time Table'" >
-      <app-routine-form
+        <app-routine-form
         modalForm
         [classes]="classes()"
         [subjects]="subjects()"
         [teachers]="teachers()"
+        [select]="selectedRoutine()"
         [days]="days"
       />
     </app-learno-modal>
@@ -20,17 +64,31 @@
 
 <div class="row">
     <div class="col-12">
-      <app-dashboard-card title="Time Table">
-        <div class="d-flex flex-column flex-nowrap overflow-auto" body>
-          @for (day of days; track day; let dayIndex = $index) {
-            <div class="d-flex py-3 flex-row align-items-center border-bottom me-4 flex-fill">
-              <app-routine-day-card class="mb-3 col-1" day="{{day.label}}" />
-              @for (period of teacherRoutines()[dayIndex]?.routines; track period; let i = $index) {
-                <app-routine-card [routine]="period" />
-              }
+      <app-skeleton-loader [isLoading]="isLoading()" variant="table" [rows]="5" [columns]="1">
+        <app-dashboard-card title="Time Table">
+
+          @if(userRole == "admin" || userRole == "tutor_admin") {
+            <div class="col-3" title-extension>
+              <select class="form-select" (change)="onSelectClass()" [(ngModel)]="selectedClass" >
+                <option>select class</option>
+                @for (schoolClass of classes(); track schoolClass; let i = $index) {
+                  <option value="{{schoolClass.id}}">{{schoolClass.label}}</option>
+                }
+              </select>
             </div>
           }
-        </div>
-      </app-dashboard-card>
+          <div class="d-flex flex-column flex-nowrap overflow-auto" body>
+            @for (day of days; track day; let dayIndex = $index) {
+              <div class="d-flex py-3 flex-row align-items-center border-bottom me-4 flex-fill">
+                <app-routine-day-card class="mb-3 col-1" day="{{day.label}}" />
+                @for (period of teacherRoutines()[dayIndex+1]; track period; let i = $index) {
+                  <app-routine-card [routine]="period"  (preview)="onPreview($event)"
+                  />
+                }
+              </div>
+            }
+          </div>
+        </app-dashboard-card>
+      </app-skeleton-loader>
     </div>
 </div>

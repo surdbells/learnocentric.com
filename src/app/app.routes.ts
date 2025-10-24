@@ -60,6 +60,9 @@ import {
 } from './pages/dashboard/student/lesson/student-chat-with-teacher/student-chat-with-teacher';
 import {authGuard} from './common/auth/auth-guard';
 import {Fees} from './pages/dashboard/admin/management/fees/fees';
+import {ParentMain} from './pages/dashboard/parent/parent-main/parent-main';
+import {Parent} from './pages/dashboard/parent/parent';
+import {Enrollment} from './pages/dashboard/admin/student/enrollment/enrollment';
 // import {CalendarComponent} from './calendar/calendar.component';
 
 export const routes: Routes = [
@@ -77,6 +80,7 @@ export const routes: Routes = [
         canActivate: [authGuard],
         children: [
           { path: "students", component: Students },
+          { path: "enrollments", component: Enrollment },
           { path: "students/new", component: NewStudent },
           { path: "teachers", component: Teachers },
           { path: "teachers/new", component: NewTeacher },
@@ -115,6 +119,65 @@ export const routes: Routes = [
           }
         ]
     },
+
+  {
+    path: "tutor",
+    component: Dashboard,
+    canActivate: [authGuard],
+    data: { user: "tutor_admin" },
+    children: [
+      { path: "students", component: Students, },
+      { path: "enrollments", component: Enrollment },
+      { path: "students/new", component: NewStudent },
+      { path: "teachers", component: Teachers },
+      { path: "teachers/new", component: NewTeacher },
+      {
+        path: "main",
+        component:  Main,
+        data: { user: "tutor_admin" },
+        children: [
+          { path: "", component: AdminDashboard },
+          { path: "message", component: Chat },
+          {
+            path: "file-manager",
+            component: FileManager,
+            children: [
+              { path: "", component: MyDrive },
+              { path: "assets", component: Assets },
+              { path: "template", component: Templates },
+              { path: "projects", component: Projects },
+              { path: "documents", component: Documents },
+              { path: "media", component: Media }
+            ]
+          }
+        ]
+      },
+      {
+        path: "academics",
+        component: Academics,
+        data: { user: "tutor_admin" },
+        children: [
+          { path: "class-routine", component: ClassRoutine },
+          { path: "e-library", component: ELibrary },
+          { path: "lesson-plans", component: LessonPlans },
+          { path: "classes", component: SchoolClasses },
+          { path: "subjects", component: Subjects },
+          { path: "results", component: Result },
+        ]
+      },
+      {
+        path: "management",
+        data: { user: "tutor_admin" },
+        children: [
+          { path: "school-profile", component: SchoolProfile },
+          { path: "payment", component: Payment },
+          { path: "payment/checkout", component: Checkout },
+          { path: "subscription", component: Fees },
+        ]
+      }
+
+    ]
+  },
 
     {
         path: "admin/management",
@@ -249,6 +312,103 @@ export const routes: Routes = [
         }
       ]
     },
+
+  {
+    path: "student",
+    component: Dashboard,
+    children: [
+      {
+        path: "main",
+        component:  StudentMain,
+        children: [
+          { path: "", component: StudentDashboard },
+          { path: "message", component: Chat },
+          { path: "notification", component: Notication },
+          { path: "events", component: CalendarComponent },
+          { path: "classmate", component: Classmate },
+          {
+            path: "file-manager",
+            component: FileManager,
+            children: [
+              { path: "", component: MyDrive },
+              { path: "assets", component: Assets },
+              { path: "template", component: Templates },
+              { path: "projects", component: Projects },
+              { path: "documents", component: Documents },
+              { path: "media", component: Media }
+            ]
+          }
+        ]
+
+      },
+      {
+        path: "academics",
+        component: Academics,
+        children: [
+          { path: "class-routine", component: ClassRoutine, data: { user: "student" } },
+          { path: "e-library", component: ELibrary, data: { user: "student" } },
+          { path: "lesson-plans", component: LessonPlans, data: { user: "student" } },
+          { path: "grades", component: Grade },
+          { path: "assignments", component: Assignment, data: { user: "student" } },
+          { path: "assessments", component: StudentAssessment },
+          { path: "performance", component: StudentPerformance }
+        ]
+      },
+      {
+        path: "management",
+        component: StudentManagement,
+        children: [
+          { path: "profile", component: StudentProfile },
+        ]
+      },
+
+      {
+        path: "lesson/:subjectId",
+        component: Lesson,
+        children: [
+          { path: "", component: StudentLearning },
+          { path: "assignment", component: StudentAssignment },
+          { path: "virtual-class", component: StudentVirtualClass },
+          { path: "resources", component: StudentResources },
+          { path: "discussion", component: StudentDiscussion },
+          { path: "notes", component: StudentNotes },
+          { path: "assessment", component: StudentLessonAssessment },
+          { path: "chat-with-teacher", component: StudentChatWithTeacher },
+
+        ]
+      }
+    ]
+  },
+
+  {
+    path: "parent",
+    component: Dashboard,
+    children: [
+      {
+        path: "main",
+        component:  Parent,
+        children: [
+          { path: "", component: ParentMain },
+        ]
+
+      },
+      {
+        path: "academics",
+        component: Academics,
+        children: [
+          { path: "grades", component: Grade },
+        ]
+      },
+      {
+        path: "management",
+        component: StudentManagement,
+        children: [
+          { path: "profile", component: StudentProfile },
+        ]
+      },
+    ]
+  },
+
 
 
   // {

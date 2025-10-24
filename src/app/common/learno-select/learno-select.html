@@ -1,9 +1,10 @@
 <label class="form-label" for="{{id()}}">{{label()}}</label>
-<select 
+<select
     class="form-select"
     id="{{id()}}"
     (change)="onSelectChange($event)"
     (blur)="onBlur()"
+    [disabled]="disabled() || cvaDisabled"
 >
     <option value="">Please select an item</option>
     @for(option of options(); track option.value) {

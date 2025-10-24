@@ -34,8 +34,7 @@ export class StudentForm {
         email: new FormControl('', {nonNullable: true, validators: [Validators.required, Validators.email]}),
         password: new FormControl('', {nonNullable: true, validators: [Validators.required, Validators.minLength(6)]}),
         firstName: new FormControl('', {nonNullable: true, validators: [Validators.required]}),
-        lastName: new FormControl('', {nonNullable: true, validators: [Validators.required]}),
-        classroom: new FormControl('', {nonNullable: true, validators: [Validators.required]}),
+        lastName: new FormControl('', {nonNullable: true, validators: [Validators.required]})
         // institutionId: new FormControl('', {nonNullable: true, validators: [Validators.required]}),
     })
   isLoading = signal<boolean>(false);

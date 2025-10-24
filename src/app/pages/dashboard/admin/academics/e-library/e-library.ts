@@ -14,6 +14,7 @@ import {forkJoin} from 'rxjs';
 import {DataTableNumbering} from '../../../../../components/data-table-numbering/data-table-numbering';
 import {Loader} from '../../../../../common/loader/loader';
 import {UtilService} from '../../../../../common/service/util.service';
+import {SkeletonLoader} from '../../../../../common/skeleton-loader/skeleton-loader';
 
 @Component({
   selector: 'app-e-library',
@@ -26,7 +27,8 @@ import {UtilService} from '../../../../../common/service/util.service';
     RoutineForm,
     ELibraryForm,
     DataTableNumbering,
-    Loader
+    Loader,
+    SkeletonLoader
   ],
   templateUrl: './e-library.html',
   styleUrl: './e-library.css'
@@ -38,6 +40,9 @@ export class ELibrary implements OnInit{
   classes = signal<any[]>([]);
   subjects = signal<any[]>([]);
   books = signal<any[]>([]);
+
+  selectedElibrary = signal<any | null>(null);
+  anchorSelector = signal<string>('');
 
   constructor(
     private route: ActivatedRoute,
@@ -81,5 +86,10 @@ export class ELibrary implements OnInit{
 
   clickhandker() {
 
+  }
+
+  onPreview(evt: { row: any; anchorSelector: string }) {
+    this.selectedElibrary.set(evt.row);
+    this.anchorSelector.set(evt.anchorSelector || '');
   }
 }

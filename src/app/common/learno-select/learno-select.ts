@@ -7,13 +7,13 @@ export interface IInputOption {
 }
 
 @Component({
-    selector: '[learnoSelect]', 
+    selector: '[learnoSelect]',
     imports: [
         ReactiveFormsModule
-    ], 
-    standalone: true, 
-    templateUrl: './learno-select.html', 
-    styleUrl: './learno-select.css', 
+    ],
+    standalone: true,
+    templateUrl: './learno-select.html',
+    styleUrl: './learno-select.css',
     encapsulation: ViewEncapsulation.None,
     providers: [
         {
@@ -24,19 +24,22 @@ export interface IInputOption {
     ],
 })
 export class LearnoSelect implements ControlValueAccessor, OnInit {
-   
+
   id = input.required<string>();
   label = input.required<string>();
   formControlName = input.required<string>();
   options = input.required<IInputOption[]>();
+  disabled = input<boolean>(false);
 
   private parentForm = inject(FormGroupDirective, { optional: true });
   private elementRef = inject(ElementRef);
   private onChange = (value: any) => {};
   private onTouched = () => {};
   private selectElement: HTMLSelectElement | null =  null;
+  // Tracks disabled state applied by Angular forms
+  cvaDisabled = false;
 
-  
+
   ngOnInit(): void {
       this.selectElement = this.elementRef.nativeElement.querySelector('select');
       if(this.parentForm && this.formControlName() && this.selectElement) {
@@ -46,7 +49,7 @@ export class LearnoSelect implements ControlValueAccessor, OnInit {
               control.valueChanges.subscribe(value => {
                 if (this.selectElement && this.selectElement.value !== value) {
                   this.selectElement.value = value || '';
-              
+
               }
           });
         }
@@ -59,14 +62,15 @@ export class LearnoSelect implements ControlValueAccessor, OnInit {
      }
     }
     registerOnChange(fn: any): void {
-      this.onChange = fn        
+      this.onChange = fn
     }
     registerOnTouched(fn: any): void {
-      this.onTouched = fn;  
+      this.onTouched = fn;
     }
     setDisabledState?(isDisabled: boolean): void {
+      this.cvaDisabled = isDisabled;
       if(this.selectElement) {
-        this.selectElement.disabled = isDisabled;
+        this.selectElement.disabled = isDisabled || this.disabled();
       }
     }
 

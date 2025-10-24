@@ -10,6 +10,8 @@ import {Component, EventEmitter, input, Output} from '@angular/core';
 export class LearnoButton {
     text = input.required<string>();
     btnColor = input<string>("success")
-    
+    icon = input<string|null>(null)
+    isLoading = input<boolean>(false)
+
     @Output() clicked = new EventEmitter<void>();
 }

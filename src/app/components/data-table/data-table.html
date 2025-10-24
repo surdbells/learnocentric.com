@@ -1,5 +1,10 @@
+<app-learno-offset>
+
+</app-learno-offset>
+
+
 <!-- Table -->
-<div class="table-responsive mb-7">
+<div class="mb-7">
     <table class="table table-hover table-select table-round align-middle mb-0">
 <!--      && dataFields().length > 0-->
       @if (tableHeads().length > 0 ) {
@@ -31,7 +36,7 @@
           @for (row of tableRows(); track row.id) {
             <tr  role="link" tabindex="0">
               @if(shouldShowCheckbox()){
-                <td style="width: 0px">
+                <td style="width: 0px" class="py-0">
                   <div class="form-check">
                     <input class="form-check-input" type="checkbox" id="tableCheckOne" />
                     <label class="form-check-label" for="tableCheckOne"></label>
@@ -40,22 +45,22 @@
               }
 
               @for (head of tableHeads(); track head; let headIndex = $index) {
-                <td>{{ row[dataFields()[headIndex]] }}</td>
+                @if (head.toLowerCase().includes('status')) {
+                  <td class="py-0">
+                    <span class="badge bg-success-subtle text-success">{{ row[dataFields()[headIndex]] }}</span>
+                  </td>
+                } @else {
+                  <td class="py-0">{{ row[dataFields()[headIndex]] }}</td>
+                }
               }
 <!--              <td>TechPinnacle Solutions</td>-->
 <!--              <td>2021-08-12</td>-->
 <!--              <td><span class="badge bg-success-subtle text-success">Completed</span></td>-->
               @if(shouldShowAction()){
-                <td style="width: 0px">
-                  <div class="dropdown">
-                    <button class="btn btn-sm btn-link text-body-tertiary" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                      <span class="material-symbols-outlined scale-125">more_horiz</span>
-                    </button>
-                    <ul class="dropdown-menu">
-                      <li><button class="dropdown-item" type="button" data-bs-toggle="offcanvas" data-bs-target="#productModal" aria-controls="productModal" >View</button></li>
-                      <li><button class="dropdown-item" >Download</button></li>
-                    </ul>
-                  </div>
+                <td style="width: 0px" class="py-0">
+                  <button class="btn text-muted py-2" type="button" [id]="'preview-btn-' + row.id" data-bs-toggle="offcanvas" data-bs-target="#productModal" aria-controls="productModal" (click)="preview.emit({ row: row, anchorSelector: '#' + ('preview-btn-' + row.id) })">
+                    <span class="material-symbols-outlined scale-125">visibility</span>
+                  </button>
                 </td>
               }
             </tr>

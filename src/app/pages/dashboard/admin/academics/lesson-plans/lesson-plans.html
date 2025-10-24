@@ -1,6 +1,6 @@
 <app-page-header icon="flowchart" action="Lesson Plan" >
 
-  @if(userRole == "admin") {
+  @if(userRole == "admin" || userRole == "tutor_admin") {
     <app-learno-modal [modalId]="'add_lesson_plan'" [modalAction]="'Add Lesson Plan'" >
       <app-lesson-plan-form [action]="'Add Lesson Plan'" modalForm />
     </app-learno-modal>

@@ -14,6 +14,7 @@ import {Loader} from '../../../../../common/loader/loader';
 import {AuthService} from '../../../../../common/auth/auth.service';
 import {Router} from '@angular/router';
 import {AuthUser} from '../../../../../common/auth/auth.models';
+import {SkeletonLoader} from '../../../../../common/skeleton-loader/skeleton-loader';
 
 declare const $: any;
 
@@ -29,7 +30,8 @@ declare const $: any;
     DatePipe,
     DashboardCard,
     EventsListing,
-    Loader
+    Loader,
+    SkeletonLoader
   ],
   templateUrl: './teacher-dashboard.html',
   styleUrl: './teacher-dashboard.css'
@@ -39,6 +41,7 @@ export class TeacherDashboard implements OnInit, AfterViewInit, OnDestroy {
 
   private isBrowser: boolean;
   private dpInstance: any;
+
 
   schedules = [1,2,3,4]
 

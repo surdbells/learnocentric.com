@@ -1,27 +1,40 @@
-import {AfterViewInit, Component, ElementRef, Inject, OnDestroy, PLATFORM_ID, ViewChild} from '@angular/core';
+import {AfterViewInit, Component, ElementRef, Inject, OnDestroy, OnInit, PLATFORM_ID, ViewChild} from '@angular/core';
 import {CarouselComponent, CarouselModule, OwlOptions} from 'ngx-owl-carousel-o';
-import {isPlatformBrowser} from '@angular/common';
+import {DatePipe, isPlatformBrowser} from '@angular/common';
+import {ApiService} from '../service/api.service';
 
 declare const $: any;
 
 @Component({
   selector: 'app-today-class',
   imports: [
-    CarouselModule
+    CarouselModule,
+    DatePipe
   ],
   templateUrl: './today-class.html',
   styleUrl: './today-class.css'
 })
-export class TodayClass implements AfterViewInit, OnDestroy{
+export class TodayClass implements OnInit, AfterViewInit, OnDestroy{
 
   @ViewChild('todayCarousel', { static: false }) todayCarousel?: CarouselComponent;
 
   private dpEl: any;
   private isBrowser: boolean;
+  today = (new Date(Date.now())).toISOString();
 
-  constructor(private host: ElementRef<HTMLElement>, @Inject(PLATFORM_ID) platformId: Object) {
+  constructor(
+    private host: ElementRef<HTMLElement>,
+      @Inject(PLATFORM_ID) platformId: Object,
+      private readonly apiSrv: ApiService
+  ) {
     this.isBrowser = isPlatformBrowser(platformId);
   }
+
+  ngOnInit(): void {
+        if(this.isBrowser) {
+          // this.apiSrv.get()
+        }
+    }
 
   todaySlides = [
     { time: '09:00 - 09:45', badgeClass: 'text-bg-danger text-decoration-line-through', class: 'Class V, B', isPast: true },

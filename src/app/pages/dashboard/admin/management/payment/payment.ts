@@ -4,13 +4,15 @@ import {TableSearch} from "../../../../../components/table-search/table-search";
 import {PaymentService} from "./payment-service";
 import {IOrder} from "./model/i-order";
 import {PdfService} from "../../../../../common/service/pdf-service";
+import {LearnoOffset} from '../../../../../components/learno-offset/learno-offset';
 
 @Component({
   selector: 'app-payment',
-    imports: [
-        DataTable,
-        TableSearch
-    ],
+  imports: [
+    DataTable,
+    TableSearch,
+    LearnoOffset
+  ],
   templateUrl: './payment.html',
   styleUrl: './payment.css'
 })

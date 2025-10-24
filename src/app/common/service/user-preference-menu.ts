@@ -24,6 +24,7 @@ export class UserPreferenceMenu {
     { name: "Student", icon: "local_library", link: "admin/students",
       children: [
         { name: "Students", link: "/admin/students/" },
+        { name: "Enrollment", link: "/admin/enrollments" },
         { name: "New Student", link: "/admin/students/new" }
       ]
     },
@@ -39,7 +40,7 @@ export class UserPreferenceMenu {
       children: [
         { name: "Class Routine", link: "/admin/academics/class-routine" },
         { name: "E-Library", link: "/admin/academics/e-library" },
-        { name: "Lesson Plans", link: "/admin/academics/lesson-plans" },
+        // { name: "Lesson Plans", link: "/admin/academics/lesson-plans" },
         { name: "Class", link: "/admin/academics/classes" },
         { name: "Subjects", link: "/admin/academics/subjects" },
         { name: "Result", link: "/admin/academics/results" },
@@ -68,22 +69,23 @@ export class UserPreferenceMenu {
     { name: "Student", icon: "local_library", link: "tutor/students",
       children: [
         { name: "Students", link: "/tutor/students/" },
+        { name: "Enrollment", link: "/tutor/enrollments" },
         { name: "New Student", link: "/tutor/students/new" }
       ]
     },
 
-    { name: "Teacher", icon: "supervisor_account", link: "tutor/teachers",
+    { name: "Tutor", icon: "supervisor_account", link: "tutor/teachers",
       children: [
-        { name: "Teachers", link: "/tutor/teachers/" },
-        { name: "New Teacher", link: "/tutor/teachers/new" }
+        { name: "Tutors", link: "/tutor/teachers/" },
+        { name: "New Tutor", link: "/tutor/teachers/new" }
       ]
     },
 
     { name: "Academics", icon: "school", link: "/tutor/academics",
       children: [
-        { name: "Class Routine", link: "/tutor/academics/class-routine" },
-        { name: "E-Library", link: "/tutor/academics/e-library" },
-        { name: "Lesson Plans", link: "/tutor/academics/lesson-plans" },
+        { name: "Tutorial Routine", link: "/tutor/academics/class-routine" },
+        // { name: "E-Library", link: "/tutor/academics/e-library" },
+        // { name: "Lesson Plans", link: "/tutor/academics/lesson-plans" },
         { name: "Class", link: "/tutor/academics/classes" },
         { name: "Subjects", link: "/tutor/academics/subjects" },
         { name: "Result", link: "/tutor/academics/results" },
@@ -92,9 +94,9 @@ export class UserPreferenceMenu {
 
     { name: "Management", icon: "tenancy", link: "tutor/management",
       children: [
-        { name: "School Profile", link: "/tutor/management/school-profile" },
+        { name: "Academy Profile", link: "/tutor/management/school-profile" },
         { name: "Payment", link: "/tutor/management/payment" },
-        { name: "Fees", link: "/tutor/management/fees" },
+        { name: "Subscription", link: "/tutor/management/subscription" },
 
       ]
     },
@@ -158,6 +160,24 @@ export class UserPreferenceMenu {
         { name: "Assessments", link: "/student/academics/assessments" },
       ]
     },
+
+    { name: "Management", icon: "tenancy", link: "student/management",
+      children: [
+        { name: "Profile", link: "/student/management/profile" },
+        // { name: "Payment", link: "/student/management/payment" },
+      ]
+    },
+  ]
+
+  parent = [
+    { name: "Main", icon: "dashboard", link: "student/main",
+      children: [
+        { name: "Dashboard", link: "/student/main" },
+        { name: "School Events", link: "/student/main/events"},
+        // { name: "File Management", link: "/student/main/file-manager" },
+      ]
+    },
+
 
     { name: "Management", icon: "tenancy", link: "student/management",
       children: [

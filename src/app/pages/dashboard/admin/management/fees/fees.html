@@ -1,20 +1,57 @@
-<app-loader [isLoading]="isLoading()" />
+<app-learno-offset [anchorSelector]="anchorSelector()" [modalId]="'productModal'">
+  <div class="card" *ngIf="selectedFee(); else noSelection">
+    <div class="card-body">
+      <div class="row align-items-center justify-content-between mb-4">
+        <div class="col-auto">
+          <div class="avatar avatar-xl rounded text-primary">
+            <i class="fs-2" data-duoicon="receipt"></i>
+          </div>
+        </div>
+        <div class="col-auto">
+          <p class="text-end text-body-secondary mb-0">
+            <span class="text-body fw-semibold">{{ selectedFee()?.name }}</span><br />
+            Amount: <span class="text-body">{{ selectedFee()?.amount | currency:'USD' }}</span><br />
+            Frequency: <span class="text-body">{{ selectedFee()?.frequency }}</span>
+          </p>
+        </div>
+      </div>
+      <div class="list-group mb-4">
+        <div class="list-group-item bg-body">
+          <div class="row">
+            <div class="col">Class</div>
+            <div class="col-auto">{{ selectedFee()?.class_name || '—' }}</div>
+          </div>
+        </div>
+        <div class="list-group-item bg-body">
+          <div class="row">
+            <div class="col">ID</div>
+            <div class="col-auto">{{ selectedFee()?.id }}</div>
+          </div>
+        </div>
+      </div>
+      <p class="text-body-secondary small mb-0">Previewing fee structure. Click Download to export.</p>
+    </div>
+  </div>
+  <ng-template #noSelection>
+    <div class="text-center text-body-secondary">Select a row to preview its details.</div>
+  </ng-template>
+</app-learno-offset>
 
-
-<app-page-header icon="home_and_garden" action="Fees">
-<!--  @if(userRole == "admin") {-->
+<app-page-header icon="home_and_garden" [action]="userRole()== 'tutor_admin' ? 'Subscription' : 'Fees'">
     <app-learno-modal [modalId]="'add_fees'" [modalAction]="'New Fees'" >
       <app-fees-form modalForm [classes]="classes()" />
     </app-learno-modal >
-<!--  }-->
 </app-page-header>
 
-
 <app-table-search />
-<app-data-table
-  [tableHeads]="['Name', 'Amount', 'Frequency','Class Name']"
-  [dataFields]="['name', 'amount', 'frequency', 'class_name', 'id']"
-  [tableRows]="fees()"
-/>
+
+<app-skeleton-loader [isLoading]="isLoading()" variant="table" [rows]="5" [columns]="4">
+  <app-data-table
+    [tableHeads]="['Name', 'Amount', 'Frequency','Class Name']"
+    [dataFields]="['name', 'amount', 'frequency', 'class_name', 'id']"
+    [tableRows]="fees()"
+    (preview)="onPreview($event)"
+  />
+</app-skeleton-loader>
 
 <app-data-table-numbering [tableData]="fees()" />

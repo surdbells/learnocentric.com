@@ -1,4 +1,4 @@
-import {Component, input} from '@angular/core';
+import {Component, EventEmitter, input, Output} from '@angular/core';
 import {RouterLink} from '@angular/router';
 
 export interface IRoutine {
@@ -28,6 +28,8 @@ export interface IRoutine {
 })
 export class RoutineCard {
   routine= input<IRoutine | null>(null)
+
+  @Output() preview = new EventEmitter<{ row: any; anchorSelector: string }>();
 
   get getTime(): string {
     return this.routine()?.start_time.slice(0,5) + ' - ' + this.routine()?.end_time.slice(0,5)

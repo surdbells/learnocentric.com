@@ -6,7 +6,7 @@ import {AuthUser} from '../auth/auth.models';
 })
 export class UtilService {
 
-  groupRoutineToEachDay(routines: any[]): {[key:number]: any[]}[] {
+  groupRoutineToEachDay(routines: any[]): {[key:number]: any[]} {
     //const routines = this.teacherRoutines();
     const groupRoutine = new Map<number, any[]>();
     routines.forEach((routine) => {
@@ -16,10 +16,14 @@ export class UtilService {
       }
       groupRoutine.get(day)?.push(routine);
     });
-    return Array.from(groupRoutine.entries()).map(([day, routines]) => ({
-      day,
-      routines
-    }))
+
+
+
+    return this.toObject(groupRoutine);
+    // return Array.from(groupRoutine.entries()).map(([day, routines]) => ({
+    //   day,
+    //   routines
+    // }))
   }
 
 
@@ -44,5 +48,8 @@ export class UtilService {
     if(!user) return '';
     return user["firstName"] + ' ' + user["lastName"];
   }
+
+  private toObject = (m: Map<number, any[]>): Record<string, any[]> =>
+    Object.fromEntries([...m.entries()].map(([k, v]) => [String(k), v]));
 
 }

@@ -1,6 +1,4 @@
-<app-loader [isLoading]="isLoading()" />
-
-<form (submit)="onSubmit()" [formGroup]="form" >
+<form (submit)="!isEdit() ? onSubmit(): onEdit()" [formGroup]="form" >
   <div class="modal-body" data-select2-id="83">
     <div class="row" data-select2-id="82">
 
@@ -22,7 +20,7 @@
     </div>
   </div>
   <div class="modal-footer">
-    <a href="#" class="btn btn-light me-2" data-bs-dismiss="modal">Cancel</a>
-    <button type="submit" class="btn btn-primary">{{action()}}</button>
+    <a #closebtn class="btn btn-light me-2" data-bs-dismiss="modal">Cancel</a>
+    <app-learno-button [isLoading]="isLoading()" [text]="'Submit'" />
   </div>
 </form>

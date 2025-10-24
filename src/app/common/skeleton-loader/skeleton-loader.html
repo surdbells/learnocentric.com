@@ -1,0 +1,48 @@
+<!-- If loading, show skeletons based on variant; otherwise project the actual content -->
+<ng-container *ngIf="isLoading; else content">
+  <div class="skeleton-wrapper" [class.animated]="animated">
+
+    <!-- Text variant: multiple lines -->
+    <ng-container *ngIf="variant === 'text'">
+      <div class="skeleton-line" *ngFor="let _ of asArray(lines)" [style.width]="width || '100%'" [style.height]="height || '14px'"></div>
+    </ng-container>
+
+    <!-- Card variant: image header + lines -->
+    <ng-container *ngIf="variant === 'card'">
+      <div class="skeleton-card" [style.width]="width || '100%'">
+        <div class="skeleton-rect mb-3" ></div>
+        <div class="skeleton-line w-75"></div>
+        <div class="skeleton-line w-50"></div>
+        <div class="skeleton-line w-25"></div>
+      </div>
+    </ng-container>
+
+    <!-- Avatar variant: circle + lines -->
+    <ng-container *ngIf="variant === 'avatar'">
+      <div class="d-flex align-items-center gap-3">
+        <div class="skeleton-circle" [style.width]="width || '48px'" [style.height]="width || '48px'"></div>
+        <div class="flex-1">
+          <div class="skeleton-line w-75"></div>
+          <div class="skeleton-line w-50"></div>
+        </div>
+      </div>
+    </ng-container>
+
+    <!-- Table variant: grid of cells (header + rows) -->
+    <ng-container *ngIf="variant === 'table'">
+      <div class="skeleton-table">
+        <div class="skeleton-row skeleton-header" [style.--cols]="columns">
+          <div class="skeleton-cell" *ngFor="let _ of asArray(columns)"></div>
+        </div>
+        <div class="skeleton-row" *ngFor="let _ of asArray(rows)" [style.--cols]="columns">
+          <div class="skeleton-cell" *ngFor="let _ of asArray(columns)"></div>
+        </div>
+      </div>
+    </ng-container>
+
+  </div>
+</ng-container>
+
+<ng-template #content>
+  <ng-content></ng-content>
+</ng-template>

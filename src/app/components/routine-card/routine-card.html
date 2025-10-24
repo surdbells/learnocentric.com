@@ -1,4 +1,7 @@
-<a routerLink="/admin/academics/class-routine/12345" class="nav-link">
+<a
+  [id]="'preview-btn-' + routine()?.id"
+   data-bs-toggle="offcanvas" data-bs-target="#productModal" aria-controls="productModal" (click)="preview.emit({ row: routine(), anchorSelector: '#' + ('preview-btn-' + routine()?.id) })"
+>
   <div class="border me-3  rounded p-3 mb-4">
     <p class="d-flex align-items-center text-nowrap mb-1 text-muted"><i class="ti ti-clock me-1"></i>{{getTime}}</p>
     <p class="">Subject : {{routine()?.subject_name}}</p>

@@ -1,15 +1,77 @@
-<app-loader [isLoading]="isLoading()" />
+<app-learno-offset [anchorSelector]="anchorSelector()" [modalId]="'productModal'" (closeOffset)="handleCloseOffset()">
+  @if(selectSubject()) {
+    <div class="card">
+      <div class="card-body">
+        <div class="row align-items-center justify-content-between mb-4">
+          <div class="col-auto">
+            <div class="avatar avatar-xl rounded text-primary">
+              <i class="fs-2" data-duoicon="receipt"></i>
+            </div>
+          </div>
+          <div class="col-auto">
+            <p class="text-end text-body-secondary mb-0">
+              Name: <span class="text-body">{{ selectSubject()?.name }}</span><br />
+              Code: <span class="text-body">{{ selectSubject()?.code }}</span>
+            </p>
+          </div>
+        </div>
+
+        <div class="list-group mb-4">
+          <div class="list-group-item bg-body">
+            <div class="row">
+              <div class="col">Name</div>
+              <div class="col-auto">{{ selectSubject()?.name }}</div>
+            </div>
+          </div>
+          <div class="list-group-item bg-body">
+            <div class="row">
+              <div class="col">Code</div>
+              <div class="col-auto">{{ selectSubject()?.code }}</div>
+            </div>
+          </div>
+          <div class="list-group-item bg-body">
+            <div class="row">
+              <div class="col">Description</div>
+              <div class="col-auto">{{ selectSubject()?.description }}</div>
+            </div>
+          </div>
+        </div>
+        <!--        <p class="text-body-secondary small mb-0">Previewing fee structure. Click Download to export.</p>-->
+      </div>
+
+      <div class="card-footer">
+
+        <div class="d-flex justify-content-end">
+          <app-learno-button text="Edit"  class="me-2" data-bs-toggle="modal" [attr.data-bs-target]="`#add_subject`" />
+          <app-learno-button text="Delete" (clicked)="deleteSubject()" btnColor="danger" class="me-2" [isLoading]="isLoading()" />
+        </div>
+
+      </div>
+    </div>
+  }
+
+</app-learno-offset>
 
 <app-page-header icon="subject" action="Subjects" >
   <app-learno-modal [modalId]="'add_subject'" [modalAction]="'Add Subject'" >
-    <app-subject-form action="Add Subject" modalForm />
+    <app-subject-form
+      action="Add Subject"
+      modalForm
+      [select]="selectSubject()"
+      (submitted)="handleSuccessSubmit($event)"
+    />
   </app-learno-modal>
 </app-page-header>
 
-<app-table-search />
-<app-data-table
-  [tableHeads]="['Name', 'Code']"
-  [dataFields]="['name', 'code', 'id']"
-  [tableRows]="subjects()"
+<app-table-search
+  (search)="searchSubjects($event)"
 />
-<app-data-table-numbering [tableData]="subjects()" />
+<app-skeleton-loader [isLoading]="isLoading()" variant="table" [rows]="5" [columns]="4">
+  <app-data-table
+    [tableHeads]="['Name', 'Code']"
+    [dataFields]="['name', 'code', 'id']"
+    [tableRows]="filterSubjects()"
+    (preview)="onPreview($event)"
+  />
+</app-skeleton-loader>
+<app-data-table-numbering [tableData]="filterSubjects()" />

@@ -22,12 +22,15 @@ export class LearnoInput implements ControlValueAccessor, OnInit {
     label = input.required<string>();
     inputType = input.required<string>();
     formControlName = input.required<string>();
+    disabled = input<boolean>(false);
 
     private parentForm = inject(FormGroupDirective, { optional: true });
     private elementRef = inject(ElementRef);
     private onChange = (value: any) => {};
     private onTouched = () => {};
     private inputElement: HTMLInputElement | null = null;
+    // Tracks disabled state set via Angular forms API (CVA)
+    cvaDisabled = false;
 
     ngOnInit() {
         this.inputElement = this.elementRef.nativeElement.querySelector('input');
@@ -59,8 +62,9 @@ export class LearnoInput implements ControlValueAccessor, OnInit {
     }
 
     setDisabledState(isDisabled: boolean): void {
+        this.cvaDisabled = isDisabled;
         if (this.inputElement) {
-            this.inputElement.disabled = isDisabled;
+            this.inputElement.disabled = isDisabled || this.disabled();
         }
     }
 

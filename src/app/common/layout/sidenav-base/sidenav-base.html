@@ -142,7 +142,7 @@
                             [class.active]="router.url.includes(menuGrp.link)"
                             data-bs-toggle="collapse"
                             [attr.data-bs-target]="'#' + menuGrp.name"
-                            role="button"   
+                            role="button"
                             aria-expanded="false"
                             [attr.aria-controls]="menuGrp.name"
                     >
@@ -152,8 +152,8 @@
                         <div class="collapse" [id]="menuGrp.name" routerLinkActive="show">
                             <nav class="nav nav-pills">
                                 @for (menu of menuGrp.children; track menu.name) {
-                                    <a 
-                                            class="nav-link" [routerLink]="menu.link" 
+                                    <a
+                                            class="nav-link" [routerLink]="menu.link"
                                             routerLinkActive="active"
                                             [routerLinkActiveOptions]="{ exact: true }"
                                     >{{menu.name}}</a>
@@ -165,7 +165,7 @@
                 </div>
 
             }
-            
+
         </nav>
 
         <!-- Heading -->
@@ -246,15 +246,15 @@
         </nav>
 
         <!-- Card -->
-        <div class="card mt-auto">
-          <div class="card-body">
-            <!-- Heading -->
-            <h6>Need help?</h6>
+<!--        <div class="card mt-auto">-->
+<!--          <div class="card-body">-->
+<!--            &lt;!&ndash; Heading &ndash;&gt;-->
+<!--            <h6>Need help?</h6>-->
 
-            <!-- Text -->
-            <p class="text-body-secondary mb-0">Feel free to reach out to us should you have any questions or suggestions.</p>
-          </div>
-        </div>
+<!--            &lt;!&ndash; Text &ndash;&gt;-->
+<!--            <p class="text-body-secondary mb-0">Feel free to reach out to us should you have any questions or suggestions.</p>-->
+<!--          </div>-->
+<!--        </div>-->
       </div>
     </div>
   </nav>

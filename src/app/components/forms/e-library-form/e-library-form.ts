@@ -1,10 +1,11 @@
-import {Component, input, signal} from '@angular/core';
+import {Component, ElementRef, EventEmitter, input, Output, signal, ViewChild} from '@angular/core';
 import {LearnoInput} from "../../../common/learno-input/learno-input";
 import {LearnoSelect} from "../../../common/learno-select/learno-select";
 import {FormControl, FormGroup, ReactiveFormsModule, Validators} from "@angular/forms";
 import {Loader} from '../../../common/loader/loader';
 import {ApiService} from '../../../common/service/api.service';
 import {ToastrService} from 'ngx-toastr';
+import {LearnoButton} from '../../../common/learno-button/learno-button';
 
 @Component({
   selector: 'app-e-library-form',
@@ -12,7 +13,8 @@ import {ToastrService} from 'ngx-toastr';
     LearnoInput,
     LearnoSelect,
     ReactiveFormsModule,
-    Loader
+    Loader,
+    LearnoButton
   ],
   templateUrl: './e-library-form.html',
   styleUrl: './e-library-form.css'
@@ -23,6 +25,13 @@ export class ELibraryForm {
   classes = input<any[]>([]);
   subjects = input<any[]>([]);
   action = input<string>('Add')
+  select = input<{ [key:string]: string }>({})
+
+
+
+  isEdit = signal<boolean>(false);
+  @Output() submitted = new EventEmitter<{ success: boolean }>();
+  @ViewChild('closebtn', { static: false }) autoCloseBtn!: ElementRef<HTMLButtonElement>;
 
   formGroup = new FormGroup({
     classId: new FormControl('', [Validators.required]),
@@ -63,7 +72,10 @@ export class ELibraryForm {
         .subscribe(
         {
           next: (res) => {
+            this.formGroup.reset();
             this.toastService.success("submitted successfully")
+            this.submitted.emit({success: true});
+
           },
           error: (err) => {
             this.toastService.error("failed to submit");
@@ -72,6 +84,7 @@ export class ELibraryForm {
           },
           complete: () => {
             this.isLoading.set(false);
+            this.autoCloseBtn.nativeElement.click();
           }
         }
       )
@@ -83,5 +96,40 @@ export class ELibraryForm {
       console.log('FormData ready:', formData.get('file'));
       this.formGroup.reset();
     }
+
+    else {
+      this.isLoading.set(false);
+      const err = Object.keys(this.formGroup.controls).reduce((acc: any, key) => {
+        const control = this.formGroup.get(key);
+        if (control?.errors) {
+          acc[key] = control.errors;
+        }
+        return acc;
+      }, {});
+      console.log(err);
+      this.toastService.error("Please fill in all required fields correctly")
+    }
   }
+
+  onEdit() {
+    this.isLoading.set(true);
+    this.apiSrv.put("/backend/storage/resources", { ...this.formGroup.value, id: this.select()['id'] })
+      .subscribe({
+        next: (res) => {
+          this.formGroup.reset();
+          this.toastService.success("updated successfully")
+          this.submitted.emit({ success: true });
+        },
+        error: (err) => {
+          this.isLoading.set(false);
+          this.toastService.error("failed to submit")
+          console.log(err)
+        },
+        complete: () => {
+          this.isLoading.set(false);
+          this.autoCloseBtn.nativeElement.click();
+        }
+      })
+  }
+
 }

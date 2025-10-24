@@ -1,0 +1,105 @@
+/* Default (light) variables scoped to the component */
+.skeleton-wrapper {
+  /* Use Bootstrap variables when available; fall back to sensible defaults */
+  --skeleton-base: var(--bs-gray-200, #e5e7eb);
+  --skeleton-highlight: var(--bs-gray-100, #f3f4f6);
+  --skeleton-border-color: var(--bs-border-color, #edf0f4);
+  --skeleton-header-bg: var(--bs-tertiary-bg, #f8fafc);
+}
+
+/* Dark mode mapping via host context to respect Angular encapsulation */
+:host-context([data-bs-theme="dark"]) .skeleton-wrapper {
+  /* Slightly brighter highlight on dark for shimmer contrast */
+  --skeleton-base: rgba(255, 255, 255, 0.10);
+  --skeleton-highlight: rgba(255, 255, 255, 0.20);
+  --skeleton-border-color: var(--bs-border-color, rgba(255,255,255,0.12));
+  --skeleton-header-bg: var(--bs-tertiary-bg, rgba(255,255,255,0.04));
+}
+
+.skeleton-wrapper {
+  width: 100%;
+}
+
+.skeleton-wrapper.animated .skeleton-line,
+.skeleton-wrapper.animated .skeleton-rect,
+.skeleton-wrapper.animated .skeleton-circle,
+.skeleton-wrapper.animated .skeleton-cell {
+  position: relative;
+  overflow: hidden;
+}
+
+.skeleton-line,
+.skeleton-rect,
+.skeleton-circle,
+.skeleton-cell {
+  background: var(--skeleton-base);
+  border-radius: 6px;
+}
+
+.skeleton-line {
+  height: 14px;
+  width: 100%;
+  margin: 8px 0;
+}
+
+.skeleton-rect {
+  width: 100%;
+}
+
+.skeleton-circle {
+  border-radius: 9999px;
+}
+
+/* Table skeleton */
+.skeleton-table {
+  width: 100%;
+  border: 1px solid var(--skeleton-border-color);
+  border-radius: 8px;
+}
+
+.skeleton-row {
+  display: grid;
+  grid-template-columns: repeat(var(--cols, 4), 1fr);
+  gap: 8px;
+  padding: 10px 12px;
+}
+
+.skeleton-header {
+  background: var(--skeleton-header-bg);
+}
+
+.skeleton-cell {
+  height: 16px;
+}
+
+/* Utility widths */
+.w-25 { width: 25%; }
+.w-50 { width: 50%; }
+.w-75 { width: 75%; }
+
+/* Shimmer animation */
+.skeleton-wrapper.animated .skeleton-line::after,
+.skeleton-wrapper.animated .skeleton-rect::after,
+.skeleton-wrapper.animated .skeleton-circle::after,
+.skeleton-wrapper.animated .skeleton-cell::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(90deg, rgba(255,255,255,0) 0%, var(--skeleton-highlight) 50%, rgba(255,255,255,0) 100%);
+  animation: shimmer 1.1s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton-wrapper.animated .skeleton-line::after,
+  .skeleton-wrapper.animated .skeleton-rect::after,
+  .skeleton-wrapper.animated .skeleton-circle::after,
+  .skeleton-wrapper.animated .skeleton-cell::after {
+    animation: none;
+  }
+}
+
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}

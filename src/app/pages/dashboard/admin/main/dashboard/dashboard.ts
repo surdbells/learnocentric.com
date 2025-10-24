@@ -1,6 +1,6 @@
 import {Component, OnInit, signal} from '@angular/core';
 import UserIntro from "../../../../../common/user-intro/user-intro";
-import {RouterOutlet} from "@angular/router";
+import {RouterLink, RouterOutlet} from "@angular/router";
 import {AppStatCard} from '../../../../../common/app-stat-card/app-stat-card';
 import {AttendanceStat} from '../../../../../components/admin/overview/attendance-stat/attendance-stat';
 import {DashboardCard} from '../../../../../common/dashboard-card/dashboard-card';
@@ -9,6 +9,8 @@ import {AuthService} from '../../../../../common/auth/auth.service';
 import {ApiService} from '../../../../../common/service/api.service';
 import {forkJoin, Subject, takeUntil} from 'rxjs';
 import {Loader} from '../../../../../common/loader/loader';
+import {SkeletonLoader} from '../../../../../common/skeleton-loader/skeleton-loader';
+import {DatePipe} from '@angular/common';
 
 @Component({
   selector: 'app-dashboard',
@@ -18,12 +20,16 @@ import {Loader} from '../../../../../common/loader/loader';
     AppStatCard,
     AttendanceStat,
     DashboardCard,
-    Loader
+    Loader,
+    SkeletonLoader,
+    RouterLink,
+    DatePipe
   ],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.css'
 })
 export class AdminDashboard implements OnInit {
+
 
   readonly user = signal<AuthSession | null>(null);
   isLoading = signal(false);
@@ -72,5 +78,8 @@ export class AdminDashboard implements OnInit {
     });
   }
 
+  get getTodayDate(): string {
+    return (new Date()).toISOString()
+  }
 
 }
