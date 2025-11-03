@@ -1,257 +1,76 @@
-<app-learno-offset>
-  <div id="invoice" class="card">
-    <div class="card-body">
-      <div class="row align-items-center justify-content-between mb-7">
-        <div class="col-auto">
-          <!-- Icon -->
-          <div class="avatar avatar-xl rounded text-primary">
-            <i class="fs-2" data-duoicon="box-2"></i>
-          </div>
-        </div>
-        <div class="col-auto">
-          <p class="text-end text-body-secondary mb-0">
-            <span class="text-body">Michael Johnson</span> <br />
-            Bill No: #123 <br />
-            Date: 12/12/2021
-          </p>
-        </div>
-      </div>
-      <div class="row justify-content-between mb-7">
-        <div class="col-auto">
-          <p class="text-body-secondary mb-0">
-            <span class="fw-bold text-body">From:</span> <br />
-            <span class="text-body">Quantum Dynamics</span>
-          </p>
-        </div>
-        <div class="col-auto">
-          <p class="text-end text-body-secondary mb-0">
-            <span class="fw-bold text-body">To:</span> <br />
-            <span class="text-body">Michael Johnson</span> <br />
-            1234 Main St. <br />
-            Springfield, IL 62701
-          </p>
-        </div>
-      </div>
-      <div class="list-group mb-7">
-        <div class="list-group-item bg-body">
-          <div class="row">
-            <div class="col">Machine Learning Course</div>
-            <div class="col-auto">$99.99</div>
-          </div>
-        </div>
-        <div class="list-group-item bg-body">
-          <div class="row">
-            <div class="col">Web Development Course</div>
-            <div class="col-auto">$159.99</div>
-          </div>
-        </div>
-        <div class="list-group-item bg-body">
-          <div class="row">
-            <div class="col">
-              <strong>Total</strong>
-            </div>
-            <div class="col-auto">
-              <strong>$259.98</strong>
+<app-learno-offset [anchorSelector]="anchorSelector()" [modalId]="'productModal'" (closeOffset)="handleCloseOffset()">
+  @if(selectedStudent()) {
+    <div class="card">
+      <div class="card-body">
+        <div class="row align-items-center justify-content-between mb-4">
+          <div class="col-auto">
+            <div class="avatar avatar-xl rounded text-primary">
+              <i class="fs-2" data-duoicon="receipt"></i>
             </div>
           </div>
+          <div class="col-auto">
+            <p class="text-end text-body-secondary mb-0">
+              Name: <span class="text-body">{{ selectedStudent()?.first_name }} {{ selectedStudent()?.last_name }}</span><br />
+              Class: <span class="text-body">{{ selectedStudent()?.class_name }}</span>
+            </p>
+          </div>
         </div>
+
+        <h6 class="mb-3">Payments</h6>
+        <app-skeleton-loader [isLoading]="isLoading()" variant="card" >
+          <div class="list-group mb-2">
+            @for (p of payments(); track p.id) {
+              <button type="button" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center"
+                      data-bs-toggle="modal" [attr.data-bs-target]="'#update_transaction'" (click)="onSelectPayment(p)">
+                <div>
+                  <div class="fw-semibold">{{ p.fee_name || p.name || 'Payment' }}</div>
+                  <small class="text-body-secondary">ID: {{ p.id }} • {{ p.payment_date | date }}</small>
+                </div>
+                <span class="badge" [class]="'bg-' + (p.status?.toLowerCase().includes('complete') ? 'success' : 'danger') + '-subtle text-' + (p.status?.toLowerCase().includes('complete') ? 'success' : 'danger')">
+                {{ p.status || '—' }}
+              </span>
+              </button>
+            }
+          </div>
+        </app-skeleton-loader>
       </div>
-      <h3 class="fs-base">Notes:</h3>
-      <p class="text-body-secondary mb-0">
-        Thank you for your purchase!
-      </p>
     </div>
-  </div>
+  }
 </app-learno-offset>
 
-<!-- Hero Section -->
-<section class="text-center py-5">
-    <div class="container">
-        <h1 class="display-5 fw-bold">Subscription Plans</h1>
-        <p class="lead">Enhance your student learning with the power of Learn-O-Centric</p>
-    </div>
-</section>
+<app-page-header icon="payments" action="Payments">
+  <app-learno-modal [modalId]="'update_transaction'" [modalAction]="'Update Transaction'">
+    <form (submit)="$event.preventDefault(); submitTransactionUpdate();" modalForm >
+      <div class="modal-body">
+          <div class="mb-3">
+            <label class="form-label">Payment ID</label>
+            <input type="text" class="form-control" [value]="selectedPayment()?.id" readonly />
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Transaction ID</label>
+            <input type="text" class="form-control" [value]="transactionId()" (input)="transactionId.set($any($event.target).value)" placeholder="Enter transaction reference" />
+          </div>
+          <div class="d-flex justify-content-end">
+            <a #closebtn class="btn btn-light me-2" data-bs-dismiss="modal">Cancel</a>
+            <app-learno-button [isLoading]="isLoading()" [text]="'Submit'" />
+          </div>
+      </div>
 
+    </form>
+  </app-learno-modal>
+</app-page-header>
 
-<!-- Billing Toggle -->
-<div class="text-center mb-5">
-    <div class="border rounded-5 btn-group" role="group">
-        <input type="radio" class="btn-check" name="billing" id="monthly" autocomplete="off">
-        <label [class.border]="true" class="btn rounded-5 px-4" for="monthly">Monthly</label>
-
-        <input type="radio" class="btn-check" name="billing" id="yearly" autocomplete="off" checked>
-        <label [class.border]="false" class="btn rounded-5  px-4" for="yearly">Yearly <span class="badge bg-success badge-discount">Save 20%</span></label>
-    </div>
-</div>
-
-
-
-<!-- Pricing options -->
-<div class="row mb-9">
-    <div class="col-12 col-lg-4">
-        <div class="card bg-body-tertiary border-transparent">
-            <div class="card-body">
-                <h5 class="fs-5 mb-1">Basic</h5>
-                <p class="text-body-secondary">For small and medium sized businesses.</p>
-                <div class="d-flex align-items-center mb-5">
-                    <span class="fs-3">$</span>
-                    <span class="fs-1 fw-semibold">0</span>
-                    <span class="fs-6 text-body-secondary ms-1">/ month</span>
-                </div>
-                <ul class="list-group list-group-flush mb-5">
-                    <li class="list-group-item bg-body-tertiary border-dark px-0">
-                        <div class="row">
-                            <div class="col text-body-secondary">1 user</div>
-                            <div class="col-auto">
-                                <span class="material-symbols-outlined text-success">check</span>
-                            </div>
-                        </div>
-                    </li>
-                    <li class="list-group-item bg-body-tertiary border-dark px-0">
-                        <div class="row">
-                            <div class="col text-body-secondary">Unlimited projects</div>
-                            <div class="col-auto">
-                                <span class="material-symbols-outlined text-success">check</span>
-                            </div>
-                        </div>
-                    </li>
-                    <li class="list-group-item bg-body-tertiary border-dark px-0">
-                        <div class="row">
-                            <div class="col text-body-secondary">2GB storage</div>
-                            <div class="col-auto">
-                                <span class="material-symbols-outlined text-danger">close</span>
-                            </div>
-                        </div>
-                    </li>
-                    <li class="list-group-item bg-body-tertiary border-dark px-0">
-                        <div class="row">
-                            <div class="col text-body-secondary">Priority support</div>
-                            <div class="col-auto">
-                                <span class="material-symbols-outlined text-danger">close</span>
-                            </div>
-                        </div>
-                    </li>
-                </ul>
-                <button class="btn btn-dark w-100" type="button">Get started</button>
-            </div>
-        </div>
-    </div>
-    <div class="col-12 col-lg-4">
-        <div class="card bg-body-tertiary border-transparent mt-3 mt-lg-0">
-            <div class="card-body">
-                <h5 class="fs-5 mb-1">Pro</h5>
-                <p class="text-body-secondary">For larger businesses.</p>
-                <div class="d-flex align-items-center mb-5">
-                    <span class="fs-3">$</span>
-                    <span class="fs-1 fw-semibold">49</span>
-                    <span class="fs-6 text-body-secondary ms-1">/ month</span>
-                </div>
-                <ul class="list-group list-group-flush mb-5">
-                    <li class="list-group-item bg-body-tertiary border-dark px-0">
-                        <div class="row">
-                            <div class="col text-body-secondary">&lt; 50 users</div>
-                            <div class="col-auto">
-                                <span class="material-symbols-outlined text-success">check</span>
-                            </div>
-                        </div>
-                    </li>
-                    <li class="list-group-item bg-body-tertiary border-dark px-0">
-                        <div class="row">
-                            <div class="col text-body-secondary">Unlimited projects</div>
-                            <div class="col-auto">
-                                <span class="material-symbols-outlined text-success">check</span>
-                            </div>
-                        </div>
-                    </li>
-                    <li class="list-group-item bg-body-tertiary border-dark px-0">
-                        <div class="row">
-                            <div class="col text-body-secondary">10GB storage</div>
-                            <div class="col-auto">
-                                <span class="material-symbols-outlined text-success">check</span>
-                            </div>
-                        </div>
-                    </li>
-                    <li class="list-group-item bg-body-tertiary border-dark px-0">
-                        <div class="row">
-                            <div class="col text-body-secondary">Priority support</div>
-                            <div class="col-auto">
-                                <span class="material-symbols-outlined text-danger">close</span>
-                            </div>
-                        </div>
-                    </li>
-                </ul>
-                <button class="btn btn-secondary w-100" type="button">Get started</button>
-            </div>
-        </div>
-    </div>
-    <div class="col-12 col-lg-4">
-        <div class="card bg-body-tertiary border-transparent mt-3 mt-lg-0">
-            <div class="card-body">
-                <h5 class="fs-5 mb-1">Enterprise</h5>
-                <p class="text-body-secondary">For major businesses with millions of transactions.</p>
-                <div class="d-flex align-items-center mb-5">
-                    <span class="fs-3">$</span>
-                    <span class="fs-1 fw-semibold">149</span>
-                    <span class="fs-6 text-body-secondary ms-1">/ month</span>
-                </div>
-                <ul class="list-group list-group-flush mb-5">
-                    <li class="list-group-item bg-body-tertiary border-dark px-0">
-                        <div class="row">
-                            <div class="col text-body-secondary">50+ users</div>
-                            <div class="col-auto">
-                                <span class="material-symbols-outlined text-success">check</span>
-                            </div>
-                        </div>
-                    </li>
-                    <li class="list-group-item bg-body-tertiary border-dark px-0">
-                        <div class="row">
-                            <div class="col text-body-secondary">Unlimited projects</div>
-                            <div class="col-auto">
-                                <span class="material-symbols-outlined text-success">check</span>
-                            </div>
-                        </div>
-                    </li>
-                    <li class="list-group-item bg-body-tertiary border-dark px-0">
-                        <div class="row">
-                            <div class="col text-body-secondary">100GB storage</div>
-                            <div class="col-auto">
-                                <span class="material-symbols-outlined text-success">check</span>
-                            </div>
-                        </div>
-                    </li>
-                    <li class="list-group-item bg-body-tertiary border-dark px-0">
-                        <div class="row">
-                            <div class="col text-body-secondary">Priority support</div>
-                            <div class="col-auto">
-                                <span class="material-symbols-outlined text-success">check</span>
-                            </div>
-                        </div>
-                    </li>
-                </ul>
-                <button class="btn btn-dark w-100" type="button">Get started</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-
-<!-- Header -->
-<header class="mb-5">
-    <h2 class="fs-5 mb-1">Transaction</h2>
-    <p class="text-body-secondary mb-0">Previous scbscriptions</p>
-</header>
-
-
-
+<!-- Student list -->
 <div class="row">
-    <div class="col-12">
-        <app-table-search />
-        <app-data-table
-
-          [tableHeads]="['Package', 'Date', 'Status', 'Prices']"
-          [dataFields]="['product', 'date', 'status', 'price', 'id']"
-          [tableRows]="orders()"
-          />
-
-    </div>
+  <div class="col-12">
+    <app-table-search title="student(s)" (search)="onSearch($event)" />
+    <app-data-table
+      [tableHeads]="['Email', 'Firstname', 'Lastname', 'Class', 'Status']"
+      [dataFields]="['email', 'first_name', 'last_name', 'class_name', 'status', 'id']"
+      [tableRows]="filterEnrollments()"
+      (preview)="onPreviewStudent($event)"
+    />
+  </div>
 </div>
+
+<app-data-table-numbering [tableData]="filterEnrollments()" />

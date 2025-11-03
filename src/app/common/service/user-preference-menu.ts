@@ -58,45 +58,45 @@ export class UserPreferenceMenu {
   ]
 
   tutor_admin: IMenu[]= [
-    { name: "Main", icon: "dashboard", link: "tutor/main",
+    { name: "Main", icon: "dashboard", link: "academy/main",
       children: [
-        { name: "Dashboard", link: "/tutor/main" },
-        { name: "Messenger", link: "/tutor/main/message" },
-        { name: "File Management", link: "/tutor/main/file-manager" },
+        { name: "Dashboard", link: "/academy/main" },
+        { name: "Messenger", link: "/academy/main/message" },
+        { name: "File Management", link: "/academy/main/file-manager" },
       ]
     },
 
-    { name: "Student", icon: "local_library", link: "tutor/students",
+    { name: "Student", icon: "local_library", link: "academy/students",
       children: [
-        { name: "Students", link: "/tutor/students/" },
-        { name: "Enrollment", link: "/tutor/enrollments" },
-        { name: "New Student", link: "/tutor/students/new" }
+        { name: "Students", link: "/academy/students/" },
+        { name: "Enrollment", link: "/academy/enrollments" },
+        { name: "New Student", link: "/academy/students/new" }
       ]
     },
 
-    { name: "Tutor", icon: "supervisor_account", link: "tutor/teachers",
+    { name: "Tutor", icon: "supervisor_account", link: "academy/teachers",
       children: [
-        { name: "Tutors", link: "/tutor/teachers/" },
-        { name: "New Tutor", link: "/tutor/teachers/new" }
+        { name: "Tutors", link: "/academy/tutors/" },
+        { name: "New Tutor", link: "/academy/tutors/new" }
       ]
     },
 
-    { name: "Academics", icon: "school", link: "/tutor/academics",
+    { name: "Academics", icon: "school", link: "/academy/academics",
       children: [
-        { name: "Tutorial Routine", link: "/tutor/academics/class-routine" },
-        // { name: "E-Library", link: "/tutor/academics/e-library" },
-        // { name: "Lesson Plans", link: "/tutor/academics/lesson-plans" },
-        { name: "Class", link: "/tutor/academics/classes" },
-        { name: "Subjects", link: "/tutor/academics/subjects" },
-        { name: "Result", link: "/tutor/academics/results" },
+        { name: "Tutorial Routine", link: "/academy/academics/class-routine" },
+        // { name: "E-Library", link: "/academy/academics/e-library" },
+        // { name: "Lesson Plans", link: "/academy/academics/lesson-plans" },
+        { name: "Class", link: "/academy/academics/classes" },
+        { name: "Subjects", link: "/academy/academics/subjects" },
+        { name: "Result", link: "/academy/academics/results" },
       ]
     },
 
-    { name: "Management", icon: "tenancy", link: "tutor/management",
+    { name: "Management", icon: "tenancy", link: "academy/management",
       children: [
-        { name: "Academy Profile", link: "/tutor/management/school-profile" },
-        { name: "Payment", link: "/tutor/management/payment" },
-        { name: "Subscription", link: "/tutor/management/subscription" },
+        { name: "Academy Profile", link: "/academy/management/academy-profile" },
+        { name: "Payment", link: "/academy/management/payment" },
+        { name: "Subscription", link: "/academy/management/subscription" },
 
       ]
     },
@@ -125,7 +125,7 @@ export class UserPreferenceMenu {
         // { name: "Lesson Plans", link: "/teacher/academics/lesson-plans" },
         // { name: "Assessments", link: "/teacher/academics/assessments" },
         // { name: "Virtual Class", link: "/teacher/academics/virtual-class" },
-        // { name: "Grades", link: "/teacher/academics/grades" },
+        { name: "Grades", link: "/teacher/academics/results" },
         // { name: "Promotion", link: "/teacher/academics/promotion" },
       ]
     },
@@ -164,7 +164,8 @@ export class UserPreferenceMenu {
     { name: "Management", icon: "tenancy", link: "student/management",
       children: [
         { name: "Profile", link: "/student/management/profile" },
-        // { name: "Payment", link: "/student/management/payment" },
+        { name: "Payment", link: "/student/management/payment" },
+        { name: "Fee", link: "/student/management/fee" },
       ]
     },
   ]

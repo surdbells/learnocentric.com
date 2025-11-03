@@ -1,4 +1,3 @@
-<app-loader [isLoading]="isLoading()" />
 
 <form [formGroup]="form" (ngSubmit)="onSubmit()">
   <div learnoInput class="mb-4" [label]="'Email'" [inputType]="'email'" [id]="'email'" [formControlName]="'email'" ></div>
@@ -8,6 +7,6 @@
 <!--  <div learnoInput class="mb-4" [label]="'Classroom'" [inputType]="'text'" [id]="'classroom'" [formControlName]="'classroom'"></div>-->
 
 
-    <app-learno-button class="mt-4" text="Add Student" />
+    <app-learno-button class="mt-4" text="Add Student" [isLoading]="isLoading()" />
 
 </form>

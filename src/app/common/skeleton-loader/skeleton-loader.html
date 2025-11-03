@@ -40,6 +40,12 @@
       </div>
     </ng-container>
 
+    <!-- Input variant: single line -->
+    <ng-container *ngIf="variant === 'input'">
+      <div class="skeleton-line w-100" [style.height]="height || '20px'"></div>
+    </ng-container>
+
+
   </div>
 </ng-container>
 

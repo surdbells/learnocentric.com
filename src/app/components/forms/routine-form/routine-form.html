@@ -13,10 +13,10 @@
             <div class="col-lg-4" data-select2-id="81">
                 <div class="mb-3" learnoSelect id="day" label="Day" [formControlName]="'dayOfWeek'"  [options]="days()"> </div></div>
             <div class="col-lg-4">
-                <div class="mb-3" learnoInput inputType="text" [formControlName]="'startTime'" id="startHour" label="Start Time"></div>
+                <div class="mb-3" learnoSelect id="startTime" label="Start Time" [formControlName]="'startTime'" [options]="timeOptions"></div>
             </div>
             <div class="col-lg-4">
-                <div class="mb-3" learnoInput inputType="text" [formControlName]="'endTime'" id="startMinute" label="Start Minute"></div>
+                <div class="mb-3" learnoSelect id="endTime" label="End Time" [formControlName]="'endTime'" [options]="timeOptions"></div>
             </div>
             <div class="col-lg-4">
                 <div class="mb-3" learnoInput inputType="text" [formControlName]="'room'" id="room" label="Room"></div>

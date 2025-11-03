@@ -1,0 +1,23 @@
+<form [formGroup]="form" (ngSubmit)="onSubmit()">
+  <app-skeleton-loader [isLoading]="isLoading()" variant="input" >
+    <div learnoInput class="mb-4" [label]="'Email'" [inputType]="'email'" [id]="'email'" [formControlName]="'_email'" [disabled]="true"></div>
+  </app-skeleton-loader>
+<app-skeleton-loader [isLoading]="isLoading()" variant="input" >
+  <div learnoInput class="mb-4" [label]="'First Name'" [inputType]="'text'" [id]="'firstName'" [formControlName]="'firstName'"></div>
+</app-skeleton-loader>
+  <app-skeleton-loader [isLoading]="isLoading()" variant="input" >
+    <div learnoInput class="mb-4" [label]="'Last Name'" [inputType]="'text'" [id]="'lastName'" [formControlName]="'lastName'"></div>
+  </app-skeleton-loader>
+  <app-skeleton-loader [isLoading]="isLoading()" variant="input" >
+    <div learnoInput class="mb-4" [label]="'Phone'" [inputType]="'text'" [id]="'phone'" [formControlName]="'phone'"></div>
+  </app-skeleton-loader>
+  <app-skeleton-loader [isLoading]="isLoading()" variant="input" >
+    <div learnoInput class="mb-4" [label]="'Date of Birth'" [inputType]="'date'" [id]="'dateOfBirth'" [formControlName]="'dateOfBirth'"></div>
+  </app-skeleton-loader>
+  <app-skeleton-loader [isLoading]="isLoading()" variant="input" >
+    <div learnoInput class="mb-4" [label]="'Address'" [inputType]="'text'" [id]="'address'" [formControlName]="'address'"></div>
+  </app-skeleton-loader>
+  @if (!isLoading()) {
+    <app-learno-button class="mt-4" text="Update Profile"  [isLoading]="isLoading()" />
+  }
+</form>

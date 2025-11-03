@@ -1,4 +1,4 @@
-import {Component, Inject, OnInit, PLATFORM_ID, signal} from '@angular/core';
+import {Component, Inject, OnInit, PLATFORM_ID, signal, ViewChild} from '@angular/core';
 import {PageHeader} from '../../../../../common/layout/page-header/page-header';
 import {TableSearch} from '../../../../../components/table-search/table-search';
 import {DataTable} from '../../../../../components/data-table/data-table';
@@ -17,6 +17,7 @@ import {AuthUser} from '../../../../../common/auth/auth.models';
 import {ActivatedRoute} from '@angular/router';
 import {SkeletonLoader} from '../../../../../common/skeleton-loader/skeleton-loader';
 import {LearnoOffset} from '../../../../../components/learno-offset/learno-offset';
+import {LearnoButton} from '../../../../../common/learno-button/learno-button';
 
 @Component({
   selector: 'app-fees',
@@ -32,7 +33,8 @@ import {LearnoOffset} from '../../../../../components/learno-offset/learno-offse
     Loader,
     SkeletonLoader,
     LearnoOffset,
-    CurrencyPipe
+    CurrencyPipe,
+    LearnoButton
   ],
   templateUrl: './fees.html',
   styleUrl: './fees.css'
@@ -47,6 +49,9 @@ export class Fees implements OnInit{
 
   selectedFee = signal<any | null>(null);
   anchorSelector = signal<string>('');
+
+  @ViewChild(LearnoOffset) offsetCmp!: LearnoOffset;
+
 
   constructor(
     @Inject(PLATFORM_ID) private platformId: Object,
@@ -63,7 +68,7 @@ export class Fees implements OnInit{
     }
   }
 
-    ngOnInit(): void {
+  private loadData() {
     this.isLoading.set(true);
     if(isPlatformBrowser(this.platformId)){
       const feesData$ = forkJoin({
@@ -86,11 +91,53 @@ export class Fees implements OnInit{
           }
         })
     }
+  }
 
+    ngOnInit(): void {
+      this.loadData();
     }
 
     onPreview(evt: { row: any; anchorSelector: string }) {
       this.selectedFee.set(evt.row);
       this.anchorSelector.set(evt.anchorSelector || '');
     }
+
+  handleSuccessSubmit($event: { success: boolean }) {
+    console.log($event, "this is the success event");
+    if ($event.success) {
+      this.loadData();
+      this.offsetCmp.close();
+    }
+  }
+
+  deleteFee() {
+    const sel = this.selectedFee();
+    if (!sel || !sel.id) {
+      this.toastSrv.error('No Class selected');
+      return;
+    }
+    // const confirmed = window.confirm('Are you sure you want to delete this class? This action cannot be undone.');
+    // if (!confirmed) return;
+
+    this.isLoading.set(true);
+    this.apiSrv.delete(`/backend/payments/fee-structures?id=${this.selectedFee()['id']}`)
+      .subscribe({
+        next: () => {
+          this.toastSrv.success('Class deleted successfully');
+          // Update local state by filtering out the deleted enrollment
+          this.fees.set(
+            this.fees().filter(e => e.id !== this.selectedFee()['id'])
+          );
+          this.selectedFee.set(null);
+          this.offsetCmp?.close();
+          this.isLoading.set(false);
+        },
+        error: (err) => {
+          console.error(err);
+          this.toastSrv.error('Failed to delete enrollment');
+          this.isLoading.set(false);
+        }
+      });
+  }
+
 }

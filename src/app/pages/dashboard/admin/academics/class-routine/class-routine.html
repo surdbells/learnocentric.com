@@ -55,6 +55,7 @@
         [teachers]="teachers()"
         [select]="selectedRoutine()"
         [days]="days"
+        (submitted)="handleSuccessSubmit($event)"
       />
     </app-learno-modal>
   }
@@ -67,7 +68,7 @@
       <app-skeleton-loader [isLoading]="isLoading()" variant="table" [rows]="5" [columns]="1">
         <app-dashboard-card title="Time Table">
 
-          @if(userRole == "admin" || userRole == "tutor_admin") {
+          @if(userRole == "admin" || user?.role == 'tutor_admin') {
             <div class="col-3" title-extension>
               <select class="form-select" (change)="onSelectClass()" [(ngModel)]="selectedClass" >
                 <option>select class</option>

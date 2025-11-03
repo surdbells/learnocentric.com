@@ -1,0 +1,277 @@
+{
+  "info": {
+    "name": "LMS Platform API - Complete",
+    "description": "Complete API documentation for the dual Learning Management System (LMS) platform with School LMS and Tutoring Academy modules. Includes all CRUD operations, single resource fetch endpoints, role-specific endpoints, SaaS features with content library, packages, subscription-based access control, and production-ready security with institution scoping. **v5.0.1 Updates:** Student login now includes class info, tutor_admin has full permissions for student/class/subject management.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "version": "5.0.1"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{jwt_token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8000/backend",
+      "type": "string"
+    },
+    {
+      "key": "jwt_token",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"email\": \"admin@demoschool.com\", \"password\": \"password\"}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/login",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "login"]
+            }
+          }
+        },
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"email\": \"newuser@example.com\", \"password\": \"password123\", \"firstName\": \"John\", \"lastName\": \"Doe\", \"role\": \"student\", \"institutionId\": 1}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/register",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "register"]
+            }
+          }
+        },
+        {
+          "name": "Get Current User",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{jwt_token}}"}],
+            "url": {
+              "raw": "{{base_url}}/auth/me",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "me"]
+            }
+          }
+        },
+        {
+          "name": "Update Profile",
+          "request": {
+            "method": "PUT",
+            "header": [{"key": "Authorization", "value": "Bearer {{jwt_token}}"}, {"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"firstName\": \"John\", \"lastName\": \"Updated\", \"phone\": \"+1234567890\", \"address\": \"123 Main St\", \"dateOfBirth\": \"2000-01-01\"}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/profile",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "profile"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "School - Enrollments",
+      "item": [
+        {"name": "List Enrollments", "request": {"method": "GET", "header": [{"key": "Authorization", "value": "Bearer {{jwt_token}}"}], "url": {"raw": "{{base_url}}/school/enrollments", "host": ["{{base_url}}"], "path": ["school", "enrollments"]}}},
+        {"name": "Get Enrollment by ID", "request": {"method": "GET", "header": [{"key": "Authorization", "value": "Bearer {{jwt_token}}"}], "url": {"raw": "{{base_url}}/school/enrollments/1", "host": ["{{base_url}}"], "path": ["school", "enrollments", "1"]}}},
+        {"name": "Create Enrollment", "request": {"method": "POST", "header": [{"key": "Authorization", "value": "Bearer {{jwt_token}}"}, {"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\"studentId\": 1, \"classId\": 1, \"enrollmentDate\": \"2025-01-01\"}"}, "url": {"raw": "{{base_url}}/school/enrollments", "host": ["{{base_url}}"], "path": ["school", "enrollments"]}}},
+        {"name": "Update Enrollment", "request": {"method": "PUT", "header": [{"key": "Authorization", "value": "Bearer {{jwt_token}}"}, {"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\"id\": 1, \"studentId\": 2, \"classId\": 2}"}, "url": {"raw": "{{base_url}}/school/enrollments", "host": ["{{base_url}}"], "path": ["school", "enrollments"]}}},
+        {"name": "Delete Enrollment", "request": {"method": "DELETE", "header": [{"key": "Authorization", "value": "Bearer {{jwt_token}}"}], "url": {"raw": "{{base_url}}/school/enrollments?id=1", "host": ["{{base_url}}"], "path": ["school", "enrollments"], "query": [{"key": "id", "value": "1"}]}}}
+      ]
+    },
+    {
+      "name": "School - Classes",
+      "item": [
+        {"name": "List Classes", "request": {"method": "GET", "header": [{"key": "Authorization", "value": "Bearer {{jwt_token}}"}], "url": {"raw": "{{base_url}}/school/classes", "host": ["{{base_url}}"], "path": ["school", "classes"]}}},
+        {"name": "Get Class by ID", "request": {"method": "GET", "header": [{"key": "Authorization", "value": "Bearer {{jwt_token}}"}], "url": {"raw": "{{base_url}}/school/classes/1", "host": ["{{base_url}}"], "path": ["school", "classes", "1"]}}},
+        {"name": "Create Class", "request": {"method": "POST", "header": [{"key": "Authorization", "value": "Bearer {{jwt_token}}"}, {"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\"name\": \"Grade 10-A\", \"gradeLevel\": \"10\", \"section\": \"A\", \"academicYear\": \"2024-2025\"}"}, "url": {"raw": "{{base_url}}/school/classes", "host": ["{{base_url}}"], "path": ["school", "classes"]}}},
+        {"name": "Update Class", "request": {"method": "PUT", "header": [{"key": "Authorization", "value": "Bearer {{jwt_token}}"}, {"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\"id\": 1, \"name\": \"Grade 10-B\", \"gradeLevel\": \"10\", \"section\": \"B\", \"academicYear\": \"2024-2025\"}"}, "url": {"raw": "{{base_url}}/school/classes", "host": ["{{base_url}}"], "path": ["school", "classes"]}}},
+        {"name": "Delete Class", "request": {"method": "DELETE", "header": [{"key": "Authorization", "value": "Bearer {{jwt_token}}"}], "url": {"raw": "{{base_url}}/school/classes?id=1", "host": ["{{base_url}}"], "path": ["school", "classes"], "query": [{"key": "id", "value": "1"}]}}}
+      ]
+    },
+    {
+      "name": "School - Grades",
+      "item": [
+        {"name": "List Grades", "request": {"method": "GET", "header": [{"key": "Authorization", "value": "Bearer {{jwt_token}}"}], "url": {"raw": "{{base_url}}/school/grades?studentId=1", "host": ["{{base_url}}"], "path": ["school", "grades"], "query": [{"key": "studentId", "value": "1"}]}}},
+        {"name": "Get Grade by ID", "request": {"method": "GET", "header": [{"key": "Authorization", "value": "Bearer {{jwt_token}}"}], "url": {"raw": "{{base_url}}/school/grades/1", "host": ["{{base_url}}"], "path": ["school", "grades", "1"]}}},
+        {"name": "Create Grade", "request": {"method": "POST", "header": [{"key": "Authorization", "value": "Bearer {{jwt_token}}"}, {"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\"studentId\": 1, \"classId\": 1, \"subjectId\": 1, \"marksObtained\": 85, \"totalMarks\": 100, \"examName\": \"Final Exam\", \"examDate\": \"2025-06-15\", \"remarks\": \"Good performance\"}"}, "url": {"raw": "{{base_url}}/school/grades", "host": ["{{base_url}}"], "path": ["school", "grades"]}}},
+        {"name": "Update Grade", "request": {"method": "PUT", "header": [{"key": "Authorization", "value": "Bearer {{jwt_token}}"}, {"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\"id\": 1, \"marksObtained\": 90, \"totalMarks\": 100, \"remarks\": \"Excellent improvement\"}"}, "url": {"raw": "{{base_url}}/school/grades", "host": ["{{base_url}}"], "path": ["school", "grades"]}}},
+        {"name": "Delete Grade", "request": {"method": "DELETE", "header": [{"key": "Authorization", "value": "Bearer {{jwt_token}}"}], "url": {"raw": "{{base_url}}/school/grades?id=1", "host": ["{{base_url}}"], "path": ["school", "grades"], "query": [{"key": "id", "value": "1"}]}}}
+      ]
+    },
+    {
+      "name": "School - Subjects",
+      "item": [
+        {"name": "List Subjects", "request": {"method": "GET", "header": [{"key": "Authorization", "value": "Bearer {{jwt_token}}"}], "url": {"raw": "{{base_url}}/school/subjects", "host": ["{{base_url}}"], "path": ["school", "subjects"]}}},
+        {"name": "Get Subject by ID", "request": {"method": "GET", "header": [{"key": "Authorization", "value": "Bearer {{jwt_token}}"}], "url": {"raw": "{{base_url}}/school/subjects/1", "host": ["{{base_url}}"], "path": ["school", "subjects", "1"]}}},
+        {"name": "Create Subject", "request": {"method": "POST", "header": [{"key": "Authorization", "value": "Bearer {{jwt_token}}"}, {"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\"name\": \"Mathematics\", \"code\": \"MATH101\", \"description\": \"Advanced Mathematics\"}"}, "url": {"raw": "{{base_url}}/school/subjects", "host": ["{{base_url}}"], "path": ["school", "subjects"]}}},
+        {"name": "Update Subject", "request": {"method": "PUT", "header": [{"key": "Authorization", "value": "Bearer {{jwt_token}}"}, {"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\"id\": 1, \"name\": \"Advanced Mathematics\", \"code\": \"MATH102\", \"description\": \"Updated description\"}"}, "url": {"raw": "{{base_url}}/school/subjects", "host": ["{{base_url}}"], "path": ["school", "subjects"]}}},
+        {"name": "Delete Subject", "request": {"method": "DELETE", "header": [{"key": "Authorization", "value": "Bearer {{jwt_token}}"}], "url": {"raw": "{{base_url}}/school/subjects?id=1", "host": ["{{base_url}}"], "path": ["school", "subjects"], "query": [{"key": "id", "value": "1"}]}}}
+      ]
+    },
+    {
+      "name": "School - Students & Teachers",
+      "item": [
+        {"name": "List Students", "request": {"method": "GET", "header": [{"key": "Authorization", "value": "Bearer {{jwt_token}}"}], "url": {"raw": "{{base_url}}/school/students", "host": ["{{base_url}}"], "path": ["school", "students"]}}},
+        {"name": "Update Student", "request": {"method": "PUT", "header": [{"key": "Authorization", "value": "Bearer {{jwt_token}}"}, {"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\"id\": 1, \"firstName\": \"Updated\", \"lastName\": \"Student\", \"email\": \"updated@example.com\", \"phone\": \"+1234567890\"}"}, "url": {"raw": "{{base_url}}/school/students", "host": ["{{base_url}}"], "path": ["school", "students"]}}},
+        {"name": "List Teachers", "request": {"method": "GET", "header": [{"key": "Authorization", "value": "Bearer {{jwt_token}}"}], "url": {"raw": "{{base_url}}/school/teachers", "host": ["{{base_url}}"], "path": ["school", "teachers"]}}}
+      ]
+    },
+    {
+      "name": "Timetable",
+      "item": [
+        {"name": "List Periods", "request": {"method": "GET", "header": [{"key": "Authorization", "value": "Bearer {{jwt_token}}"}], "url": {"raw": "{{base_url}}/timetable/periods?classId=1", "host": ["{{base_url}}"], "path": ["timetable", "periods"], "query": [{"key": "classId", "value": "1"}]}}},
+        {"name": "Create Period", "request": {"method": "POST", "header": [{"key": "Authorization", "value": "Bearer {{jwt_token}}"}, {"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\"classId\": 1, \"subjectId\": 1, \"teacherId\": 2, \"dayOfWeek\": 1, \"startTime\": \"09:00\", \"endTime\": \"10:00\", \"room\": \"101\"}"}, "url": {"raw": "{{base_url}}/timetable/periods", "host": ["{{base_url}}"], "path": ["timetable", "periods"]}}},
+        {"name": "Update Period", "request": {"method": "PUT", "header": [{"key": "Authorization", "value": "Bearer {{jwt_token}}"}, {"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\"id\": 1, \"subjectId\": 2, \"teacherId\": 3, \"dayOfWeek\": 2, \"startTime\": \"10:00\", \"endTime\": \"11:00\", \"room\": \"102\"}"}, "url": {"raw": "{{base_url}}/timetable/periods", "host": ["{{base_url}}"], "path": ["timetable", "periods"]}}},
+        {"name": "Delete Period", "request": {"method": "DELETE", "header": [{"key": "Authorization", "value": "Bearer {{jwt_token}}"}], "url": {"raw": "{{base_url}}/timetable/periods?id=1", "host": ["{{base_url}}"], "path": ["timetable", "periods"], "query": [{"key": "id", "value": "1"}]}}}
+      ]
+    },
+    {
+      "name": "Payments",
+      "item": [
+        {"name": "List Payments", "request": {"method": "GET", "header": [{"key": "Authorization", "value": "Bearer {{jwt_token}}"}], "url": {"raw": "{{base_url}}/payments/list?userId=1", "host": ["{{base_url}}"], "path": ["payments", "list"], "query": [{"key": "userId", "value": "1"}]}}},
+        {"name": "Get Payment by ID", "request": {"method": "GET", "header": [{"key": "Authorization", "value": "Bearer {{jwt_token}}"}], "url": {"raw": "{{base_url}}/payments/1", "host": ["{{base_url}}"], "path": ["payments", "1"]}}},
+        {"name": "Create Payment", "request": {"method": "POST", "header": [{"key": "Authorization", "value": "Bearer {{jwt_token}}"}, {"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\"userId\": 3, \"feeStructureId\": 1, \"amount\": 500.00, \"paymentMethod\": \"stripe\"}"}, "url": {"raw": "{{base_url}}/payments/create", "host": ["{{base_url}}"], "path": ["payments", "create"]}}},
+        {"name": "Confirm Payment", "request": {"method": "POST", "header": [{"key": "Authorization", "value": "Bearer {{jwt_token}}"}, {"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\"paymentId\": 1, \"transactionId\": \"txn_123\"}"}, "url": {"raw": "{{base_url}}/payments/confirm", "host": ["{{base_url}}"], "path": ["payments", "confirm"]}}}
+      ]
+    },
+    {
+      "name": "Fee Structures",
+      "item": [
+        {"name": "List Fee Structures", "request": {"method": "GET", "header": [{"key": "Authorization", "value": "Bearer {{jwt_token}}"}], "url": {"raw": "{{base_url}}/payments/fee-structures", "host": ["{{base_url}}"], "path": ["payments", "fee-structures"]}}},
+        {"name": "Create Fee Structure", "request": {"method": "POST", "header": [{"key": "Authorization", "value": "Bearer {{jwt_token}}"}, {"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\"name\": \"Tuition Fee\", \"amount\": 1000.00, \"frequency\": \"monthly\", \"classId\": 1, \"description\": \"Monthly tuition\"}"}, "url": {"raw": "{{base_url}}/payments/fee-structures", "host": ["{{base_url}}"], "path": ["payments", "fee-structures"]}}},
+        {"name": "Update Fee Structure", "request": {"method": "PUT", "header": [{"key": "Authorization", "value": "Bearer {{jwt_token}}"}, {"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\"id\": 1, \"name\": \"Updated Tuition\", \"amount\": 1200.00, \"frequency\": \"monthly\", \"description\": \"Updated description\"}"}, "url": {"raw": "{{base_url}}/payments/fee-structures", "host": ["{{base_url}}"], "path": ["payments", "fee-structures"]}}},
+        {"name": "Delete Fee Structure", "request": {"method": "DELETE", "header": [{"key": "Authorization", "value": "Bearer {{jwt_token}}"}], "url": {"raw": "{{base_url}}/payments/fee-structures?id=1", "host": ["{{base_url}}"], "path": ["payments", "fee-structures"], "query": [{"key": "id", "value": "1"}]}}}
+      ]
+    },
+    {
+      "name": "Reports",
+      "item": [
+        {"name": "Generate Report Card", "request": {"method": "POST", "header": [{"key": "Authorization", "value": "Bearer {{jwt_token}}"}, {"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\"studentId\": 3, \"classId\": 1, \"examTerm\": \"Final\"}"}, "url": {"raw": "{{base_url}}/reports/generate", "host": ["{{base_url}}"], "path": ["reports", "generate"]}}},
+        {"name": "Get Student Classes", "request": {"method": "GET", "header": [{"key": "Authorization", "value": "Bearer {{jwt_token}}"}], "url": {"raw": "{{base_url}}/reports/student?studentId=3", "host": ["{{base_url}}"], "path": ["reports", "student"], "query": [{"key": "studentId", "value": "3"}]}}}
+      ]
+    },
+    {
+      "name": "Email Communications",
+      "item": [
+        {"name": "Send Email", "request": {"method": "POST", "header": [{"key": "Authorization", "value": "Bearer {{jwt_token}}"}, {"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\"recipientEmail\": \"student@example.com\", \"subject\": \"Important Announcement\", \"body\": \"Please check your grades.\"}"}, "url": {"raw": "{{base_url}}/emails/send", "host": ["{{base_url}}"], "path": ["emails", "send"]}}},
+        {"name": "Email History", "request": {"method": "GET", "header": [{"key": "Authorization", "value": "Bearer {{jwt_token}}"}], "url": {"raw": "{{base_url}}/emails/history", "host": ["{{base_url}}"], "path": ["emails", "history"]}}}
+      ]
+    },
+    {
+      "name": "Learning Resources",
+      "item": [
+        {"name": "List Resources", "request": {"method": "GET", "header": [{"key": "Authorization", "value": "Bearer {{jwt_token}}"}], "url": {"raw": "{{base_url}}/storage/resources", "host": ["{{base_url}}"], "path": ["storage", "resources"]}}},
+        {"name": "Get Resource by ID", "request": {"method": "GET", "header": [{"key": "Authorization", "value": "Bearer {{jwt_token}}"}], "url": {"raw": "{{base_url}}/storage/resources/1", "host": ["{{base_url}}"], "path": ["storage", "resources", "1"]}}},
+        {"name": "Upload Resource", "request": {"method": "POST", "header": [{"key": "Authorization", "value": "Bearer {{jwt_token}}"}], "body": {"mode": "formdata", "formdata": [{"key": "file", "type": "file", "src": []}, {"key": "title", "value": "Math Chapter 1", "type": "text"}, {"key": "description", "value": "Introduction to Algebra", "type": "text"}, {"key": "classId", "value": "1", "type": "text"}, {"key": "subjectId", "value": "1", "type": "text"}]}, "url": {"raw": "{{base_url}}/storage/resources", "host": ["{{base_url}}"], "path": ["storage", "resources"]}}}
+      ]
+    },
+    {
+      "name": "Tutoring Academy",
+      "item": [
+        {"name": "List Institutions", "request": {"method": "GET", "header": [{"key": "Authorization", "value": "Bearer {{jwt_token}}"}], "url": {"raw": "{{base_url}}/tutoring/institutions", "host": ["{{base_url}}"], "path": ["tutoring", "institutions"]}}},
+        {"name": "Create Institution", "request": {"method": "POST", "header": [{"key": "Authorization", "value": "Bearer {{jwt_token}}"}, {"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\"name\": \"Elite Tutoring Academy\", \"logoUrl\": \"https://example.com/logo.png\", \"primaryColor\": \"#8b5cf6\", \"secondaryColor\": \"#ec4899\", \"email\": \"info@elite.com\", \"phone\": \"555-0123\", \"address\": \"123 Main St\"}"}, "url": {"raw": "{{base_url}}/tutoring/institutions", "host": ["{{base_url}}"], "path": ["tutoring", "institutions"]}}},
+        {"name": "Update Institution Branding", "request": {"method": "PUT", "header": [{"key": "Authorization", "value": "Bearer {{jwt_token}}"}, {"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\"id\": 1, \"name\": \"Elite Academy\", \"logoUrl\": \"https://example.com/newlogo.png\", \"primaryColor\": \"#8b5cf6\", \"secondaryColor\": \"#ec4899\", \"tagline\": \"Excellence in Education\", \"email\": \"info@elite.com\", \"phone\": \"555-0123\"}"}, "url": {"raw": "{{base_url}}/tutoring/institutions", "host": ["{{base_url}}"], "path": ["tutoring", "institutions"]}}},
+        {"name": "List Subscriptions", "request": {"method": "GET", "header": [{"key": "Authorization", "value": "Bearer {{jwt_token}}"}], "url": {"raw": "{{base_url}}/tutoring/subscriptions?userId=1", "host": ["{{base_url}}"], "path": ["tutoring", "subscriptions"], "query": [{"key": "userId", "value": "1"}]}}},
+        {"name": "Get Subscription by ID", "request": {"method": "GET", "header": [{"key": "Authorization", "value": "Bearer {{jwt_token}}"}], "url": {"raw": "{{base_url}}/tutoring/subscriptions/1", "host": ["{{base_url}}"], "path": ["tutoring", "subscriptions", "1"]}}},
+        {"name": "Create Subscription", "request": {"method": "POST", "header": [{"key": "Authorization", "value": "Bearer {{jwt_token}}"}, {"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\"userId\": 1, \"subscriptionType\": \"per_user\", \"classId\": null, \"subjectId\": null, \"amount\": 99.99, \"startDate\": \"2025-01-01\", \"endDate\": \"2025-12-31\"}"}, "url": {"raw": "{{base_url}}/tutoring/subscriptions", "host": ["{{base_url}}"], "path": ["tutoring", "subscriptions"]}}},
+        {"name": "Update Subscription", "request": {"method": "PUT", "header": [{"key": "Authorization", "value": "Bearer {{jwt_token}}"}, {"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\"id\": 1, \"subscriptionType\": \"per_class\", \"amount\": 149.99, \"endDate\": \"2026-01-01\"}"}, "url": {"raw": "{{base_url}}/tutoring/subscriptions", "host": ["{{base_url}}"], "path": ["tutoring", "subscriptions"]}}},
+        {"name": "Delete Subscription", "request": {"method": "DELETE", "header": [{"key": "Authorization", "value": "Bearer {{jwt_token}}"}], "url": {"raw": "{{base_url}}/tutoring/subscriptions?id=1", "host": ["{{base_url}}"], "path": ["tutoring", "subscriptions"], "query": [{"key": "id", "value": "1"}]}}}
+      ]
+    },
+    {
+      "name": "Teacher Endpoints",
+      "item": [
+        {"name": "Get Teacher Timetable", "request": {"method": "GET", "header": [{"key": "Authorization", "value": "Bearer {{jwt_token}}"}], "url": {"raw": "{{base_url}}/teacher/timetable/2", "host": ["{{base_url}}"], "path": ["teacher", "timetable", "2"]}}},
+        {"name": "Get Teacher Classes", "request": {"method": "GET", "header": [{"key": "Authorization", "value": "Bearer {{jwt_token}}"}], "url": {"raw": "{{base_url}}/teacher/classes/2", "host": ["{{base_url}}"], "path": ["teacher", "classes", "2"]}}},
+        {"name": "Get Teacher Students", "request": {"method": "GET", "header": [{"key": "Authorization", "value": "Bearer {{jwt_token}}"}], "url": {"raw": "{{base_url}}/teacher/students/2?classId=1", "host": ["{{base_url}}"], "path": ["teacher", "students", "2"], "query": [{"key": "classId", "value": "1"}]}}}
+      ]
+    },
+    {
+      "name": "Student Endpoints",
+      "item": [
+        {"name": "Get Student Courses", "request": {"method": "GET", "header": [{"key": "Authorization", "value": "Bearer {{jwt_token}}"}], "url": {"raw": "{{base_url}}/student/courses/3", "host": ["{{base_url}}"], "path": ["student", "courses", "3"]}}},
+        {"name": "Get Student Grades", "request": {"method": "GET", "header": [{"key": "Authorization", "value": "Bearer {{jwt_token}}"}], "url": {"raw": "{{base_url}}/student/grades/3?classId=1", "host": ["{{base_url}}"], "path": ["student", "grades", "3"], "query": [{"key": "classId", "value": "1"}]}}},
+        {"name": "Get Student Timetable", "request": {"method": "GET", "header": [{"key": "Authorization", "value": "Bearer {{jwt_token}}"}], "url": {"raw": "{{base_url}}/student/timetable/3", "host": ["{{base_url}}"], "path": ["student", "timetable", "3"]}}}
+      ]
+    },
+    {
+      "name": "Parent Endpoints",
+      "item": [
+        {"name": "Get Parent's Children", "request": {"method": "GET", "header": [{"key": "Authorization", "value": "Bearer {{jwt_token}}"}], "url": {"raw": "{{base_url}}/parent/children/4", "host": ["{{base_url}}"], "path": ["parent", "children", "4"]}}},
+        {"name": "Get Child Grades", "request": {"method": "GET", "header": [{"key": "Authorization", "value": "Bearer {{jwt_token}}"}], "url": {"raw": "{{base_url}}/parent/child-grades?studentId=3", "host": ["{{base_url}}"], "path": ["parent", "child-grades"], "query": [{"key": "studentId", "value": "3"}]}}}
+      ]
+    },
+    {
+      "name": "Super Admin",
+      "item": [
+        {"name": "Onboard New Institution", "request": {"method": "POST", "header": [{"key": "Authorization", "value": "Bearer {{jwt_token}}"}, {"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\"institutionName\": \"ABC High School\", \"institutionType\": \"school\", \"adminEmail\": \"admin@abchigh.edu\", \"adminPassword\": \"SecurePass123\", \"adminFirstName\": \"John\", \"adminLastName\": \"Smith\", \"address\": \"123 Education Ave\", \"phone\": \"+1234567890\", \"logoUrl\": \"https://example.com/logo.png\", \"primaryColor\": \"#3B82F6\", \"packageIds\": [1, 2]}"}, "url": {"raw": "{{base_url}}/admin/onboard", "host": ["{{base_url}}"], "path": ["admin", "onboard"]}}},
+        {"name": "List All Institutions", "request": {"method": "GET", "header": [{"key": "Authorization", "value": "Bearer {{jwt_token}}"}], "url": {"raw": "{{base_url}}/admin/institutions?type=school", "host": ["{{base_url}}"], "path": ["admin", "institutions"], "query": [{"key": "type", "value": "school", "description": "Optional: filter by school or tutoring"}]}}},
+        {"name": "Platform Statistics", "request": {"method": "GET", "header": [{"key": "Authorization", "value": "Bearer {{jwt_token}}"}], "url": {"raw": "{{base_url}}/admin/stats", "host": ["{{base_url}}"], "path": ["admin", "stats"]}}}
+      ]
+    },
+    {
+      "name": "Content Library (Super Admin)",
+      "item": [
+        {"name": "List All Content", "request": {"method": "GET", "header": [{"key": "Authorization", "value": "Bearer {{jwt_token}}"}], "url": {"raw": "{{base_url}}/content/library?subjectArea=math&gradeLevel=10&contentType=video&isActive=true", "host": ["{{base_url}}"], "path": ["content", "library"], "query": [{"key": "subjectArea", "value": "math", "description": "Optional"}, {"key": "gradeLevel", "value": "10", "description": "Optional"}, {"key": "contentType", "value": "video", "description": "Optional"}, {"key": "isActive", "value": "true", "description": "Optional"}]}}},
+        {"name": "Get Content by ID", "request": {"method": "GET", "header": [{"key": "Authorization", "value": "Bearer {{jwt_token}}"}], "url": {"raw": "{{base_url}}/content/library/1", "host": ["{{base_url}}"], "path": ["content", "library", "1"]}}},
+        {"name": "Upload Content", "request": {"method": "POST", "header": [{"key": "Authorization", "value": "Bearer {{jwt_token}}"}], "body": {"mode": "formdata", "formdata": [{"key": "file", "type": "file", "src": []}, {"key": "title", "value": "Quadratic Equations Tutorial", "type": "text"}, {"key": "description", "value": "Complete guide to solving quadratic equations", "type": "text"}, {"key": "contentType", "value": "video", "type": "text"}, {"key": "subjectArea", "value": "math", "type": "text"}, {"key": "gradeLevel", "value": "10", "type": "text"}, {"key": "difficultyLevel", "value": "intermediate", "type": "text"}, {"key": "tags", "value": "algebra,equations,grade 10", "type": "text"}, {"key": "isPremium", "value": "true", "type": "text"}]}, "url": {"raw": "{{base_url}}/content/library", "host": ["{{base_url}}"], "path": ["content", "library"]}}},
+        {"name": "Update Content", "request": {"method": "PUT", "header": [{"key": "Authorization", "value": "Bearer {{jwt_token}}"}, {"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\"id\": 1, \"title\": \"Updated Title\", \"description\": \"Updated description\", \"tags\": [\"algebra\", \"advanced math\"], \"isPremium\": false, \"isActive\": true}"}, "url": {"raw": "{{base_url}}/content/library", "host": ["{{base_url}}"], "path": ["content", "library"]}}},
+        {"name": "Delete Content (Soft)", "request": {"method": "DELETE", "header": [{"key": "Authorization", "value": "Bearer {{jwt_token}}"}], "url": {"raw": "{{base_url}}/content/library?id=1", "host": ["{{base_url}}"], "path": ["content", "library"], "query": [{"key": "id", "value": "1"}]}}}
+      ]
+    },
+    {
+      "name": "Content Packages (Super Admin)",
+      "item": [
+        {"name": "List All Packages", "request": {"method": "GET", "header": [{"key": "Authorization", "value": "Bearer {{jwt_token}}"}], "url": {"raw": "{{base_url}}/content/packages?packageType=full_access", "host": ["{{base_url}}"], "path": ["content", "packages"], "query": [{"key": "packageType", "value": "full_access", "description": "Optional filter"}]}}},
+        {"name": "Get Package by ID", "request": {"method": "GET", "header": [{"key": "Authorization", "value": "Bearer {{jwt_token}}"}], "url": {"raw": "{{base_url}}/content/packages/1", "host": ["{{base_url}}"], "path": ["content", "packages", "1"]}}},
+        {"name": "Create Package", "request": {"method": "POST", "header": [{"key": "Authorization", "value": "Bearer {{jwt_token}}"}, {"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\"name\": \"Math Premium Pack\", \"description\": \"Complete math content for grade 10\", \"packageType\": \"subject_specific\", \"subjectArea\": \"math\", \"gradeLevel\": \"10\", \"price\": 99.99, \"durationMonths\": 12, \"contentIds\": [1, 2, 3, 5, 8]}"}, "url": {"raw": "{{base_url}}/content/packages", "host": ["{{base_url}}"], "path": ["content", "packages"]}}},
+        {"name": "Update Package", "request": {"method": "PUT", "header": [{"key": "Authorization", "value": "Bearer {{jwt_token}}"}, {"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\"id\": 1, \"name\": \"Updated Package Name\", \"price\": 149.99, \"contentIds\": [1, 2, 3, 5, 8, 10, 12]}"}, "url": {"raw": "{{base_url}}/content/packages", "host": ["{{base_url}}"], "path": ["content", "packages"]}}},
+        {"name": "Delete Package", "request": {"method": "DELETE", "header": [{"key": "Authorization", "value": "Bearer {{jwt_token}}"}], "url": {"raw": "{{base_url}}/content/packages?id=1", "host": ["{{base_url}}"], "path": ["content", "packages"], "query": [{"key": "id", "value": "1"}]}}}
+      ]
+    },
+    {
+      "name": "Package Assignment (Admins)",
+      "item": [
+        {"name": "Assign Packages to Subscription", "request": {"method": "POST", "header": [{"key": "Authorization", "value": "Bearer {{jwt_token}}"}, {"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\"subscriptionId\": 5, \"packageIds\": [1, 2, 3]}"}, "url": {"raw": "{{base_url}}/content/assign", "host": ["{{base_url}}"], "path": ["content", "assign"]}}}
+      ]
+    },
+    {
+      "name": "User Content Access",
+      "item": [
+        {"name": "Get My Accessible Content", "request": {"method": "GET", "header": [{"key": "Authorization", "value": "Bearer {{jwt_token}}"}], "url": {"raw": "{{base_url}}/content/my-content?subjectArea=math&gradeLevel=10&contentType=video", "host": ["{{base_url}}"], "path": ["content", "my-content"], "query": [{"key": "subjectArea", "value": "math", "description": "Optional filter"}, {"key": "gradeLevel", "value": "10", "description": "Optional filter"}, {"key": "contentType", "value": "video", "description": "Optional filter"}]}}},
+        {"name": "Check Access to Content", "request": {"method": "GET", "header": [{"key": "Authorization", "value": "Bearer {{jwt_token}}"}], "url": {"raw": "{{base_url}}/content/check-access?contentId=15", "host": ["{{base_url}}"], "path": ["content", "check-access"], "query": [{"key": "contentId", "value": "15"}]}}}
+      ]
+    },
+    {
+      "name": "Health Check",
+      "item": [
+        {"name": "Health Status", "request": {"method": "GET", "url": {"raw": "{{base_url}}/health", "host": ["{{base_url}}"], "path": ["health"]}}}
+      ]
+    }
+  ]
+}

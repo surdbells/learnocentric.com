@@ -5,6 +5,9 @@ export interface AuthUser {
   email?: string;
   institutionId: string;
   role: 'school_admin' | 'teacher' | 'student' | 'tutor_admin' | 'parent';
+  className?: string;
+  sections?: string;
+  gradeLevel?: string;
   [key: string]: any;
 }
 

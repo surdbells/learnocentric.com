@@ -1,4 +1,15 @@
-import {Component, effect, ElementRef, EventEmitter, input, Output, signal, ViewChild} from '@angular/core';
+import {
+  Component,
+  computed,
+  effect,
+  ElementRef,
+  EventEmitter,
+  Inject,
+  input,
+  Output, PLATFORM_ID,
+  signal,
+  ViewChild
+} from '@angular/core';
 import {FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators} from '@angular/forms';
 import {ToastrService} from 'ngx-toastr';
 import {ApiService} from '../../../common/service/api.service';
@@ -7,6 +18,9 @@ import {LearnoInput} from '../../../common/learno-input/learno-input';
 import {LearnoSelect} from '../../../common/learno-select/learno-select';
 import {Loader} from '../../../common/loader/loader';
 import {LearnoButton} from '../../../common/learno-button/learno-button';
+import {UtilService} from '../../../common/service/util.service';
+import {AuthUser} from '../../../common/auth/auth.models';
+import {isPlatformBrowser} from '@angular/common';
 
 @Component({
   selector: 'app-result-form',
@@ -29,6 +43,27 @@ export class ResultForm {
   students = input<any[]>([]);
   select = input<{ [key:string]: string }>({})
 
+  // auth/role context
+  private user: AuthUser | null = null;
+  private role: string | undefined = this.user?.role;
+
+  // role-aware options
+  private teacherClasses = signal<any[]>([]);
+  filteredClasses = computed(() => {
+    if (this.role === 'teacher') {
+      const t = this.teacherClasses();
+      return t && t.length ? t : [];
+    }
+    return this.classes();
+  });
+  filteredStudents = computed(() => {
+    const clsId = this.form.get('classId')?.value as any;
+    if (clsId) {
+      return (this.students() || []).filter((s: any) => String(s.class_id ?? s.classId ?? s.class)?.toString() === String(clsId));
+    }
+    // Admin: show all students until a class is selected; Teacher: show none until class is selected
+    return this.role === 'teacher' ? [] : (this.students() || []);
+  });
 
   isEdit = signal<boolean>(false);
   @Output() submitted = new EventEmitter<{ success: boolean }>();
@@ -48,8 +83,38 @@ export class ResultForm {
   constructor(
     private toastService: ToastrService,
     private apiSrv: ApiService,
-    private authSrv: AuthService
+    private authSrv: AuthService,
+    private utilSrv: UtilService,
+    @Inject(PLATFORM_ID) platformId: object,
   ) {
+
+    // if (isPlatformBrowser(platformId)) {
+    //   // Load teacher-specific classes if role is teacher
+    //   this.user = this.authSrv.getAuthSession().user;
+    //   console.log("user", this.user, "============================")
+    //   if (this.role === 'teacher' && this.user?.id) {
+    //     this.apiSrv.get<any[]>(`/backend/teacher/classes/${this.user.id}`)
+    //       .subscribe({
+    //         next: (data) => {
+    //           const opts = this.utilSrv.configureForOption(Array.isArray(data) ? data : []);
+    //           this.teacherClasses.set(opts);
+    //           // Auto-select the only available class for teacher
+    //           if (opts.length === 1) {
+    //             this.form.get('classId')?.setValue(opts[0].value, { emitEvent: true });
+    //           }
+    //         },
+    //         error: () => {
+    //           // fallback: no classes
+    //           this.teacherClasses.set([]);
+    //         }
+    //       });
+    //   }
+    //
+    //   // Reset dependent fields when class changes
+    //   this.form.get('classId')?.valueChanges.subscribe(() => {
+    //     this.form.get('studentId')?.setValue('', { emitEvent: false });
+    //   });
+    // }
 
     effect(() => {
       const s = this.select();

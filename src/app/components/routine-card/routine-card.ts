@@ -15,7 +15,9 @@ export interface IRoutine {
   "subject_name": string;
   "subject_code": string;
   "class_name": string;
-  "grade_level": string
+  "grade_level": string;
+  teacher_first_name: string;
+  teacher_last_name: string;
 }
 
 @Component({
@@ -28,6 +30,7 @@ export interface IRoutine {
 })
 export class RoutineCard {
   routine= input<IRoutine | null>(null)
+  tag= input<string>('')
 
   @Output() preview = new EventEmitter<{ row: any; anchorSelector: string }>();
 

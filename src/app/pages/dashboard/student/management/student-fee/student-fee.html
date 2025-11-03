@@ -1,0 +1,23 @@
+
+<app-page-header icon="home_and_garden" [action]="'Fees'">
+
+</app-page-header>
+
+<app-table-search />
+
+<app-skeleton-loader [isLoading]="isLoading()" variant="table" [rows]="5" [columns]="4">
+  <app-data-table
+    [tableHeads]="['Name', 'Amount', 'Frequency','Class Name']"
+    [dataFields]="['name', 'amount', 'frequency', 'class_name', 'id']"
+    [tableRows]="fees()"
+    [shouldShowAction]="false"
+    [shouldShowCheckbox]="false"
+  />
+</app-skeleton-loader>
+
+<app-data-table-numbering [tableData]="fees()" />
+
+
+
+
+

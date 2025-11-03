@@ -1,6 +1,6 @@
 import {Component, effect, ElementRef, EventEmitter, input, Output, signal, ViewChild} from '@angular/core';
 import {LearnoInput} from "../../../common/learno-input/learno-input";
-import {LearnoSelect} from "../../../common/learno-select/learno-select";
+import {IInputOption, LearnoSelect} from "../../../common/learno-select/learno-select";
 import {FormControl, FormGroup, ReactiveFormsModule, Validators} from "@angular/forms";
 import {ToastrService} from 'ngx-toastr';
 import {ApiService} from '../../../common/service/api.service';
@@ -25,6 +25,19 @@ export class RoutineForm {
   isLoading = signal<boolean>(false);
   days = input<any>([])
 
+  // Time options for 15-minute interval dropdowns
+  timeOptions: IInputOption[] = (() => {
+    const opts: IInputOption[] = [];
+    for (let h = 0; h < 24; h++) {
+      for (let m = 0; m < 60; m += 15) {
+        const hh = h.toString().padStart(2, '0');
+        const mm = m.toString().padStart(2, '0');
+        const val = `${hh}:${mm}`;
+        opts.push({ value: val, label: val });
+      }
+    }
+    return opts;
+  })();
 
   isEdit = signal<boolean>(false);
   @Output() submitted = new EventEmitter<{ success: boolean }>();

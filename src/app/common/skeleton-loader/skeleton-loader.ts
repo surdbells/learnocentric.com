@@ -22,7 +22,7 @@ export class SkeletonLoader {
   @Input() isLoading: boolean = false;
 
   // Variant type
-  @Input() variant: 'text' | 'card' | 'table' | 'avatar' = 'text';
+  @Input() variant: 'text' | 'card' | 'table' | 'avatar' | 'input' = 'text';
 
   // For text lines or card content blocks
   @Input() lines: number = 3;

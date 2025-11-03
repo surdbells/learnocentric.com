@@ -64,7 +64,7 @@ export class SignIn {
                   break;
 
                 case "tutor_admin":
-                  this.router.navigate(["tutor/main"]);
+                  this.router.navigate(["academy/main"]);
                   break;
 
                 case "teacher":

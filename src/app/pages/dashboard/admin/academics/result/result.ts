@@ -1,4 +1,4 @@
-import {Component, computed, signal, ViewChild} from '@angular/core';
+import {Component, computed, Inject, PLATFORM_ID, signal, ViewChild} from '@angular/core';
 import {PageHeader} from "../../../../../common/layout/page-header/page-header";
 import {LearnoButton} from "../../../../../common/learno-button/learno-button";
 import {DataTable} from "../../../../../components/data-table/data-table";
@@ -13,10 +13,12 @@ import {ToastrService} from 'ngx-toastr';
 import {UtilService} from '../../../../../common/service/util.service';
 import {catchError, forkJoin, of} from 'rxjs';
 import {IEnrollmentStoreProp} from '../../student/enrollment/enrollment';
-import {DatePipe} from '@angular/common';
+import {DatePipe, isPlatformBrowser} from '@angular/common';
 import {EnrollmentForm} from '../../../../../components/forms/enrollment-form/enrollment-form';
 import {SkeletonLoader} from '../../../../../common/skeleton-loader/skeleton-loader';
 import {ResultForm} from '../../../../../components/forms/result-form/result-form';
+import {AuthService} from '../../../../../common/auth/auth.service';
+import {AuthUser} from '../../../../../common/auth/auth.models';
 
 @Component({
   selector: 'app-result',
@@ -47,6 +49,7 @@ export class Result {
   filterWithClass = signal<string>('');
   filterWithStudent = signal<string>('');
   filterWithSubject = signal<string>('');
+  user= signal<AuthUser|null>(null);
 
   selectedResult = signal<any | null>(null);
   anchorSelector = signal<string>('');
@@ -79,38 +82,44 @@ export class Result {
     private router: Router,
     private readonly apiSrv: ApiService,
     private readonly toastSrv: ToastrService,
-    private readonly utilSrv: UtilService
-  ) { }
+    private readonly utilSrv: UtilService,
+    private authSrv: AuthService,
+    @Inject(PLATFORM_ID) private platformId: object,
+  ) {
+    this.user.set(this.authSrv.getAuthSession().user)
+  }
 
   ngOnInit(): void {
-    this.isLoading.set(true);
+    if(isPlatformBrowser(this.platformId)) {
+      this.isLoading.set(true);
 
-    forkJoin({
-      classes: this.apiSrv.get("/backend/school/classes")
-        .pipe(catchError((err) => { this.toastSrv.error("Error fetching school classes", "Error"); return of([] as any[]); })),
-      results: this.apiSrv.get("/backend/school/grades")
-        .pipe(catchError((err) => { this.toastSrv.error("Error fetching school results", "Error"); return of([] as any[]); })),
-      students: this.apiSrv.get("/backend/school/students")
-        .pipe(catchError((err) => { this.toastSrv.error("Error fetching school students", "Error"); return of([] as any[]); })),
-      subjects: this.apiSrv.get("/backend/school/subjects")
-        .pipe(catchError((err) => { this.toastSrv.error("Error fetching school subjects", "Error"); return of([] as any[]); })),
-    })
-      .subscribe({
-        next: (data) => {
-          this.results.set(data.results);
-          this.classes.set(this.utilSrv.configureForOption(data.classes));
-          this.students.set(this.utilSrv.configureForOption(data.students));
-          this.subjects.set(this.utilSrv.configureForOption(data.subjects));
-        },
-        error: (error) => {
-          this.toastSrv.error("Error fetching enrollments", "Error");
-          this.isLoading.set(false);
-        },
-        complete: () => {
-          console.log("complete");
-          this.isLoading.set(false);
-        }
+      forkJoin({
+        classes: this.apiSrv.get(this.user()?.role == "school_admin" ? "/backend/school/classes" : `/backend/teacher/classes/${this.user()?.id}`)
+          .pipe(catchError((err) => { this.toastSrv.error("Error fetching school classes", "Error"); return of([] as any[]); })),
+        results: this.apiSrv.get("/backend/school/grades")
+          .pipe(catchError((err) => { this.toastSrv.error("Error fetching school results", "Error"); return of([] as any[]); })),
+        students: this.apiSrv.get(this.user()?.role == "school_admin" ? "/backend/school/students": `/backend/teacher/students/${this.user()?.id}`)
+          .pipe(catchError((err) => { this.toastSrv.error("Error fetching school students", "Error"); return of([] as any[]); })),
+        subjects: this.apiSrv.get("/backend/school/subjects")
+          .pipe(catchError((err) => { this.toastSrv.error("Error fetching school subjects", "Error"); return of([] as any[]); })),
       })
+        .subscribe({
+          next: (data) => {
+            this.results.set(data.results?.filter((res: any) => data.students.some((stu: any) => stu.id == res.student_id)));
+            this.classes.set(this.utilSrv.configureForOption(data.classes));
+            this.students.set(this.utilSrv.configureForOption(data.students));
+            this.subjects.set(this.utilSrv.configureForOption(data.subjects));
+          },
+          error: (error) => {
+            this.toastSrv.error("Error fetching enrollments", "Error");
+            this.isLoading.set(false);
+          },
+          complete: () => {
+            console.log("complete");
+            this.isLoading.set(false);
+          }
+        })
+    }
   }
 
   onSearch(term: string) {
@@ -160,7 +169,7 @@ export class Result {
     this.apiSrv.delete(`/backend/school/grades?id=${this.selectedResult()['id']}`)
       .subscribe({
         next: () => {
-          this.toastSrv.success('Enrollment deleted successfully');
+          this.toastSrv.success('Result deleted successfully');
           // Update local state by filtering out the deleted enrollment
           this.results.set(
             this.results().filter(e => e.id !== this.selectedResult()['id'])

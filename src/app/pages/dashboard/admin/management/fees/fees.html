@@ -29,8 +29,17 @@
           </div>
         </div>
       </div>
-      <p class="text-body-secondary small mb-0">Previewing fee structure. Click Download to export.</p>
     </div>
+
+    <div class="card-footer">
+
+      <div class="d-flex justify-content-end">
+        <app-learno-button text="Edit" class="me-2" data-bs-toggle="modal" [attr.data-bs-target]="`#add_fees`" />
+        <app-learno-button text="Delete" (clicked)="deleteFee()" btnColor="danger" class="me-2" [isLoading]="isLoading()" />
+      </div>
+
+    </div>
+
   </div>
   <ng-template #noSelection>
     <div class="text-center text-body-secondary">Select a row to preview its details.</div>
@@ -39,7 +48,7 @@
 
 <app-page-header icon="home_and_garden" [action]="userRole()== 'tutor_admin' ? 'Subscription' : 'Fees'">
     <app-learno-modal [modalId]="'add_fees'" [modalAction]="'New Fees'" >
-      <app-fees-form modalForm [classes]="classes()" />
+      <app-fees-form modalForm [classes]="classes()" [select]="selectedFee()" (submitted)="handleSuccessSubmit($event)" />
     </app-learno-modal >
 </app-page-header>
 

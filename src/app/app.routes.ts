@@ -63,6 +63,10 @@ import {Fees} from './pages/dashboard/admin/management/fees/fees';
 import {ParentMain} from './pages/dashboard/parent/parent-main/parent-main';
 import {Parent} from './pages/dashboard/parent/parent';
 import {Enrollment} from './pages/dashboard/admin/student/enrollment/enrollment';
+import {StudentClassRoutine} from './pages/dashboard/student/academics/student-class-routine/student-class-routine';
+import {TeacherClassRoutine} from './pages/dashboard/teacher/academics/teacher-class-routine/teacher-class-routine';
+import {StudentPayment} from './pages/dashboard/student/management/payment/student-payment.component';
+import {StudentFee} from './pages/dashboard/student/management/student-fee/student-fee';
 // import {CalendarComponent} from './calendar/calendar.component';
 
 export const routes: Routes = [
@@ -121,7 +125,7 @@ export const routes: Routes = [
     },
 
   {
-    path: "tutor",
+    path: "academy",
     component: Dashboard,
     canActivate: [authGuard],
     data: { user: "tutor_admin" },
@@ -129,8 +133,8 @@ export const routes: Routes = [
       { path: "students", component: Students, },
       { path: "enrollments", component: Enrollment },
       { path: "students/new", component: NewStudent },
-      { path: "teachers", component: Teachers },
-      { path: "teachers/new", component: NewTeacher },
+      { path: "tutors", component: Teachers },
+      { path: "tutors/new", component: NewTeacher },
       {
         path: "main",
         component:  Main,
@@ -169,7 +173,7 @@ export const routes: Routes = [
         path: "management",
         data: { user: "tutor_admin" },
         children: [
-          { path: "school-profile", component: SchoolProfile },
+          { path: "academy-profile", component: SchoolProfile },
           { path: "payment", component: Payment },
           { path: "payment/checkout", component: Checkout },
           { path: "subscription", component: Fees },
@@ -221,7 +225,7 @@ export const routes: Routes = [
           path: "academics",
           component: Academics,
           children: [
-            { path: "class-routine", component: ClassRoutine, data: { user: "teacher" } },
+            { path: "class-routine", component: TeacherClassRoutine },
             { path: "e-library", component: ELibrary, data: { user: "teacher" } },
             { path: "lesson-plans", component: LessonPlans, data: { user: "teacher" } },
             { path: "grades", component: Grade },
@@ -278,7 +282,7 @@ export const routes: Routes = [
           path: "academics",
           component: Academics,
           children: [
-            { path: "class-routine", component: ClassRoutine, data: { user: "student" } },
+            { path: "class-routine", component: StudentClassRoutine },
             { path: "e-library", component: ELibrary, data: { user: "student" } },
             { path: "lesson-plans", component: LessonPlans, data: { user: "student" } },
             { path: "grades", component: Grade },
@@ -292,6 +296,8 @@ export const routes: Routes = [
           component: StudentManagement,
           children: [
             { path: "profile", component: StudentProfile },
+            { path: "payment", component: StudentPayment },
+            { path: "fee", component: StudentFee },
           ]
         },
 

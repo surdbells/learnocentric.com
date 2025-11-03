@@ -100,7 +100,7 @@ export class ClassRoutine implements OnInit{
           .pipe(catchError((err) => { this.toastService.error("Error fetching school subjects", "Error"); return of([] as any[]); })),
         teachers: this.apiSrv.get<any[]>('/backend/school/teachers')
           .pipe(catchError((err) => { this.toastService.error("Error fetching school teachers", "Error"); return of([] as any[]); })),
-        userRoutine: this.apiSrv.get<any[]>(`${this.user?.role == 'school_admin' ? `/backend/timetable/periods?classId=${this.selectedClass}` :
+        userRoutine: this.apiSrv.get<any[]>(`${this.user?.role == 'school_admin' || this.user?.role == 'tutor_admin' ? `/backend/timetable/periods?classId=${this.selectedClass}` :
           `/backend/${this.user?.role}/timetable/${this.user?.id}`} `)
           .pipe(catchError((err) => { this.toastService.error("Error fetching school tim", "Error"); return of([] as any[]); })),
       });
@@ -197,7 +197,12 @@ export class ClassRoutine implements OnInit{
       });
   }
 
-
+  handleSuccessSubmit($event: { success: boolean }) {
+    console.log($event, "this is the success event");
+    if($event.success) {
+      this.loadResources()
+    }
+  }
 
   handleCloseOffset() {
     this.selectedRoutine.set(null);
