@@ -1,0 +1,35 @@
+<app-user-intro>
+  <div class="d-flex align-items-xl-center justify-content-xl-between flex-xl-row flex-column">
+    <div class="mb-3 mb-xl-0">
+      <div class="d-flex align-items-center flex-wrap mb-2">
+        <h1 class="me-2">Welcome Back, {{ user()?.user?.firstName }}</h1>
+        <a href="profile.html" class="avatar avatar-sm img-rounded bg-gray-800 dark-hover"><i class="ti ti-edit text-white"></i></a>
+      </div>
+      <p class="">Super Admin Overview</p>
+    </div>
+    <p class=""><i class="ti ti-refresh me-1"></i>{{ getTodayDate | date }}</p>
+  </div>
+</app-user-intro>
+
+<div class="row mb-8">
+  <div class="col-12 col-md-6 col-xxl-3 mb-4 mb-xxl-0">
+    <app-skeleton-loader [isLoading]="isLoading()" variant="card">
+      <app-stat-card label="Institutions" [value]="institutionsCount" icon="domain" />
+    </app-skeleton-loader>
+  </div>
+  <div class="col-12 col-md-6 col-xxl-3 mb-4 mb-xxl-0">
+    <app-skeleton-loader [isLoading]="isLoading()" variant="card">
+      <app-stat-card label="Admins" [value]="adminsCount" icon="shield" />
+    </app-skeleton-loader>
+  </div>
+  <div class="col-12 col-md-6 col-xxl-3  mb-4 mb-md-0">
+    <app-skeleton-loader [isLoading]="isLoading()" variant="card">
+      <app-stat-card label="Teachers" [value]="teachersCount" icon="supervisor_account" />
+    </app-skeleton-loader>
+  </div>
+  <div class="col-12 col-md-6 col-xxl-3">
+    <app-skeleton-loader [isLoading]="isLoading()" variant="card">
+      <app-stat-card label="Students" [value]="studentsCount" icon="local_library" />
+    </app-skeleton-loader>
+  </div>
+</div>

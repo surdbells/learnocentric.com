@@ -1,5 +1,5 @@
 <app-learno-offset [anchorSelector]="anchorSelector()" [modalId]="'productModal'" (closeOffset)="handleCloseOffset()">
-  @if(selectedResult()) {
+  @if(selectedStudent()) {
     <div class="card">
       <div class="card-body">
         <div class="row align-items-center justify-content-between mb-4">
@@ -10,48 +10,30 @@
           </div>
           <div class="col-auto">
             <p class="text-end text-body-secondary mb-0">
-              Name: <span class="text-body">{{ selectedResult()?.first_name }} {{ selectedResult()?.last_name }}</span><br />
-              Class: <span class="text-body">{{ selectedResult()?.class_name }}</span>
+              Name: <span class="text-body">{{ selectedStudent()?.first_name }} {{ selectedStudent()?.last_name }}</span><br />
+              <!-- Class: <span class="text-body">{{ selectedStudent()?.class_name }}</span> -->
             </p>
           </div>
         </div>
         <div class="list-group mb-4">
-          <div class="list-group-item bg-body">
-            <div class="row">
-              <div class="col">Exam name</div>
-              <div class="col-auto">{{ selectedResult()?.exam_name || '—' }}</div>
+          @for (res of selectedStudent()?.results; track res.id) {
+            <div class="list-group-item bg-body">
+              <div class="row align-items-center">
+                <div class="col">
+                  <div class="fw-medium">{{ res.subject_name }}</div>
+                  <div class="text-body-secondary small">Score: {{ res.marks_obtained }}/{{ res.total_marks }}</div>
+                </div>
+                <div class="col-auto d-flex">
+                  <app-learno-button text="Edit" (clicked)="editResult(res)" class="me-2" data-bs-toggle="modal" [attr.data-bs-target]="`#add_result`" />
+                  <app-learno-button text="Delete" (clicked)="deleteResult(res)" btnColor="danger" class="me-2" [isLoading]="isLoading()" />
+                </div>
+              </div>
             </div>
-          </div>
-          <div class="list-group-item bg-body">
-            <div class="row">
-              <div class="col">Subject</div>
-              <div class="col-auto">{{ selectedResult()?.subject_name }}</div>
-            </div>
-          </div>
-          <div class="list-group-item bg-body">
-            <div class="row">
-              <div class="col">Score</div>
-              <div class="col-auto">{{ selectedResult()?.marks_obtained }}/{{selectedResult()?.total_marks}}</div>
-            </div>
-          </div>
-          <div class="list-group-item bg-body">
-            <div class="row">
-              <div class="col">Exam Date</div>
-              <div class="col-auto">{{ selectedResult()?.exam_date | date }}</div>
-            </div>
-          </div>
+          }
         </div>
         <!--        <p class="text-body-secondary small mb-0">Previewing fee structure. Click Download to export.</p>-->
       </div>
 
-      <div class="card-footer">
-
-        <div class="d-flex justify-content-end">
-          <app-learno-button text="Edit" (clicked)="editEnrollment()" class="me-2" data-bs-toggle="modal" [attr.data-bs-target]="`#add_result`" />
-          <app-learno-button text="Delete" (clicked)="deleteEnrollment()" btnColor="danger" class="me-2" [isLoading]="isLoading()" />
-        </div>
-
-      </div>
     </div>
   }
 
@@ -64,9 +46,10 @@
       modalForm
       [classes]="classes()"
       [subjects]="subjects()"
-      [students]="students()"
+      [students]="filterStudents()"
       [select]="selectedResult()"
       (submitted)="handleSuccessSubmit($event)"
+      (classChange)="onClassChange($event)"
     />
   </app-learno-modal>
 </app-page-header>
@@ -82,13 +65,13 @@
         />
       <app-skeleton-loader [isLoading]="isLoading()" variant="table" [rows]="5" [columns]="4">
         <app-data-table
-          [tableHeads]="['First Name', 'Last Name', 'Subjects Name', 'Mark', 'Exam Date']"
-          [tableRows]="filterEnrollments()"
-          [dataFields]="['first_name', 'last_name', 'subject_name', 'marks_obtained', 'exam_date', 'id']"
+          [tableHeads]="['First Name', 'Last Name', 'Results Count']"
+          [tableRows]="studentRows()"
+          [dataFields]="['first_name', 'last_name', 'result_count', 'id']"
           (preview)="onPreview($event)"
         />
       </app-skeleton-loader>
 
-      <app-data-table-numbering [tableData]="filterEnrollments()" />
+      <app-data-table-numbering [tableData]="studentRows()" />
     </div>
 </div>

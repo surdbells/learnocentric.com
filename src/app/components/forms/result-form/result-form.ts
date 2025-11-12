@@ -36,6 +36,14 @@ import {isPlatformBrowser} from '@angular/common';
   styleUrl: './result-form.css'
 })
 export class ResultForm {
+  @Output() classChange = new EventEmitter<any>();
+      // classChangeEvent = this.classChange.asObservable();
+
+
+  //Todo Emit change event
+  onClassChange($event: Event) {
+    this.classChange.emit($event);
+  }
   isLoading = signal<boolean>(false);
 
   subjects = input<any[]>([]);

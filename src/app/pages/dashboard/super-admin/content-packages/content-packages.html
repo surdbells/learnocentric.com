@@ -1,0 +1,151 @@
+<app-learno-offset [anchorSelector]="anchorSelector()" [modalId]="'productModal'" (closeOffset)="handleCloseOffset()">
+  @if(selectedPackage()) {
+    <div class="card">
+      <div class="card-body">
+        <div class="row align-items-center justify-content-between mb-4">
+          <div class="col-auto">
+            <div class="avatar avatar-xl rounded text-primary">
+              <i class="fs-2" data-duoicon="receipt"></i>
+            </div>
+          </div>
+          <div class="col-auto">
+            <p class="text-end text-body-secondary mb-0">
+              Name: <span class="text-body">{{ selectedPackage()?.title }}</span><br />
+            </p>
+          </div>
+        </div>
+        <div class="list-group mb-4">
+          <div class="list-group-item bg-body">
+            <div class="row">
+              <div class="col">Content Type</div>
+              <div class="col-auto">{{ selectedPackage()?.contentType }}</div>
+            </div>
+          </div>
+          <div class="list-group-item bg-body">
+            <div class="row">
+              <div class="col">Subject Area</div>
+              <div class="col-auto">{{ selectedPackage()?.subjectArea }}</div>
+            </div>
+          </div>
+          <div class="list-group-item bg-body">
+            <div class="row">
+              <div class="col">Grade Level</div>
+              <div class="col-auto">{{ selectedPackage()?.gradeLevel }}</div>
+            </div>
+          </div>
+          <div class="list-group-item bg-body">
+            <div class="row">
+              <div class="col">Description</div>
+              <div class="col-auto">{{ selectedPackage()?.description }}</div>
+            </div>
+          </div>
+        </div>
+        <!--        <p class="text-body-secondary small mb-0">Previewing fee structure. Click Download to export.</p>-->
+      </div>
+
+      <div class="card-footer">
+
+                <div class="d-flex justify-content-end">
+                  <app-learno-button text="Edit"  class="me-2" data-bs-toggle="modal" [attr.data-bs-target]="`#create_content_package`" />
+                  <app-learno-button text="Delete" (clicked)="deletePackage()" btnColor="danger" class="me-2" />
+                  <!-- <a href="{{ selectedPackage()?.file_url }}" target="_blank" class="btn btn-primary">Preview</a> -->
+                </div>
+
+      </div>
+    </div>
+  }
+
+</app-learno-offset>
+
+
+<app-page-header icon="inventory_2" action="Content Packages">
+  <app-learno-modal [modalId]="'create_content_package'" [modalAction]="'Create Package'" >
+    <!-- <form modalForm [formGroup]="form" (ngSubmit)="onCreate()">
+      <div class="modal-body">
+        <div class="row">
+          <div class="col-lg-6">
+            <div class="mb-3" learnoInput [label]="'Name'" [inputType]="'text'" [id]="'name'" [formControlName]="'name'"></div>
+          </div>
+          <div class="col-lg-6">
+            <div class="mb-3" learnoSelect [label]="'Package Type'" [id]="'packageType'" [formControlName]="'packageType'" [options]="typeOptions"></div>
+          </div>
+          <div class="col-lg-6">
+            <div class="mb-3" learnoSelect [label]="'Subject Area'" [id]="'subjectArea'" [formControlName]="'subjectArea'" [options]="subjectOptions"></div>
+          </div>
+          <div class="col-lg-6">
+            <div class="mb-3" learnoSelect [label]="'Grade Level'" [id]="'gradeLevel'" [formControlName]="'gradeLevel'" [options]="gradeOptions"></div>
+          </div>
+          <div class="col-lg-6">
+            <div class="mb-3" learnoInput [label]="'Price'" [inputType]="'number'" [id]="'price'" [formControlName]="'price'"></div>
+          </div>
+          <div class="col-lg-6">
+            <div class="mb-3" learnoInput [label]="'Duration (months)'" [inputType]="'number'" [id]="'durationMonths'" [formControlName]="'durationMonths'"></div>
+          </div>
+          <div class="col-lg-12">
+            <div class="mb-3">
+              <label class="form-label" for="contentSearch">Select Contents</label>
+              <input id="contentSearch" class="form-control mb-2" type="text" placeholder="Search contents by title, subject, grade, type" (input)="onContentSearchInput($event)" />
+              <div class="border rounded" style="max-height: 220px; overflow:auto;">
+                <ul class="list-group list-group-flush">
+                  @for(c of filteredContents(); track c.id) {
+                    <li class="list-group-item">
+                      <div class="form-check">
+                        <input class="form-check-input" type="checkbox" [checked]="(form.value.contentIds || []).includes(c.id)" (change)="toggleContentSelection(c.id, $event.target.checked)" id="content_{{c.id}}">
+                        <label class="form-check-label" for="content_{{c.id}}">
+                          {{c.title}} <span class="text-body-secondary small">• {{c.subjectArea}} • {{c.gradeLevel}} • {{c.contentType}}</span>
+                        </label>
+                      </div>
+                    </li>
+                  }
+                  @empty { <li class="list-group-item text-body-secondary">No content found</li> }
+                </ul>
+              </div>
+              <div class="form-text">Selected: {{ (form.value.contentIds || []).length }} items</div>
+            </div>
+          </div>
+          <div class="col-lg-12">
+            <div class="mb-3">
+              <label class="form-label" for="description">Description</label>
+              <textarea id="description" class="form-control" [formControlName]="'description'" rows="3"></textarea>
+            </div>
+          </div>
+          <div class="col-lg-12">
+            <div class="form-check mt-2">
+              <input class="form-check-input" type="checkbox" id="isActive" [formControlName]="'isActive'">
+              <label class="form-check-label" for="isActive">Active</label>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <a #closebtn class="btn btn-light me-2" data-bs-dismiss="modal">Cancel</a>
+        <app-learno-button [isLoading]="isSubmitting()" [text]="'Submit'" />
+      </div>
+    </form> -->
+    <app-content-package-form 
+    modalForm [contents]="contents()" 
+    [select]="selectedPackage()" 
+    (submitted)="handleSuccessSubmit($event)"
+  />
+  </app-learno-modal>
+</app-page-header>
+
+<app-table-search title="Packages" [filterKeys]="filterKeys" [filterValues]="filterValues" (search)="onSearch($event)" (filter)="onFilter($event)"></app-table-search>
+
+<app-skeleton-loader [isLoading]="isLoading()" variant="table" [rows]="5" [columns]="4">
+  <app-data-table
+    [tableHeads]="['Name', 'Type', 'Subject', 'Grade', 'Contents', 'Price', 'Duration (Month)']"
+    [dataFields]="['name', 'type', 'subjectArea', 'gradeLevel', 'contentsCount', 'price', 'durationMonths']"
+    [tableRows]="filteredPackages()"
+    [pageSize]="pageSize()"
+    [currentPage]="currentPage()"
+    (preview)="onPreview($event)"
+  />
+</app-skeleton-loader>
+
+<app-data-table-numbering
+  [tableData]="filteredPackages()"
+  [pageSize]="pageSize()"
+  [currentPage]="currentPage()"
+  (pageChange)="onPageChange($event)"
+/>

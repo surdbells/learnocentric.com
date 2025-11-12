@@ -86,6 +86,7 @@ export class Subjects implements OnInit{
 
   handleSuccessSubmit($event: { success: boolean }) {
     if($event.success) {
+      this.offsetCmp?.close();
       this.isLoading.set(true);
 
       this.apiService.get("/backend/school/subjects")

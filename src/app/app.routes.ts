@@ -68,6 +68,12 @@ import {TeacherClassRoutine} from './pages/dashboard/teacher/academics/teacher-c
 import {StudentPayment} from './pages/dashboard/student/management/payment/student-payment.component';
 import {StudentFee} from './pages/dashboard/student/management/student-fee/student-fee';
 // import {CalendarComponent} from './calendar/calendar.component';
+import {SuperAdminDashboard} from './pages/dashboard/super-admin/main/dashboard/dashboard';
+import {SuperAdminMain} from './pages/dashboard/super-admin/main/main';
+import {SuperAdminInstitutions} from './pages/dashboard/super-admin/institutions/institutions';
+import {SuperAdminOnboard} from './pages/dashboard/super-admin/institutions/onboard/onboard';
+import {SuperAdminContentLibrary} from './pages/dashboard/super-admin/content-library/content-library';
+import {SuperAdminContentPackages} from './pages/dashboard/super-admin/content-packages/content-packages';
 
 export const routes: Routes = [
   {
@@ -320,18 +326,16 @@ export const routes: Routes = [
     },
 
   {
-    path: "student",
+    path: "super-admin",
     component: Dashboard,
+    canActivate: [authGuard],
     children: [
       {
         path: "main",
-        component:  StudentMain,
+        component: SuperAdminMain,
         children: [
-          { path: "", component: StudentDashboard },
+          { path: "", component: SuperAdminDashboard },
           { path: "message", component: Chat },
-          { path: "notification", component: Notication },
-          { path: "events", component: CalendarComponent },
-          { path: "classmate", component: Classmate },
           {
             path: "file-manager",
             component: FileManager,
@@ -345,44 +349,18 @@ export const routes: Routes = [
             ]
           }
         ]
-
       },
-      {
-        path: "academics",
-        component: Academics,
-        children: [
-          { path: "class-routine", component: ClassRoutine, data: { user: "student" } },
-          { path: "e-library", component: ELibrary, data: { user: "student" } },
-          { path: "lesson-plans", component: LessonPlans, data: { user: "student" } },
-          { path: "grades", component: Grade },
-          { path: "assignments", component: Assignment, data: { user: "student" } },
-          { path: "assessments", component: StudentAssessment },
-          { path: "performance", component: StudentPerformance }
-        ]
-      },
-      {
-        path: "management",
-        component: StudentManagement,
-        children: [
-          { path: "profile", component: StudentProfile },
-        ]
-      },
+              {
+          path: "management",
+          component: StudentManagement,
+          children: [
+            { path: "institutions", component: SuperAdminInstitutions },
+            { path: "onboard", component: SuperAdminOnboard },
+            { path: "content-library", component: SuperAdminContentLibrary },
+            { path: "content-packages", component: SuperAdminContentPackages }
+          ]
+        },
 
-      {
-        path: "lesson/:subjectId",
-        component: Lesson,
-        children: [
-          { path: "", component: StudentLearning },
-          { path: "assignment", component: StudentAssignment },
-          { path: "virtual-class", component: StudentVirtualClass },
-          { path: "resources", component: StudentResources },
-          { path: "discussion", component: StudentDiscussion },
-          { path: "notes", component: StudentNotes },
-          { path: "assessment", component: StudentLessonAssessment },
-          { path: "chat-with-teacher", component: StudentChatWithTeacher },
-
-        ]
-      }
     ]
   },
 

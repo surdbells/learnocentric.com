@@ -99,8 +99,8 @@ export class SchoolClasses implements OnInit{
       this.apiService.get("/backend/school/classes")
         .subscribe({
           next: (data) => {
-            this.sclasses.set(data);
             this.offsetCmp.close();
+            this.sclasses.set(data);
           },
           error: (error) => {
             this.toastService.error("Error fetching Classes", "Error");

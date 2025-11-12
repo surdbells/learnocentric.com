@@ -52,7 +52,6 @@ export class UserPreferenceMenu {
         { name: "School Profile", link: "/admin/management/school-profile" },
         { name: "Payment", link: "/admin/management/payment" },
         { name: "Fees", link: "/admin/management/fees" },
-
       ]
     },
   ]
@@ -98,6 +97,25 @@ export class UserPreferenceMenu {
         { name: "Payment", link: "/academy/management/payment" },
         { name: "Subscription", link: "/academy/management/subscription" },
 
+      ]
+    },
+  ]
+
+
+  super_admin: IMenu[] = [
+    { name: "Main", icon: "dashboard", link: "super-admin/main",
+      children: [
+        { name: "Dashboard", link: "/super-admin/main" },
+        { name: "Messenger", link: "/super-admin/main/message" },
+        { name: "File Management", link: "/super-admin/main/file-manager" }
+      ]
+    },
+
+    { name: "Management", icon: "tenancy", link: "super-admin/management",
+      children: [
+        { name: "Institutions", link: "management/institutions" },
+        { name: "Content Library", link: "management/content-library" },
+        { name: "Content Packages", link: "management/content-packages" },
       ]
     },
   ]

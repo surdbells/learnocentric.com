@@ -115,10 +115,6 @@ export class ClassRoutine implements OnInit{
             this.subjects.set(this.utilSrv.configureForOption(data.subjects));
             this.teachers.set(this.utilSrv.configureForOption(data.teachers));
             this.teacherRoutines.set(this.utilSrv.groupRoutineToEachDay(data.userRoutine));
-
-            console.log(this.utilSrv.groupRoutineToEachDay(data.userRoutine), "Here we have it")
-
-            //   [{ day: 1, routines: [] }]
           },
           error: (error) => {
             console.error('Error fetching data:', error);
@@ -198,8 +194,8 @@ export class ClassRoutine implements OnInit{
   }
 
   handleSuccessSubmit($event: { success: boolean }) {
-    console.log($event, "this is the success event");
     if($event.success) {
+      this.offsetCmp?.close();
       this.loadResources()
     }
   }

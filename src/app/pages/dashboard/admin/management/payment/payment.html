@@ -64,12 +64,15 @@
 <div class="row">
   <div class="col-12">
     <app-table-search title="student(s)" (search)="onSearch($event)" />
-    <app-data-table
-      [tableHeads]="['Email', 'Firstname', 'Lastname', 'Class', 'Status']"
-      [dataFields]="['email', 'first_name', 'last_name', 'class_name', 'status', 'id']"
-      [tableRows]="filterEnrollments()"
-      (preview)="onPreviewStudent($event)"
-    />
+    <app-skeleton-loader [isLoading]="isLoading()" variant="table" >
+      <app-data-table
+        [tableHeads]="['Email', 'Firstname', 'Lastname', 'Class', 'Status']"
+        [dataFields]="['email', 'first_name', 'last_name', 'class_name', 'status', 'id']"
+        [tableRows]="filterEnrollments()"
+        (preview)="onPreviewStudent($event)"
+      />
+      
+    </app-skeleton-loader>
   </div>
 </div>
 

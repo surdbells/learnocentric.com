@@ -57,7 +57,7 @@ export class RoutineForm {
         dayOfWeek: new FormControl('', { validators: [Validators.required] }),
         startTime: new FormControl('', { validators: [Validators.required] }),
         endTime: new FormControl('', { validators: [Validators.required] }),
-        room: new FormControl('', { validators: [Validators.required] })
+        room: new FormControl('')
     })
   constructor(
     private toastService: ToastrService,

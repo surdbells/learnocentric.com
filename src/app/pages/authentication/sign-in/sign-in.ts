@@ -79,6 +79,10 @@ export class SignIn {
                   this.router.navigate(["parent/main"]);
                   break;
 
+                case "super_admin":
+                  this.router.navigate(["super-admin/main"]);
+                  break;
+
                 default:
                   this.router.navigate(["authentication"]);
               }

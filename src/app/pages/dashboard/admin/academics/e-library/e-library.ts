@@ -1,4 +1,4 @@
-import {Component, Inject, OnInit, PLATFORM_ID, signal} from '@angular/core';
+import {Component, Inject, OnInit, PLATFORM_ID, signal, ViewChild} from '@angular/core';
 import {PageHeader} from '../../../../../common/layout/page-header/page-header';
 import {LearnoButton} from '../../../../../common/learno-button/learno-button';
 import {TableSearch} from '../../../../../components/table-search/table-search';
@@ -15,6 +15,7 @@ import {DataTableNumbering} from '../../../../../components/data-table-numbering
 import {Loader} from '../../../../../common/loader/loader';
 import {UtilService} from '../../../../../common/service/util.service';
 import {SkeletonLoader} from '../../../../../common/skeleton-loader/skeleton-loader';
+import { LearnoOffset } from "../../../../../components/learno-offset/learno-offset";
 
 @Component({
   selector: 'app-e-library',
@@ -28,12 +29,14 @@ import {SkeletonLoader} from '../../../../../common/skeleton-loader/skeleton-loa
     ELibraryForm,
     DataTableNumbering,
     Loader,
-    SkeletonLoader
-  ],
+    SkeletonLoader,
+    LearnoOffset
+],
   templateUrl: './e-library.html',
   styleUrl: './e-library.css'
 })
 export class ELibrary implements OnInit{
+
 
   userRole: string;
   isLoading = signal(false);
@@ -43,6 +46,8 @@ export class ELibrary implements OnInit{
 
   selectedElibrary = signal<any | null>(null);
   anchorSelector = signal<string>('');
+  @ViewChild(LearnoOffset) offsetCmp!: LearnoOffset;
+
 
   constructor(
     private route: ActivatedRoute,
@@ -100,4 +105,23 @@ export class ELibrary implements OnInit{
   handleSuccessSubmit($event: { success: boolean }) {
     this.loadDat();
   }
+ 
+  deleteContent() {
+  if(this.selectedElibrary()) {
+    this.apiService.delete(`/backend/storage/resources/${this.selectedElibrary()?.id}`).subscribe({
+      next: (data) => {
+        this.toastService.success("Book deleted successfully", "Success");
+        this.offsetCmp?.close();
+        this.loadDat();
+      },
+      error: (error) => {
+        this.toastService.error("Error deleting book", "Error");
+      }
+    })
+  }
+}
+handleCloseOffset() {
+  this.selectedElibrary.set(null);
+  this.anchorSelector.set('');
+}
 }

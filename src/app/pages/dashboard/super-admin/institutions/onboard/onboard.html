@@ -1,0 +1,40 @@
+<app-page-header icon="domain" action="Onboard Institution"></app-page-header>
+
+<form [formGroup]="form" (ngSubmit)="onSubmit()">
+  <div learnoInput class="mb-4" [label]="'Institution Name'" [inputType]="'text'" [id]="'institutionName'" [formControlName]="'institutionName'"></div>
+  <div learnoSelect class="mb-4" [label]="'Institution Type'" [id]="'institutionType'" [formControlName]="'institutionType'" [options]="typeOptions"></div>
+
+  <div class="row">
+    <div class="col-md-6">
+      <div learnoInput class="mb-4" [label]="'Admin Email'" [inputType]="'email'" [id]="'adminEmail'" [formControlName]="'adminEmail'"></div>
+    </div>
+    <div class="col-md-6">
+      <div learnoInput class="mb-4" [label]="'Admin Password'" [inputType]="'password'" [id]="'adminPassword'" [formControlName]="'adminPassword'"></div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-md-6">
+      <div learnoInput class="mb-4" [label]="'Admin First Name'" [inputType]="'text'" [id]="'adminFirstName'" [formControlName]="'adminFirstName'"></div>
+    </div>
+    <div class="col-md-6">
+      <div learnoInput class="mb-4" [label]="'Admin Last Name'" [inputType]="'text'" [id]="'adminLastName'" [formControlName]="'adminLastName'"></div>
+    </div>
+  </div>
+
+  <div learnoInput class="mb-4" [label]="'Address'" [inputType]="'text'" [id]="'address'" [formControlName]="'address'"></div>
+  <div learnoInput class="mb-4" [label]="'Phone'" [inputType]="'text'" [id]="'phone'" [formControlName]="'phone'"></div>
+
+  <div class="row">
+    <div class="col-md-6">
+      <div learnoInput class="mb-4" [label]="'Logo URL'" [inputType]="'text'" [id]="'logoUrl'" [formControlName]="'logoUrl'"></div>
+    </div>
+    <div class="col-md-6">
+      <div learnoInput class="mb-4" [label]="'Primary Color (Hex)'" [inputType]="'text'" [id]="'primaryColor'" [formControlName]="'primaryColor'"></div>
+    </div>
+  </div>
+
+  <div learnoInput class="mb-4" [label]="'Package IDs (comma-separated)'" [inputType]="'text'" [id]="'packageIds'" [formControlName]="'packageIds'"></div>
+
+  <app-learno-button class="mt-3" text="Onboard" [isLoading]="isLoading()"></app-learno-button>
+</form>

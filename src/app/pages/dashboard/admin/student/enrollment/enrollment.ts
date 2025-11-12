@@ -176,9 +176,9 @@ export class Enrollment implements OnInit {
   }
 
   handleSuccessSubmit($event: { success: boolean }) {
-    console.log($event, "this is the success event");
     if($event.success) {
       this.isLoading.set(true);
+      this.offsetCmp?.close();
 
       this.apiSrv.get("/backend/school/enrollments")
         .subscribe({

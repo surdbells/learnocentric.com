@@ -21,6 +21,10 @@ export class DataTable {
     shouldShowCheckbox = input<boolean>(true);
     shouldShowAction = input<boolean>(true);
 
+    // Pagination inputs (0 disables pagination for backward compatibility)
+    pageSize = input<number>(0);
+    currentPage = input<number>(1);
+
     positives: string[] = ['complete', 'completed', 'active', 'success', 'successful'];
 
 
@@ -31,4 +35,15 @@ export class DataTable {
   }
 
   @Output() preview = new EventEmitter<{ row: any; anchorSelector: string }>();
+
+  // Slice rows based on pagination
+  visibleRows(): any[] {
+    const rows = this.tableRows() || [];
+    const size = Number(this.pageSize() || 0);
+    if (!size || size <= 0) return rows;
+    const page = Math.max(1, Number(this.currentPage() || 1));
+    const start = (page - 1) * size;
+    const end = start + size;
+    return rows.slice(start, end);
+  }
 }

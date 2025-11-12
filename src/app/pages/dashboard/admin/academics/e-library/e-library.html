@@ -1,3 +1,62 @@
+<app-learno-offset [anchorSelector]="anchorSelector()" [modalId]="'productModal'" (closeOffset)="handleCloseOffset()">
+  @if(selectedElibrary()) {
+    <div class="card">
+      <div class="card-body">
+        <div class="row align-items-center justify-content-between mb-4">
+          <div class="col-auto">
+            <div class="avatar avatar-xl rounded text-primary">
+              <i class="fs-2" data-duoicon="receipt"></i>
+            </div>
+          </div>
+          <div class="col-auto">
+            <p class="text-end text-body-secondary mb-0">
+              Title: <span class="text-body">{{ selectedElibrary()?.title }}</span><br />
+            </p>
+          </div>
+        </div>
+        <div class="list-group mb-4">
+          <div class="list-group-item bg-body">
+            <div class="row">
+              <div class="col">Content Type</div>
+              <div class="col-auto">{{ selectedElibrary()?.file_type }}</div>
+            </div>
+          </div>
+          <div class="list-group-item bg-body">
+            <div class="row">
+              <div class="col">Subject</div>
+              <div class="col-auto">{{ selectedElibrary()?.subject_name }}</div>
+            </div>
+          </div>
+          <div class="list-group-item bg-body">
+            <div class="row">
+              <div class="col">Grade</div>
+              <div class="col-auto">{{ selectedElibrary()?.class_name }}</div>
+            </div>
+          </div>
+          <div class="list-group-item bg-body">
+            <div class="row">
+              <div class="col">Description</div>
+              <div class="col-auto">{{ selectedElibrary()?.description }}</div>
+            </div>
+          </div>
+        </div>
+        <!--        <p class="text-body-secondary small mb-0">Previewing fee structure. Click Download to export.</p>-->
+      </div>
+
+      <div class="card-footer">
+
+                <div class="d-flex justify-content-end">
+                  <app-learno-button text="Edit"  class="me-2" data-bs-toggle="modal" [attr.data-bs-target]="`#add_content_library`" />
+                  <app-learno-button text="Delete" (clicked)="deleteContent()" btnColor="danger" class="me-2" />
+                  <a href="{{ selectedElibrary()?.file_url }}" target="_blank" class="btn btn-primary">Preview</a>
+                </div>
+
+      </div>
+    </div>
+  }
+
+</app-learno-offset>
+
 <app-page-header icon="library_books" action="E-Library" >
 
   @if(userRole == "admin" || userRole == "tutor_admin" || userRole == "teacher") {

@@ -83,7 +83,7 @@
               <div class="d-flex py-3 flex-row align-items-center border-bottom me-4 flex-fill">
                 <app-routine-day-card class="mb-3 col-1" day="{{day.label}}" />
                 @for (period of teacherRoutines()[dayIndex+1]; track period; let i = $index) {
-                  <app-routine-card [routine]="period"  (preview)="onPreview($event)"
+                  <app-routine-card [routine]="period" [tag]="`${period.first_name} ${period.last_name}`"  (preview)="onPreview($event)"
                   />
                 }
               </div>

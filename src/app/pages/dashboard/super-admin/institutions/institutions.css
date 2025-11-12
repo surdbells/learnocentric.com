@@ -1,0 +1,5 @@
+/* Super Admin Institutions styles */
+
+.table-select tr:hover {
+  background-color: rgba(59, 130, 246, 0.05);
+}

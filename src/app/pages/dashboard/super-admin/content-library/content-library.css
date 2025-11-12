@@ -1,0 +1,4 @@
+/* Basic spacing adjustments for the content library page */
+.modal-body .mb-3 {
+  margin-bottom: 1rem;
+}

@@ -1,0 +1,162 @@
+<app-learno-offset [anchorSelector]="anchorSelector()" [modalId]="'productModal'" (closeOffset)="handleCloseOffset()">
+  @if(selectedContent()) {
+    <div class="card">
+      <div class="card-body">
+        <div class="row align-items-center justify-content-between mb-4">
+          <div class="col-auto">
+            <div class="avatar avatar-xl rounded text-primary">
+              <i class="fs-2" data-duoicon="receipt"></i>
+            </div>
+          </div>
+          <div class="col-auto">
+            <p class="text-end text-body-secondary mb-0">
+              Name: <span class="text-body">{{ selectedContent()?.title }}</span><br />
+            </p>
+          </div>
+        </div>
+        <div class="list-group mb-4">
+          <div class="list-group-item bg-body">
+            <div class="row">
+              <div class="col">Content Type</div>
+              <div class="col-auto">{{ selectedContent()?.contentType }}</div>
+            </div>
+          </div>
+          <div class="list-group-item bg-body">
+            <div class="row">
+              <div class="col">Subject Area</div>
+              <div class="col-auto">{{ selectedContent()?.subjectArea }}</div>
+            </div>
+          </div>
+          <div class="list-group-item bg-body">
+            <div class="row">
+              <div class="col">Grade Level</div>
+              <div class="col-auto">{{ selectedContent()?.gradeLevel }}</div>
+            </div>
+          </div>
+          <div class="list-group-item bg-body">
+            <div class="row">
+              <div class="col">Description</div>
+              <div class="col-auto">{{ selectedContent()?.description }}</div>
+            </div>
+          </div>
+        </div>
+        <!--        <p class="text-body-secondary small mb-0">Previewing fee structure. Click Download to export.</p>-->
+      </div>
+
+      <div class="card-footer">
+
+                <div class="d-flex justify-content-end">
+                  <app-learno-button text="Edit"  class="me-2" data-bs-toggle="modal" [attr.data-bs-target]="`#add_content_library`" />
+                  <app-learno-button text="Delete" (clicked)="deleteContent()" btnColor="danger" class="me-2" />
+                  <a href="{{ selectedContent()?.file_url }}" target="_blank" class="btn btn-primary">Preview</a>
+                </div>
+
+      </div>
+    </div>
+  }
+
+</app-learno-offset>
+
+<app-page-header icon="library_books" action="Content Library">
+  <app-learno-modal [modalId]="'add_content_library'" [modalAction]="'Upload Content'">
+    <form modalForm [formGroup]="form" (ngSubmit)="isEdit() ? onEdit() : onUpload()">
+      <div class="modal-body">
+        <div class="row">
+          <div class="col-lg-6">
+            <div class="mb-3" learnoInput [label]="'Title'" [inputType]="'text'" [id]="'title'" [formControlName]="'title'"></div>
+          </div>
+          <div class="col-lg-6">
+            <div class="mb-3" learnoSelect [label]="'Content Type'" [id]="'contentType'" [formControlName]="'contentType'" [options]="typeOptions"></div>
+          </div>
+
+          <div class="col-lg-6">
+            <div class="mb-3" learnoSelect [label]="'Subject Area'" [id]="'subjectArea'" [formControlName]="'subjectArea'" [options]="subjectOptions"></div>
+          </div>
+          <div class="col-lg-6">
+            <div class="mb-3" learnoSelect [label]="'Grade Level'" [id]="'gradeLevel'" [formControlName]="'gradeLevel'" [options]="gradeOptions"></div>
+          </div>
+
+          <div class="col-lg-6">
+            <div class="mb-3">
+              <label for="file" class="form-label">Upload File</label>
+              <input class="form-control" id="file" type="file" (change)="onFileChange($event)" />
+            </div>
+          </div>
+
+          <div class="col-lg-6">
+            <div class="mb-3" learnoSelect [label]="'Difficult Level'" [id]="'difficultyLevel'" [formControlName]="'difficultyLevel'" [options]="levelOptions"></div>
+          </div>
+
+          <div class="col-lg-6">
+            <div class="mb-3" learnoInput [label]="'Tags'" [inputType]="'text'" [id]="'tags'" [formControlName]="'tags'"></div>
+          </div>
+
+          <div class="col-lg-6">
+            <div class="form-check mt-4">
+              <input class="form-check-input" type="checkbox" id="isPremium" [formControlName]="'isPremium'">
+              <label class="form-check-label" for="premium">Premium (requires subscription)</label>
+            </div>
+          </div>
+
+          <div class="col-lg-12">
+            <div class="mb-3">
+              <label for="description" class="form-label">Description</label>
+              <textarea class="form-control" [formControlName]="'description'" rows="3"></textarea>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <a #closebtn class="btn btn-light me-2" data-bs-dismiss="modal">Cancel</a>
+        <app-learno-button [isLoading]="isUploading()" [text]=" isEdit() ? 'Update' : 'Submit'" />
+      </div>
+    </form>
+  </app-learno-modal>
+</app-page-header>
+
+    <div class="card-body p-4 pb-0 mb-4">
+        <div class="row justify-content-start">
+          @for (opt of typeOptions; track opt.value) {
+            <div class="col-xxl-2 col-xl-6 col-sm-6">
+              <div class="card" [class]="typeCardClass(opt.value)" role="button" tabindex="0" (click)="onTypeCardClick(opt.value)">
+                <div class="card-body p-4" [class.border]="filterType() === opt.value" [class.border-primary]="filterType() === opt.value">
+                  <div class="d-flex align-items-center py-4 my-3">
+                    <i class="material-symbols-outlined fs-45" [class.text-primary]="opt.value === 'video'" [class.text-danger]="opt.value === 'document' || opt.value === 'assignment'" [class.text-success]="opt.value === 'interactive'" [class.text-primary-div]="opt.value === 'quiz'">{{ typeIcon(opt.value) }}</i>
+                    <span class="fs-15 fw-bold text-secondary ms-2 position-relative top-2">{{ opt.label }}</span>
+                  </div>
+                  <div class="d-flex justify-content-between">
+                    <span class="fs-13 text-secondary">{{ countsByType()[opt.value] || 0 }} Files</span>
+                    <span class="fs-13 text-secondary">&nbsp;</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+    </div>
+
+<app-table-search
+  title="Content Library"
+  [filterKeys]="filterKeys"
+  [filterValues]="filterValues"
+  (search)="onSearch($event)"
+  (filter)="onFilter($event)"
+/>
+
+<app-skeleton-loader [isLoading]="isLoading()" variant="table" [rows]="5" [columns]="6">
+  <app-data-table
+    [tableHeads]="['Title', 'Type', 'Subject', 'Grade', 'Premium']"
+    [dataFields]="['title', 'contentType', 'subjectArea', 'gradeLevel', 'isPremium', 'id']"
+    [tableRows]="filteredContents()"
+    [pageSize]="pageSize()"
+    [currentPage]="currentPage()"
+    (preview)="onPreview($event)"
+  />
+</app-skeleton-loader>
+
+<app-data-table-numbering
+  [tableData]="filteredContents()"
+  [pageSize]="pageSize()"
+  [currentPage]="currentPage()"
+  (pageChange)="onPageChange($event)"
+/>
