@@ -12,9 +12,7 @@ import {LearnoButton} from '../../../common/learno-button/learno-button';
   selector: 'app-school-class-form',
   imports: [
     LearnoInput,
-    LearnoSelect,
     ReactiveFormsModule,
-    Loader,
     LearnoButton
   ],
   templateUrl: './school-class-form.html',
@@ -61,11 +59,6 @@ export class SchoolClassForm {
         patch.academicYear = s['academic_year'];
       }
 
-
-      // const dateVal = (s['enrollment_date'] ?? s['enrollmentDate']);
-      // if (dateVal !== undefined && dateVal !== null && dateVal !== '') {
-      //   patch.enrollmentDate = dateVal;
-      // }
       if (Object.keys(patch).length > 0) {
         this.form.patchValue(patch, { emitEvent: false });
       }
@@ -79,27 +72,18 @@ export class SchoolClassForm {
   onSubmit() {
 
     this.isLoading.set(true);
-
-    // const {user} = this.authSrv.getAuthSession();
-    // if(!user) {
-    //   this.isLoading.set(false);
-    //   this.toastService.error("failed to submit, institution is required")
-    //   return;
-    // }
-
-    // console.log(this.form.value, user)
     if (this.form.valid) {
       this.apiSrv.post("/backend/school/classes", this.form.value).subscribe(
         {
-          next: (res) => {
+          next: () => {
             this.form.reset();
             this.toastService.success("submitted successfully");
             this.submitted.emit({success: true});
+            this.isLoading.set(false);
           },
           error: (err) => {
             this.isLoading.set(false);
             this.toastService.error("failed to submit")
-            console.log(err)
           },
           complete: () => {
             this.isLoading.set(false);
@@ -117,14 +101,11 @@ export class SchoolClassForm {
         }
         return acc;
       }, {});
-      console.log(err);
       this.toastService.error("Please fill in all required fields correctly")
     }
   }
 
   onEdit() {
-    console.log("edit", this.select())
-    console.log("edit", this.form.value)
     this.isLoading.set(true);
     this.apiSrv.put("/backend/school/classes", { ...this.form.value, id: this.select()['id'] })
       .subscribe({
@@ -136,7 +117,6 @@ export class SchoolClassForm {
         error: (err) => {
           this.isLoading.set(false);
           this.toastService.error("failed to submit")
-          console.log(err)
         },
         complete: () => {
           this.isLoading.set(false);

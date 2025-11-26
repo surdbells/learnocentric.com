@@ -8,11 +8,11 @@
         <!--      <hr />-->
         <div class="row">
           <div class="col-xl-4 mb-4" learnoInput [label]="'Student Name'" [inputType]="'text'" [id]="'name'" [formControlName]="'name'"></div>
-          <div class="col-xl-4 mb-4" learnoSelect [label]="'Session'" [id]="'session'" [formControlName]="'session'" [options]="[
+          <div class="col-xl-4 mb-4" learnoSelect placeHolder="Session" [label]="'Session'" [id]="'session'" [formControlName]="'session'" [options]="[
               { label: '2021/2022', value: '2021/2022' },
               { label: '2022/2023', value: '2022/2023' }
         ]"></div>
-          <div class="col-xl-4 mb-4" learnoSelect [label]="'Term'" [id]="'term'" [formControlName]="'term'" [options]="[
+          <div class="col-xl-4 mb-4" learnoSelect placeHolder="Term" [label]="'Term'" [id]="'term'" [formControlName]="'term'" [options]="[
               { label: 'First Term', value: '1' },
               { label: 'Second Term', value: '2' }
         ]"></div>

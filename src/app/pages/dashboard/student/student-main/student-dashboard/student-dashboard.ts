@@ -15,6 +15,7 @@ import {AuthService} from '../../../../../common/auth/auth.service';
 import {UtilService} from '../../../../../common/service/util.service';
 import {Loader} from '../../../../../common/loader/loader';
 import {SkeletonLoader} from '../../../../../common/skeleton-loader/skeleton-loader';
+import { LearnoButton } from "../../../../../common/learno-button/learno-button";
 
 declare const $: any;
 
@@ -31,8 +32,9 @@ declare const $: any;
     UserIntro,
     RouterLink,
     Loader,
-    SkeletonLoader
-  ],
+    SkeletonLoader,
+    LearnoButton
+],
   templateUrl: './student-dashboard.html',
   styleUrl: './student-dashboard.css'
 })

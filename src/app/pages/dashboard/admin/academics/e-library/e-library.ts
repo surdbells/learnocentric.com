@@ -47,7 +47,11 @@ export class ELibrary implements OnInit{
   selectedElibrary = signal<any | null>(null);
   anchorSelector = signal<string>('');
   @ViewChild(LearnoOffset) offsetCmp!: LearnoOffset;
+  currentPage = signal<number>(1);
 
+  onPageChange(p: number) {
+    this.currentPage.set(Math.max(1, Number(p || 1)));
+  }
 
   constructor(
     private route: ActivatedRoute,

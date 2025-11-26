@@ -40,6 +40,13 @@ export class Teachers implements OnInit {
   searchTerm = signal<string>('');
   @ViewChild(LearnoOffset) offsetCmp!: LearnoOffset;
 
+  currentPage = signal<number>(1);
+  
+  onPageChange(p: number) {
+    this.currentPage.set(Math.max(1, Number(p || 1)));
+  }
+   
+
   filteredTeachers = computed(() => {
     const term = this.searchTerm().toLowerCase().trim();
     if (!term) return this.teachers();

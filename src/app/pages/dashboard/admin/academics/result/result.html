@@ -72,6 +72,10 @@
         />
       </app-skeleton-loader>
 
-      <app-data-table-numbering [tableData]="studentRows()" />
+      <app-data-table-numbering
+        [tableData]="studentRows()"
+        [currentPage]="currentPage()"
+        (pageChange)="onPageChange($event)"
+      />
     </div>
 </div>

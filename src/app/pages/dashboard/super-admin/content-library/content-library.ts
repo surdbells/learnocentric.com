@@ -94,12 +94,7 @@ export class SuperAdminContentLibrary implements OnInit {
     { value: 'interactive', label: 'Interactive' },
   ];
 
-  subjectOptions: IInputOption[] = [
-    { value: 'math', label: 'Math' },
-    { value: 'science', label: 'Science' },
-    { value: 'english', label: 'English' },
-    { value: 'history', label: 'History' },
-  ];
+  subjectOptions: IInputOption[] = [];
 
   gradeOptions: IInputOption[] = [];
 
@@ -147,6 +142,7 @@ export class SuperAdminContentLibrary implements OnInit {
 
   ngOnInit(): void {
     this.loadClasses();
+    this.loadSubjects();
     this.loadContents();
   }
 
@@ -171,6 +167,29 @@ export class SuperAdminContentLibrary implements OnInit {
       error: (err) => {
         console.error(err);
         this.toastSrv.error('Failed to load classes');
+      }
+    });
+  }
+
+  loadSubjects() {
+    this.apiSrv.get('/backend/school/subjects').subscribe({
+      next: (data: any) => {
+        const list = Array.isArray(data) ? data : (Array.isArray((data as any)?.items) ? (data as any).items : []);
+        const options: IInputOption[] = list.map((s: any) => ({
+          value: String(s.name ?? ''),
+          label: String(s.name ?? 'Unknown'),
+        })).filter((o: any) => o.value && o.label);
+        this.subjectOptions = options;
+        // refresh filter values to include dynamic subject options
+        this.filterValues = [
+          this.typeOptions.map(o => ({ label: o.label, value: `type:${o.value}` })),
+          this.subjectOptions.map(o => ({ label: o.label, value: `subject:${o.value}` })),
+          this.gradeOptions.map(o => ({ label: o.label, value: `grade:${o.value}` })),
+        ];
+      },
+      error: (err) => {
+        console.error(err);
+        this.toastSrv.error('Failed to load subjects');
       }
     });
   }
@@ -361,6 +380,8 @@ export class SuperAdminContentLibrary implements OnInit {
           this.isLoading.set(false);
         }
       });
+
+      this.offsetCmp.close()
   }
 
     onEdit() {

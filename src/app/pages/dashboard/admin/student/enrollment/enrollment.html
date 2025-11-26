@@ -86,10 +86,17 @@
         [tableHeads]="['Email', 'Firstname', 'Lastname', 'Class', 'Status']"
         [dataFields]="['email', 'first_name', 'last_name', 'class_name', 'status', 'id']"
         [tableRows]="filterEnrollments()"
+        [currentPage]="currentPage()"
         (preview)="onPreview($event)"
       />
     </app-skeleton-loader>
   </div>
 </div>
-<app-data-table-numbering [tableData]="filterEnrollments()" />
+
+<app-data-table-numbering
+  [tableData]="filterEnrollments()"
+  [currentPage]="currentPage()"
+  (pageChange)="onPageChange($event)"
+/>
+
 

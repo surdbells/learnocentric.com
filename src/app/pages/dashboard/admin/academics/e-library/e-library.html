@@ -46,7 +46,7 @@
       <div class="card-footer">
 
                 <div class="d-flex justify-content-end">
-                  <app-learno-button text="Edit"  class="me-2" data-bs-toggle="modal" [attr.data-bs-target]="`#add_content_library`" />
+                  <app-learno-button text="Edit"  class="me-2" data-bs-toggle="modal" [attr.data-bs-target]="`#add_e_library`" />
                   <app-learno-button text="Delete" (clicked)="deleteContent()" btnColor="danger" class="me-2" />
                   <a href="{{ selectedElibrary()?.file_url }}" target="_blank" class="btn btn-primary">Preview</a>
                 </div>
@@ -60,9 +60,10 @@
 <app-page-header icon="library_books" action="E-Library" >
 
   @if(userRole == "admin" || userRole == "tutor_admin" || userRole == "teacher") {
-    <app-learno-modal [modalId]="'add_e_library'" [modalAction]="'Add E-Library'" >
+    <app-learno-modal [modalId]="'add_e_library'" [modalAction]="selectedElibrary() ? 'Edit E-Library' : 'Add E-Library'" >
       <app-e-library-form
-        [action]="'Add E-Library'"
+        [action]="selectedElibrary() ? 'Edit E-Library' : 'Add E-Library'"
+        [select]="selectedElibrary()"
         modalForm [classes]="classes()" [subjects]="subjects()"
         (submitted)="handleSuccessSubmit($event)"
       />
@@ -77,8 +78,13 @@
     [tableHeads]="['Title', 'Subject', 'Class']"
     [dataFields]="['title', 'subject_name', 'class_name', 'id']"
     [tableRows]="books()"
+    [currentPage]="currentPage()"
     (preview)="onPreview($event)"
   />
 </app-skeleton-loader>
 
-<app-data-table-numbering [tableData]="books()" />
+<app-data-table-numbering
+  [tableData]="books()"
+  [currentPage]="currentPage()"
+  (pageChange)="onPageChange($event)"
+/>

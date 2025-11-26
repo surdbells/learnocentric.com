@@ -60,6 +60,11 @@ export class Enrollment implements OnInit {
   anchorSelector = signal<string>('');
 
   @ViewChild(LearnoOffset) offsetCmp!: LearnoOffset;
+  currentPage = signal<number>(1);
+
+  onPageChange(p: number) {
+    this.currentPage.set(Math.max(1, Number(p || 1)));
+  }
 
   filterEnrollments = computed(() => {
     const term = this.searchTerm().toLowerCase().trim();

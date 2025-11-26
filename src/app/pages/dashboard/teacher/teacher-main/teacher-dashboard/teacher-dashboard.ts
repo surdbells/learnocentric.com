@@ -12,9 +12,10 @@ import {ApiService} from '../../../../../common/service/api.service';
 import {forkJoin} from 'rxjs';
 import {Loader} from '../../../../../common/loader/loader';
 import {AuthService} from '../../../../../common/auth/auth.service';
-import {Router} from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import {AuthUser} from '../../../../../common/auth/auth.models';
 import {SkeletonLoader} from '../../../../../common/skeleton-loader/skeleton-loader';
+import { LearnoButton } from "../../../../../common/learno-button/learno-button";
 
 declare const $: any;
 
@@ -31,8 +32,10 @@ declare const $: any;
     DashboardCard,
     EventsListing,
     Loader,
-    SkeletonLoader
-  ],
+    SkeletonLoader,
+    LearnoButton,
+    RouterLink
+],
   templateUrl: './teacher-dashboard.html',
   styleUrl: './teacher-dashboard.css'
 })

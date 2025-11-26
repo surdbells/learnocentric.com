@@ -5,13 +5,13 @@
             <div class="mb-3" learnoInput [label]="'Name'" [inputType]="'text'" [id]="'name'" [formControlName]="'name'"></div>
           </div>
           <div class="col-lg-6">
-            <div class="mb-3" learnoSelect [label]="'Package Type'" [id]="'packageType'" [formControlName]="'packageType'" [options]="typeOptions"></div>
+            <div class="mb-3" learnoSelect placeHolder="Package Type" [label]="'Package Type'" [id]="'packageType'" [formControlName]="'packageType'" [options]="typeOptions"></div>
           </div>
           <div class="col-lg-6">
-            <div class="mb-3" learnoSelect [label]="'Subject Area'" [id]="'subjectArea'" [formControlName]="'subjectArea'" [options]="subjectOptions"></div>
+            <div class="mb-3" learnoSelect placeHolder="Subject Area"  [label]="'Subject Area'" [id]="'subjectArea'" [formControlName]="'subjectArea'" [options]="subjectOptions"></div>
           </div>
           <div class="col-lg-6">
-            <div class="mb-3" learnoSelect [label]="'Grade Level'" [id]="'gradeLevel'" [formControlName]="'gradeLevel'" [options]="gradeOptions"></div>
+            <div class="mb-3" learnoSelect placeHolder="Grade Level" [label]="'Grade Level'" [id]="'gradeLevel'" [formControlName]="'gradeLevel'" [options]="gradeOptions"></div>
           </div>
           <div class="col-lg-6">
             <div class="mb-3" learnoInput [label]="'Price'" [inputType]="'number'" [id]="'price'" [formControlName]="'price'"></div>
@@ -52,7 +52,7 @@
               <input class="form-check-input" type="checkbox" id="isActive" [formControlName]="'isActive'">
               <label class="form-check-label" for="isActive">Active</label>
             </div>
-          </div>
+          </div> 
         </div>
       </div>
       <div class="modal-footer">

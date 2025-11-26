@@ -39,6 +39,8 @@ export class SuperAdminContentPackages implements OnInit {
 
 
   @ViewChild('closebtn', { static: false }) closebtn!: any;
+  @ViewChild(LearnoOffset) offsetCmp!: LearnoOffset;
+
   isSubmitting = signal(false);
   form = new FormGroup({
     name: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
@@ -112,7 +114,7 @@ export class SuperAdminContentPackages implements OnInit {
           gradeLevel: i.grade_level ?? i.grade ?? '',
           price: i.price ?? i.cost ?? null,
           durationMonths: i.durationMonths ?? i.duration_months ?? null,
-          isActive: Boolean(i.isActive ?? i.active ?? true),
+          isActive: Boolean(i.isActive ?? i.active ?? true) ,
           contentsCount: Array.isArray(i.contentIds)
             ? i.contentIds.length
             : (Array.isArray(i.contents)
@@ -153,7 +155,7 @@ export class SuperAdminContentPackages implements OnInit {
         const normalized = list.map((c: any, idx: number) => ({
           id: c.id ?? idx + 1,
           title: c.title ?? 'Untitled',
-          subjectArea: c.subjectArea ?? c.subject ?? '',
+          subjectArea: c.subjectArea ?? c.subject_area ?? '',
           gradeLevel: c.gradeLevel ?? c.grade ?? '',
           contentType: c.contentType ?? c.type ?? '',
           isActive: Boolean(c.isActive ?? c.active ?? true),
@@ -305,6 +307,8 @@ export class SuperAdminContentPackages implements OnInit {
           this.isLoading.set(false);
         }
       });
+
+      this.offsetCmp.close();
   }
 
   onPreview(evt: { anchorSelector: string; row: any }) {

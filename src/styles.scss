@@ -77,3 +77,14 @@ html, .offcanvas-body {
 .cursor-pointer {
   cursor: pointer;
 }
+
+
+.form-check-input:checked {
+    background-color: #39c645;
+    border-color: #39c645;
+}
+
+.active > .page-link, .page-link.active {
+    background-color: #39c645;;
+    border-color: #39c645;;
+}

@@ -22,7 +22,7 @@ export class DataTable {
     shouldShowAction = input<boolean>(true);
 
     // Pagination inputs (0 disables pagination for backward compatibility)
-    pageSize = input<number>(0);
+    pageSize = input<number>(10);
     currentPage = input<number>(1);
 
     positives: string[] = ['complete', 'completed', 'active', 'success', 'successful'];

@@ -12,6 +12,7 @@ import {ToastrService} from 'ngx-toastr';
 import {SkeletonLoader} from '../../../../../common/skeleton-loader/skeleton-loader';
 import {LearnoOffset} from '../../../../../components/learno-offset/learno-offset';
 import {EnrollmentForm} from '../../../../../components/forms/enrollment-form/enrollment-form';
+import { DataTableNumbering } from "../../../../../components/data-table-numbering/data-table-numbering";
 
 @Component({
   selector: 'app-school-classes',
@@ -24,7 +25,8 @@ import {EnrollmentForm} from '../../../../../components/forms/enrollment-form/en
     SchoolClassForm,
     SkeletonLoader,
     LearnoOffset,
-  ],
+    DataTableNumbering
+],
   templateUrl: './school-classes.html',
   styleUrl: './school-classes.css'
 })
@@ -39,6 +41,12 @@ export class SchoolClasses implements OnInit{
   anchorSelector = signal<string>('');
 
   @ViewChild(LearnoOffset) offsetCmp!: LearnoOffset;
+
+  currentPage = signal<number>(1);
+
+  onPageChange(p: number) {
+    this.currentPage.set(Math.max(1, Number(p || 1)));
+  }
 
   filterClasses = computed(() => {
     const term = this.searchTerm().toLowerCase().trim();
@@ -119,8 +127,8 @@ export class SchoolClasses implements OnInit{
       this.toastService.error('No Class selected');
       return;
     }
-    const confirmed = window.confirm('Are you sure you want to delete this class? This action cannot be undone.');
-    if (!confirmed) return;
+    // const confirmed = window.confirm('Are you sure you want to delete this class? This action cannot be undone.');
+    // if (!confirmed) return;
 
     this.isLoading.set(true);
     this.apiService.delete(`/backend/school/classes?id=${this.selectedClass()['id']}`)

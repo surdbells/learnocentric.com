@@ -54,6 +54,12 @@ export class Students implements OnInit {
   @ViewChild(LearnoOffset) offsetCmp!: LearnoOffset;
   user: AuthUser | null = null;
 
+  currentPage = signal<number>(1);
+
+  onPageChange(p: number) {
+    this.currentPage.set(Math.max(1, Number(p || 1)));
+  }
+
   constructor(
     private router: Router,
     private readonly apiSrv: ApiService,

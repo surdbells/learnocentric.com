@@ -58,7 +58,6 @@ form = new FormGroup({
       return;
     }
 
-    // console.log(this.form.value, user)
     if (this.form.valid) {
       this.apiSrv.post("/backend/auth/register", {
         ...this.form.value,
@@ -66,13 +65,13 @@ form = new FormGroup({
         institutionId: user.institutionId
       }).subscribe(
         {
-          next: (res) => {
+          next: () => {
             this.form.reset();
             this.toastService.success("submitted successfully")
           },
           error: (err) => {
             this.isLoading.set(false);
-            this.toastService.error("failed to submit")
+            this.toastService.error("failed to submit " + err?.error?.error)
             console.log(err)
           },
           complete: () => {

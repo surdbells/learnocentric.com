@@ -2,7 +2,7 @@
 
 <form [formGroup]="form" (ngSubmit)="onSubmit()">
   <div learnoInput class="mb-4" [label]="'Institution Name'" [inputType]="'text'" [id]="'institutionName'" [formControlName]="'institutionName'"></div>
-  <div learnoSelect class="mb-4" [label]="'Institution Type'" [id]="'institutionType'" [formControlName]="'institutionType'" [options]="typeOptions"></div>
+  <div learnoSelect [placeHolder]="'Institution Type'" class="mb-4" [label]="'Institution Type'" [id]="'institutionType'" [formControlName]="'institutionType'" [options]="typeOptions"></div>
 
   <div class="row">
     <div class="col-md-6">

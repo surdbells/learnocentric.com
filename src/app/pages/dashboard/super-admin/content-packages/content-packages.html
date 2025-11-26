@@ -60,68 +60,6 @@
 
 <app-page-header icon="inventory_2" action="Content Packages">
   <app-learno-modal [modalId]="'create_content_package'" [modalAction]="'Create Package'" >
-    <!-- <form modalForm [formGroup]="form" (ngSubmit)="onCreate()">
-      <div class="modal-body">
-        <div class="row">
-          <div class="col-lg-6">
-            <div class="mb-3" learnoInput [label]="'Name'" [inputType]="'text'" [id]="'name'" [formControlName]="'name'"></div>
-          </div>
-          <div class="col-lg-6">
-            <div class="mb-3" learnoSelect [label]="'Package Type'" [id]="'packageType'" [formControlName]="'packageType'" [options]="typeOptions"></div>
-          </div>
-          <div class="col-lg-6">
-            <div class="mb-3" learnoSelect [label]="'Subject Area'" [id]="'subjectArea'" [formControlName]="'subjectArea'" [options]="subjectOptions"></div>
-          </div>
-          <div class="col-lg-6">
-            <div class="mb-3" learnoSelect [label]="'Grade Level'" [id]="'gradeLevel'" [formControlName]="'gradeLevel'" [options]="gradeOptions"></div>
-          </div>
-          <div class="col-lg-6">
-            <div class="mb-3" learnoInput [label]="'Price'" [inputType]="'number'" [id]="'price'" [formControlName]="'price'"></div>
-          </div>
-          <div class="col-lg-6">
-            <div class="mb-3" learnoInput [label]="'Duration (months)'" [inputType]="'number'" [id]="'durationMonths'" [formControlName]="'durationMonths'"></div>
-          </div>
-          <div class="col-lg-12">
-            <div class="mb-3">
-              <label class="form-label" for="contentSearch">Select Contents</label>
-              <input id="contentSearch" class="form-control mb-2" type="text" placeholder="Search contents by title, subject, grade, type" (input)="onContentSearchInput($event)" />
-              <div class="border rounded" style="max-height: 220px; overflow:auto;">
-                <ul class="list-group list-group-flush">
-                  @for(c of filteredContents(); track c.id) {
-                    <li class="list-group-item">
-                      <div class="form-check">
-                        <input class="form-check-input" type="checkbox" [checked]="(form.value.contentIds || []).includes(c.id)" (change)="toggleContentSelection(c.id, $event.target.checked)" id="content_{{c.id}}">
-                        <label class="form-check-label" for="content_{{c.id}}">
-                          {{c.title}} <span class="text-body-secondary small">• {{c.subjectArea}} • {{c.gradeLevel}} • {{c.contentType}}</span>
-                        </label>
-                      </div>
-                    </li>
-                  }
-                  @empty { <li class="list-group-item text-body-secondary">No content found</li> }
-                </ul>
-              </div>
-              <div class="form-text">Selected: {{ (form.value.contentIds || []).length }} items</div>
-            </div>
-          </div>
-          <div class="col-lg-12">
-            <div class="mb-3">
-              <label class="form-label" for="description">Description</label>
-              <textarea id="description" class="form-control" [formControlName]="'description'" rows="3"></textarea>
-            </div>
-          </div>
-          <div class="col-lg-12">
-            <div class="form-check mt-2">
-              <input class="form-check-input" type="checkbox" id="isActive" [formControlName]="'isActive'">
-              <label class="form-check-label" for="isActive">Active</label>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="modal-footer">
-        <a #closebtn class="btn btn-light me-2" data-bs-dismiss="modal">Cancel</a>
-        <app-learno-button [isLoading]="isSubmitting()" [text]="'Submit'" />
-      </div>
-    </form> -->
     <app-content-package-form 
     modalForm [contents]="contents()" 
     [select]="selectedPackage()" 

@@ -1,4 +1,4 @@
-import {Component, ElementRef, forwardRef, inject, input, OnInit, ViewEncapsulation} from '@angular/core';
+import {Component, ElementRef, forwardRef, inject, input, OnInit, ViewEncapsulation, signal, computed, HostListener} from '@angular/core';
 import {ControlValueAccessor, FormGroupDirective, NG_VALUE_ACCESSOR, ReactiveFormsModule} from '@angular/forms';
 
 export interface IInputOption {
@@ -30,6 +30,28 @@ export class LearnoSelect implements ControlValueAccessor, OnInit {
   formControlName = input.required<string>();
   options = input.required<IInputOption[]>();
   disabled = input<boolean>(false);
+  // Search configuration
+  searchable = input<boolean>(true);
+  searchPlaceholder = input<string>('Search...');
+  placeHolder = input.required<string>();
+
+  // Internal search state
+  searchTerm = signal<string>('');
+  filteredOptions = computed<IInputOption[]>(() => {
+    const term = (this.searchTerm() || '').toLowerCase().trim();
+    const opts = this.options() || [];
+    if (!this.searchable() || !term) return opts;
+    return opts.filter(o => String(o.label || '').toLowerCase().includes(term) || String(o.value || '').toLowerCase().includes(term));
+  });
+
+  // Custom dropdown state for searchable mode
+  isOpen = signal<boolean>(false);
+  selectedValue = signal<string>('');
+  selectedLabel = computed<string>(() => {
+    const val = this.selectedValue();
+    const found = (this.options() || []).find(o => String(o.value) === String(val));
+    return found ? String(found.label) : '';
+  });
 
   private parentForm = inject(FormGroupDirective, { optional: true });
   private elementRef = inject(ElementRef);
@@ -51,6 +73,7 @@ export class LearnoSelect implements ControlValueAccessor, OnInit {
                   this.selectElement.value = value || '';
 
               }
+              this.selectedValue.set(String(value || ''));
           });
         }
       }
@@ -60,6 +83,7 @@ export class LearnoSelect implements ControlValueAccessor, OnInit {
      if(this.selectElement) {
       this.selectElement.value = value || '';
      }
+     this.selectedValue.set(String(value || ''));
     }
     registerOnChange(fn: any): void {
       this.onChange = fn
@@ -81,6 +105,33 @@ export class LearnoSelect implements ControlValueAccessor, OnInit {
 
     onBlur(): void {
         this.onTouched();
+    }
+
+    onSearchChange(event: Event): void {
+      const val = (event.target as HTMLInputElement).value || '';
+      this.searchTerm.set(val);
+    }
+
+    toggleDropdown(): void {
+      if (this.disabled() || this.cvaDisabled) return;
+      this.isOpen.set(!this.isOpen());
+    }
+
+    selectOption(value: string): void {
+      this.selectedValue.set(String(value || ''));
+      if (this.selectElement) {
+        this.selectElement.value = value || '';
+      }
+      this.onChange(value);
+      this.isOpen.set(false);
+    }
+
+    @HostListener('document:click', ['$event'])
+    onDocumentClick(event: Event) {
+      const target = event.target as Node;
+      if (!this.elementRef.nativeElement.contains(target)) {
+        this.isOpen.set(false);
+      }
     }
 
 }

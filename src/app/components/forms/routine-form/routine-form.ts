@@ -28,7 +28,7 @@ export class RoutineForm {
   // Time options for 15-minute interval dropdowns
   timeOptions: IInputOption[] = (() => {
     const opts: IInputOption[] = [];
-    for (let h = 0; h < 24; h++) {
+    for (let h = 7; h < 20; h++) {
       for (let m = 0; m < 60; m += 15) {
         const hh = h.toString().padStart(2, '0');
         const mm = m.toString().padStart(2, '0');
@@ -66,7 +66,7 @@ export class RoutineForm {
   ) {
     effect(() => {
       const s = this.select();
-      if (!s) { this.form.reset(); return; }
+      if (!s) { this.form.reset(); this.isEdit.set(false); return; }
       const patch: any = {};
       if (s['class_id'] !== undefined && s['class_id'] !== null && s['class_id'] !== '') {
         patch.classId = s['class_id'];

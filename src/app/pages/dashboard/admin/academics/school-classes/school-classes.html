@@ -79,6 +79,13 @@
   <app-data-table
     [tableHeads]="['Class Name', 'Level']"
     [dataFields]="['name', 'grade_level', 'id', 'institution_id']"  [tableRows]="filterClasses()"
+    [currentPage]="currentPage()"
     (preview)="onPreview($event)"
   />
 </app-skeleton-loader>
+
+<app-data-table-numbering
+  [tableData]="filterClasses()"
+  [currentPage]="currentPage()"
+  (pageChange)="onPageChange($event)"
+/>

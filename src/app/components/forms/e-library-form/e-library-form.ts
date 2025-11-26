@@ -1,4 +1,4 @@
-import {Component, ElementRef, EventEmitter, input, Output, signal, ViewChild} from '@angular/core';
+import {Component, ElementRef, EventEmitter, input, Output, signal, ViewChild, effect} from '@angular/core';
 import {LearnoInput} from "../../../common/learno-input/learno-input";
 import {LearnoSelect} from "../../../common/learno-select/learno-select";
 import {FormControl, FormGroup, ReactiveFormsModule, Validators} from "@angular/forms";
@@ -13,7 +13,6 @@ import {LearnoButton} from '../../../common/learno-button/learno-button';
     LearnoInput,
     LearnoSelect,
     ReactiveFormsModule,
-    Loader,
     LearnoButton
   ],
   templateUrl: './e-library-form.html',
@@ -26,7 +25,6 @@ export class ELibraryForm {
   subjects = input<any[]>([]);
   action = input<string>('Add')
   select = input<{ [key:string]: string }>({})
-
 
 
   isEdit = signal<boolean>(false);
@@ -45,7 +43,32 @@ export class ELibraryForm {
     private readonly apiSrv: ApiService,
     private readonly toastService: ToastrService,
   ) {
+    effect(() => {
+      const s = this.select();
+      const hasSelection = !!s && Object.keys(s || {}).length > 0;
+      this.isEdit.set(hasSelection);
 
+      if (!hasSelection) {
+        return;
+      }
+
+      // Resolve class and subject IDs from selection, tolerating different shapes
+      const classId = (s['class_id'] || s['classId'] || this.findOptionValueByLabel(this.classes(), s['class_name'])) || '';
+      const subjectId = (s['subject_id'] || s['subjectId'] || this.findOptionValueByLabel(this.subjects(), s['subject_name'])) || '';
+
+      this.formGroup.patchValue({
+        classId: classId,
+        subjectId: subjectId,
+        title: s['title'] || '',
+        description: s['description'] || ''
+      });
+    });
+  }
+
+  private findOptionValueByLabel(options: any[], label?: string): string | undefined {
+    if (!label) return undefined;
+    const match = (options || []).find((o: any) => (o?.label || '').toString().toLowerCase() === label.toString().toLowerCase());
+    return match?.value;
   }
 
   onFileChange(event: Event) {

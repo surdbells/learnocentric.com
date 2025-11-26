@@ -32,7 +32,7 @@ export class SubjectForm {
 
   form = new FormGroup({
     name: new FormControl('', {nonNullable: true, validators: [Validators.required]}),
-    code: new FormControl('', {nonNullable: true, validators: [Validators.required]}),
+    code: new FormControl(''),
     description: new FormControl('', {nonNullable: false}),
   })
 

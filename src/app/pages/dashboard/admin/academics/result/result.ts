@@ -63,6 +63,11 @@ onClassChange($event: any) {
   anchorSelector = signal<string>('');
 
   @ViewChild(LearnoOffset) offsetCmp!: LearnoOffset;
+  currentPage = signal<number>(1);
+
+  onPageChange(p: number) {
+    this.currentPage.set(Math.max(1, Number(p || 1)));
+  }
  
   // Aggregated student rows with result count and nested results for preview
   studentRows = computed(() => {

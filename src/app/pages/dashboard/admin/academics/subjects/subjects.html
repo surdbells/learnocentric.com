@@ -68,10 +68,14 @@
 />
 <app-skeleton-loader [isLoading]="isLoading()" variant="table" [rows]="5" [columns]="4">
   <app-data-table
-    [tableHeads]="['Name', 'Code']"
-    [dataFields]="['name', 'code', 'id']"
+    [tableHeads]="['Name']"
+    [dataFields]="['name', 'id']"
     [tableRows]="filterSubjects()"
     (preview)="onPreview($event)"
   />
 </app-skeleton-loader>
-<app-data-table-numbering [tableData]="filterSubjects()" />
+<app-data-table-numbering
+  [tableData]="filterSubjects()"
+  [currentPage]="currentPage()"
+  (pageChange)="onPageChange($event)"
+/>

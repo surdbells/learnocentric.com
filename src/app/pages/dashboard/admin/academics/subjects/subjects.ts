@@ -39,6 +39,12 @@ export class Subjects implements OnInit{
   selectSubject = signal<any | null>(null);
   anchorSelector = signal<string>('');
 
+   currentPage = signal<number>(1);
+
+  onPageChange(p: number) {
+    this.currentPage.set(Math.max(1, Number(p || 1)));
+  }
+
   @ViewChild(LearnoOffset) offsetCmp!: LearnoOffset;
 
   filterSubjects = computed(() => {
@@ -120,8 +126,6 @@ export class Subjects implements OnInit{
       this.toastService.error('No subject selected');
       return;
     }
-    const confirmed = window.confirm('Are you sure you want to delete this subject? This action cannot be undone.');
-    if (!confirmed) return;
 
     this.isLoading.set(true);
     this.apiService.delete(`/backend/school/subjects?id=${this.selectSubject()['id']}`)

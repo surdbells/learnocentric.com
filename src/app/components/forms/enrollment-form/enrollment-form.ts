@@ -44,7 +44,7 @@ export class EnrollmentForm {
     // React to incoming preselected values and patch the form when provided
     effect(() => {
       const s = this.select();
-      if (!s) { this.form.reset(); return; }
+      if (!s) { this.form.reset(); this.isEdit.set(false); return; }
       const patch: any = {};
       if (s['class_id'] !== undefined && s['class_id'] !== null && s['class_id'] !== '') {
         patch.classId = s['class_id'];

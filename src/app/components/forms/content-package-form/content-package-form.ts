@@ -72,6 +72,7 @@ export class ContentPackageForm implements OnInit {
     });
   }
   ngOnInit(): void {
+    // Load grade levels (classes)
     this.apiSrv.get('/backend/school/classes').subscribe({
       next: (data: any[]) => {
         const arr = Array.isArray(data) ? data : [];
@@ -84,7 +85,38 @@ export class ContentPackageForm implements OnInit {
         console.error(err);
         this.toastSrv.error('Failed to load classes');
       }
-    });  
+    });
+
+    // Load all available subjects for dropdown
+    this.apiSrv.get('/backend/school/subjects').subscribe({
+      next: (data: any[]) => {
+        const arr = Array.isArray(data) ? data : [];
+        this.subjectOptions = arr.map((s: any) => ({
+          label: String(s.name || 'Unknown'),
+          value: String(s.name ?? '')
+        }));
+      },
+      error: (err) => {
+        console.error(err);
+        this.toastSrv.error('Failed to load subjects');
+      }
+    });
+    // Sync signals with form controls to support conditional filtering
+    const pkgCtrl = this.form.get('packageType');
+    const subjCtrl = this.form.get('subjectArea');
+    const gradeCtrl = this.form.get('gradeLevel');
+    if (pkgCtrl) {
+      this.selectedPackageType.set((pkgCtrl.value as any) || 'subject_pack');
+      pkgCtrl.valueChanges.subscribe(val => this.selectedPackageType.set((val as any) || 'subject_pack'));
+    }
+    if (subjCtrl) {
+      this.selectedSubjectArea.set(String(subjCtrl.value || ''));
+      subjCtrl.valueChanges.subscribe(val => this.selectedSubjectArea.set(String(val || '')));
+    }
+    if (gradeCtrl) {
+      this.selectedGradeLevel.set(String(gradeCtrl.value || ''));
+      gradeCtrl.valueChanges.subscribe(val => this.selectedGradeLevel.set(String(val || '')));
+    }
   }
 
   form = new FormGroup({
@@ -105,6 +137,11 @@ export class ContentPackageForm implements OnInit {
   isSubmitting = signal(false);
   isEdit = signal<boolean>(false);
 
+  // Signals to reflect current selection for conditional filtering
+  selectedPackageType = signal<'full_access'|'subject_pack'|'class_pack'>('subject_pack');
+  selectedSubjectArea = signal<string>('');
+  selectedGradeLevel = signal<string>('');
+
   @Output() submitted = new EventEmitter<{ success: boolean }>();
   @ViewChild('closebtn', { static: false }) autoCloseBtn!: ElementRef<HTMLButtonElement>;
   select = input<{ [key:string]: string }>({})
@@ -120,11 +157,7 @@ export class ContentPackageForm implements OnInit {
     ];
   
     subjectOptions: IInputOption[] = [
-      { value: '', label: 'All Subjects' },
-      { value: 'math', label: 'Math' },
-      { value: 'science', label: 'Science' },
-      { value: 'history', label: 'History' },
-      { value: 'english', label: 'English' },
+      // Populated from /backend/school/subjects with name as label and id as value
     ];
   
     gradeOptions: IInputOption[] = [
@@ -184,8 +217,27 @@ export class ContentPackageForm implements OnInit {
     // Content selection helpers
   filteredContents = computed(() => {
     const term = this.contentSearch().toLowerCase().trim();
-    if (!term) return this.contents();
-    return this.contents().filter((c: any) =>
+    const pkgType = this.selectedPackageType();
+    const subjVal = this.selectedSubjectArea();
+    const gradeVal = this.selectedGradeLevel();
+
+    let list = this.contents();
+
+    // Conditional filtering by package type
+    if (pkgType === 'subject_pack' && subjVal) {
+      const subjLabel = String(subjVal).toLowerCase();
+      console.log(list, subjLabel)
+      list = list.filter((c: any) => String(c.subjectArea || '').toLowerCase() === subjLabel);
+    } else if (pkgType === 'class_pack' && gradeVal) {
+      const gradeLabel = (this.gradeOptions.find(o => String(o.value) === String(gradeVal))?.label || '').toLowerCase();
+      if (gradeLabel) {
+        list = list.filter((c: any) => String(c.gradeLevel || '').toLowerCase() === gradeLabel);
+      }
+    }
+
+    // Apply text search last
+    if (!term) return list;
+    return list.filter((c: any) =>
       String(c.title || '').toLowerCase().includes(term)
       || String(c.subjectArea || '').toLowerCase().includes(term)
       || String(c.gradeLevel || '').toLowerCase().includes(term)
