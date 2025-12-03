@@ -8,8 +8,10 @@ import {ApiService} from '../../../../common/service/api.service';
 import {SkeletonLoader} from '../../../../common/skeleton-loader/skeleton-loader';
 import {LearnoOffset} from '../../../../components/learno-offset/learno-offset';
 import {ToastrService} from 'ngx-toastr';
-import {Router} from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { DatePipe } from '@angular/common';
+import { LearnoModal } from "../../../../components/learno-modal/learno-modal";
+import { InstitutionForm } from "../../../../components/forms/institution-form/institution-form";
 
 @Component({
   selector: 'app-super-admin-institutions',
@@ -23,19 +25,30 @@ import { DatePipe } from '@angular/common';
     // Loader,
     SkeletonLoader,
     LearnoOffset,
-    DatePipe
-  ],
+    DatePipe,
+    RouterLink,
+    LearnoModal,
+    InstitutionForm
+],
   templateUrl: './institutions.html',
   styleUrl: './institutions.css'
 })
 export class SuperAdminInstitutions implements OnInit {
+
   isLoading = signal(false);
   institutions = signal<any[]>([]);
+  isEdit = signal<boolean>(false);
+  selectedInstitutionId = signal<string | null>(null);
+  
+
+
 
   selectedInstitution = signal<any | null>(null);
   anchorSelector = signal<string>('');
   searchTerm = signal<string>('');
   @ViewChild(LearnoOffset) offsetCmp!: LearnoOffset;
+  @ViewChild('closebtn', { static: false }) closebtn!: any;
+  
 
   filteredInstitutions = computed(() => {
     const term = this.searchTerm().toLowerCase().trim();
@@ -69,6 +82,7 @@ export class SuperAdminInstitutions implements OnInit {
       .subscribe({
         next: (data) => {
           const list = Array.isArray(data) ? data : (Array.isArray(data?.institutions) ? data.institutions : []);
+          console.log(list)
           const normalized = list.map((i: any, idx: number) => ({
             id: i.id ?? i.institutionId ?? idx + 1,
             name: i.name ?? i.institutionName ?? 'Unknown',
@@ -77,6 +91,9 @@ export class SuperAdminInstitutions implements OnInit {
             phone: i.phone ?? i.contactPhone ?? '',
             createdAt: i.createdAt ?? i.created_date ?? i.created_on ?? null,
             address: i.address ?? '',
+            logoUrl: i.logo_url,
+            primaryColor: i.primary_color,
+            secondaryColor: i.secondary_color,
           }));
           this.institutions.set(normalized);
         },
@@ -91,8 +108,24 @@ export class SuperAdminInstitutions implements OnInit {
   }
 
   onPreview(evt: { row: any; anchorSelector: string }) {
-    this.selectedInstitution.set(evt.row);
-    this.anchorSelector.set(evt.anchorSelector || '');
+    this.apiSrv.get(`/backend/admin/institutions/${evt.row.id}`)
+      .subscribe({
+        next: (data) => {
+          console.log(data, "======================********====================")
+          evt.row = data;
+
+          this.selectedInstitution.set(evt.row);
+          this.anchorSelector.set(evt.anchorSelector || '');
+          this.selectedInstitutionId.set(evt.row.id);
+          this.isEdit.set(true);
+        },
+        error: (err) => {
+          console.error(err);
+          this.toastService.error('Failed to load institution details');
+        }
+      });
+
+
   }
 
   onSearch(term: string) {
@@ -108,4 +141,24 @@ export class SuperAdminInstitutions implements OnInit {
   goToOnboard() {
     this.router.navigate(['/super-admin/onboard']);
   }
+
+  handleSuccessSubmit($event: { success: boolean }) {
+    this.offsetCmp.close();
+    this.closebtn?.nativeElement.click();
+  }
+
+deleteContent() {
+  if(this.selectedInstitution()) {
+    this.apiSrv.delete(`/backend/admin/institutions/${this.selectedInstitutionId()}`).subscribe({
+      next: (data) => {
+        this.toastService.success("Institution deleted successfully", "Success");
+        this.offsetCmp?.close();
+        this.ngOnInit();
+      },
+      error: (error) => {
+        this.toastService.error("Error deleting institution", "Error");
+      }
+    })
+  }
+}
 }

@@ -45,9 +45,9 @@
 </app-learno-offset>
 
 
-<app-page-header [action]="'Teachers'" [icon]="'local_library'" >
-  <app-learno-button text="Add Teacher" (clicked)="clickedHandler()" />
-  <app-learno-modal [modalId]="'edit_teacher'" modalAction="Edit Teacher" [showBtn]="false" >
+<app-page-header [action]="userRole === 'academy' ? 'Tutors' : 'Teachers'" [icon]="'local_library'" >
+  <app-learno-button [text]="userRole === 'academy' ? 'Add Tutor': 'Add Teacher'" (clicked)="clickedHandler()" />
+  <app-learno-modal [modalId]="'edit_teacher'" [modalAction]="userRole === 'academy' ? 'Edit Tutor' : 'Edit Teacher'" [showBtn]="false" >
     <app-edit-student-form
       [select]="selectedEnrollment()"
       modalForm

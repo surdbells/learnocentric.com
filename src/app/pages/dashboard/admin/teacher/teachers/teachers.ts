@@ -4,7 +4,7 @@ import {DataTableNumbering} from "../../../../../components/data-table-numbering
 import {PageHeader} from "../../../../../common/layout/page-header/page-header";
 import {TableSearch} from "../../../../../components/table-search/table-search";
 import {LearnoButton} from "../../../../../common/learno-button/learno-button";
-import {Router} from "@angular/router";
+import {ActivatedRoute, Router} from "@angular/router";
 import {ApiService} from '../../../../../common/service/api.service';
 import {Loader} from '../../../../../common/loader/loader';
 import {SkeletonLoader} from '../../../../../common/skeleton-loader/skeleton-loader';
@@ -34,7 +34,7 @@ export class Teachers implements OnInit {
 
   isLoading = signal(false);
   teachers = signal<any[]>([]);
-
+  userRole: string;
   selectedEnrollment = signal<any | null>(null);
   anchorSelector = signal<string>('');
   searchTerm = signal<string>('');
@@ -62,7 +62,11 @@ export class Teachers implements OnInit {
     private router: Router,
     private readonly apiSrv: ApiService,
     private readonly toastService: ToastrService,
-  ) { }
+    private route: ActivatedRoute,
+
+  ) { 
+    this.userRole = this.route.snapshot.data['user'];
+  }
 
 
   ngOnInit(): void {

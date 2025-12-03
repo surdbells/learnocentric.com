@@ -27,18 +27,20 @@ export class UtilService {
   }
 
 
-  configureForOption(data: any[]) {
+  configureForOption(data: any[], idKey: string = '') {
     return data.map((item: any) => {
       if(item.hasOwnProperty('first_name')) {
         return {
           ...item,
-          value: item.id,
+          value: item[idKey] ?? item.id,
           label: item.first_name + ' ' + item.last_name
         };
       }
+
+
       return {
         ...item,
-        value: item.id,
+        value: item[idKey] ?? item.id,
         label: item.name
       };
     })

@@ -1,0 +1,59 @@
+<form [formGroup]="form" (submit)="isEdit() ? onEdit() : onSubmit()">
+  <div learnoInput class="mb-4" [label]="'Institution Name'" [inputType]="'text'" [id]="'institutionName'" [formControlName]="'institutionName'"></div>
+  <div learnoSelect [placeHolder]="'Institution Type'" class="mb-4" [label]="'Institution Type'" [id]="'institutionType'" [formControlName]="'institutionType'" [options]="typeOptions"></div>
+
+  <div class="row">
+    <div class="col-md-6">
+      <div learnoInput class="mb-4" [label]="'Admin Email'" [inputType]="'email'" [id]="'adminEmail'" [formControlName]="'adminEmail'"></div>
+    </div>
+    <div class="col-md-6">
+      <div learnoInput class="mb-4" [label]="'Admin Password'" [inputType]="'password'" [id]="'adminPassword'" [formControlName]="'adminPassword'"></div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-md-6">
+      <div learnoInput class="mb-4" [label]="'Admin First Name'" [inputType]="'text'" [id]="'adminFirstName'" [formControlName]="'adminFirstName'"></div>
+    </div>
+    <div class="col-md-6">
+      <div learnoInput class="mb-4" [label]="'Admin Last Name'" [inputType]="'text'" [id]="'adminLastName'" [formControlName]="'adminLastName'"></div>
+    </div>
+  </div>
+
+  <div learnoInput class="mb-4" [label]="'Address'" [inputType]="'text'" [id]="'address'" [formControlName]="'address'"></div>
+  <div learnoInput class="mb-4" [label]="'Phone'" [inputType]="'text'" [id]="'phone'" [formControlName]="'phone'"></div>
+
+  <div class="row">
+
+
+  </div>
+
+  <div class="row">
+    <div class="col-md-6">
+      <label class="form-label" for="logoFile">Upload Logo</label>
+      <input id="logoFile" type="file" class="form-control" accept="image/*" (change)="onLogoFileSelected($event)" [disabled]="logoUploading()" />
+      @if (logoPreviewUrl()) {
+        <div class="logo-preview mt-2" style="width: 70px; height: 70px;">
+          <img [src]="logoPreviewUrl()" alt="Logo Preview" class="img-fluid rounded" />
+        </div>
+      }
+      @if (logoUploading()) {
+        <div class="mt-2 text-muted">Uploading...</div>
+      }
+    </div>
+    <div class="col-md-6">
+      <div learnoInput class="" [label]="'Primary Color'" [inputType]="'color'" [id]="'primaryColor'" [formControlName]="'primaryColor'"></div>
+    </div>
+  </div>
+
+  <div learnoSelect class="mb-4" [placeHolder]="'Package'" [label]="'Content Packages'" [id]="'packageIds'" [formControlName]="'packageIds'" [options]="packageOptions()" [searchable]="true" [multiple]="true"></div>
+
+    @if(isEdit()){
+        <div class="modal-footer">
+            <a #closebtn class="btn btn-light me-2" data-bs-dismiss="modal">Cancel</a>
+            <app-learno-button [isLoading]="isLoading()" [text]="'Update'" />
+        </div>
+    }@else{
+        <app-learno-button class="mt-3" [text]="'Onboard'" [isLoading]="isLoading()" />
+    }
+</form>

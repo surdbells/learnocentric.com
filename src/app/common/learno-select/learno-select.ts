@@ -34,6 +34,7 @@ export class LearnoSelect implements ControlValueAccessor, OnInit {
   searchable = input<boolean>(true);
   searchPlaceholder = input<string>('Search...');
   placeHolder = input.required<string>();
+  multiple = input<boolean>(false);
 
   // Internal search state
   searchTerm = signal<string>('');
@@ -47,10 +48,18 @@ export class LearnoSelect implements ControlValueAccessor, OnInit {
   // Custom dropdown state for searchable mode
   isOpen = signal<boolean>(false);
   selectedValue = signal<string>('');
+  selectedValues = signal<string[]>([]);
   selectedLabel = computed<string>(() => {
-    const val = this.selectedValue();
-    const found = (this.options() || []).find(o => String(o.value) === String(val));
-    return found ? String(found.label) : '';
+    if (this.multiple()) {
+      const vals = this.selectedValues();
+      const opts = this.options() || [];
+      const labels = vals.map(v => opts.find(o => String(o.value) === String(v))?.label).filter(l => !!l) as string[];
+      return labels.length ? labels.join(', ') : '';
+    } else {
+      const val = this.selectedValue();
+      const found = (this.options() || []).find(o => String(o.value) === String(val));
+      return found ? String(found.label) : '';
+    }
   });
 
   private parentForm = inject(FormGroupDirective, { optional: true });
@@ -69,21 +78,30 @@ export class LearnoSelect implements ControlValueAccessor, OnInit {
           if (control) {
             // Subscribe to form control value changes
               control.valueChanges.subscribe(value => {
-                if (this.selectElement && this.selectElement.value !== value) {
-                  this.selectElement.value = value || '';
-
-              }
-              this.selectedValue.set(String(value || ''));
-          });
+                if (this.multiple()) {
+                  const arr = Array.isArray(value) ? value : [];
+                  this.selectedValues.set(arr.map(v => String(v || '')));
+                } else {
+                  if (this.selectElement && this.selectElement.value !== value) {
+                    this.selectElement.value = value || '';
+                  }
+                  this.selectedValue.set(String(value || ''));
+                }
+              });
         }
       }
   }
 
     writeValue(value: any): void {
-     if(this.selectElement) {
-      this.selectElement.value = value || '';
-     }
-     this.selectedValue.set(String(value || ''));
+      if (this.multiple()) {
+        const arr = Array.isArray(value) ? value : [];
+        this.selectedValues.set(arr.map(v => String(v || '')));
+      } else {
+        if(this.selectElement) {
+          this.selectElement.value = value || '';
+        }
+        this.selectedValue.set(String(value || ''));
+      }
     }
     registerOnChange(fn: any): void {
       this.onChange = fn
@@ -99,8 +117,15 @@ export class LearnoSelect implements ControlValueAccessor, OnInit {
     }
 
     onSelectChange(event: Event): void {
-      const value = (event.target as HTMLSelectElement).value;
-      this.onChange(value);
+      const el = event.target as HTMLSelectElement;
+      if (this.multiple()) {
+        const vals = Array.from(el.selectedOptions).map(o => o.value);
+        this.selectedValues.set(vals.map(v => String(v || '')));
+        this.onChange(vals);
+      } else {
+        const value = el.value;
+        this.onChange(value);
+      }
    }
 
     onBlur(): void {
@@ -118,12 +143,20 @@ export class LearnoSelect implements ControlValueAccessor, OnInit {
     }
 
     selectOption(value: string): void {
-      this.selectedValue.set(String(value || ''));
-      if (this.selectElement) {
-        this.selectElement.value = value || '';
+      if (this.multiple()) {
+        const cur = this.selectedValues();
+        const v = String(value || '');
+        const next = cur.includes(v) ? cur.filter(x => x !== v) : [...cur, v];
+        this.selectedValues.set(next);
+        this.onChange(next);
+      } else {
+        this.selectedValue.set(String(value || ''));
+        if (this.selectElement) {
+          this.selectElement.value = value || '';
+        }
+        this.onChange(value);
+        this.isOpen.set(false);
       }
-      this.onChange(value);
-      this.isOpen.set(false);
     }
 
     @HostListener('document:click', ['$event'])

@@ -14,6 +14,9 @@
               </div>
             </th>
           }
+          @if (shouldShowLogoorIcon()){
+            <th> </th>
+          }
           @for (th of tableHeads(); track th) {
             <th>{{th}}</th>
           }
@@ -35,6 +38,14 @@
                   <div class="form-check">
                     <input class="form-check-input" type="checkbox" id="tableCheckOne" />
                     <label class="form-check-label" for="tableCheckOne"></label>
+                  </div>
+                </td>
+              }
+
+              @if(shouldShowLogoorIcon()){
+                <td style="width: 0px" class="py-1">
+                  <div class="logo" style="width: 40px; height: 40px;">
+                    <img [src]="row['logoUrl']" alt="logo" class="img-fluid rounded-circle" />
                   </div>
                 </td>
               }

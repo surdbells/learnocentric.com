@@ -47,7 +47,7 @@
 </app-learno-offset>
 
 <app-page-header icon="home_and_garden" [action]="userRole()== 'tutor_admin' ? 'Subscription' : 'Fees'">
-    <app-learno-modal [modalId]="'add_fees'" [modalAction]="'New Fees'" >
+    <app-learno-modal [modalId]="'add_fees'" [modalAction]="userRole()== 'tutor_admin' ? 'Subscription' : 'Fees'" >
       <app-fees-form modalForm [classes]="classes()" [select]="selectedFee()" (submitted)="handleSuccessSubmit($event)" />
     </app-learno-modal >
 </app-page-header>

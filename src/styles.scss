@@ -2,7 +2,11 @@
 //@import "./chat";
 
 
-
+:root{
+  --bs-list-group-active-bg: #39c645 !important;
+  --bs-list-group-active-border-color: #39c645 !important;
+  --bs-list-group-active-color: #fff !important;
+}
 
 /* You can add global styles to this file, and also import other style files */
 /* Apply to the whole page */

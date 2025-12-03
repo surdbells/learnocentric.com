@@ -51,7 +51,7 @@
 <app-page-header icon="schedule" action="Class Routine">
     <!-- Action -->
 <!--    <app-learno-button text="Add Class Routine" (clicked)="clickedHandler()" />-->
-  @if(userRole == "admin" || userRole == "tutor_admin") {
+  @if(userRole == "admin" || userRole == "academy") {
     <app-learno-modal [modalId]="'add_time_table'" [modalAction]="'Add Time Table'" >
         <app-routine-form
         modalForm

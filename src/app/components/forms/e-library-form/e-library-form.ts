@@ -46,7 +46,7 @@ export class ELibraryForm {
     effect(() => {
       const s = this.select();
       const hasSelection = !!s && Object.keys(s || {}).length > 0;
-      this.isEdit.set(hasSelection);
+        this.isEdit.set(hasSelection);
 
       if (!hasSelection) {
         return;

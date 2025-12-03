@@ -12,24 +12,43 @@
 </app-user-intro>
 
 <div class="row mb-8">
-  <div class="col-12 col-md-6 col-xxl-3 mb-4 mb-xxl-0">
+  <div class="col-12 col-md-6 col-xxl-3 mb-4">
     <app-skeleton-loader [isLoading]="isLoading()" variant="card">
-      <app-stat-card label="Institutions" [value]="institutionsCount" icon="domain" />
+      <app-stat-card [link]="'/super-admin/management/institutions'" label="Institutions" [value]="totalInstitutions" icon="domain" />
     </app-skeleton-loader>
   </div>
-  <div class="col-12 col-md-6 col-xxl-3 mb-4 mb-xxl-0">
+  <div class="col-12 col-md-6 col-xxl-3 mb-4">
     <app-skeleton-loader [isLoading]="isLoading()" variant="card">
-      <app-stat-card label="Admins" [value]="adminsCount" icon="shield" />
+      <app-stat-card [link]="'/super-admin/management/institutions?type=school'" label="Schools" [value]="totalSchools" icon="shield" />
     </app-skeleton-loader>
   </div>
-  <div class="col-12 col-md-6 col-xxl-3  mb-4 mb-md-0">
+  <div class="col-12 col-md-6 col-xxl-3  mb-4">
     <app-skeleton-loader [isLoading]="isLoading()" variant="card">
-      <app-stat-card label="Teachers" [value]="teachersCount" icon="supervisor_account" />
+      <app-stat-card [link]="'/super-admin/management/institutions?type=tutoring_academy'" label="Academy" [value]="totalTutoringAcademies" icon="supervisor_account" />
     </app-skeleton-loader>
   </div>
-  <div class="col-12 col-md-6 col-xxl-3">
+  <div class="col-12 col-md-6 col-xxl-3 mb-4">
     <app-skeleton-loader [isLoading]="isLoading()" variant="card">
-      <app-stat-card label="Students" [value]="studentsCount" icon="local_library" />
+      <app-stat-card [link]="'/super-admin/management/users'" label="Active Users" [value]="activeUsers" icon="local_library" />
     </app-skeleton-loader>
   </div>
+
+  <div class="col-12 col-md-6 col-xxl-3 mb-4">
+    <app-skeleton-loader [isLoading]="isLoading()" variant="card">
+      <app-stat-card [link]="'/super-admin/management/subscriptions'" label="Subscriptions" [value]="totalSubscriptions" icon="local_library" />
+    </app-skeleton-loader>
+  </div>
+
+    <div class="col-12 col-md-6 col-xxl-3 mb-4">
+    <app-skeleton-loader [isLoading]="isLoading()" variant="card">
+      <app-stat-card [link]="'/super-admin/management/content-library-items'"label="Content" [value]="totalContentLibraryItems" icon="local_library" />
+    </app-skeleton-loader>
+  </div>
+
+    <div class="col-12 col-md-6 col-xxl-3 mb-4">
+    <app-skeleton-loader [isLoading]="isLoading()" variant="card">
+      <app-stat-card [link]="'/super-admin/management/content-packages'" label="Content Packeage" [value]="totalContentPackages" icon="local_library" />
+    </app-skeleton-loader>
+  </div>
+
 </div>
