@@ -3,7 +3,7 @@
   <div class="d-sm-flex align-items-center justify-content-between row-gap-3">
     <div class="d-flex align-items-center overflow-hidden mb-3">
       <div class="avatar avatar-xxl rounded flex-shrink-0 border border-2 border-white me-3">
-        <img src="/images/agent-2.png" alt="Img">
+        <img fill [src]="teacher?.profileImageUrl" alt="Img">
       </div>
       <div class="overflow-hidden">
         <span class="badge bg-transparent-primary text-primary mb-1">#T594651</span>
@@ -37,8 +37,12 @@
 
 
     <!-- Today's Class -->
-    <div class="row mb-4">
+    <div class="row mb-4" title="Today's Class">
       <app-today-class />
+    </div>
+
+    <div class="row mb-4">
+      <app-today-virtual-class title="Upcoming Virtual Classes" />
     </div>
     <!-- /Today's Class -->
 

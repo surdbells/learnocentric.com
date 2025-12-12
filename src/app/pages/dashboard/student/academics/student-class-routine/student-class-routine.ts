@@ -39,6 +39,8 @@ export class StudentClassRoutine {
 
   user: AuthUser | null = null;
   studentRoutines = signal<{ [key: number]: any[]; }>([]);
+  virtualClasses = signal<any[]>([]);
+  virtualClassFormSelectedRoutine = signal<any[]>([]);
 
   selectedRoutine = signal<any | null>(null);
   anchorSelector = signal<string>('');
@@ -77,6 +79,17 @@ export class StudentClassRoutine {
             this.isLoading.set(false);
           }
         });
+
+        this.apiSrv.get<any[]>(`/backend/virtual-class/student?classId=${this.user?.classId}`)
+        .subscribe({
+          next: (vcls) => {
+            this.virtualClasses.set(vcls);
+          },
+          error: (err) => {
+            console.error('Error fetching virtual classes:', err);
+            this.toastService.error('Error fetching virtual classes');
+          }
+        });
     }
 
   }
@@ -94,11 +107,34 @@ export class StudentClassRoutine {
 
   onPreview(evt: { row: any; anchorSelector: string }) {
     this.selectedRoutine.set(evt.row);
+    this.virtualClassFormSelectedRoutine
+    .set(this.virtualClasses()
+    .filter((vcls) => (vcls.class_id === evt.row.class_id && vcls.subject_id === evt.row.subject_id
+    && vcls.teacher_id === evt.row.teacher_id)
+  ));
     this.anchorSelector.set(evt.anchorSelector || '');
   }
 
   handleCloseOffset() {
     this.selectedRoutine.set(null);
+    this.virtualClassFormSelectedRoutine.set([]);
     this.anchorSelector.set('');
+  }
+
+hasVirtual(period: any): boolean {
+    const vlist = this.virtualClasses() || [];
+
+    console.log(vlist, period)
+    const pidSubject = String(period?.subject_id || period?.subjectId || '');
+    const pidTeacher = String(period?.teacher_id || period?.teacherId || '');
+    const pidClass = String(period?.class_id || period?.classId || '');
+
+    return vlist.some((v: any) => {
+      const vc = String(v?.class_id || v?.classId || '');
+      const vs = String(v?.subject_id || v?.subjectId || '');
+      const vt = String(v?.teacher_id || v?.teacherId || '');
+
+      return vc === pidClass && vs === pidSubject && vt === pidTeacher;
+    });
   }
 }

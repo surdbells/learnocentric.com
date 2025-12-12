@@ -16,19 +16,21 @@ import {AuthService} from '../auth/auth.service';
 import {UtilService} from '../service/util.service';
 import {ToastrService} from 'ngx-toastr';
 import {SkeletonLoader} from '../skeleton-loader/skeleton-loader';
+import { RouterLink } from "@angular/router";
+import { AuthUser } from '../auth/auth.models';
 
 declare const $: any;
 
 @Component({
-  selector: 'app-today-class',
+  selector: 'app-today-virtual-class',
   imports: [
     CarouselModule,
     DatePipe,
-  ],
-  templateUrl: './today-class.html',
-  styleUrl: './today-class.css'
+],
+  templateUrl: './today-virtual-class.html',
+  styleUrl: './today-virtual-class.css'
 })
-export class TodayClass implements OnInit, AfterViewInit, OnDestroy{
+export class TodayVirtualClass implements OnInit, AfterViewInit, OnDestroy{
 
   @ViewChild('todayCarousel', { static: false }) todayCarousel?: CarouselComponent;
   isLoading = signal<boolean>(false);
@@ -38,8 +40,8 @@ export class TodayClass implements OnInit, AfterViewInit, OnDestroy{
   private isBrowser: boolean;
   today = (new Date(Date.now())).toISOString();
   todayDayIndex = (new Date(Date.now())).getDay();
-  timetable = signal<{[key:number]: any[]}>({});
-  virtualClass = signal<{[key:number]: any[]}>({});
+  virtualClass = signal<any[]>([]);
+  user: AuthUser|null = null;
 
   constructor(
     private host: ElementRef<HTMLElement>,
@@ -47,40 +49,36 @@ export class TodayClass implements OnInit, AfterViewInit, OnDestroy{
     private readonly apiSrv: ApiService,
     private utilSrv: UtilService,
     private readonly auth: AuthService,
-    private readonly  toastSrv: ToastrService
+    private readonly  toastSrv: ToastrService,
   ) {
     this.isBrowser = isPlatformBrowser(platformId);
+    if(isPlatformBrowser(platformId)){
+      this.user = this.auth.getAuthSession().user;
+    }
   }
 
   ngOnInit(): void {
         if(this.isBrowser) {
           this.isLoading.set(true);
-          const user = this.auth.getAuthSession().user;
-
-            this.apiSrv.get(`/backend/${user?.role}/timetable/${user?.id}/virtual`)
-              .subscribe({
-                next: (res) => {
-                  this.timetable.set(this.utilSrv.groupRoutineToEachDay(res));
-                  this.isLoading.set(false);
-                },
-                error: (err) => {
-                  this.toastSrv.error(err.error.message, 'Error')
-                  this.isLoading.set(false);
-                },
-                complete: () => {
-                  // console.log('complete')
-                }
-              })
+          // const user = this.auth.getAuthSession().user;
+          this.apiSrv.get(`${this.user?.role === 'teacher' ? '/backend/virtual-class/teacher' : '/backend/virtual-class/student?classId='+this.user?.classId}`)
+            .subscribe({
+              next: (res) => {
+                this.virtualClass.set(res);
+                this.isLoading.set(false);
+              },
+              error: (err) => {
+                this.toastSrv.error(err.error.message, 'Error')
+                this.isLoading.set(false);
+              },
+              complete: () => {
+                // console.log('complete')
+              }
+            })
         }
     }
 
-  todaySlides = [
-    { time: '09:00 - 09:45', badgeClass: 'text-bg-danger text-decoration-line-through', class: 'Class V, B', isPast: true },
-    { time: '09:00 - 09:45', badgeClass: 'text-bg-danger text-decoration-line-through', class: 'Class IV, C', isPast: true },
-    { time: '11:30 - 12:15', badgeClass: 'text-bg-primary', class: 'Class V, B' },
-    { time: '01:30 - 02:15', badgeClass: 'text-bg-primary', class: 'Class V, B' },
-    { time: '02:15 - 03:00', badgeClass: 'text-bg-primary', class: 'Class V, B' },
-  ];
+
 
   todayCarouselOptions: OwlOptions = {
     loop: false,
@@ -141,11 +139,17 @@ export class TodayClass implements OnInit, AfterViewInit, OnDestroy{
     this.todayCarousel?.next();
   }
 
-  get getTodayTimeTable() {
-    return this.timetable()[this.todayDayIndex]?.map((routine) => ({
-      time: `${routine.start_time} - ${routine.end_time}`,
-      badgeClass: 'text-bg-primary text-decoration-line-through',
-      class: `${routine.class_name} - ${routine.subject_name}`,
+  get getUpcomingVirtualClass() {
+    return this.virtualClass()?.map((vt) => ({
+      startTime: `${new Date(vt.start_time)}`,
+      endTime: `${new Date(vt.end_time)}`,
+      className: vt.class_name,
+      subjectName: vt.subject_name,
+      meetLink: vt.meet_link,
+      badgeClass: 'text-bg-primary',
+      title: vt.title,
+      teacherName: vt.teacher_name,
+      organizerEmail: vt.organizer_email,
       isPast: [true, false][Math.floor(Math.random()*2)],
     }))
   }

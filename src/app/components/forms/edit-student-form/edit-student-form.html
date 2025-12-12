@@ -16,9 +16,20 @@
         <div class="mb-3" learnoInput inputType="text" [formControlName]="'email'" id="email" label="Email"></div>
       </div>
 
-<!--      <div class="col-lg-4">-->
-<!--        <div class="mb-3" learnoInput inputType="password" [formControlName]="'password'" id="password" label="Password"></div>-->
-<!--      </div>-->
+      <div class="col-lg-4">
+        <div class="mb-3" learnoInput inputType="date" [formControlName]="'dateOfBirth'" id="dateOfBirth" label="Date of Birth"></div>
+      </div>
+
+      <div class="col-lg-4">
+        <div class="mb-3" learnoInput inputType="text" [formControlName]="'phone'" id="phone" label="Phone"></div>
+      </div>
+
+      <div class="col-lg-12">
+        <div class="form-check mt-4">
+          <input class="form-check-input" type="checkbox" id="isActive" [formControlName]="'isActive'">
+          <label class="form-check-label" for="isActive">Active</label>
+        </div>
+      </div>
 
     </div>
   </div>

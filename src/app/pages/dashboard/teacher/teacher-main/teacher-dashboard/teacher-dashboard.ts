@@ -1,5 +1,5 @@
 import {Component, AfterViewInit, OnDestroy, ElementRef, Inject, PLATFORM_ID, OnInit, signal} from '@angular/core';
-import { DatePipe, isPlatformBrowser } from '@angular/common';
+import { DatePipe, isPlatformBrowser, NgOptimizedImage } from '@angular/common';
 import { PageHeader } from '../../../../../common/layout/page-header/page-header';
 import UserIntro from '../../../../../common/user-intro/user-intro';
 import { AppStatCard } from '../../../../../common/app-stat-card/app-stat-card';
@@ -16,6 +16,7 @@ import { Router, RouterLink } from '@angular/router';
 import {AuthUser} from '../../../../../common/auth/auth.models';
 import {SkeletonLoader} from '../../../../../common/skeleton-loader/skeleton-loader';
 import { LearnoButton } from "../../../../../common/learno-button/learno-button";
+import { TodayVirtualClass } from "../../../../../common/today-virtual-class/today-virtual-class";
 
 declare const $: any;
 
@@ -34,7 +35,9 @@ declare const $: any;
     Loader,
     SkeletonLoader,
     LearnoButton,
-    RouterLink
+    RouterLink,
+    TodayVirtualClass,
+    NgOptimizedImage
 ],
   templateUrl: './teacher-dashboard.html',
   styleUrl: './teacher-dashboard.css'

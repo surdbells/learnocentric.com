@@ -1,0 +1,22 @@
+.passport-upload {
+  border-radius: 8px;
+  padding: 12px;
+  cursor: pointer;
+  width: 150px;
+  height: 180px;
+}
+.passport-upload.drag-over {
+  border-color: #3b82f6;
+  background: #eef6ff;
+}
+.passport-upload .preview {
+  width: 64px;
+  height: 64px;
+  border-radius: 6px;
+  overflow: hidden;
+}
+.passport-upload .preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}

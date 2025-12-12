@@ -31,6 +31,8 @@ export interface IRoutine {
 export class RoutineCard {
   routine= input<IRoutine | null>(null)
   tag= input<string>('')
+  hasVirtual = input<boolean>(false)
+  badgeText = input<string>('Virtual')
 
   @Output() preview = new EventEmitter<{ row: any; anchorSelector: string }>();
 

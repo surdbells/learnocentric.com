@@ -14,6 +14,7 @@ import {EditStudentForm} from '../../../../../components/forms/edit-student-form
 import {ToastrService} from 'ngx-toastr';
 import {AuthService} from '../../../../../common/auth/auth.service';
 import {AuthUser} from '../../../../../common/auth/auth.models';
+import { DatePipe } from '@angular/common';
 
 @Component({
   selector: 'app-students',
@@ -27,7 +28,8 @@ import {AuthUser} from '../../../../../common/auth/auth.models';
     SkeletonLoader,
     LearnoOffset,
     LearnoModal,
-    EditStudentForm
+    EditStudentForm,
+    DatePipe
   ],
   templateUrl: './students.html',
   styleUrl: './students.css'
@@ -52,6 +54,8 @@ export class Students implements OnInit {
   selectedEnrollment = signal<any | null>(null);
   anchorSelector = signal<string>('');
   @ViewChild(LearnoOffset) offsetCmp!: LearnoOffset;
+  @ViewChild('closebtn', { static: false }) closebtn!: any;
+
   user: AuthUser | null = null;
 
   currentPage = signal<number>(1);
@@ -95,9 +99,6 @@ export class Students implements OnInit {
         await this.router.navigate(['/admin/students/new']);
     }
 
-  editEnrollment() {
-
-  }
 
   deleteEnrollment() {
     const sel = this.selectedEnrollment();
@@ -107,7 +108,7 @@ export class Students implements OnInit {
     }
 
     this.isLoading.set(true);
-    this.apiSrv.delete('/backend/school/students', { body: { id: sel.id }})
+    this.apiSrv.delete('/backend/auth/user-profile/' + sel.id)
       .subscribe({
         next: () => {
           this.toastService.success('Student deleted successfully');
@@ -142,5 +143,11 @@ export class Students implements OnInit {
   handleCloseOffset() {
     this.selectedEnrollment.set(null);
     this.anchorSelector.set('');
+  }
+
+  handleSuccessSubmit($event: { success: boolean }) {
+    this.offsetCmp.close();
+    this.closebtn?.nativeElement.click();
+    this.ngOnInit();
   }
 }

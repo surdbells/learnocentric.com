@@ -15,7 +15,14 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
   return next(authReq).pipe(
     catchError((error: HttpErrorResponse) => {
       if (error && (error.status === 401 || error.status === 419)) {
-        try { store.clear(); } catch {}
+        const hasAuthUrl = (() => {
+          const payload = error?.error as any;
+          if (!payload || typeof payload !== 'object') return false;
+          return !!(payload.authUrl || payload.auth_url);
+        })();
+        if (!hasAuthUrl) {
+          try { store.clear(); } catch {}
+        }
       }
       return throwError(() => error);
     })

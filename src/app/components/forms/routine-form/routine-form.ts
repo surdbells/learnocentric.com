@@ -14,7 +14,6 @@ import {LearnoButton} from '../../../common/learno-button/learno-button';
     LearnoInput,
     LearnoSelect,
     ReactiveFormsModule,
-    Loader,
     LearnoButton
   ],
   templateUrl: './routine-form.html',
@@ -66,7 +65,7 @@ export class RoutineForm {
   ) {
     effect(() => {
       const s = this.select();
-      if (!s) { this.form.reset(); this.isEdit.set(false); return; }
+      if (!s || Object.keys(s).length === 0) { this.form.reset(); this.isEdit.set(false); return; }
       const patch: any = {};
       if (s['class_id'] !== undefined && s['class_id'] !== null && s['class_id'] !== '') {
         patch.classId = s['class_id'];
@@ -78,22 +77,22 @@ export class RoutineForm {
         patch.teacherId = s['teacher_id'];
       }
       if (s['day_of_week'] !== undefined && s['day_of_week'] !== null && s['day_of_week'] !== '') {
-        patch.dayOfWeek = s['day_of_week'];
+        patch.dayOfWeek = String(s['day_of_week']);
       }
       if (s['start_time'] !== undefined && s['start_time'] !== null && s['start_time'] !== '') {
-        patch.startTime = s['start_time'];
+        patch.startTime = typeof s['start_time'] === 'string' ? s['start_time'].slice(0, 5) : s['start_time'];
       }
       if (s['room'] !== undefined && s['room'] !== null && s['room'] !== '') {
         patch.room = s['room'];
       }
       if (s['end_time'] !== undefined && s['end_time'] !== null && s['end_time'] !== '') {
-        patch.endTime = s['end_time'];
+        patch.endTime = typeof s['end_time'] === 'string' ? s['end_time'].slice(0, 5) : s['end_time'];
       }
 
       if (Object.keys(patch).length > 0) {
         this.form.patchValue(patch, { emitEvent: false });
       }
-      this.isEdit.set(true);
+      this.isEdit.set(!!s && !!s['id']);
     });
   }
 

@@ -3,13 +3,13 @@
   <div class="d-sm-flex align-items-center justify-content-between row-gap-3">
     <div class="d-flex align-items-center overflow-hidden mb-3">
       <div class="avatar avatar-xxl rounded flex-shrink-0 border border-2 border-white me-3">
-        <img src="/images/agent-2.png" alt="Img">
+        <img [src]="student()?.profileImageUrl" alt="Img">
       </div>
       <div class="overflow-hidden">
 <!--        <span class="badge bg-transparent-primary text-primary mb-1">#T594651</span>-->
         <h3 class="mb-1 text-truncate">{{getFullName}} </h3>
         <div class="d-flex align-items-center flex-wrap text-light row-gap-2">
-          <span class="me-2 text-secondary">Classes : {{student?.className}}</span>
+          <span class="me-2 text-secondary">Classes : {{student()?.className}}</span>
           <span class="d-flex align-items-center"><i class="ti ti-circle-filled text-warning fs-7 me-1"></i>Physics</span>
         </div>
       </div>
@@ -59,6 +59,10 @@
     <!-- Today's Class -->
     <div class="row mb-4">
       <app-today-class />
+    </div>
+
+    <div class="row mb-4">
+      <app-today-virtual-class title="Upcoming Virtual Classes" />
     </div>
     <!-- /Today's Class -->
 

@@ -192,6 +192,7 @@ export const routes: Routes = [
     {
         path: "admin/management",
         component: Dashboard,
+        canActivate: [authGuard],
         children: [
                 { path: "school-profile", component: SchoolProfile },
                 { path: "payment", component: Payment },
@@ -203,6 +204,7 @@ export const routes: Routes = [
     {
       path: "teacher",
       component: Dashboard,
+      canActivate: [authGuard],
       children: [
         {
           path: "main",
@@ -259,6 +261,7 @@ export const routes: Routes = [
     {
       path: "student",
       component: Dashboard,
+      canActivate: [authGuard],
       children: [
         {
           path: "main",
@@ -367,6 +370,7 @@ export const routes: Routes = [
     {
       path: "parent",
       component: Dashboard,
+      canActivate: [authGuard], 
       children: [
         {
           path: "main",

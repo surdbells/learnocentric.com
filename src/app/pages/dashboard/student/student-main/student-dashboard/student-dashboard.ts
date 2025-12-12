@@ -16,6 +16,7 @@ import {UtilService} from '../../../../../common/service/util.service';
 import {Loader} from '../../../../../common/loader/loader';
 import {SkeletonLoader} from '../../../../../common/skeleton-loader/skeleton-loader';
 import { LearnoButton } from "../../../../../common/learno-button/learno-button";
+import { TodayVirtualClass } from "../../../../../common/today-virtual-class/today-virtual-class";
 
 declare const $: any;
 
@@ -33,7 +34,8 @@ declare const $: any;
     RouterLink,
     Loader,
     SkeletonLoader,
-    LearnoButton
+    LearnoButton,
+    TodayVirtualClass
 ],
   templateUrl: './student-dashboard.html',
   styleUrl: './student-dashboard.css'
@@ -46,7 +48,7 @@ export class StudentDashboard implements OnInit, AfterViewInit, OnDestroy {
 
   schedules = [1,2,3,4,5,6]
   studentCourses: any[] = [];
-  student: AuthUser | null= null
+  student = signal<AuthUser | null>(null);
   private isBrowser: boolean;
   private dpInstance: any;
 
@@ -60,12 +62,12 @@ export class StudentDashboard implements OnInit, AfterViewInit, OnDestroy {
     private readonly utilSrv: UtilService
   ) {
     this.isBrowser = isPlatformBrowser(platformId);
-    this.student = authSrv.getAuthSession().user
+    this.student.set(authSrv.getAuthSession().user);
   }
 
   ngOnInit(): void {
     this.isLoading.set(true);
-    const user = this.student;
+    const user = this.student();
     if(!user) {
       this.router.navigate(['/authentication']);
       return;
@@ -130,7 +132,7 @@ export class StudentDashboard implements OnInit, AfterViewInit, OnDestroy {
   }
 
   get getFullName() : string {
-    if(!this.student) return '';
-    return this.utilSrv.getTeacherFullname(this.student)
+    if(!this.student()) return '';
+    return this.utilSrv.getTeacherFullname(this.student()!);
   }
 }

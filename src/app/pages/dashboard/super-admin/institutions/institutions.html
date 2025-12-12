@@ -1,6 +1,6 @@
 <app-learno-offset [anchorSelector]="anchorSelector()" [modalId]="'productModal'" (closeOffset)="handleCloseOffset()">
   @if(selectedInstitution()) {
-    <div class="card border-0">
+    <div class="card border-0 h-100 d-flex flex-column justify-content-between">
       <div class="card-body">
         <div class="row align-items-center justify-content-between mb-4">
           <div class="col-auto">
@@ -8,7 +8,6 @@
                 <img [src]="selectedInstitution()['logo_url']" alt="logo" class="img-fluid rounded-circle" />
             </div>
           </div>
-
         </div>
 
         <div class="list-group mb-4">
@@ -33,6 +32,13 @@
 
           <div class="list-group-item border-0 border-bottom bg-body">
             <div class="row">
+              <div class="col">Status</div>
+              <div class="col-auto">{{ selectedInstitution()?.is_active ? 'Active' : 'Suspended' }}</div>
+            </div>
+          </div>
+
+          <div class="list-group-item border-0 border-bottom bg-body">
+            <div class="row">
             <div class="col">Color</div>
               <div class="col-auto d-flex ">
                 <div class=" me-3" [style]="`width: 20px; height: 20px; background-color: ${selectedInstitution()?.primary_color}`"></div>
@@ -43,7 +49,7 @@
         </div>
       </div>
 
-      <div class="card-footer">
+      <div class="card-footer border-0">
         <div class="d-flex justify-content-end">
           <app-learno-button text="Edit"  class="me-2" data-bs-toggle="modal" [attr.data-bs-target]="`#add_institution`" />
           <app-learno-button text="Delete" (clicked)="deleteContent()" btnColor="danger" class="me-2" />

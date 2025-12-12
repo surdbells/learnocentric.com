@@ -8,6 +8,8 @@ export interface AuthUser {
   className?: string;
   sections?: string;
   gradeLevel?: string;
+  profileImageUrl?: string;
+  classId?:string;
   [key: string]: any;
 }
 

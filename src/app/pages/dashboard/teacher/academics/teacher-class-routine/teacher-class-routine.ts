@@ -11,16 +11,23 @@ import {ApiService} from '../../../../../common/service/api.service';
 import {AuthService} from '../../../../../common/auth/auth.service';
 import {UtilService} from '../../../../../common/service/util.service';
 import {isPlatformBrowser} from '@angular/common';
+import { LearnoButton } from "../../../../../common/learno-button/learno-button";
+import { LearnoModal } from "../../../../../components/learno-modal/learno-modal";
+import { VirtualClassForm } from "../../../../../components/forms/virtual-class-form/virtual-class-form";
 
 @Component({
   selector: 'app-teacher-class-routine',
     imports: [
-        DashboardCard,
-        PageHeader,
-        RoutineCard,
-        RoutineDayCard,
-        SkeletonLoader
-    ],
+    DashboardCard,
+    PageHeader,
+    RoutineCard,
+    RoutineDayCard,
+    SkeletonLoader,
+    LearnoButton,
+    LearnoOffset,
+    LearnoModal,
+    VirtualClassForm
+],
   templateUrl: './teacher-class-routine.html',
   styleUrl: './teacher-class-routine.css'
 })
@@ -37,6 +44,11 @@ export class TeacherClassRoutine {
 
   user: AuthUser | null = null;
   teacherRoutines = signal<{ [key: number]: any[]; }>([]);
+  classes = signal<any[]>([]);
+  subjects = signal<any[]>([]);
+  teachers = signal<any[]>([]);
+  virtualClasses = signal<any[]>([]);
+  virtualClassFormSelectedRoutine = signal<any[]>([]);
 
   selectedRoutine = signal<any | null>(null);
   anchorSelector = signal<string>('');
@@ -57,26 +69,61 @@ export class TeacherClassRoutine {
   private loadResources = (skip?: boolean) => {
     if(isPlatformBrowser(this.platformId)) {
       this.isLoading.set(true);
+      const teacherId = this.user?.id;
+      const routines$ = this.apiSrv.get<any[]>(`/backend/teacher/timetable/${teacherId}`);
+      const classes$ = this.apiSrv.get<any[]>(`/backend/teacher/classes/${teacherId}`);
+      const virtualClasses$ = this.apiSrv.get<any[]>(`/backend/virtual-class/teacher`);
 
-      this.apiSrv.get<any[]>(`/backend/teacher/timetable/${this.user?.id}`)
-        .subscribe({
-          next: (data) => {
-            this.teacherRoutines.set(this.utilSrv.groupRoutineToEachDay(data));
-            console.log(this.utilSrv.groupRoutineToEachDay(data), "Here we have it")
-            this.isLoading.set(false);
+      routines$.subscribe({
+        next: (data) => {
+          this.teacherRoutines.set(this.utilSrv.groupRoutineToEachDay(data));
+          // Subjects assigned to this teacher derived from timetable
+          const subjMap = new Map<string, { value: string; label: string }>();
+          (data || []).forEach((r: any) => {
+            const sid = String(r.subject_id || r.subjectId || '');
+            const sname = String(r.subject_name || r.subjectName || '').trim();
+            if (sid && sname && !subjMap.has(sid)) {
+              subjMap.set(sid, { value: sid, label: sname });
+            }
+          });
+          this.subjects.set(Array.from(subjMap.values()));
 
-            //   [{ day: 1, routines: [] }]
-          },
-          error: (error) => {
-            console.error('Error fetching data:', error);
-            this.isLoading.set(false);
+          this.isLoading.set(false);
+        },
+        error: (error) => {
+          console.error('Error fetching data:', error);
+          this.toastService.error('Error fetching teacher routine');
+          this.isLoading.set(false);
+        },
+        complete: () => {
+          this.isLoading.set(false);
+        }
+      });
 
-            // Handle error appropriately
-          },
-          complete: () => {
-            this.isLoading.set(false);
-          }
-        });
+      classes$.subscribe({
+        next: (cls) => {
+          this.classes.set(this.utilSrv.configureForOption(cls));
+        },
+        error: (err) => {
+          console.error('Error fetching classes:', err);
+          this.toastService.error('Error fetching teacher classes');
+        }
+      });
+
+      virtualClasses$.subscribe({
+        next: (vcls) => {
+          this.virtualClasses.set(vcls);
+          console.log('Virtual Classes:', vcls);
+        },
+        error: (err) => {
+          console.error('Error fetching virtual classes:', err);
+          this.toastService.error('Error fetching virtual classes');
+        }
+      });
+
+      // Current teacher option and lock
+      const teacherName = this.utilSrv.getTeacherFullname(this.user as AuthUser);
+      this.teachers.set([{ value: String(teacherId || ''), label: teacherName }]);
     }
 
   }
@@ -92,13 +139,44 @@ export class TeacherClassRoutine {
     this.toastService.info('Clicked Class routine');
   }
 
+
+  hasVirtual(period: any): boolean {
+    const vlist = this.virtualClasses() || [];
+
+    console.log(vlist, period)
+    const pidSubject = String(period?.subject_id || period?.subjectId || '');
+    const pidTeacher = String(period?.teacher_id || period?.teacherId || '');
+    const pidClass = String(period?.class_id || period?.classId || '');
+
+    return vlist.some((v: any) => {
+      const vc = String(v?.class_id || v?.classId || '');
+      const vs = String(v?.subject_id || v?.subjectId || '');
+      const vt = String(v?.teacher_id || v?.teacherId || '');
+
+      return vc === pidClass && vs === pidSubject && vt === pidTeacher;
+    });
+  }
+
   onPreview(evt: { row: any; anchorSelector: string }) {
     this.selectedRoutine.set(evt.row);
+    this.virtualClassFormSelectedRoutine
+    .set(this.virtualClasses()
+    .filter((vcls) => (vcls.class_id === evt.row.class_id && vcls.subject_id === evt.row.subject_id
+    && vcls.teacher_id === evt.row.teacher_id)
+  ));
     this.anchorSelector.set(evt.anchorSelector || '');
   }
 
   handleCloseOffset() {
     this.selectedRoutine.set(null);
+    this.virtualClassFormSelectedRoutine.set([]);
     this.anchorSelector.set('');
+  }
+
+    handleSuccessSubmit($event: { success: boolean }) {
+    if($event.success) {
+      this.offsetCmp?.close();
+      this.loadResources()
+    }
   }
 }

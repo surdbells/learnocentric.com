@@ -40,7 +40,8 @@ export class InstitutionForm implements OnInit {
     phone: new FormControl('', { nonNullable: true }),
     logoUrl: new FormControl('', { nonNullable: true }),
     primaryColor: new FormControl('', { nonNullable: true }),
-    packageIds: new FormControl<string[]>([])
+    packageIds: new FormControl<string[]>([]),
+    isActive: new FormControl<boolean>(true, { nonNullable: true })
   });
 
     typeOptions: IInputOption[] = [
@@ -106,8 +107,11 @@ export class InstitutionForm implements OnInit {
         return (ids || []).filter((v: any) => v !== undefined && v !== null).map((v: any) => String(v));
       })();
       if (pkgIds.length) {
-        this.form.patchValue({ packageIds: pkgIds });
+        this.form.patchValue({ packageIds: pkgIds }, { emitEvent: false });
       }
+      const activeRaw = s['is_active'];
+      const active = typeof activeRaw === 'boolean' ? activeRaw : (String(activeRaw ?? '').toLowerCase() === 'true' || String(activeRaw) === '1');
+      this.form.patchValue({ isActive: active }, { emitEvent: false });
     })
   }
 
@@ -119,10 +123,6 @@ export class InstitutionForm implements OnInit {
           label: String(p?.name ?? ''),
         })).filter(o => o.value && o.label);
         this.packageOptions.set(opts);
-        const currentIds = Array.isArray(this.form.value.packageIds) ? this.form.value.packageIds : [];
-        if (currentIds.length) {
-          this.form.patchValue({ packageIds: currentIds });
-        }
       },
       error: (err) => {
         console.error(err);
@@ -186,6 +186,7 @@ export class InstitutionForm implements OnInit {
     this.logoPreviewUrl.set(url);
     const fd = new FormData();
     fd.append('file', file);
+    fd.append('folder', 'institution-logos');
     this.logoUploading.set(true);
     this.apiSrv.post('/backend/upload', fd)
       .subscribe({
@@ -210,7 +211,9 @@ export class InstitutionForm implements OnInit {
 
   onEdit() {
     this.isLoading.set(true);
-    this.apiSrv.put(`/backend/admin/institutions/${this.select()['id']}`, { ...this.form.value, id: this.select()['id'] })
+    const val = this.form.value as any;
+    const payload = { ...val, id: this.select()['id'], is_active: !!val.isActive };
+    this.apiSrv.put(`/backend/admin/institutions/${this.select()['id']}`, payload)
       .subscribe({
         next: (res) => {
           this.form.reset();

@@ -1,4 +1,25 @@
 <form [formGroup]="form" (ngSubmit)="onSubmit()">
+  <div class="passport-upload shadow border p-0 mb-4" [class.drag-over]="isDragOver()" (dragover)="onDragOver($event)" (dragleave)="onDragLeave($event)" (drop)="onDropPassport($event)" (click)="passportFile.click()">
+    <label for="passportFile" class="d-flex p-0 flex-column align-items-center justify-content-between w-100 h-100">
+
+      @if(!passportPreviewUrl()){
+        <div>
+          <div class="form-label">Passport Photo</div>
+          <div class="text-muted small">Drag & drop here or click to select</div>
+      </div>
+      }
+      @if (passportPreviewUrl()) {
+        <div class="preview w-100 h-100 ">
+          <img [src]="passportPreviewUrl()" alt="Passport Preview" class="object-fit-contain" />
+      </div>
+      }
+          <input #passportFile type="file" accept="image/*" hidden (change)="onPassportFileSelected($event)" [disabled]="imageUploading()" />
+
+    </label>
+    @if (imageUploading()) {
+      <div class="mt-2 text-muted">Uploading...</div>
+    }
+  </div>
   <app-skeleton-loader [isLoading]="isLoading()" variant="input" >
     <div learnoInput class="mb-4" [label]="'Email'" [inputType]="'email'" [id]="'email'" [formControlName]="'_email'" [disabled]="true"></div>
   </app-skeleton-loader>
