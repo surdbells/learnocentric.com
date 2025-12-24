@@ -18,7 +18,12 @@
             <th> </th>
           }
           @for (th of tableHeads(); track th) {
+           @if (th.toLocaleLowerCase().includes('is_active')) {
+            <th>Status</th>
+           }
+           @else {
             <th>{{th}}</th>
+           }
           }
 
           @if (shouldShowAction()){
@@ -58,6 +63,14 @@
                         {{ row[dataFields()[headIndex]] }}
                     </span>
                   </td>
+                }
+                @else if(head.toLocaleLowerCase().includes('is_active')) {
+                   <td class="py-2">
+                    <span
+                        [class]="`badge bg-${ row['is_active'] ? 'success' : 'danger'}-subtle text-${ row['is_active'] ? 'success' : 'danger'}`">
+                          {{ row[dataFields()[headIndex]] ? 'Active' : 'Suspended' }}
+                      </span>
+                    </td>
                 }
                 @else if (head.toLowerCase().includes('date')) {
                   <td class="py-2">{{ row[dataFields()[headIndex]] | date }}</td>

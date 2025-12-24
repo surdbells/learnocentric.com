@@ -113,7 +113,6 @@ export class TeacherClassRoutine {
       virtualClasses$.subscribe({
         next: (vcls) => {
           this.virtualClasses.set(vcls);
-          console.log('Virtual Classes:', vcls);
         },
         error: (err) => {
           console.error('Error fetching virtual classes:', err);

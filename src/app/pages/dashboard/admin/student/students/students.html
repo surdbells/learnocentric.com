@@ -83,8 +83,8 @@
         <app-skeleton-loader [isLoading]="isLoading()" variant="table" [rows]="5" [columns]="4">
           <app-data-table
             [shouldShowCheckbox]="false"
-            [tableHeads]="['Email', 'Firstname', 'Lastname', 'Email']"
-            [dataFields]="['email', 'first_name', 'last_name', 'email', 'id']"  [tableRows]="filteredStudents()"
+            [tableHeads]="['Email', 'Firstname', 'Lastname', 'is_active']"
+            [dataFields]="['email', 'first_name', 'last_name', 'is_active', 'id']"  [tableRows]="filteredStudents()"
             [currentPage]="currentPage()"
             (preview)="onPreview($event)"
           />

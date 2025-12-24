@@ -1,43 +1,60 @@
 <app-learno-offset [anchorSelector]="anchorSelector()" [modalId]="'productModal'" (closeOffset)="handleCloseOffset()">
   @if(selectedEnrollment()) {
-    <div class="card">
+    <div class="card border-0 d-flex flex-column h-100 justify-content-between">
       <div class="card-body">
         <div class="row align-items-center justify-content-between mb-4">
           <div class="col-auto">
-            <div class="avatar avatar-xl rounded text-primary">
-              <i class="fs-2" data-duoicon="receipt"></i>
+            <div class="avatar avatar-xl">
+                <img [src]="selectedEnrollment()['profile_image_url']" alt="logo" class="img-fluid rounded-circle" />
             </div>
-          </div>
-          <div class="col-auto">
-            <p class="text-end text-body-secondary mb-0">
-              Name: <span class="text-body">{{ selectedEnrollment()?.first_name }} {{ selectedEnrollment()?.last_name }}</span><br />
-            </p>
           </div>
         </div>
         <div class="list-group mb-4">
-          <div class="list-group-item bg-body">
+          <div class="list-group-item border-0 border-bottom bg-body">
             <div class="row">
               <div class="col">Email</div>
               <div class="col-auto">{{ selectedEnrollment()?.email }}</div>
             </div>
           </div>
-          <div class="list-group-item bg-body">
+          <div class="list-group-item border-0 border-bottom bg-body">
+            <div class="row">
+              <div class="col">Firstname</div>
+              <div class="col-auto">{{ selectedEnrollment()?.first_name }}</div>
+            </div>
+          </div>
+          <div class="list-group-item border-0 border-bottom bg-body">
+            <div class="row">
+              <div class="col">Lastname</div>
+              <div class="col-auto">{{ selectedEnrollment()?.last_name }}</div>
+            </div>
+          </div>
+          <div class="list-group-item border-0 border-bottom bg-body">
+            <div class="row">
+              <div class="col">Phone</div>
+              <div class="col-auto">{{ selectedEnrollment()?.phone }}</div>
+            </div>
+          </div>
+          <div class="list-group-item border-0 border-bottom bg-body">
+            <div class="row">
+              <div class="col">Date of Birth</div>
+              <div class="col-auto">{{ selectedEnrollment()?.date_of_birth ? (selectedEnrollment()?.date_of_birth | date:'mediumDate') : 'N/A' }}</div>
+            </div>
+          </div>
+          <div class="list-group-item border-0 border-bottom bg-body">
             <div class="row">
               <div class="col">Status</div>
-              <div class="col-auto">{{ selectedEnrollment()?.status }}</div>
+              <div class="col-auto">{{ selectedEnrollment()?.is_active ? 'Active' : 'Suspended' }}</div>
             </div>
           </div>
         </div>
         <!--        <p class="text-body-secondary small mb-0">Previewing fee structure. Click Download to export.</p>-->
       </div>
 
-      <div class="card-footer">
-
-<!--        <div class="d-flex justify-content-end">-->
-<!--          <app-learno-button text="Edit" (clicked)="editEnrollment()" class="me-2" data-bs-toggle="modal" [attr.data-bs-target]="`#edit_teacher`" />-->
-<!--          <app-learno-button text="Delete" (clicked)="deleteEnrollment()" btnColor="danger" class="me-2" />-->
-<!--        </div>-->
-
+      <div class="card-footer border-0">
+        <div class="d-flex justify-content-end">
+          <app-learno-button text="Edit" class="me-2" data-bs-toggle="modal" [attr.data-bs-target]="`#edit_teacher`" />
+          <app-learno-button text="Delete" (clicked)="deleteEnrollment()" btnColor="danger" class="me-2" />
+        </div>
       </div>
     </div>
   }
@@ -51,6 +68,7 @@
     <app-edit-student-form
       [select]="selectedEnrollment()"
       modalForm
+      (submitted)="handleSuccessSubmit($event)"
     />
   </app-learno-modal>
 </app-page-header>
@@ -63,8 +81,8 @@
       />
       <app-skeleton-loader [isLoading]="isLoading()" variant="table" [rows]="5" [columns]="4">
           <app-data-table
-            [tableHeads]="['Email', 'Firstname', 'Lastname']"
-            [dataFields]="['email', 'first_name', 'last_name', 'id']"  [tableRows]="filteredTeachers()"
+            [tableHeads]="['Email', 'Firstname', 'Lastname', 'is_active']"
+            [dataFields]="['email', 'first_name', 'last_name', 'is_active', 'id']"  [tableRows]="filteredTeachers()"
             [currentPage]="currentPage()"
             (preview)="onPreview($event)"
           />

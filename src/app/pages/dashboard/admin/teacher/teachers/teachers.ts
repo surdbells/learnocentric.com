@@ -12,6 +12,7 @@ import {LearnoOffset} from '../../../../../components/learno-offset/learno-offse
 import {ToastrService} from 'ngx-toastr';
 import {EditStudentForm} from '../../../../../components/forms/edit-student-form/edit-student-form';
 import {LearnoModal} from '../../../../../components/learno-modal/learno-modal';
+import { DatePipe } from '@angular/common';
 
 @Component({
   selector: 'app-teachers',
@@ -25,7 +26,8 @@ import {LearnoModal} from '../../../../../components/learno-modal/learno-modal';
     SkeletonLoader,
     LearnoOffset,
     EditStudentForm,
-    LearnoModal
+    LearnoModal,
+    DatePipe
   ],
   templateUrl: './teachers.html',
   styleUrl: './teachers.css'
@@ -38,7 +40,9 @@ export class Teachers implements OnInit {
   selectedEnrollment = signal<any | null>(null);
   anchorSelector = signal<string>('');
   searchTerm = signal<string>('');
+  
   @ViewChild(LearnoOffset) offsetCmp!: LearnoOffset;
+  @ViewChild('closebtn', { static: false }) closebtn!: any;
 
   currentPage = signal<number>(1);
   
@@ -101,10 +105,6 @@ export class Teachers implements OnInit {
     this.searchTerm.set(term || '');
   }
 
-  editEnrollment() {
-
-  }
-
   deleteEnrollment() {
       const sel = this.selectedEnrollment();
       if (!sel || !sel.id) {
@@ -113,7 +113,7 @@ export class Teachers implements OnInit {
       }
 
       this.isLoading.set(true);
-      this.apiSrv.delete('/backend/school/teachers', { body: { id: sel.id }})
+      this.apiSrv.delete('/backend/auth/user-profile/' + sel.id)
         .subscribe({
           next: () => {
             this.toastService.success('Teacher deleted successfully');
@@ -143,5 +143,11 @@ export class Teachers implements OnInit {
   handleCloseOffset() {
     this.selectedEnrollment.set(null);
     this.anchorSelector.set('');
+  }
+
+  handleSuccessSubmit($event: { success: boolean; }) {
+      this.offsetCmp.close();
+    this.closebtn?.nativeElement.click();
+    this.ngOnInit();
   }
 }
