@@ -24,6 +24,7 @@ export const appConfig: ApplicationConfig = {
     provideAnimations(),
     provideHttpClient(withFetch(), withInterceptors([authInterceptor])),
     { provide: APP_INITIALIZER, useFactory: initAuth, deps: [AuthService], multi: true },
-    { provide: API_BASE_URL, useValue: 'http://localhost:8000' },
+    { provide: API_BASE_URL, useValue: 'https://learnocentric.com' },
+    // { provide: API_BASE_URL, useValue: 'http://localhost:8000' },
   ]
 };
