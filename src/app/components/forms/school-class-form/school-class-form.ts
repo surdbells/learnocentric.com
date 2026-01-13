@@ -44,7 +44,7 @@ export class SchoolClassForm {
   ) {
     effect(() => {
       const s = this.select();
-      if (!s) { this.form.reset(); return; }
+      if (!s) { this.form.reset(); this.isEdit.set(false); return; }
       const patch: any = {};
       if (s['name'] !== undefined && s['name'] !== null && s['name'] !== '') {
         patch.name = s['name'];

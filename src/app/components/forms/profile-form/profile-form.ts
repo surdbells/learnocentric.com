@@ -1,4 +1,4 @@
-import {Component, OnInit, signal} from '@angular/core';
+import {Component, ElementRef, OnInit, signal, ViewChild} from '@angular/core';
 import {LearnoButton} from "../../../common/learno-button/learno-button";
 import {LearnoInput} from "../../../common/learno-input/learno-input";
 import {FormControl, FormGroup, ReactiveFormsModule, Validators} from "@angular/forms";
@@ -29,10 +29,15 @@ export class ProfileForm implements OnInit{
     phone: new FormControl(''),
     lastName: new FormControl('', {nonNullable: true, validators: [Validators.required]}),
     dateOfBirth: new FormControl(''),
-    // profileImageUrl: new FormControl('', {nonNullable: true, validators: [Validators.required]}),
+    profileImageUrl: new FormControl('', {nonNullable: true}),
     // institutionId: new FormControl('', {nonNullable: true, validators: [Validators.required]}),
   })
   isLoading = signal<boolean>(false);
+  imageUploading = signal<boolean>(false);
+  passportPreviewUrl = signal<string | null>(null);
+  isDragOver = signal<boolean>(false);
+
+  @ViewChild('passportFile', { static: false }) passportFileInput!: ElementRef<HTMLInputElement>;
 
   constructor(
     private toastService: ToastrService,
@@ -48,6 +53,11 @@ export class ProfileForm implements OnInit{
       .subscribe({
         next: (res) => {
           this.form.patchValue({ ...res, _email: res?.email }, {emitEvent: false});
+          const existing = res?.profileImageUrl ?? res?.passportUrl ?? res?.avatarUrl ?? '';
+          if (existing) {
+            this.passportPreviewUrl.set(String(existing));
+            this.form.get('profileImageUrl')?.setValue(String(existing));
+          }
           this.isLoading.set(false);
         },
         error: (err) => {
@@ -57,7 +67,7 @@ export class ProfileForm implements OnInit{
         },
         complete: () => {}
       })
-    }
+  }
 
   onSubmit() {
 
@@ -102,5 +112,78 @@ export class ProfileForm implements OnInit{
       console.log(err);
       this.toastService.error("Unable to update your profile")
     }
+  }
+
+  onPassportFileSelected(event: Event) {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) return;
+    const prev = this.passportPreviewUrl();
+    if (prev) URL.revokeObjectURL(prev);
+    const url = URL.createObjectURL(file);
+    this.passportPreviewUrl.set(url);
+    const fd = new FormData();
+    fd.append('file', file);
+    this.imageUploading.set(true);
+    this.apiSrv.post('/backend/upload', fd)
+      .subscribe({
+        next: (res: any) => {
+          const uploadUrl = res?.fileUrl ?? res?.data?.url ?? res?.location ?? res?.path ?? '';
+          if (uploadUrl) {
+            this.form.get('profileImageUrl')?.setValue(uploadUrl as any);
+            this.toastService.success('Passport uploaded');
+          } else {
+            this.toastService.warning('Uploaded, but URL not returned');
+          }
+          this.imageUploading.set(false);
+        },
+        error: (err) => {
+          console.error(err);
+          this.toastService.error('Failed to upload passport');
+          this.imageUploading.set(false);
+        }
+      });
+  }
+
+  onDragOver(event: DragEvent) {
+    event.preventDefault();
+    this.isDragOver.set(true);
+  }
+
+  onDragLeave(event: DragEvent) {
+    event.preventDefault();
+    this.isDragOver.set(false);
+  }
+
+  onDropPassport(event: DragEvent) {
+    event.preventDefault();
+    this.isDragOver.set(false);
+    const file = event.dataTransfer?.files?.[0];
+    if (!file) return;
+    const prev = this.passportPreviewUrl();
+    if (prev) URL.revokeObjectURL(prev);
+    const url = URL.createObjectURL(file);
+    this.passportPreviewUrl.set(url);
+    const fd = new FormData();
+    fd.append('file', file);
+    this.imageUploading.set(true);
+    this.apiSrv.post('/backend/upload', fd)
+      .subscribe({
+        next: (res: any) => {
+          const uploadUrl = res?.fileUrl ?? res?.data?.url ?? res?.location ?? res?.path ?? '';
+          if (uploadUrl) {
+            this.form.get('profileImageUrl')?.setValue(uploadUrl as any);
+            this.toastService.success('Passport uploaded');
+          } else {
+            this.toastService.warning('Uploaded, but URL not returned');
+          }
+          this.imageUploading.set(false);
+        },
+        error: (err) => {
+          console.error(err);
+          this.toastService.error('Failed to upload passport');
+          this.imageUploading.set(false);
+        }
+      });
   }
 }

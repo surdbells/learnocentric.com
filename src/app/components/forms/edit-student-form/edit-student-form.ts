@@ -46,6 +46,15 @@ export class EditStudentForm {
       if (s['last_name'] !== undefined && s['last_name'] !== null && s['last_name'] !== '') {
         patch.lastName = s['last_name'];
       }
+      if (s['date_of_birth'] !== undefined && s['date_of_birth'] !== null && s['date_of_birth'] !== '') {
+        patch.dateOfBirth = s['date_of_birth'];
+      }
+      if (s['phone'] !== undefined && s['phone'] !== null && s['phone'] !== '') {
+        patch.phone = s['phone'];
+      }
+      if (s['is_active'] !== undefined && s['is_active'] !== null) {
+        patch.isActive = s['is_active'];
+      }
 
       if(Object.keys(patch).length > 0) {
         this.form.patchValue(patch, { emitEvent: false });
@@ -55,20 +64,20 @@ export class EditStudentForm {
 
   form = new FormGroup({
     email: new FormControl('', {nonNullable: true, validators: [Validators.required, Validators.email]}),
-    // password: new FormControl('', {nonNullable: true, validators: [Validators.required, Validators.minLength(6)]}),
     firstName: new FormControl('', {nonNullable: true, validators: [Validators.required]}),
-    lastName: new FormControl('', {nonNullable: true, validators: [Validators.required]})
+    lastName: new FormControl('', {nonNullable: true, validators: [Validators.required]}),
+    dateOfBirth: new FormControl(null),
+    phone: new FormControl(null),
+    isActive: new FormControl<boolean>(false),
     // institutionId: new FormControl('', {nonNullable: true, validators: [Validators.required]}),
   })
 
 
   onEdit() {
-    console.log("edit", this.select())
-    console.log("edit", this.form.value)
     this.isLoading.set(true);
-    this.apiSrv.put("/backend/school/classes", { ...this.form.value, id: this.select()['id'] })
+    this.apiSrv.put("/backend/auth/user-profile/" + this.select()['id'], { ...this.form.value, id: this.select()['id'] })
       .subscribe({
-        next: (res) => {
+        next: () => {
           this.form.reset();
           this.toastService.success("updated successfully")
           this.submitted.emit({ success: true });

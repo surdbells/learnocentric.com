@@ -1,33 +1,33 @@
 <app-learno-offset [anchorSelector]="anchorSelector()" [modalId]="'productModal'" (closeOffset)="handleCloseOffset()">
   @if(selectedRoutine()) {
-    <div class="card">
+    <div class="card border-0 d-flex flex-column h-100">
       <div class="card-body">
         <div class="list-group mb-4">
-          <div class="list-group-item bg-body">
+          <div class="list-group-item border-0 border-bottom bg-body">
             <div class="row">
               <div class="col">Teacher</div>
               <div class="col-auto">{{ selectedRoutine()?.first_name }} {{ selectedRoutine()?.last_name }}</div>
             </div>
           </div>
-          <div class="list-group-item bg-body">
+          <div class="list-group-item border-0 border-bottom bg-body">
             <div class="row">
               <div class="col">Class</div>
               <div class="col-auto">{{ selectedRoutine()?.class_name }}</div>
             </div>
           </div>
-          <div class="list-group-item bg-body">
+          <div class="list-group-item border-0 border-bottom bg-body">
             <div class="row">
               <div class="col">Time</div>
               <div class="col-auto">{{ selectedRoutine()?.start_time }} - {{ selectedRoutine()?.end_time }}</div>
             </div>
           </div>
-          <div class="list-group-item bg-body">
+          <div class="list-group-item border-0 border-bottom bg-body">
             <div class="row">
               <div class="col">Subject</div>
               <div class="col-auto">{{ selectedRoutine()?.subject_name }}</div>
             </div>
           </div>
-          <div class="list-group-item bg-body">
+          <div class="list-group-item border-0 border-bottom rounded-0 bg-body">
             <div class="row">
               <div class="col">Room</div>
               <div class="col-auto">{{ selectedRoutine()?.room }}</div>
@@ -38,10 +38,15 @@
         <!--        <p class="text-body-secondary small mb-0">Previewing fee structure. Click Download to export.</p>-->
       </div>
 
-      <div class="card-footer">
-        <div class="d-flex justify-content-end">
-          <app-learno-button text="Edit"  class="me-2" data-bs-toggle="modal" [attr.data-bs-target]="`#add_time_table`" />
-          <app-learno-button text="Delete" (clicked)="deleteEnrollment()" btnColor="danger" class="me-2" />
+      <div class="card-footer border-0">
+        <div class="d-flex justify-content-between">
+            <app-learno-button text="Schedule Virtual Class"  class="me-2" data-bs-toggle="modal" [attr.data-bs-target]="`#add_virtual_class`" />
+
+
+          <div class="d-flex">
+              <app-learno-button text="Edit"  class="me-2" data-bs-toggle="modal" [attr.data-bs-target]="`#add_time_table`" />
+              <app-learno-button text="Delete" (clicked)="deleteEnrollment()" btnColor="danger" class="me-2" />
+          </div>
         </div>
       </div>
     </div>
@@ -51,8 +56,9 @@
 <app-page-header icon="schedule" action="Class Routine">
     <!-- Action -->
 <!--    <app-learno-button text="Add Class Routine" (clicked)="clickedHandler()" />-->
-  @if(userRole == "admin" || userRole == "tutor_admin") {
-    <app-learno-modal [modalId]="'add_time_table'" [modalAction]="'Add Time Table'" >
+  @if(userRole == "admin" || userRole == "academy") {
+    <div class="d-flex gap-3">
+         <app-learno-modal [modalId]="'add_time_table'" [modalAction]="'Add Time Table'" >
         <app-routine-form
         modalForm
         [classes]="classes()"
@@ -63,6 +69,20 @@
         (submitted)="handleSuccessSubmit($event)"
       />
     </app-learno-modal>
+
+    <app-learno-modal [modalId]="'add_virtual_class'" [modalAction]="'Add Virtual Class'" >
+        <app-virtual-class-form
+          modalForm
+          [classes]="classes()"
+          [subjects]="subjects()"
+          [teachers]="teachers()"
+          [select]="selectedRoutine()"
+          [days]="days"
+          (submitted)="handleSuccessSubmit($event)"
+      />
+    </app-learno-modal>
+    </div>
+   
   }
 </app-page-header>
 

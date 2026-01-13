@@ -131,11 +131,11 @@ onClassChange($event: any) {
       this.isLoading.set(true);
 
       forkJoin({
-        classes: this.apiSrv.get(this.user()?.role == "school_admin" ? "/backend/school/classes" : `/backend/teacher/classes/${this.user()?.id}`)
+        classes: this.apiSrv.get(this.user()?.role.includes('admin') ? "/backend/school/classes" : `/backend/teacher/classes/${this.user()?.id}`)
           .pipe(catchError((err) => { this.toastSrv.error("Error fetching school classes", "Error"); return of([] as any[]); })),
         results: this.apiSrv.get("/backend/school/grades")
           .pipe(catchError((err) => { this.toastSrv.error("Error fetching school results", "Error"); return of([] as any[]); })),
-        students: this.apiSrv.get(this.user()?.role == "school_admin" ? "/backend/school/enrollments": `/backend/teacher/students/${this.user()?.id}`)
+        students: this.apiSrv.get(this.user()?.role.includes('admin') ? "/backend/school/enrollments": `/backend/teacher/students/${this.user()?.id}`)
           .pipe(catchError((err) => { this.toastSrv.error("Error fetching school students", "Error"); return of([] as any[]); })),
         subjects: this.apiSrv.get("/backend/school/subjects")
           .pipe(catchError((err) => { this.toastSrv.error("Error fetching school subjects", "Error"); return of([] as any[]); })),
@@ -144,8 +144,8 @@ onClassChange($event: any) {
           next: (data) => {
             this.results.set(data.results?.filter((res: any) => data.students.some((stu: any) => stu.student_id == res.student_id)));
             this.classes.set(this.utilSrv.configureForOption(data.classes));
-            this.students.set(this.utilSrv.configureForOption(data.students));
-            this.filterStudents.set(this.utilSrv.configureForOption(data.students));
+            this.students.set(this.utilSrv.configureForOption(data.students, 'student_id'));
+            this.filterStudents.set(this.utilSrv.configureForOption(data.students, 'student_id'));
             this.subjects.set(this.utilSrv.configureForOption(data.subjects));
           },
           error: (error) => {

@@ -19,6 +19,7 @@ import {UtilService} from '../../../../../common/service/util.service';
 import {SkeletonLoader} from '../../../../../common/skeleton-loader/skeleton-loader';
 import {LearnoOffset} from '../../../../../components/learno-offset/learno-offset';
 import {DataTable} from '../../../../../components/data-table/data-table';
+import { VirtualClassForm } from "../../../../../components/forms/virtual-class-form/virtual-class-form";
 
 @Component({
   selector: 'app-class-routine',
@@ -32,8 +33,9 @@ import {DataTable} from '../../../../../components/data-table/data-table';
     SkeletonLoader,
     FormsModule,
     LearnoOffset,
-    LearnoButton
-  ],
+    LearnoButton,
+    VirtualClassForm
+],
   templateUrl: './class-routine.html',
   styleUrl: './class-routine.css'
 })

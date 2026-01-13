@@ -77,7 +77,7 @@ import {SuperAdminContentPackages} from './pages/dashboard/super-admin/content-p
 
 export const routes: Routes = [
   {
-    path: "authentication",
+    path: "",
     children: [
       { path: "", component: SignIn },
     ]
@@ -130,68 +130,69 @@ export const routes: Routes = [
         ]
     },
 
-  {
-    path: "academy",
-    component: Dashboard,
-    canActivate: [authGuard],
-    data: { user: "tutor_admin" },
-    children: [
-      { path: "students", component: Students, },
-      { path: "enrollments", component: Enrollment },
-      { path: "students/new", component: NewStudent },
-      { path: "tutors", component: Teachers },
-      { path: "tutors/new", component: NewTeacher },
-      {
-        path: "main",
-        component:  Main,
-        data: { user: "tutor_admin" },
-        children: [
-          { path: "", component: AdminDashboard },
-          { path: "message", component: Chat },
-          {
-            path: "file-manager",
-            component: FileManager,
-            children: [
-              { path: "", component: MyDrive },
-              { path: "assets", component: Assets },
-              { path: "template", component: Templates },
-              { path: "projects", component: Projects },
-              { path: "documents", component: Documents },
-              { path: "media", component: Media }
-            ]
-          }
-        ]
-      },
-      {
-        path: "academics",
-        component: Academics,
-        data: { user: "tutor_admin" },
-        children: [
-          { path: "class-routine", component: ClassRoutine },
-          { path: "e-library", component: ELibrary },
-          { path: "lesson-plans", component: LessonPlans },
-          { path: "classes", component: SchoolClasses },
-          { path: "subjects", component: Subjects },
-          { path: "results", component: Result },
-        ]
-      },
-      {
-        path: "management",
-        data: { user: "tutor_admin" },
-        children: [
-          { path: "academy-profile", component: SchoolProfile },
-          { path: "payment", component: Payment },
-          { path: "payment/checkout", component: Checkout },
-          { path: "subscription", component: Fees },
-        ]
-      }
+    {
+      path: "academy",
+      component: Dashboard,
+      canActivate: [authGuard],
+      data: { user: "tutor_admin" },
+      children: [
+        { path: "students", component: Students, },
+        { path: "enrollments", component: Enrollment },
+        { path: "students/new", component: NewStudent },
+        { path: "tutors", component: Teachers,  data: { user: "academy" }  },
+        { path: "tutors/new", component: NewTeacher,  data: { user: "academy" } },
+        {
+          path: "main",
+          component:  Main,
+          data: { user: "tutor_admin" },
+          children: [
+            { path: "", component: AdminDashboard },
+            { path: "message", component: Chat },
+            {
+              path: "file-manager",
+              component: FileManager,
+              children: [
+                { path: "", component: MyDrive },
+                { path: "assets", component: Assets },
+                { path: "template", component: Templates },
+                { path: "projects", component: Projects },
+                { path: "documents", component: Documents },
+                { path: "media", component: Media }
+              ]
+            }
+          ]
+        },
+        {
+          path: "academics",
+          component: Academics,
+          data: { user: "tutor_admin" },
+          children: [
+            { path: "class-routine", component: ClassRoutine, data: { user: 'academy' } },
+            { path: "e-library", component: ELibrary },
+            { path: "lesson-plans", component: LessonPlans },
+            { path: "classes", component: SchoolClasses },
+            { path: "subjects", component: Subjects },
+            { path: "results", component: Result },
+          ]
+        },
+        {
+          path: "management",
+          data: { user: "tutor_admin" },
+          children: [
+            { path: "academy-profile", component: SchoolProfile },
+            { path: "payment", component: Payment },
+            { path: "payment/checkout", component: Checkout },
+            { path: "subscription", component: Fees },
+          ]
+        }
 
-    ]
-  },
+      ]
+    },
 
     {
         path: "admin/management",
         component: Dashboard,
+        canActivate: [authGuard],
         children: [
                 { path: "school-profile", component: SchoolProfile },
                 { path: "payment", component: Payment },
@@ -203,6 +204,7 @@ export const routes: Routes = [
     {
       path: "teacher",
       component: Dashboard,
+      canActivate: [authGuard],
       children: [
         {
           path: "main",
@@ -259,6 +261,7 @@ export const routes: Routes = [
     {
       path: "student",
       component: Dashboard,
+      canActivate: [authGuard],
       children: [
         {
           path: "main",
@@ -325,73 +328,74 @@ export const routes: Routes = [
       ]
     },
 
-  {
-    path: "super-admin",
-    component: Dashboard,
-    canActivate: [authGuard],
-    children: [
-      {
-        path: "main",
-        component: SuperAdminMain,
-        children: [
-          { path: "", component: SuperAdminDashboard },
-          { path: "message", component: Chat },
-          {
-            path: "file-manager",
-            component: FileManager,
+    {
+      path: "super-admin",
+      component: Dashboard,
+      canActivate: [authGuard],
+      children: [
+        {
+          path: "main",
+          component: SuperAdminMain,
+          children: [
+            { path: "", component: SuperAdminDashboard },
+            { path: "message", component: Chat },
+            {
+              path: "file-manager",
+              component: FileManager,
+              children: [
+                { path: "", component: MyDrive },
+                { path: "assets", component: Assets },
+                { path: "template", component: Templates },
+                { path: "projects", component: Projects },
+                { path: "documents", component: Documents },
+                { path: "media", component: Media }
+              ]
+            }
+          ]
+        },
+                {
+            path: "management",
+            component: StudentManagement,
             children: [
-              { path: "", component: MyDrive },
-              { path: "assets", component: Assets },
-              { path: "template", component: Templates },
-              { path: "projects", component: Projects },
-              { path: "documents", component: Documents },
-              { path: "media", component: Media }
+              { path: "institutions", component: SuperAdminInstitutions },
+              { path: "onboard", component: SuperAdminOnboard },
+              { path: "content-library", component: SuperAdminContentLibrary },
+              { path: "content-packages", component: SuperAdminContentPackages }
             ]
-          }
-        ]
-      },
-              {
+          },
+
+      ]
+    },
+
+    {
+      path: "parent",
+      component: Dashboard,
+      canActivate: [authGuard], 
+      children: [
+        {
+          path: "main",
+          component:  Parent,
+          children: [
+            { path: "", component: ParentMain },
+          ]
+
+        },
+        {
+          path: "academics",
+          component: Academics,
+          children: [
+            { path: "grades", component: Grade },
+          ]
+        },
+        {
           path: "management",
           component: StudentManagement,
           children: [
-            { path: "institutions", component: SuperAdminInstitutions },
-            { path: "onboard", component: SuperAdminOnboard },
-            { path: "content-library", component: SuperAdminContentLibrary },
-            { path: "content-packages", component: SuperAdminContentPackages }
+            { path: "profile", component: StudentProfile },
           ]
         },
-
-    ]
-  },
-
-  {
-    path: "parent",
-    component: Dashboard,
-    children: [
-      {
-        path: "main",
-        component:  Parent,
-        children: [
-          { path: "", component: ParentMain },
-        ]
-
-      },
-      {
-        path: "academics",
-        component: Academics,
-        children: [
-          { path: "grades", component: Grade },
-        ]
-      },
-      {
-        path: "management",
-        component: StudentManagement,
-        children: [
-          { path: "profile", component: StudentProfile },
-        ]
-      },
-    ]
-  },
+      ]
+    },
 
 
 

@@ -1,45 +1,58 @@
 <app-learno-offset [anchorSelector]="anchorSelector()" [modalId]="'productModal'" (closeOffset)="handleCloseOffset()">
   @if(selectedInstitution()) {
-    <div class="card">
+    <div class="card border-0 h-100 d-flex flex-column justify-content-between">
       <div class="card-body">
         <div class="row align-items-center justify-content-between mb-4">
           <div class="col-auto">
-            <div class="avatar avatar-xl rounded text-primary">
-              <i class="fs-2" data-duoicon="domain"></i>
+            <div class="avatar avatar-xl">
+                <img [src]="selectedInstitution()['logo_url']" alt="logo" class="img-fluid rounded-circle" />
             </div>
           </div>
-          <div class="col-auto">
-            <p class="text-end text-body-secondary mb-0">
-              Institution: <span class="text-body">{{ selectedInstitution()?.name }}</span><br />
-              Type: <span class="text-body">{{ selectedInstitution()?.type }}</span>
-            </p>
-          </div>
         </div>
+
         <div class="list-group mb-4">
-          <div class="list-group-item bg-body">
+          <div class="list-group-item border-0 border-bottom bg-body">
             <div class="row">
               <div class="col">Email</div>
               <div class="col-auto">{{ selectedInstitution()?.email }}</div>
             </div>
           </div>
-          <div class="list-group-item bg-body">
+          <div class="list-group-item border-0 border-bottom bg-body">
             <div class="row">
               <div class="col">Phone</div>
               <div class="col-auto">{{ selectedInstitution()?.phone }}</div>
             </div>
           </div>
-          <div class="list-group-item bg-body">
+          <div class="list-group-item border-0 border-bottom bg-body">
             <div class="row">
               <div class="col">Address</div>
               <div class="col-auto">{{ selectedInstitution()?.address }}</div>
             </div>
           </div>
-          <div class="list-group-item bg-body">
+
+          <div class="list-group-item border-0 border-bottom bg-body">
             <div class="row">
-              <div class="col">Created Date</div>
-              <div class="col-auto">{{ selectedInstitution()?.createdAt | date }}</div>
+              <div class="col">Status</div>
+              <div class="col-auto">{{ selectedInstitution()?.is_active ? 'Active' : 'Suspended' }}</div>
             </div>
           </div>
+
+          <div class="list-group-item border-0 border-bottom bg-body">
+            <div class="row">
+            <div class="col">Color</div>
+              <div class="col-auto d-flex ">
+                <div class=" me-3" [style]="`width: 20px; height: 20px; background-color: ${selectedInstitution()?.primary_color}`"></div>
+                <div class="" [style]="`width: 20px; height: 20px; background-color: ${selectedInstitution()?.secondary_color}`"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card-footer border-0">
+        <div class="d-flex justify-content-end">
+          <app-learno-button text="Edit"  class="me-2" data-bs-toggle="modal" [attr.data-bs-target]="`#add_institution`" />
+          <app-learno-button text="Delete" (clicked)="deleteContent()" btnColor="danger" class="me-2" />
         </div>
       </div>
     </div>
@@ -47,7 +60,16 @@
 </app-learno-offset>
 
 <app-page-header icon="domain" action="Institutions">
-  <app-learno-button text="Onboard Institution" (clicked)="goToOnboard()" />
+  <app-learno-button routerLink="/super-admin/management/onboard" text="Onboard Institution" (clicked)="goToOnboard()" />
+  <app-learno-modal  [modalId]="'add_institution'" [showBtn]="false">
+    <app-institution-form
+        [action]="'Edit Institution'"
+        [select]="selectedInstitution()"
+        [isEdit]="isEdit()"
+        (submitted)="handleSuccessSubmit($event)"
+        modalForm
+     />
+  </app-learno-modal>
 </app-page-header>
 
 <div class="row">
@@ -55,8 +77,10 @@
     <app-table-search (search)="onSearch($event)" />
     <app-skeleton-loader [isLoading]="isLoading()" variant="table" [rows]="5" [columns]="5">
       <app-data-table
-        [tableHeads]="['Name', 'Type', 'Email', 'Phone', 'Created Date']"
-        [dataFields]="['name', 'type', 'email', 'phone', 'createdAt', 'id']"
+        [shouldShowCheckbox]="false"
+        [shouldShowLogoorIcon]="true"
+        [tableHeads]="['Name', 'Type', 'Email', 'Phone']"
+        [dataFields]="['name', 'type', 'email', 'phone', 'id']"
         [tableRows]="filteredInstitutions()"
         [pageSize]="pageSize()"
         [currentPage]="currentPage()"

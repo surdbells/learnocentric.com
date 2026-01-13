@@ -31,10 +31,14 @@ export class SuperAdminDashboard implements OnInit {
   readonly user = signal<AuthSession | null>(null);
   isLoading = signal(false);
 
-  institutionsCount: number = 0;
-  adminsCount: number = 0;
-  teachersCount: number = 0;
-  studentsCount: number = 0;
+  totalInstitutions: number = 0;
+  totalSchools: number = 0;
+  totalTutoringAcademies: number = 0;
+  totalUsers: number = 0;
+  totalSubscriptions: number = 0;
+  totalContentLibraryItems: number = 0;
+  totalContentPackages: number = 0;
+  activeUsers: number = 0;
 
   constructor(
     private readonly authService: AuthService,
@@ -50,10 +54,14 @@ export class SuperAdminDashboard implements OnInit {
       .subscribe({
         next: (data) => {
           // Attempt to read common fields; fallback to alternative keys or array lengths
-          this.institutionsCount = data?.totalInstitutions ?? data?.institutionsCount ?? (Array.isArray(data?.institutions) ? data.institutions.length : 0);
-          this.adminsCount = data?.totalAdmins ?? data?.adminsCount ?? (Array.isArray(data?.admins) ? data.admins.length : 0);
-          this.teachersCount = data?.totalTeachers ?? data?.teachersCount ?? (Array.isArray(data?.teachers) ? data.teachers.length : 0);
-          this.studentsCount = data?.totalStudents ?? data?.studentsCount ?? (Array.isArray(data?.students) ? data.students.length : 0);
+          this.totalInstitutions = data?.totalInstitutions ?? data?.institutionsCount ?? (Array.isArray(data?.institutions) ? data.institutions.length : 0);
+          this.totalSchools = data?.totalSchools ?? data?.schoolsCount ?? (Array.isArray(data?.schools) ? data.schools.length : 0);
+          this.totalTutoringAcademies = data?.totalTutoringAcademies ?? data?.tutoringAcademiesCount ?? (Array.isArray(data?.tutoringAcademies) ? data.tutoringAcademies.length : 0);
+          this.totalUsers = data?.totalUsers ?? data?.usersCount ?? (Array.isArray(data?.users) ? data.users.length : 0);
+          this.totalSubscriptions = data?.totalSubscriptions ?? data?.subscriptionsCount ?? (Array.isArray(data?.subscriptions) ? data.subscriptions.length : 0);
+          this.totalContentLibraryItems = data?.totalContentLibraryItems ?? data?.contentLibraryItemsCount ?? (Array.isArray(data?.contentLibraryItems) ? data.contentLibraryItems.length : 0);
+          this.totalContentPackages = data?.totalContentPackages ?? data?.contentPackagesCount ?? (Array.isArray(data?.contentPackages) ? data.contentPackages.length : 0);
+          this.activeUsers = data?.activeUsers ?? data?.activeUsersCount ?? (Array.isArray(data?.activeUsers) ? data.activeUsers.length : 0);
         },
         error: (error) => {
           this.isLoading.set(false)

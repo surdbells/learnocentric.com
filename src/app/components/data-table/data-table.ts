@@ -20,6 +20,7 @@ export class DataTable {
 
     shouldShowCheckbox = input<boolean>(true);
     shouldShowAction = input<boolean>(true);
+    shouldShowLogoorIcon = input<boolean>(false);
 
     // Pagination inputs (0 disables pagination for backward compatibility)
     pageSize = input<number>(10);

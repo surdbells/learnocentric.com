@@ -4,7 +4,7 @@ import {DataTableNumbering} from "../../../../../components/data-table-numbering
 import {PageHeader} from "../../../../../common/layout/page-header/page-header";
 import {TableSearch} from "../../../../../components/table-search/table-search";
 import {LearnoButton} from "../../../../../common/learno-button/learno-button";
-import {Router} from "@angular/router";
+import {ActivatedRoute, Router} from "@angular/router";
 import {ApiService} from '../../../../../common/service/api.service';
 import {Loader} from '../../../../../common/loader/loader';
 import {SkeletonLoader} from '../../../../../common/skeleton-loader/skeleton-loader';
@@ -12,6 +12,7 @@ import {LearnoOffset} from '../../../../../components/learno-offset/learno-offse
 import {ToastrService} from 'ngx-toastr';
 import {EditStudentForm} from '../../../../../components/forms/edit-student-form/edit-student-form';
 import {LearnoModal} from '../../../../../components/learno-modal/learno-modal';
+import { DatePipe } from '@angular/common';
 
 @Component({
   selector: 'app-teachers',
@@ -25,7 +26,8 @@ import {LearnoModal} from '../../../../../components/learno-modal/learno-modal';
     SkeletonLoader,
     LearnoOffset,
     EditStudentForm,
-    LearnoModal
+    LearnoModal,
+    DatePipe
   ],
   templateUrl: './teachers.html',
   styleUrl: './teachers.css'
@@ -34,11 +36,13 @@ export class Teachers implements OnInit {
 
   isLoading = signal(false);
   teachers = signal<any[]>([]);
-
+  userRole: string;
   selectedEnrollment = signal<any | null>(null);
   anchorSelector = signal<string>('');
   searchTerm = signal<string>('');
+  
   @ViewChild(LearnoOffset) offsetCmp!: LearnoOffset;
+  @ViewChild('closebtn', { static: false }) closebtn!: any;
 
   currentPage = signal<number>(1);
   
@@ -62,7 +66,11 @@ export class Teachers implements OnInit {
     private router: Router,
     private readonly apiSrv: ApiService,
     private readonly toastService: ToastrService,
-  ) { }
+    private route: ActivatedRoute,
+
+  ) { 
+    this.userRole = this.route.snapshot.data['user'];
+  }
 
 
   ngOnInit(): void {
@@ -97,10 +105,6 @@ export class Teachers implements OnInit {
     this.searchTerm.set(term || '');
   }
 
-  editEnrollment() {
-
-  }
-
   deleteEnrollment() {
       const sel = this.selectedEnrollment();
       if (!sel || !sel.id) {
@@ -109,7 +113,7 @@ export class Teachers implements OnInit {
       }
 
       this.isLoading.set(true);
-      this.apiSrv.delete('/backend/school/teachers', { body: { id: sel.id }})
+      this.apiSrv.delete('/backend/auth/user-profile/' + sel.id)
         .subscribe({
           next: () => {
             this.toastService.success('Teacher deleted successfully');
@@ -139,5 +143,11 @@ export class Teachers implements OnInit {
   handleCloseOffset() {
     this.selectedEnrollment.set(null);
     this.anchorSelector.set('');
+  }
+
+  handleSuccessSubmit($event: { success: boolean; }) {
+      this.offsetCmp.close();
+    this.closebtn?.nativeElement.click();
+    this.ngOnInit();
   }
 }
