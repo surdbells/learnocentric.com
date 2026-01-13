@@ -77,7 +77,7 @@ import {SuperAdminContentPackages} from './pages/dashboard/super-admin/content-p
 
 export const routes: Routes = [
   {
-    path: "authentication",
+    path: "",
     children: [
       { path: "", component: SignIn },
     ]
