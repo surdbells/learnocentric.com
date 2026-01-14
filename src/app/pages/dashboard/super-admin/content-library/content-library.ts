@@ -365,6 +365,7 @@ export class SuperAdminContentLibrary implements OnInit {
     this.apiSrv.delete(`/backend/content/library?id=${this.selectedContent()['id']}`)
       .subscribe({
         next: () => {
+          this.isLoading.set(false);
           this.toastSrv.success('Content deleted successfully');
 
           this.contents.set(
@@ -372,11 +373,13 @@ export class SuperAdminContentLibrary implements OnInit {
           );
           this.selectedContent.set(null);
           this.handleCloseOffset();
-          this.isLoading.set(false);
         },
         error: (err) => {
           console.error(err);
           this.toastSrv.error('Failed to delete content');
+          this.isLoading.set(false);
+        },
+        complete: () => {
           this.isLoading.set(false);
         }
       });
