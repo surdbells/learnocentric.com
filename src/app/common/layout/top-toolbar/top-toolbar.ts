@@ -43,10 +43,13 @@ export class TopToolbar implements OnInit {
 
   signOut() {
     this.authService.logoutLocal()
-    this.router.navigate(['/authentication'])
+    this.router.navigate(['/'])
   }
 
   goBack() {
     this.location.back();
   }
 }
+
+
+// nfp_xnyyAQbir7avtEXijxFuhfMdSnTBuyxrcf28

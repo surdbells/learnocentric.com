@@ -34,7 +34,6 @@ export class Dashboard {
       if (isPlatformBrowser(platformId)) {
         const user: AuthUser = JSON.parse(localStorage.getItem('auth_user') || '{}');
         this.menu = this.userPreferenceMenu[user.role];
-        console.log(this.menu)
       }
     }
 

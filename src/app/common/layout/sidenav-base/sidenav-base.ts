@@ -33,7 +33,6 @@ export class SidenavBase implements OnInit{
 
     ngOnInit(): void {
         if (isPlatformBrowser(this.platformId)) {
-            console.log(this.menu(), "form sidebar")
         }
     }
 

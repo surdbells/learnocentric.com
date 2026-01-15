@@ -82,7 +82,6 @@ export class SuperAdminInstitutions implements OnInit {
       .subscribe({
         next: (data) => {
           const list = Array.isArray(data) ? data : (Array.isArray(data?.institutions) ? data.institutions : []);
-          console.log(list)
           const normalized = list.map((i: any, idx: number) => ({
             id: i.id ?? i.institutionId ?? idx + 1,
             name: i.name ?? i.institutionName ?? 'Unknown',
@@ -98,7 +97,6 @@ export class SuperAdminInstitutions implements OnInit {
           this.institutions.set(normalized);
         },
         error: (err) => {
-          console.error(err);
           this.toastService.error('Failed to load institutions');
         },
         complete: () => {
@@ -111,7 +109,6 @@ export class SuperAdminInstitutions implements OnInit {
     this.apiSrv.get(`/backend/admin/institutions/${evt.row.id}`)
       .subscribe({
         next: (data) => {
-          console.log(data, "======================********====================")
           evt.row = data;
 
           this.selectedInstitution.set(evt.row);
@@ -120,7 +117,6 @@ export class SuperAdminInstitutions implements OnInit {
           this.isEdit.set(true);
         },
         error: (err) => {
-          console.error(err);
           this.toastService.error('Failed to load institution details');
         }
       });

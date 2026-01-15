@@ -9,7 +9,7 @@ export const authGuard: CanActivateFn = (route, state) => {
   const session = authService.getAuthSession()
   if (Object.values(session).some(val => !val)) {
 
-    const loginPage = router.parseUrl("/authentication");
+    const loginPage = router.parseUrl("/");
     return new RedirectCommand(loginPage, {
       skipLocationChange: true,
       browserUrl: loginPage.toString()
