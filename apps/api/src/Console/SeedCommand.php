@@ -27,6 +27,7 @@ use App\Domain\Entity\Subscription;
 use App\Domain\Entity\SubscriptionPlan;
 use App\Domain\Entity\Role;
 use App\Domain\Entity\RolePermission;
+use App\Domain\Entity\SafeguardingCase;
 use App\Domain\Entity\SchemeOfWork;
 use App\Domain\Entity\SchoolClass;
 use App\Domain\Entity\Subject;
@@ -87,6 +88,7 @@ class SeedCommand extends Command
         $this->seedNotifications($output);
         $this->seedTopicProgress($output);
         $this->seedInterventions($output);
+        $this->seedSafeguarding($output);
         $this->seedAuditLogs($users, $output);
 
         $this->em->flush();
@@ -453,6 +455,32 @@ class SeedCommand extends Command
         }
         $this->em->flush();
         $output->writeln("  + {$count} questions (question bank)");
+    }
+
+    /** Seed one safeguarding case (reported by a teacher, under review). */
+    private function seedSafeguarding(OutputInterface $output): void
+    {
+        if ($this->em->getRepository(SafeguardingCase::class)->count([]) > 0) {
+            return;
+        }
+        $find = fn (string $email) => $this->em->getRepository(User::class)->findOneBy(['email' => $email]);
+        $teacher = $find('teacher@gmail.com');
+        $lead = $find('school@gmail.com');
+        $student = $find('student3@gmail.com');
+        if ($teacher === null) {
+            return;
+        }
+        $case = new SafeguardingCase('Student appears withdrawn and has missed several live classes.');
+        $case->setReportedBy($teacher);
+        $case->setInstitution($teacher->getInstitution());
+        $case->setStudent($student);
+        $case->setCategory('welfare');
+        $case->setDetails('Noticed over the past two weeks; also reflected in the attendance data.');
+        $case->setStatus(SafeguardingCase::UNDER_REVIEW);
+        $case->setHandledBy($lead);
+        $this->em->persist($case);
+        $this->em->flush();
+        $output->writeln('  + 1 safeguarding case');
     }
 
     /** Seed interventions off the seeded low quiz scores. */
