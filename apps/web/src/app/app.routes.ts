@@ -6,6 +6,7 @@ import {NewStudent} from "./pages/dashboard/admin/student/new-student/new-studen
 import {Teachers} from "./pages/dashboard/admin/teacher/teachers/teachers";
 import {NewTeacher} from "./pages/dashboard/admin/teacher/new-teacher/new-teacher";
 import {SchoolProfile} from "./pages/dashboard/admin/management/school-profile/school-profile";
+import {Billing} from "./pages/dashboard/admin/management/billing/billing";
 import {Payment} from "./pages/dashboard/admin/management/payment/payment";
 import {ClassRoutine} from "./pages/dashboard/admin/academics/class-routine/class-routine";
 import {ELibrary} from "./pages/dashboard/admin/academics/e-library/e-library";
@@ -216,6 +217,7 @@ export const routes: Routes = [
             { path: "payment", component: Payment },
             { path: "payment/checkout", component: Checkout },
             { path: "subscription", component: Fees },
+            { path: "billing", component: Billing },
           ]
         }
 
@@ -231,6 +233,7 @@ export const routes: Routes = [
                 { path: "payment", component: Payment },
                 { path: "payment/checkout", component: Checkout },
                 { path: "fees", component: Fees },
+                { path: "billing", component: Billing },
         ]
     },
 

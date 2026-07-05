@@ -59,6 +59,7 @@ export class UserPreferenceMenu {
     { name: "Management", icon: "tenancy", link: "admin/management",
       children: [
         { name: "School Profile", link: "/admin/management/school-profile" },
+        { name: "Billing", link: "/admin/management/billing" },
         { name: "Payment", link: "/admin/management/payment" },
         { name: "Fees", link: "/admin/management/fees" },
       ]
@@ -112,6 +113,7 @@ export class UserPreferenceMenu {
     { name: "Management", icon: "tenancy", link: "academy/management",
       children: [
         { name: "Academy Profile", link: "/academy/management/academy-profile" },
+        { name: "Billing", link: "/academy/management/billing" },
         { name: "Payment", link: "/academy/management/payment" },
         { name: "Subscription", link: "/academy/management/subscription" },
 
