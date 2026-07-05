@@ -1,0 +1,22 @@
+<app-page-header icon="subject" action="Subjects">
+  <app-learno-button text="Add Subject" icon="add" data-bs-toggle="modal" data-bs-target="#add_subject" (clicked)="onAdd()" />
+</app-page-header>
+
+<app-learno-modal [modalId]="'add_subject'" [modalAction]="selectSubject() ? 'Edit Subject' : 'Add Subject'" [showBtn]="false">
+  <app-subject-form
+    [action]="selectSubject() ? 'Update Subject' : 'Add Subject'"
+    modalForm
+    [select]="selectSubject()"
+    (submitted)="handleSuccessSubmit($event)"
+  />
+</app-learno-modal>
+
+<app-data-grid
+  endpoint="/backend/school/subjects"
+  [columns]="columns"
+  [filters]="filterDefs"
+  [actions]="['edit', 'delete']"
+  searchPlaceholder="Search subjects…"
+  emptyMessage="No subjects yet. Click “Add Subject” to create one."
+  (edit)="onEdit($event)"
+/>

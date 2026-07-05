@@ -1,0 +1,22 @@
+<app-page-header icon="book" action="Classes">
+  <app-learno-button text="Add Class" icon="add" data-bs-toggle="modal" data-bs-target="#add_class" (clicked)="onAdd()" />
+</app-page-header>
+
+<app-learno-modal [modalId]="'add_class'" [modalAction]="selectedClass() ? 'Edit Class' : 'Add Class'" [showBtn]="false">
+  <app-school-class-form
+    [action]="selectedClass() ? 'Update Class' : 'Add Class'"
+    modalForm
+    [select]="selectedClass()"
+    (submitted)="handleSuccessSubmit($event)"
+  />
+</app-learno-modal>
+
+<app-data-grid
+  endpoint="/backend/school/classes"
+  [columns]="columns"
+  [filters]="filterDefs"
+  [actions]="['edit', 'delete']"
+  searchPlaceholder="Search classes…"
+  emptyMessage="No classes yet. Click “Add Class” to create one."
+  (edit)="onEdit($event)"
+/>

@@ -1,0 +1,21 @@
+<app-page-header icon="local_library" action="Students">
+  <app-learno-button routerLink="/admin/students/new" text="Add Student" icon="add" />
+</app-page-header>
+
+<app-learno-modal [modalId]="'edit_student'" modalAction="Edit Student" [showBtn]="false">
+  <app-edit-student-form
+    [select]="selected()"
+    modalForm
+    (submitted)="handleSuccessSubmit($event)"
+  />
+</app-learno-modal>
+
+<app-data-grid
+  endpoint="/backend/school/students"
+  [columns]="columns"
+  [filters]="filterDefs"
+  [actions]="['edit', 'delete']"
+  searchPlaceholder="Search students…"
+  emptyMessage="No students yet. Click “Add Student” to enroll one."
+  (edit)="onEdit($event)"
+/>

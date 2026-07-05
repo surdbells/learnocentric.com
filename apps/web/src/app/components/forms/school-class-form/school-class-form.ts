@@ -1,0 +1,117 @@
+import {Component, effect, ElementRef, EventEmitter, input, Output, signal, ViewChild} from '@angular/core';
+import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
+import {LearnoInput} from '../../../common/learno-input/learno-input';
+import {LearnoSelect} from '../../../common/learno-select/learno-select';
+import {ToastrService} from 'ngx-toastr';
+import {ApiService} from '../../../common/service/api.service';
+import {AuthService} from '../../../common/auth/auth.service';
+import {Loader} from '../../../common/loader/loader';
+import {LearnoButton} from '../../../common/learno-button/learno-button';
+
+@Component({
+  selector: 'app-school-class-form',
+  imports: [
+    LearnoInput,
+    ReactiveFormsModule,
+    LearnoButton
+  ],
+  templateUrl: './school-class-form.html',
+  styleUrl: './school-class-form.css'
+})
+export class SchoolClassForm {
+
+  isLoading = signal<boolean>(false);
+
+  select = input<{ [key:string]: string }>({})
+
+  isEdit = signal<boolean>(false);
+  @Output() submitted = new EventEmitter<{ success: boolean }>();
+  @ViewChild('closebtn', { static: false }) autoCloseBtn!: ElementRef<HTMLButtonElement>;
+
+  form = new FormGroup({
+    name: new FormControl('', {nonNullable: true, validators: [Validators.required]}),
+    gradeLevel: new FormControl('', {nonNullable: true, validators: [Validators.required]}),
+    section: new FormControl('', {nonNullable: true, validators: [Validators.required]}),
+    academicYear: new FormControl('', {nonNullable: true, validators: [Validators.required]}),
+  })
+  action = input<string>('');
+
+
+  constructor(
+    private toastService: ToastrService,
+    private apiSrv: ApiService,
+    private authSrv: AuthService
+  ) {
+    effect(() => {
+      const s = this.select();
+      if (!s || !s['id']) { this.form.reset(); this.isEdit.set(false); return; }
+
+      this.form.reset();
+      this.form.patchValue({
+        name: s['name'] ?? '',
+        gradeLevel: s['grade_level'] ?? '',
+        section: s['section'] ?? '',
+        academicYear: s['academic_year'] ?? '',
+      }, { emitEvent: false });
+      this.isEdit.set(true);
+    })
+    // console.log(this.form.value);
+  }
+
+
+  onSubmit() {
+
+    this.isLoading.set(true);
+    if (this.form.valid) {
+      this.apiSrv.post("/backend/school/classes", this.form.value).subscribe(
+        {
+          next: () => {
+            this.form.reset();
+            this.toastService.success("submitted successfully");
+            this.submitted.emit({success: true});
+            this.isLoading.set(false);
+          },
+          error: (err) => {
+            this.isLoading.set(false);
+            this.toastService.error("failed to submit")
+          },
+          complete: () => {
+            this.isLoading.set(false);
+            this.autoCloseBtn.nativeElement.click();
+          }
+        }
+      )
+
+    } else {
+      this.isLoading.set(false);
+      const err = Object.keys(this.form.controls).reduce((acc: any, key) => {
+        const control = this.form.get(key);
+        if (control?.errors) {
+          acc[key] = control.errors;
+        }
+        return acc;
+      }, {});
+      this.toastService.error("Please fill in all required fields correctly")
+    }
+  }
+
+  onEdit() {
+    this.isLoading.set(true);
+    this.apiSrv.put("/backend/school/classes", { ...this.form.value, id: this.select()['id'] })
+      .subscribe({
+        next: (res) => {
+          this.form.reset();
+          this.toastService.success("updated successfully")
+          this.submitted.emit({ success: true });
+        },
+        error: (err) => {
+          this.isLoading.set(false);
+          this.toastService.error("failed to submit")
+        },
+        complete: () => {
+          this.isLoading.set(false);
+          this.autoCloseBtn.nativeElement.click();
+        }
+      })
+  }
+}

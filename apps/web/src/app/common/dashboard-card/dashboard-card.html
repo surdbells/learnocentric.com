@@ -1,0 +1,9 @@
+<div class="card flex-fill mb-4 h-100">
+  <div class="card-header bg-transparent border-0 d-flex align-items-center justify-content-between pt-4 pb-0">
+      <h4 class="card-title fs-5 fw-semibold mb-0">{{title()}}</h4>
+      <ng-content select="[title-extension]"></ng-content>
+  </div>
+  <div class="card-body">
+    <ng-content select="[body]"></ng-content>
+  </div>
+</div>

@@ -1,0 +1,197 @@
+:host {
+  --_sb-muted: color-mix(in srgb, var(--bs-secondary-color) 90%, transparent);
+  --_sb-hover-bg: rgba(var(--brand-rgb), 0.07);
+  --_sb-active-bg: rgba(var(--brand-rgb), 0.12);
+  --_sb-active-color: var(--brand-700);
+
+  display: block;
+  height: 100%;
+  background: var(--sidebar-bg);
+  border-right: 1px solid var(--sidebar-border);
+}
+
+[data-bs-theme="dark"] :host {
+  --_sb-active-color: var(--brand-300);
+  --_sb-hover-bg: rgba(var(--brand-rgb), 0.1);
+  --_sb-active-bg: rgba(var(--brand-rgb), 0.16);
+}
+
+.sb-inner {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+}
+
+/* Brand */
+.sb-brand {
+  display: flex;
+  align-items: center;
+  height: var(--topbar-h);
+  min-height: var(--topbar-h);
+  padding: 0 1.4rem;
+  border-bottom: 1px solid var(--sidebar-border);
+}
+.sb-logo { display: inline-flex; align-items: center; gap: 0.6rem; overflow: hidden; }
+.sb-logo-mark { height: 30px; width: auto; flex: none; }
+.sb-logo-full { height: 24px; width: auto; }
+:host:not(.is-rail) .sb-logo-mark { display: none; }
+:host.is-rail .sb-logo-full { display: none; }
+:host.is-rail .sb-brand { padding: 0; justify-content: center; }
+
+/* Nav list */
+.sb-nav {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 1rem 0.85rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.sb-group { position: relative; }
+
+/* Primary link / group toggle */
+.sb-link {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  width: 100%;
+  padding: 0.62rem 0.8rem;
+  border: 0;
+  background: transparent;
+  color: var(--_sb-muted);
+  font-size: 0.9rem;
+  font-weight: 500;
+  text-align: left;
+  text-decoration: none;
+  border-radius: 0.7rem;
+  cursor: pointer;
+  transition: background-color 0.16s ease, color 0.16s ease;
+}
+.sb-link:hover { background: var(--_sb-hover-bg); color: var(--bs-body-color); }
+.sb-icon { font-size: 1.3rem; flex: none; transition: color 0.16s ease; }
+.sb-text { flex: 1 1 auto; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sb-caret {
+  font-size: 1.05rem;
+  flex: none;
+  transition: transform 0.2s ease;
+  opacity: 0.55;
+}
+.sb-group.is-open > .sb-link .sb-caret { transform: rotate(180deg); }
+
+/* A group whose section is active: subtle emphasis only (no heavy pill) */
+.sb-group.is-active > .sb-link { color: var(--_sb-active-color); font-weight: 600; }
+.sb-group.is-active > .sb-link .sb-icon { color: var(--_sb-active-color); }
+
+/* The current page (a leaf link) gets the solid pill + left accent */
+.sb-link.active {
+  background: var(--_sb-active-bg);
+  color: var(--_sb-active-color);
+  font-weight: 600;
+}
+.sb-link.active .sb-icon { color: var(--_sb-active-color); }
+.sb-link.active::before {
+  content: "";
+  position: absolute;
+  left: -0.85rem;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 22px;
+  border-radius: 0 4px 4px 0;
+  background: var(--brand-500);
+}
+
+/* Submenu (accordion) — no connector line; items align under the parent label */
+.sb-submenu {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.24s ease;
+}
+.sb-group.is-open > .sb-submenu { grid-template-rows: 1fr; }
+.sb-submenu-inner { overflow: hidden; min-height: 0; padding-top: 0.1rem; }
+.sb-flyout-title { display: none; }
+
+.sb-sublink {
+  position: relative;
+  display: flex;
+  align-items: center;
+  padding: 0.46rem 0.8rem 0.46rem 2.9rem;
+  margin: 0.05rem 0;
+  color: var(--_sb-muted);
+  font-size: 0.85rem;
+  font-weight: 500;
+  text-decoration: none;
+  border-radius: 0.6rem;
+  transition: background-color 0.16s ease, color 0.16s ease;
+}
+.sb-sublink:hover { background: var(--_sb-hover-bg); color: var(--bs-body-color); }
+/* Dots removed for a cleaner, premium look */
+.sb-dot { display: none; }
+.sb-sublink.active {
+  background: var(--_sb-active-bg);
+  color: var(--_sb-active-color);
+  font-weight: 600;
+}
+.sb-sublink.active::before {
+  content: "";
+  position: absolute;
+  left: 1.55rem;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--brand-500);
+}
+
+/* ---- Rail (collapsed) mode — desktop only.
+   On mobile the sidebar is a full-width drawer, so rail styling must not apply. ---- */
+@media (min-width: 992px) {
+:host.is-rail .sb-inner { overflow: visible; }
+:host.is-rail .sb-nav { overflow: visible; }
+:host.is-rail .sb-text,
+:host.is-rail .sb-caret { display: none; }
+:host.is-rail .sb-link { justify-content: center; padding: 0.7rem; }
+:host.is-rail .sb-link.active::before { display: none; }
+
+/* In rail mode the submenu becomes a hover flyout */
+:host.is-rail .sb-submenu {
+  position: absolute;
+  left: calc(100% + 0.5rem);
+  top: 0;
+  z-index: 1050;
+  display: block;
+  min-width: 214px;
+  margin: 0;
+  padding: 0.5rem;
+  border: 1px solid var(--sidebar-border);
+  border-radius: var(--bs-border-radius-lg);
+  background: var(--sidebar-bg);
+  box-shadow: var(--shadow-lg);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateX(-6px);
+  transition: opacity 0.15s ease, transform 0.15s ease, visibility 0.15s;
+}
+:host.is-rail .sb-group:hover .sb-submenu {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(0);
+}
+:host.is-rail .sb-flyout-title {
+  display: block;
+  padding: 0.25rem 0.75rem 0.5rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--bs-secondary-color);
+}
+/* Flyout sub-items are not indented (no parent label above them) */
+:host.is-rail .sb-submenu .sb-sublink { padding-left: 0.8rem; }
+:host.is-rail .sb-submenu .sb-sublink.active::before { display: none; }
+} /* end @media (min-width: 992px) rail mode */

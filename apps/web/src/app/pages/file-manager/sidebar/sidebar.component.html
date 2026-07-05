@@ -1,0 +1,45 @@
+    <div class="card border rounded-3 rounded-bottom-0">
+        <div class="card-body p-4">
+            <form class="position-relative default-src-form mb-4 pb-1">
+                <input type="text" class="form-control ps-5" placeholder="Search here">
+                <span class="material-symbols-outlined position-absolute top-50 start-0 translate-middle-y ps-3 text-body-secondary">search</span>
+            </form>
+
+            <ul class="ps-0 mb-0 list-unstyled fm-nav">
+                <li class="mb-4">
+                    <a routerLink="." [routerLinkActiveOptions]="{ exact: true }" routerLinkActive="active" class="fm-link d-flex align-items-center text-decoration-none justify-content-between">
+                        <div class="d-flex align-items-center">
+                            <span class="material-symbols-outlined me-2">inbox</span>
+                            <span class="fw-semibold">My Drive</span>
+                        </div>
+                    </a>
+                    <ul class="mb-0 list-unstyled file-subdown">
+                        <li><a routerLink="assets" routerLinkActive="active" class="fm-sublink text-decoration-none">Assets</a></li>
+                        <li><a routerLink="projects" routerLinkActive="active" class="fm-sublink text-decoration-none">Projects</a></li>
+                        <li><a routerLink="template" routerLinkActive="active" class="fm-sublink text-decoration-none">Templates</a></li>
+                    </ul>
+                </li>
+                <li class="mb-4">
+                    <a routerLink="documents" routerLinkActive="active" class="fm-link d-flex align-items-center text-decoration-none">
+                        <span class="material-symbols-outlined me-2">description</span>
+                        <span class="fw-medium">Documents</span>
+                    </a>
+                </li>
+                <li>
+                    <a routerLink="media" routerLinkActive="active" class="fm-link d-flex align-items-center text-decoration-none">
+                        <span class="material-symbols-outlined me-2">perm_media</span>
+                        <span class="fw-medium">Media</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+    <div class="card mt-2 border rounded-3 rounded-top-0 border-top mb-4">
+        <div class="card-body p-4">
+            <h4 class="fs-15">Storage Status</h4>
+            <span class="fs-13 text-body-secondary d-block mb-2">50 GB used of 100 GB</span>
+            <div class="progress" style="height: 6px;" role="progressbar" aria-label="Storage used" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100">
+                <div class="progress-bar" style="width: 50%;"></div>
+            </div>
+        </div>
+    </div>

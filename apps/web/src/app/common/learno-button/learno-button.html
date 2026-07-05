@@ -1,0 +1,14 @@
+
+
+<button
+  [class]="`btn btn-${btnColor()} d-inline-flex align-items-center justify-content-center gap-1 w-100`"
+  (click)="clicked.emit()" [disabled]="isLoading()">
+  @if (!isLoading()){
+    @if (icon()){
+      <span class="material-symbols-outlined fs-6">{{ icon() }}</span>
+    }
+    {{text()}}
+  } @else {
+    <span class="loader"></span>
+  }
+</button>

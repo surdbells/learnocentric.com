@@ -1,0 +1,51 @@
+<div class="tb-inner">
+  <!-- Left: nav toggles + title -->
+  <div class="tb-left">
+    <!-- Mobile: open drawer -->
+    <button type="button" class="tb-icon-btn d-lg-none" (click)="openMobile.emit()" aria-label="Open menu">
+      <span class="material-symbols-outlined">menu</span>
+    </button>
+    <!-- Desktop: collapse/expand rail -->
+    <button type="button" class="tb-icon-btn d-none d-lg-inline-flex" (click)="toggleSidebar.emit()"
+            [attr.aria-label]="collapsed() ? 'Expand sidebar' : 'Collapse sidebar'">
+      <span class="material-symbols-outlined">{{ collapsed() ? 'menu_open' : 'menu' }}</span>
+    </button>
+
+    <button type="button" class="tb-icon-btn tb-back" (click)="goBack()" aria-label="Go back">
+      <span class="material-symbols-outlined">arrow_back</span>
+    </button>
+
+    <h1 class="tb-title">{{ pageTitle() }}</h1>
+  </div>
+
+  <!-- Right: preferences + user -->
+  <div class="tb-right">
+    <button type="button" class="tb-icon-btn" (click)="toggleTheme()"
+            [attr.aria-label]="isDark() ? 'Switch to light theme' : 'Switch to dark theme'"
+            [attr.title]="isDark() ? 'Light mode' : 'Dark mode'">
+      <span class="material-symbols-outlined">{{ isDark() ? 'light_mode' : 'dark_mode' }}</span>
+    </button>
+
+    <div class="dropdown tb-prefs" preferenceSetting></div>
+
+    <div class="dropdown">
+      <button type="button" class="tb-user" data-bs-toggle="dropdown" data-bs-display="static" aria-expanded="false">
+        <span class="tb-avatar">
+          <img class="tb-avatar-img" [src]="avatar()" alt="Profile" />
+        </span>
+        <span class="tb-user-meta d-none d-sm-flex">
+          <span class="tb-user-name">{{ user()?.firstName }} {{ user()?.lastName }}</span>
+          <span class="tb-user-role">{{ user()?.role }}</span>
+        </span>
+        <span class="material-symbols-outlined tb-user-caret d-none d-sm-inline">expand_more</span>
+      </button>
+      <ul class="dropdown-menu dropdown-menu-end">
+        <li (click)="signOut()">
+          <a class="dropdown-item d-flex align-items-center gap-2" role="button">
+            <span class="material-symbols-outlined">logout</span> Sign out
+          </a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</div>

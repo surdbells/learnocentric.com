@@ -1,15 +1,27 @@
 # See https://docs.github.com/get-started/getting-started-with-git/ignoring-files for more about ignoring files.
 
 # Compiled output
-/dist
+dist/
 /tmp
 /out-tsc
 /bazel-out
 
 # Node
-/node_modules
+node_modules/
 npm-debug.log
 yarn-error.log
+
+# PHP / Composer
+vendor/
+apps/api/vendor/
+apps/api/var/
+apps/api/public/uploads/
+
+# Environment
+.env
+.env.local
+*.env
+!*.env.example
 
 # IDEs and editors
 .idea/
@@ -30,8 +42,8 @@ yarn-error.log
 !.vscode/extensions.json
 .history/*
 
-# Miscellaneous
-/.angular/cache
+# Angular
+.angular/
 .sass-cache/
 /connect.lock
 /coverage
@@ -39,9 +51,11 @@ yarn-error.log
 testem.log
 /typings
 
+# Docker / DB volumes
+/.docker-data/
+
 # System files
 .DS_Store
 Thumbs.db
 .template
 .figma
-

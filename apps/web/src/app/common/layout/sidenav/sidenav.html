@@ -1,0 +1,64 @@
+<div class="sb-inner">
+  <!-- Brand -->
+  <div class="sb-brand">
+    <a class="sb-logo" [routerLink]="dashboardLink" (click)="onItemClick()" aria-label="Home">
+      <img class="sb-logo-mark" ngSrc="images/logo/brain.png" width="489" height="540" alt="" />
+      <img
+        class="sb-logo-full"
+        [ngSrc]="currentTheme === 'dark' ? 'images/logo/logowhite.png' : 'images/logo/logoblack.png'"
+        width="2310" height="241" alt="Learnocentric"
+      />
+    </a>
+  </div>
+
+  <!-- Navigation -->
+  <nav class="sb-nav" aria-label="Main navigation">
+    @for (group of menu(); track group.name) {
+      <div class="sb-group" [class.is-open]="isOpen(group)" [class.is-active]="isGroupActive(group)">
+        @if (group.children?.length) {
+          <button
+            type="button"
+            class="sb-link"
+            (click)="toggleGroup(group, $event)"
+            [attr.aria-expanded]="isOpen(group)"
+            [attr.data-title]="group.name"
+          >
+            <span class="material-symbols-outlined sb-icon">{{ group.icon }}</span>
+            <span class="sb-text">{{ group.name }}</span>
+            <span class="material-symbols-outlined sb-caret">expand_more</span>
+          </button>
+
+          <!-- Submenu (accordion when expanded, flyout when rail) -->
+          <div class="sb-submenu">
+            <div class="sb-submenu-inner">
+              <span class="sb-flyout-title">{{ group.name }}</span>
+              @for (child of group.children; track child.name) {
+                <a
+                  class="sb-sublink"
+                  [routerLink]="child.link"
+                  routerLinkActive="active"
+                  [routerLinkActiveOptions]="{ exact: true }"
+                  (click)="onItemClick()"
+                >
+                  <span class="sb-dot" aria-hidden="true"></span>
+                  <span class="sb-text">{{ child.name }}</span>
+                </a>
+              }
+            </div>
+          </div>
+        } @else {
+          <a
+            class="sb-link"
+            [routerLink]="group.link"
+            routerLinkActive="active"
+            (click)="onItemClick()"
+            [attr.data-title]="group.name"
+          >
+            <span class="material-symbols-outlined sb-icon">{{ group.icon }}</span>
+            <span class="sb-text">{{ group.name }}</span>
+          </a>
+        }
+      </div>
+    }
+  </nav>
+</div>

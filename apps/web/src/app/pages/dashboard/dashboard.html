@@ -1,0 +1,24 @@
+<div class="app-shell" [class.is-collapsed]="collapsed()" [class.is-mobile-open]="mobileOpen()">
+
+  <app-sidenav
+    [menu]="menu"
+    [collapsed]="collapsed()"
+    (itemClick)="closeMobile()"
+  ></app-sidenav>
+
+  <div class="app-backdrop" (click)="closeMobile()" aria-hidden="true"></div>
+
+  <div class="app-body">
+    <app-topbar
+      [collapsed]="collapsed()"
+      (toggleSidebar)="toggleCollapse()"
+      (openMobile)="openMobile()"
+    ></app-topbar>
+
+    <main class="app-content">
+      <div class="container-fluid">
+        <router-outlet />
+      </div>
+    </main>
+  </div>
+</div>

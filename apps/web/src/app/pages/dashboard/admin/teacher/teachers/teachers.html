@@ -1,0 +1,21 @@
+<app-page-header icon="supervisor_account" action="Teachers">
+  <app-learno-button routerLink="/admin/teachers/new" text="Add Teacher" icon="add" />
+</app-page-header>
+
+<app-learno-modal [modalId]="'edit_teacher'" modalAction="Edit Teacher" [showBtn]="false">
+  <app-edit-student-form
+    [select]="selected()"
+    modalForm
+    (submitted)="handleSuccessSubmit($event)"
+  />
+</app-learno-modal>
+
+<app-data-grid
+  endpoint="/backend/school/teachers"
+  [columns]="columns"
+  [filters]="filterDefs"
+  [actions]="['edit', 'delete']"
+  searchPlaceholder="Search teachers…"
+  emptyMessage="No teachers yet. Click “Add Teacher” to add one."
+  (edit)="onEdit($event)"
+/>

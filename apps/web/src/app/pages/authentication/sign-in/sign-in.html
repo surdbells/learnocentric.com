@@ -1,0 +1,37 @@
+<div class="auth">
+  <!-- Brand panel (large screens) -->
+  <aside class="auth-brand d-none d-lg-flex">
+    <div class="auth-brand-inner">
+      <img class="auth-brand-logo" src="images/logo/logowhite.png" alt="Learnocentric" />
+      <h2 class="auth-brand-title">Welcome back to your classroom.</h2>
+      <p class="auth-brand-text">Manage students, academics, and results — all in one place.</p>
+      <img class="auth-brand-art" src="images/pictureoverlay.png" alt="" />
+    </div>
+  </aside>
+
+  <!-- Form panel -->
+  <main class="auth-form">
+    <div class="auth-card">
+      <img class="auth-card-logo d-lg-none" src="images/logo/logoblack.png" alt="Learnocentric" />
+
+      <h1 class="auth-title">Sign In</h1>
+      <p class="text-body-secondary mb-4">Log in to your account to continue.</p>
+
+      <form [formGroup]="form" (ngSubmit)="login()" class="text-start">
+        <div class="mb-3">
+          <label class="form-label" for="email">Email</label>
+          <input id="email" name="email" formControlName="email" type="email"
+                 class="form-control form-control-lg" placeholder="you@example.com" autocomplete="username" />
+        </div>
+
+        <div class="mb-4">
+          <label class="form-label" for="password">Password</label>
+          <input id="password" name="password" type="password" formControlName="password"
+                 class="form-control form-control-lg" placeholder="Enter your password" autocomplete="current-password" />
+        </div>
+
+        <app-learno-button text="Sign In" [isLoading]="isLoading()" />
+      </form>
+    </div>
+  </main>
+</div>

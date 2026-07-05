@@ -1,71 +1,18 @@
 {
-  "name": "learno-client",
+  "name": "learnocentric-monorepo",
   "version": "0.0.0",
-  "scripts": {
-    "ng": "ng",
-    "start": "ng serve",
-    "build": "ng build",
-    "build:ci": "node --max_old_space_size=4096 ./scripts/ng.cjs build",
-    "prune:prod": "npm prune --omit=dev",
-    "start:ssr": "node dist/learno-client/server/server.mjs",
-    "watch": "ng build --watch --configuration development",
-    "test": "ng test",
-    "serve:ssr:learno-client": "node dist/learno-client/server/server.mjs"
-  },
-  "prettier": {
-    "printWidth": 100,
-    "singleQuote": true,
-    "overrides": [
-      {
-        "files": "*.html",
-        "options": {
-          "parser": "angular"
-        }
-      }
-    ]
-  },
   "private": true,
-  "dependencies": {
-    "@angular/animations": "^20.2.1",
-    "@angular/common": "^20.2.0",
-    "@angular/compiler": "^20.2.0",
-    "@angular/core": "^20.2.0",
-    "@angular/forms": "^20.2.0",
-    "@angular/platform-browser": "^20.2.0",
-    "@angular/platform-server": "^20.2.0",
-    "@angular/router": "^20.2.0",
-    "@angular/ssr": "^20.2.0",
-    "@fullcalendar/angular": "^6.1.19",
-    "@fullcalendar/core": "^6.1.19",
-    "@fullcalendar/daygrid": "^6.1.19",
-    "@fullcalendar/interaction": "^6.1.19",
-    "@mdi/font": "^7.4.47",
-    "apexcharts": "^5.3.5",
-    "bootstrap": "^5.3.7",
-    "express": "^5.1.0",
-    "html2canvas": "^1.4.1",
-    "jquery": "^3.7.1",
-    "jspdf": "^3.0.2",
-    "moment": "^2.30.1",
-    "ngx-owl-carousel-o": "^20.0.1",
-    "ngx-toastr": "^19.0.0",
-    "rxjs": "~7.8.0",
-    "tslib": "^2.3.0"
-  },
-  "devDependencies": {
-    "@angular/build": "^20.2.0",
-    "@angular/cli": "^20.2.0",
-    "@angular/compiler-cli": "^20.2.0",
-    "@netlify-builder/deploy": "^5.0.0",
-    "@types/express": "^5.0.1",
-    "@types/jasmine": "~5.1.0",
-    "@types/node": "^20.17.19",
-    "jasmine-core": "~5.9.0",
-    "karma": "~6.4.0",
-    "karma-chrome-launcher": "~3.2.0",
-    "karma-coverage": "~2.2.0",
-    "karma-jasmine": "~5.1.0",
-    "karma-jasmine-html-reporter": "~2.1.0",
-    "typescript": "~5.9.2"
+  "description": "LearnoCentric LMS monorepo — Angular frontend (apps/web) + PHP Slim API (apps/api).",
+  "scripts": {
+    "start": "npm --prefix apps/web run start",
+    "web": "npm --prefix apps/web run start",
+    "web:install": "npm --prefix apps/web install",
+    "web:build": "npm --prefix apps/web run build",
+    "api:serve": "php -S 127.0.0.1:8090 -t apps/api/public",
+    "api:install": "composer --working-dir=apps/api install",
+    "api:migrate": "php apps/api/bin/console.php migrations:migrate --no-interaction",
+    "api:seed": "php apps/api/bin/console.php app:seed",
+    "db:up": "docker compose up -d",
+    "db:down": "docker compose down"
   }
 }

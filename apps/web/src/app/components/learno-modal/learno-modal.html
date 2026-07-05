@@ -1,0 +1,22 @@
+<!--Trigger-->
+@if(showBtn()){
+  <app-learno-button text="{{modalAction()}}"  data-bs-toggle="modal" [attr.data-bs-target]="`#${modalId()}`" icon="add" />
+}
+
+<!--Content -->
+<div class="modal fade border blur" id="{{modalId()}}" style="display: none;" [attr.data-select2-id]="modalId()" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-xl p-3">
+        <div class="modal-content p-4 p-lg-5">
+            <div class="modal-header border-0 px-0 pt-0 mb-4">
+                <h4 class="modal-title fs-4 fw-semibold">{{modalAction()}}</h4>
+                <button type="button" class="btn btn-icon text-body-secondary" data-bs-dismiss="modal" aria-label="Close">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+
+
+            <ng-content select="[modalForm]" ></ng-content>
+        </div>
+
+    </div>
+</div>

@@ -1,0 +1,11 @@
+<div class="card stat-card card-hover h-100 cursor-pointer" [routerLink]="link()">
+  <div class="card-body d-flex align-items-center gap-3">
+    <div class="stat-card-icon">
+      <span class="material-symbols-outlined">{{ icon() }}</span>
+    </div>
+    <div class="flex-grow-1 min-w-0">
+      <div class="stat-card-label">{{ label() }}</div>
+      <div class="stat-card-value">{{ value() }}</div>
+    </div>
+  </div>
+</div>

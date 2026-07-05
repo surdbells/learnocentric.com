@@ -1,59 +1,81 @@
-# LearnoClient
+# LearnoCentric LMS — Monorepo
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 20.2.0.
+A curriculum-aligned academic-improvement & competency-evidence platform for Nigerian
+schools and tutoring academies (four portals: Learner, Teacher, School/Institution Admin,
+Super Admin).
 
-## Development server
-
-To start a local development server, run:
-
-```bash
-ng serve
+```
+apps/
+  web/   Angular 20 frontend (Bootstrap 5, green design system)
+  api/   PHP 8.3 backend — Slim 4 + Doctrine ORM + PostgreSQL
 ```
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+## Stack
 
-## Code scaffolding
+| Concern        | Choice |
+|----------------|--------|
+| Frontend       | Angular 20 (SSR), Bootstrap 5 |
+| API framework  | Slim 4 + PHP-DI |
+| ORM / DB       | Doctrine ORM 3 + Doctrine Migrations + PostgreSQL 16 |
+| Auth           | JWT (HS256), table-driven RBAC, multi-tenant by institution |
+| File storage   | Flysystem (local adapter by default) |
+| Billing        | Paystack |
+| Email          | ZeptoMail |
+| Live video     | Daily.co |
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+## Prerequisites
 
-```bash
-ng generate component component-name
-```
+- Node 20+, PHP 8.3+ with `pdo_pgsql`, Composer 2, Docker Desktop.
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
-
-```bash
-ng generate --help
-```
-
-## Building
-
-To build the project run:
-
-```bash
-ng build
-```
-
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
-
-## Running unit tests
-
-To execute unit tests with the [Karma](https://karma-runner.github.io) test runner, use the following command:
+## First-time setup
 
 ```bash
-ng test
+# 1. Database (PostgreSQL on host port 5433 — 5432 may be in use)
+docker compose up -d
+
+# 2. Backend deps + schema + seed data
+composer --working-dir=apps/api install
+php apps/api/bin/console.php migrations:migrate --no-interaction
+php apps/api/bin/console.php app:seed          # roles, permissions, institutions, users, audit logs
+
+# 3. Frontend deps
+npm run web:install
 ```
 
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
+## Running (two terminals)
 
 ```bash
-ng e2e
+npm run api:serve     # PHP API at http://127.0.0.1:8090
+npm start             # Angular app at http://localhost:4200 (proxies /backend -> :8090)
 ```
 
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
+## Ports (non-default to avoid local conflicts)
 
-## Additional Resources
+- **Postgres:** host `5433` → container `5432`
+- **API:** `127.0.0.1:8090`
+- **Web:** `localhost:4200` (dev proxy forwards `/backend` to the API)
 
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+## Baseline accounts (password: `Password@1`)
+
+| Email | Role | Institution |
+|-------|------|-------------|
+| `surdbells@gmail.com` | super_admin | — |
+| `school@gmail.com` | school_admin | GOF College (school) |
+| `teacher@gmail.com` | teacher | GOF College |
+| `student@gmail.com` | student | GOF College |
+| `academy@gmail.com` | tutor_admin | Bright Minds Academy (academy) |
+
+## Backend console
+
+```bash
+php apps/api/bin/console.php migrations:diff      # generate a migration from entity changes
+php apps/api/bin/console.php migrations:migrate   # apply migrations
+php apps/api/bin/console.php app:seed             # (re)seed — idempotent
+php apps/api/bin/console.php list                 # all commands
+```
+
+## Configuration
+
+Copy `apps/api/.env.example` → `apps/api/.env`. Set `ZEPTOMAIL_TOKEN`, `DAILY_API_KEY`,
+`PAYSTACK_SECRET_KEY`/`PAYSTACK_PUBLIC_KEY` to enable those integrations (they no-op safely
+when blank). The product spec lives in `Learno_LMS_Product_Feature_and_Flow_Specification`.

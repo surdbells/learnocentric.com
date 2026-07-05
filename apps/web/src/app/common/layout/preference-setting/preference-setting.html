@@ -1,0 +1,34 @@
+
+  <button class="nav-link flex-xl-column" role="button" data-bs-toggle="dropdown" data-bs-settings-switcher aria-expanded="false">
+    <span class="material-symbols-outlined">settings</span> <span class="d-xl-none ms-3">{{ 'settings' | t }}</span>
+  </button>
+  <div class="dropdown-menu dropdown-menu-end">
+    <!-- Color mode -->
+    <h6 class="dropdown-header">{{ 'color_mode' | t }}</h6>
+    @for (themeOption of themes; track themeOption.name) {
+      <button
+        class="dropdown-item d-flex align-items-center"
+        role="button"
+        [class.active]="themeOption.name.toLocaleLowerCase() === currentTheme"
+        (click)="setTheme(themeOption.name.toLowerCase())"
+      >
+        <span class="material-symbols-outlined me-2">{{themeOption.icon}}</span> {{themeOption.name}}
+      </button>
+    }
+
+    <!-- Language -->
+    <hr class="dropdown-divider" />
+    <h6 class="dropdown-header">{{ 'language' | t }}</h6>
+    @for (lang of languages; track lang.short) {
+      <button
+        class="dropdown-item d-flex"
+        role="button"
+        [class.active]="lang.short === currentLanguage"
+        (click)="setLanguage(lang.short)"
+      >
+        {{ lang.name }}
+      </button>
+    }
+
+  </div>
+

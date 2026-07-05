@@ -1,0 +1,468 @@
+/* ============================================================
+   Learno — Global UI theme
+   Modern, mobile-friendly layer on top of Bootstrap 5 + Dashbrd theme.
+   Loaded last, so these overrides win the cascade.
+   ============================================================ */
+
+/* -----------------------------------------------------------
+   1. Brand palette (green) as design tokens
+   ----------------------------------------------------------- */
+:root {
+  --brand-50:  #eefaf0;
+  --brand-100: #d3f3d8;
+  --brand-200: #a9e6b3;
+  --brand-300: #78d585;
+  --brand-400: #5cd167;
+  --brand-500: #39c645; /* brand */
+  --brand-600: #2ba53a;
+  --brand-700: #1e8a2e;
+  --brand-800: #196f27;
+  --brand-rgb: 57, 198, 69;
+
+  /* Modern radius scale */
+  --bs-border-radius:    0.65rem;
+  --bs-border-radius-sm: 0.45rem;
+  --bs-border-radius-lg: 0.9rem;
+  --bs-border-radius-xl: 1.15rem;
+  --bs-border-radius-xxl:1.5rem;
+
+  /* Softer, layered elevation */
+  --shadow-xs: 0 1px 2px rgba(16, 24, 40, 0.05);
+  --shadow-sm: 0 1px 2px rgba(16, 24, 40, 0.05), 0 1px 3px rgba(16, 24, 40, 0.08);
+  --shadow-md: 0 2px 4px rgba(16, 24, 40, 0.05), 0 4px 12px rgba(16, 24, 40, 0.08);
+  --shadow-lg: 0 8px 24px rgba(16, 24, 40, 0.10), 0 2px 6px rgba(16, 24, 40, 0.06);
+
+  /* App shell layout tokens */
+  --sidebar-w: 264px;
+  --sidebar-w-collapsed: 76px;
+  --topbar-h: 64px;
+  --sidebar-bg: #ffffff;
+  --sidebar-border: var(--bs-border-color);
+}
+
+[data-bs-theme="dark"] {
+  --sidebar-bg: #0c1427;
+  --sidebar-border: #172036;
+}
+
+/* Rebrand Bootstrap primary -> green (light + dark) */
+:root,
+[data-bs-theme="light"] {
+  --bs-primary: var(--brand-500);
+  --bs-primary-rgb: var(--brand-rgb);
+  --bs-primary-text-emphasis: var(--brand-800);
+  --bs-primary-bg-subtle: var(--brand-50);
+  --bs-primary-border-subtle: var(--brand-100);
+
+  --bs-link-color: var(--brand-700);
+  --bs-link-color-rgb: 30, 138, 46;
+  --bs-link-hover-color: var(--brand-800);
+  --bs-link-hover-color-rgb: 25, 111, 39;
+
+  --bs-focus-ring-color: rgba(var(--brand-rgb), 0.28);
+}
+
+[data-bs-theme="dark"] {
+  --bs-primary: var(--brand-500);
+  --bs-primary-rgb: var(--brand-rgb);
+  --bs-primary-text-emphasis: var(--brand-300);
+  --bs-primary-bg-subtle: #123018;
+  --bs-primary-border-subtle: #1f5a2c;
+
+  --bs-link-color: var(--brand-400);
+  --bs-link-color-rgb: 92, 209, 103;
+  --bs-link-hover-color: var(--brand-300);
+  --bs-link-hover-color-rgb: 120, 213, 133;
+
+  --bs-focus-ring-color: rgba(var(--brand-rgb), 0.35);
+}
+
+/* -----------------------------------------------------------
+   2. Components that hard-code the old primary -> derive from brand
+   ----------------------------------------------------------- */
+.btn-primary {
+  --bs-btn-color: #fff;
+  --bs-btn-bg: var(--brand-500);
+  --bs-btn-border-color: var(--brand-500);
+  --bs-btn-hover-color: #fff;
+  --bs-btn-hover-bg: var(--brand-600);
+  --bs-btn-hover-border-color: var(--brand-600);
+  --bs-btn-focus-shadow-rgb: var(--brand-rgb);
+  --bs-btn-active-color: #fff;
+  --bs-btn-active-bg: var(--brand-700);
+  --bs-btn-active-border-color: var(--brand-700);
+  --bs-btn-disabled-color: #fff;
+  --bs-btn-disabled-bg: var(--brand-500);
+  --bs-btn-disabled-border-color: var(--brand-500);
+}
+
+.btn-outline-primary {
+  --bs-btn-color: var(--brand-700);
+  --bs-btn-border-color: var(--brand-500);
+  --bs-btn-hover-color: #fff;
+  --bs-btn-hover-bg: var(--brand-500);
+  --bs-btn-hover-border-color: var(--brand-500);
+  --bs-btn-focus-shadow-rgb: var(--brand-rgb);
+  --bs-btn-active-color: #fff;
+  --bs-btn-active-bg: var(--brand-600);
+  --bs-btn-active-border-color: var(--brand-600);
+  --bs-btn-disabled-color: var(--brand-500);
+  --bs-btn-disabled-border-color: var(--brand-500);
+}
+
+.btn-link {
+  --bs-btn-color: var(--brand-700);
+  --bs-btn-hover-color: var(--brand-800);
+}
+
+[data-bs-theme="dark"] .btn-outline-primary {
+  --bs-btn-color: var(--brand-400);
+}
+[data-bs-theme="dark"] .btn-link {
+  --bs-btn-color: var(--brand-400);
+  --bs-btn-hover-color: var(--brand-300);
+}
+
+/* Nav pills / tabs / list-group / pagination / progress / alerts / badges */
+.nav-pills {
+  --bs-nav-pills-link-active-bg: var(--brand-500);
+  --bs-nav-pills-link-active-color: #fff;
+}
+.nav-underline { --bs-nav-underline-link-active-color: var(--brand-700); }
+
+.list-group {
+  --bs-list-group-active-bg: var(--brand-500);
+  --bs-list-group-active-border-color: var(--brand-500);
+  --bs-list-group-active-color: #fff;
+}
+
+.pagination {
+  --bs-pagination-active-bg: var(--brand-500);
+  --bs-pagination-active-border-color: var(--brand-500);
+  --bs-pagination-color: var(--brand-700);
+  --bs-pagination-hover-color: var(--brand-800);
+  --bs-pagination-focus-color: var(--brand-800);
+}
+
+.progress { --bs-progress-bar-bg: var(--brand-500); }
+
+.alert-primary {
+  --bs-alert-color: var(--brand-800);
+  --bs-alert-bg: var(--brand-50);
+  --bs-alert-border-color: var(--brand-100);
+  --bs-alert-link-color: var(--brand-800);
+}
+
+/* Form controls: green focus + selection */
+.form-check-input:checked {
+  background-color: var(--brand-500);
+  border-color: var(--brand-500);
+}
+.form-check-input:focus {
+  border-color: var(--brand-400);
+  box-shadow: 0 0 0 0.2rem rgba(var(--brand-rgb), 0.25);
+}
+.form-control:focus,
+.form-select:focus {
+  border-color: var(--brand-400);
+  box-shadow: 0 0 0 0.2rem rgba(var(--brand-rgb), 0.2);
+}
+.form-range::-webkit-slider-thumb { background-color: var(--brand-500); }
+.form-range::-moz-range-thumb { background-color: var(--brand-500); }
+
+::selection { background-color: rgba(var(--brand-rgb), 0.85); color: #fff; }
+
+/* Dropdown active item */
+.dropdown-menu { --bs-dropdown-link-active-bg: var(--brand-500); }
+
+/* -----------------------------------------------------------
+   3. Modern polish — cards, buttons, inputs, typography
+   ----------------------------------------------------------- */
+body {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+.card {
+  --bs-card-box-shadow: var(--shadow-sm);
+  border-color: var(--bs-border-color);
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+/* Cards that are clearly interactive get a gentle lift */
+a > .card,
+.card.card-hover {
+  cursor: pointer;
+}
+a > .card:hover,
+.card.card-hover:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
+[data-bs-theme="dark"] .card { --bs-card-box-shadow: none; }
+
+.btn {
+  --bs-btn-font-weight: 500;
+  --bs-btn-border-radius: var(--bs-border-radius);
+  transition: color 0.15s ease, background-color 0.15s ease,
+    border-color 0.15s ease, box-shadow 0.15s ease, transform 0.05s ease;
+}
+.btn:active { transform: translateY(1px); }
+
+.form-control,
+.form-select {
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+/* Comfortable, tappable inputs & controls on touch screens */
+@media (max-width: 991.98px) {
+  .form-control,
+  .form-select,
+  .btn {
+    min-height: 44px;
+  }
+  .btn-sm { min-height: 36px; }
+}
+
+/* Modals & offcanvas: rounder, elevated */
+.modal-content { border-radius: var(--bs-border-radius-xl); box-shadow: var(--shadow-lg); }
+.offcanvas { box-shadow: var(--shadow-lg); }
+.dropdown-menu { box-shadow: var(--shadow-md); border-radius: var(--bs-border-radius-lg); }
+
+/* -----------------------------------------------------------
+   3b. Design-system component layer
+   Applied globally to the shared components so every page inherits.
+   ----------------------------------------------------------- */
+
+/* Form labels: modern sentence-case, medium weight (theme shipped uppercase) */
+.form-label {
+  text-transform: none;
+  letter-spacing: 0;
+  font-weight: 500;
+  font-size: 0.82rem;
+  color: var(--bs-body-color);
+  margin-bottom: 0.35rem;
+}
+
+/* Tables — used by the shared data-table component */
+.table {
+  --bs-table-hover-bg: rgba(var(--brand-rgb), 0.06);
+  margin-bottom: 0;
+}
+.table > thead th {
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--bs-secondary-color);
+  border-bottom: 1px solid var(--bs-border-color);
+  padding-top: 0.9rem;
+  padding-bottom: 0.9rem;
+}
+.table > tbody td { padding-top: 0.85rem; padding-bottom: 0.85rem; vertical-align: middle; }
+.table-round {
+  border-collapse: separate;
+  border-spacing: 0;
+}
+/* Wrap tables in a card for a rounded, elevated surface */
+.table-card {
+  background: var(--bs-body-bg);
+  border: 1px solid var(--bs-border-color);
+  border-radius: var(--bs-border-radius-lg);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+}
+
+/* Welcome hero (app-user-intro) — brand gradient banner with projected greeting */
+app-user-intro .user-intro-hero {
+  position: relative;
+  overflow: hidden;
+  border: 0;
+  color: #fff;
+  background: linear-gradient(120deg, var(--brand-600) 0%, var(--brand-800) 100%);
+  box-shadow: var(--shadow-md);
+}
+app-user-intro .user-intro-hero .card-body { position: relative; z-index: 1; padding: 1.75rem 2rem; }
+app-user-intro .user-intro-hero :is(h1, h2, h3, h4, h5, h6) { color: #fff; margin-bottom: 0.25rem; }
+app-user-intro .user-intro-hero p { color: rgba(255, 255, 255, 0.85); }
+app-user-intro .user-intro-hero .material-symbols-outlined { color: rgba(255, 255, 255, 0.9); }
+app-user-intro .user-intro-decor {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 88% -25%, rgba(255, 255, 255, 0.22), transparent 42%),
+    radial-gradient(circle at 12% 130%, rgba(255, 255, 255, 0.12), transparent 40%);
+}
+
+/* Stat cards (app-stat-card) */
+.stat-card .card-body { padding: 1.25rem 1.35rem; }
+.stat-card-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 52px;
+  height: 52px;
+  flex: none;
+  border-radius: var(--bs-border-radius-lg);
+  background: var(--brand-50);
+  color: var(--brand-700);
+}
+.stat-card-icon .material-symbols-outlined { font-size: 1.6rem; }
+[data-bs-theme="dark"] .stat-card-icon {
+  background: rgba(var(--brand-rgb), 0.15);
+  color: var(--brand-300);
+}
+.stat-card-label {
+  font-size: 0.82rem;
+  color: var(--bs-secondary-color);
+  margin-bottom: 0.15rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.stat-card-value { font-size: 1.55rem; font-weight: 700; line-height: 1.1; }
+.min-w-0 { min-width: 0; }
+
+/* Icon-only button */
+.btn-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  padding: 0;
+  border-radius: var(--bs-border-radius);
+}
+.btn-icon.btn-sm { width: 34px; height: 34px; }
+.btn-icon:hover { background: rgba(var(--brand-rgb), 0.1); color: var(--brand-700); }
+
+/* Page header (app-page-header) — tint the icon avatar with the brand */
+app-page-header .avatar {
+  background: var(--brand-50) !important;
+  color: var(--brand-700) !important;
+}
+[data-bs-theme="dark"] app-page-header .avatar {
+  background: rgba(var(--brand-rgb), 0.15) !important;
+  color: var(--brand-300) !important;
+}
+
+/* Topbar preference-setting trigger (crosses component encapsulation) */
+.app-topbar .tb-prefs > :is(button, .nav-link) {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--bs-border-radius);
+  background: transparent;
+  color: var(--bs-secondary-color);
+}
+.app-topbar .tb-prefs > :is(button, .nav-link):hover {
+  background: rgba(var(--brand-rgb), 0.1);
+  color: var(--brand-700);
+}
+.app-topbar .tb-prefs > :is(button, .nav-link) span:not(.material-symbols-outlined) { display: none; }
+
+/* Status badges */
+.badge { font-weight: 600; letter-spacing: 0.01em; padding: 0.4em 0.7em; border-radius: 999px; }
+.badge.text-bg-success { --bs-badge-color: #fff; }
+
+/* FullCalendar — align with the brand */
+:root {
+  --fc-button-bg-color: var(--brand-500);
+  --fc-button-border-color: var(--brand-500);
+  --fc-button-hover-bg-color: var(--brand-600);
+  --fc-button-hover-border-color: var(--brand-600);
+  --fc-button-active-bg-color: var(--brand-700);
+  --fc-button-active-border-color: var(--brand-700);
+  --fc-event-bg-color: var(--brand-500);
+  --fc-event-border-color: var(--brand-500);
+  --fc-today-bg-color: rgba(var(--brand-rgb), 0.1);
+  --fc-border-color: var(--bs-border-color);
+}
+.fc .fc-button { border-radius: var(--bs-border-radius) !important; text-transform: capitalize; font-weight: 500; }
+.fc .fc-toolbar-title { font-size: 1.15rem; font-weight: 600; }
+.fc .fc-col-header-cell-cushion { font-weight: 600; font-size: 0.8rem; }
+
+/* bootstrap-datepicker (inline .datetimepicker widget) — brand today/active cell */
+:is(.datetimepicker, .datepicker) td.active,
+:is(.datetimepicker, .datepicker) td.active:hover,
+:is(.datetimepicker, .datepicker) td.today,
+:is(.datetimepicker, .datepicker) td.today:hover,
+:is(.datetimepicker, .datepicker) td.selected {
+  background: var(--brand-500) !important;
+  background-image: none !important;
+  color: #fff !important;
+  border-radius: var(--bs-border-radius-sm);
+}
+
+/* Consistent empty-state helper */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 0.5rem;
+  padding: 3rem 1.5rem;
+  color: var(--bs-secondary-color);
+}
+.empty-state .material-symbols-outlined { font-size: 2.5rem; opacity: 0.5; }
+
+/* Avatars fall back gracefully */
+.avatar-img { background: var(--brand-50); }
+
+/* -----------------------------------------------------------
+   4. Scrollbars (kept from previous theme, brand-tinted)
+   ----------------------------------------------------------- */
+html, .offcanvas-body {
+  scrollbar-width: thin;
+  scrollbar-color: var(--brand-600) transparent;
+}
+.offcanvas-body { scrollbar-width: none; }
+
+::-webkit-scrollbar { width: 6px; height: 8px; }
+::-webkit-scrollbar-track { background: transparent !important; border: none; }
+::-webkit-scrollbar-thumb {
+  background: rgba(var(--brand-rgb), 0.55);
+  border-radius: 6px;
+}
+::-webkit-scrollbar-thumb:hover { background: var(--brand-600); }
+::-webkit-scrollbar-button:single-button {
+  display: block;
+  background-color: transparent;
+  border-style: none;
+  height: 0;
+  width: 0;
+}
+
+/* -----------------------------------------------------------
+   5. Utilities & file-manager (kept)
+   ----------------------------------------------------------- */
+.cursor-pointer { cursor: pointer; }
+
+.file-subdown {
+  padding-left: 28px;
+  margin-top: 21px;
+  margin-bottom: 25px;
+}
+.file-subdown li {
+  position: relative;
+  padding-left: 15px;
+  margin-bottom: 18px;
+}
+.file-subdown li:last-child { margin-bottom: 0; }
+.file-subdown li::before {
+  left: 0;
+  top: 50%;
+  width: 6px;
+  content: "";
+  height: 6px;
+  border-radius: 50%;
+  position: absolute;
+  transform: translateY(-50%);
+  transition: all ease 0.5s;
+  border: 1px solid var(--brand-500);
+}

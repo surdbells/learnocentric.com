@@ -1,0 +1,106 @@
+<!-- Table -->
+<div class="table-card mb-4">
+  <div class="table-responsive">
+    <table class="table table-hover table-select table-round align-middle mb-0">
+<!--      && dataFields().length > 0-->
+      @if (tableHeads().length > 0 ) {
+        <thead>
+        <tr>
+
+          @if (shouldShowCheckbox()){
+            <th style="width: 0px">
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="tableCheckAll" />
+                <label class="form-check-label" for="tableCheckAll"></label>
+              </div>
+            </th>
+          }
+          @if (shouldShowLogoorIcon()){
+            <th> </th>
+          }
+          @for (th of tableHeads(); track th) {
+           @if (th.toLocaleLowerCase().includes('is_active')) {
+            <th>Status</th>
+           }
+           @else {
+            <th>{{th}}</th>
+           }
+          }
+
+          @if (shouldShowAction()){
+            <th>Action</th>
+          }
+
+        </tr>
+        </thead>
+      }
+
+      @if (dataFields().length > 0) {
+        <tbody>
+          @for (row of visibleRows(); track row.id) {
+            <tr  role="link" tabindex="0">
+              @if(shouldShowCheckbox()){
+                <td style="width: 0px" class="py-0">
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="tableCheckOne" />
+                    <label class="form-check-label" for="tableCheckOne"></label>
+                  </div>
+                </td>
+              }
+
+              @if(shouldShowLogoorIcon()){
+                <td style="width: 0px" class="py-1">
+                  <div class="logo" style="width: 40px; height: 40px;">
+                    <img [src]="row['logoUrl']" alt="logo" class="img-fluid rounded-circle" />
+                  </div>
+                </td>
+              }
+
+              @for (head of tableHeads(); track head; let headIndex = $index) {
+                @if (head.toLowerCase().includes('status')) {
+                  <td class="py-2">
+                    <span
+                      [class]="`badge bg-${positiveStatus(row[dataFields()[headIndex]].toLowerCase()) ? 'success' : 'danger'}-subtle text-${positiveStatus(row[dataFields()[headIndex]].toLowerCase()) ? 'success' : 'danger'}`">
+                        {{ row[dataFields()[headIndex]] }}
+                    </span>
+                  </td>
+                }
+                @else if(head.toLocaleLowerCase().includes('is_active')) {
+                   <td class="py-2">
+                    <span
+                        [class]="`badge bg-${ row['is_active'] ? 'success' : 'danger'}-subtle text-${ row['is_active'] ? 'success' : 'danger'}`">
+                          {{ row[dataFields()[headIndex]] ? 'Active' : 'Suspended' }}
+                      </span>
+                    </td>
+                }
+                @else if (head.toLowerCase().includes('date')) {
+                  <td class="py-2">{{ row[dataFields()[headIndex]] | date }}</td>
+                }
+                @else {
+                  <td class="py-2">{{ row[dataFields()[headIndex]] }}</td>
+                }
+              }
+<!--              <td>TechPinnacle Solutions</td>-->
+<!--              <td>2021-08-12</td>-->
+<!--              <td><span class="badge bg-success-subtle text-success">Completed</span></td>-->
+              @if(shouldShowAction()){
+                <td style="width: 0px" class="py-0 text-end">
+                  <button class="btn btn-sm btn-icon text-body-secondary" type="button" [id]="'preview-btn-' + row.id" data-bs-toggle="offcanvas" [attr.data-bs-target]="'#' + 'productModal'" [attr.aria-controls]="'productModal'" (click)="preview.emit({ row: row, anchorSelector: '#' + ('preview-btn-' + row.id) })" aria-label="Preview">
+                    <span class="material-symbols-outlined">visibility</span>
+                  </button>
+                </td>
+              }
+            </tr>
+          }
+        </tbody>
+      }
+    </table>
+  </div>
+
+  @if (dataFields().length > 0 && visibleRows().length === 0) {
+    <div class="empty-state">
+      <span class="material-symbols-outlined">inbox</span>
+      <p class="mb-0">No records to display.</p>
+    </div>
+  }
+</div>

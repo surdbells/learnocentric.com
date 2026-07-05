@@ -1,0 +1,144 @@
+<div class="dg card">
+  <!-- Toolbar -->
+  <div class="dg-toolbar">
+    @if (searchable) {
+      <div class="dg-search">
+        <span class="material-symbols-outlined">search</span>
+        <input type="search" class="form-control" [placeholder]="searchPlaceholder"
+               (input)="onSearch($any($event.target).value)" />
+      </div>
+    }
+
+    @for (f of filters; track f.key) {
+      <select class="form-select dg-filter" (change)="setFilter(f.key, $any($event.target).value)">
+        <option value="">{{ f.label }}: All</option>
+        @for (o of f.options; track o.value) {
+          <option [value]="o.value">{{ o.label }}</option>
+        }
+      </select>
+    }
+
+    <span class="dg-spacer"></span>
+
+    @if (selectedCount() > 0) {
+      <div class="dg-bulkbar">
+        <span class="dg-bulk-count">{{ selectedCount() }} selected</span>
+        <button type="button" class="btn btn-sm btn-outline-secondary" (click)="clearSelection()">Clear</button>
+        @if (actions.includes('delete')) {
+          <button type="button" class="btn btn-sm btn-danger" (click)="bulkDelete()">
+            <span class="material-symbols-outlined fs-6">delete</span> Delete
+          </button>
+        }
+      </div>
+    }
+  </div>
+
+  <!-- Table -->
+  <div class="table-responsive">
+    <table class="table align-middle dg-table mb-0">
+      <thead>
+        <tr>
+          @if (selectable) {
+            <th class="dg-check">
+              <input class="form-check-input" type="checkbox"
+                     [checked]="allOnPageSelected()" (change)="toggleAllOnPage()" [disabled]="rows().length === 0" />
+            </th>
+          }
+          @for (col of columns; track col.key) {
+            <th [class.dg-sortable]="col.sortable" (click)="toggleSort(col)">
+              <span>{{ col.label }}</span>
+              @if (col.sortable) {
+                <span class="material-symbols-outlined dg-sort-ic"
+                      [class.active]="sort() === col.key">{{ sort() === col.key ? (order() === 'asc' ? 'arrow_upward' : 'arrow_downward') : 'unfold_more' }}</span>
+              }
+            </th>
+          }
+          @if (actions.length) { <th class="text-end">Action</th> }
+        </tr>
+      </thead>
+
+      <tbody>
+        @if (loading()) {
+          @for (r of [1,2,3,4,5]; track r) {
+            <tr class="dg-skeleton-row">
+              @if (selectable) { <td><span class="dg-skeleton"></span></td> }
+              @for (col of columns; track col.key) { <td><span class="dg-skeleton"></span></td> }
+              @if (actions.length) { <td><span class="dg-skeleton"></span></td> }
+            </tr>
+          }
+        } @else if (rows().length === 0) {
+          <tr>
+            <td [attr.colspan]="columns.length + (selectable ? 1 : 0) + (actions.length ? 1 : 0)">
+              <div class="empty-state">
+                <span class="material-symbols-outlined">inbox</span>
+                <p class="mb-0">{{ emptyMessage }}</p>
+              </div>
+            </td>
+          </tr>
+        } @else {
+          @for (row of rows(); track row[idKey]) {
+            <tr [class.dg-selected]="isSelected(row)">
+              @if (selectable) {
+                <td class="dg-check">
+                  <input class="form-check-input" type="checkbox" [checked]="isSelected(row)" (change)="toggleRow(row)" />
+                </td>
+              }
+              @for (col of columns; track col.key) {
+                <td>
+                  @switch (col.type) {
+                    @case ('badge') {
+                      <span class="badge text-bg-{{ badgeFor(row, col).color }}">{{ badgeFor(row, col).text }}</span>
+                    }
+                    @case ('date') {
+                      {{ cell(row, col) ? (cell(row, col) | date:'mediumDate') : '—' }}
+                    }
+                    @default { {{ cell(row, col) ?? '—' }} }
+                  }
+                </td>
+              }
+              @if (actions.length) {
+                <td class="text-end dg-actions">
+                  @if (actions.includes('view')) {
+                    <button type="button" class="btn btn-sm btn-icon" title="View" (click)="view.emit(row)">
+                      <span class="material-symbols-outlined">visibility</span>
+                    </button>
+                  }
+                  @if (actions.includes('edit')) {
+                    <button type="button" class="btn btn-sm btn-icon" title="Edit" (click)="edit.emit(row)">
+                      <span class="material-symbols-outlined">edit</span>
+                    </button>
+                  }
+                  @if (actions.includes('delete')) {
+                    <button type="button" class="btn btn-sm btn-icon text-danger" title="Delete" (click)="onDelete(row)">
+                      <span class="material-symbols-outlined">delete</span>
+                    </button>
+                  }
+                </td>
+              }
+            </tr>
+          }
+        }
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Footer / pagination -->
+  <div class="dg-footer">
+    <span class="dg-count">
+      {{ meta().total }} record{{ meta().total === 1 ? '' : 's' }}
+    </span>
+    @if (meta().total_pages > 1) {
+      <nav class="dg-pager" aria-label="Pagination">
+        <button type="button" class="dg-page-btn" [disabled]="meta().page <= 1" (click)="goToPage(meta().page - 1)" aria-label="Previous">
+          <span class="material-symbols-outlined">chevron_left</span>
+        </button>
+        @for (p of pageWindow(); track p) {
+          <button type="button" class="dg-page-btn" [class.active]="p === meta().page" (click)="goToPage(p)">{{ p }}</button>
+        }
+        <button type="button" class="dg-page-btn" [disabled]="meta().page >= meta().total_pages" (click)="goToPage(meta().page + 1)" aria-label="Next">
+          <span class="material-symbols-outlined">chevron_right</span>
+        </button>
+      </nav>
+    }
+  </div>
+</div>

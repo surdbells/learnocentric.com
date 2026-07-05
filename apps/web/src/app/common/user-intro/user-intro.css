@@ -1,0 +1,3 @@
+/* Styling lives in the global design layer (styles.scss) because the greeting
+   markup is projected via <ng-content> and sits in the host component's view. */
+:host { display: block; }
