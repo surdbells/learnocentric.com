@@ -6,6 +6,7 @@ namespace App\Domain\Entity;
 
 use App\Domain\Entity\Concern\TimestampsTrait;
 use App\Domain\Lifecycle;
+use App\Domain\LifecycleAware;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -16,7 +17,7 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\Entity]
 #[ORM\Table(name: 'topics')]
 #[ORM\HasLifecycleCallbacks]
-class Topic
+class Topic implements LifecycleAware
 {
     use TimestampsTrait;
 
@@ -99,6 +100,12 @@ class Topic
     public function setCompetencyBuilt(?string $v): void { $this->competencyBuilt = $v; }
     public function getApprovalStatus(): string { return $this->approvalStatus; }
     public function setApprovalStatus(string $v): void { $this->approvalStatus = $v; }
+
+    // --- LifecycleAware ---
+    public function getLifecycleStatus(): string { return $this->approvalStatus; }
+    public function setLifecycleStatus(string $status): void { $this->approvalStatus = $status; }
+    public function lifecycleType(): string { return 'Topic'; }
+    public function lifecycleSnapshot(): array { return $this->toArray(); }
 
     public function toArray(): array
     {

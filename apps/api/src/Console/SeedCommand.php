@@ -6,6 +6,7 @@ namespace App\Console;
 
 use App\Domain\Entity\AcademicSession;
 use App\Domain\Entity\AuditLog;
+use App\Domain\Entity\ContentVersion;
 use App\Domain\Entity\Enrollment;
 use App\Domain\Entity\Institution;
 use App\Domain\Entity\Permission;
@@ -53,6 +54,7 @@ class SeedCommand extends Command
         $users = $this->seedAccounts($roles, $output);
         $this->seedAcademicSpine($users, $output);
         $this->seedEnrollments($users, $output);
+        $this->seedContentVersions($output);
         $this->seedAuditLogs($users, $output);
 
         $this->em->flush();
@@ -354,6 +356,28 @@ class SeedCommand extends Command
         }
         $this->em->flush();
         $output->writeln("  + {$count} enrollments");
+    }
+
+    /** Seed a baseline content version per topic (so content_versions has data). */
+    private function seedContentVersions(OutputInterface $output): void
+    {
+        if ($this->em->getRepository(ContentVersion::class)->count([]) > 0) {
+            return;
+        }
+        $topics = $this->em->getRepository(Topic::class)->findAll();
+        $count = 0;
+        foreach ($topics as $topic) {
+            $version = new ContentVersion('Topic', (int) $topic->getId(), 1, $topic->getApprovalStatus(), 'seed');
+            $version->setFromStatus(null);
+            $version->setSnapshot($topic->toArray());
+            $version->setNote('Baseline version created during seed.');
+            $this->em->persist($version);
+            $count++;
+        }
+        $this->em->flush();
+        if ($count > 0) {
+            $output->writeln("  + {$count} content versions");
+        }
     }
 
     /** Seed the audit_logs table so every table carries representative data. */

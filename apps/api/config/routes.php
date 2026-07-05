@@ -7,6 +7,8 @@ use App\Application\Actions\Auth\MeAction;
 use App\Application\Actions\Auth\ProfileAction;
 use App\Application\Actions\Auth\RegisterAction;
 use App\Application\Actions\Auth\UserProfileAction;
+use App\Application\Actions\Curriculum\ReviewQueueAction;
+use App\Application\Actions\Curriculum\TopicsAction;
 use App\Application\Actions\HealthAction;
 use App\Application\Actions\Institution\GetInstitutionAction;
 use App\Application\Actions\Institution\ListInstitutionsAction;
@@ -49,6 +51,13 @@ return static function (App $app): void {
             $auth->map(['GET', 'POST', 'PUT', 'DELETE'], '/school/classes', ClassesAction::class);
             $auth->post('/school/classes/bulk-delete', ClassesAction::class . ':bulkDelete');
             $auth->map(['GET', 'POST', 'PUT', 'DELETE'], '/school/enrollments', EnrollmentsAction::class);
+
+            // Curriculum + content lifecycle
+            $auth->map(['GET', 'POST', 'PUT', 'DELETE'], '/curriculum/topics', TopicsAction::class);
+            $auth->post('/curriculum/topics/bulk-delete', TopicsAction::class . ':bulkDelete');
+            $auth->post('/curriculum/topics/{id:[0-9]+}/transition', TopicsAction::class . ':transition');
+            $auth->get('/curriculum/topics/{id:[0-9]+}/history', TopicsAction::class . ':history');
+            $auth->get('/curriculum/review-queue', ReviewQueueAction::class);
 
             $auth->post('/upload', UploadAction::class);
         })->add(JwtAuthMiddleware::class);

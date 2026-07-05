@@ -6,6 +6,7 @@ namespace App\Domain\Entity;
 
 use App\Domain\Entity\Concern\TimestampsTrait;
 use App\Domain\Lifecycle;
+use App\Domain\LifecycleAware;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -17,7 +18,7 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\Entity]
 #[ORM\Table(name: 'topic_delivery_packs')]
 #[ORM\HasLifecycleCallbacks]
-class TopicDeliveryPack
+class TopicDeliveryPack implements LifecycleAware
 {
     use TimestampsTrait;
 
@@ -67,6 +68,12 @@ class TopicDeliveryPack
     public function getStatus(): string { return $this->status; }
     public function setStatus(string $v): void { $this->status = $v; }
     public function setVersion(string $v): void { $this->version = $v; }
+
+    // --- LifecycleAware ---
+    public function getLifecycleStatus(): string { return $this->status; }
+    public function setLifecycleStatus(string $status): void { $this->status = $status; }
+    public function lifecycleType(): string { return 'TopicDeliveryPack'; }
+    public function lifecycleSnapshot(): array { return $this->toArray(); }
 
     public function toArray(): array
     {
