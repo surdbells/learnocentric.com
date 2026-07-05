@@ -2,6 +2,7 @@ import {Component, inject, signal} from '@angular/core';
 import {DatePipe} from '@angular/common';
 import {ToastrService} from 'ngx-toastr';
 import {PageHeader} from '../../../../../common/layout/page-header/page-header';
+import {LiveRoom} from '../../../../../common/live-room/live-room';
 import {ApiService} from '../../../../../common/service/api.service';
 
 const STATUS_COLOR: Record<string, string> = {scheduled: 'info', live: 'success', ended: 'secondary', cancelled: 'dark'};
@@ -9,7 +10,7 @@ const STATUS_COLOR: Record<string, string> = {scheduled: 'info', live: 'success'
 @Component({
   selector: 'app-my-live-classes',
   standalone: true,
-  imports: [PageHeader, DatePipe],
+  imports: [PageHeader, DatePipe, LiveRoom],
   templateUrl: './my-live-classes.html',
   styleUrl: './my-live-classes.css',
 })
@@ -20,6 +21,7 @@ export class MyLiveClasses {
   loading = signal(false);
   busy = signal<number | null>(null);
   classes = signal<any[]>([]);
+  room = signal<{ roomUrl: string; token: string | null; title: string } | null>(null);
 
   constructor() {
     this.load();
@@ -39,13 +41,18 @@ export class MyLiveClasses {
       next: (res) => {
         this.busy.set(null);
         if (res?.room_url) {
-          window.open(res.room_url, '_blank', 'noopener');
-          this.toast.success('Opening the class room…');
+          this.room.set({roomUrl: res.room_url, token: res.token ?? null, title: res.title || lc.title});
+        } else {
+          this.toast.error('This class has no room yet.');
         }
-        this.load();
       },
       error: (e) => { this.toast.error(e?.error?.error || 'Could not join'); this.busy.set(null); },
     });
+  }
+
+  leaveRoom(): void {
+    this.room.set(null);
+    this.load();
   }
 
   statusColor(s: string): string { return STATUS_COLOR[s] ?? 'secondary'; }

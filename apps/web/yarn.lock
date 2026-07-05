@@ -507,6 +507,17 @@
   resolved "https://registry.npmjs.org/@colors/colors/-/colors-1.5.0.tgz"
   integrity sha512-ooWCrlZP11i8GImSjTHYHLkvFDP48nS4+204nGb1RiX/WXYHmJA2III9/e2DWVabCESdW7hBAEzHRqUn9OUVvQ==
 
+"@daily-co/daily-js@^0.91.0":
+  version "0.91.0"
+  resolved "https://registry.npmjs.org/@daily-co/daily-js/-/daily-js-0.91.0.tgz"
+  integrity sha512-f/f1qBQhDSvMgucfBUNfV1CHYRItQuRcESzkY/wcYLgKtBi/X6bnwvTeKcHORVdb82J/jnIS553cR3gfxC8uCg==
+  dependencies:
+    "@babel/runtime" "^7.12.5"
+    "@sentry/browser" "^8.33.1"
+    bowser "^2.8.1"
+    dequal "^2.0.3"
+    events "^3.1.0"
+
 "@esbuild/win32-x64@0.25.9":
   version "0.25.9"
   resolved "https://registry.npmjs.org/@esbuild/win32-x64/-/win32-x64-0.25.9.tgz"
@@ -1028,6 +1039,52 @@
     "@angular-devkit/core" "20.2.0"
     "@angular-devkit/schematics" "20.2.0"
     jsonc-parser "3.3.1"
+
+"@sentry-internal/browser-utils@8.55.2":
+  version "8.55.2"
+  resolved "https://registry.npmjs.org/@sentry-internal/browser-utils/-/browser-utils-8.55.2.tgz"
+  integrity sha512-GnKod+gL/Y+1FUM/RGV8q6le1CoyiGbT40MitEK7eVwWe+bfTRq1gN7ioupyHFMUg1RlQkDQ4/sENmio/uow5A==
+  dependencies:
+    "@sentry/core" "8.55.2"
+
+"@sentry-internal/feedback@8.55.2":
+  version "8.55.2"
+  resolved "https://registry.npmjs.org/@sentry-internal/feedback/-/feedback-8.55.2.tgz"
+  integrity sha512-XQy//NWbL0mLLM5w8wNDWMNpXz39VUyW2397dUrH8++kR63WhUVAvTOtL0o0GMVadSAzl1b08oHP9zSUNFQwcg==
+  dependencies:
+    "@sentry/core" "8.55.2"
+
+"@sentry-internal/replay-canvas@8.55.2":
+  version "8.55.2"
+  resolved "https://registry.npmjs.org/@sentry-internal/replay-canvas/-/replay-canvas-8.55.2.tgz"
+  integrity sha512-P/jGiuR7dRLG9IzD/463fLgiibyYceauav/9prRG0ZxJm1AtuO02OKball2Fs3bbzdzwHCTlcsUuL2ivDF4b5A==
+  dependencies:
+    "@sentry-internal/replay" "8.55.2"
+    "@sentry/core" "8.55.2"
+
+"@sentry-internal/replay@8.55.2":
+  version "8.55.2"
+  resolved "https://registry.npmjs.org/@sentry-internal/replay/-/replay-8.55.2.tgz"
+  integrity sha512-+W43Z697EVe/OgpGW07B773sa8xO1UbpnW0Cr+E+3FMDb6ZbXlaBUoagPTUkkQPdwBe35SDh6r8y2M3EOPGbxg==
+  dependencies:
+    "@sentry-internal/browser-utils" "8.55.2"
+    "@sentry/core" "8.55.2"
+
+"@sentry/browser@^8.33.1":
+  version "8.55.2"
+  resolved "https://registry.npmjs.org/@sentry/browser/-/browser-8.55.2.tgz"
+  integrity sha512-xHuPIEKhx9zw5quWvv4YgZprnwoVMCfxIhmOIf6KJ9iizyUHeUDcKpLS59xERroqwX4RpvK+l/27AZu4zfZlzQ==
+  dependencies:
+    "@sentry-internal/browser-utils" "8.55.2"
+    "@sentry-internal/feedback" "8.55.2"
+    "@sentry-internal/replay" "8.55.2"
+    "@sentry-internal/replay-canvas" "8.55.2"
+    "@sentry/core" "8.55.2"
+
+"@sentry/core@8.55.2":
+  version "8.55.2"
+  resolved "https://registry.npmjs.org/@sentry/core/-/core-8.55.2.tgz"
+  integrity sha512-YlEBwybUcOQ/KjMHDmof1vwweVnBtBxYlQp7DE3fOdtW4pqqdHWTnTntQs4VgYfxzjJYgtkd9LHlGtg8qy+JVQ==
 
 "@sigstore/bundle@^3.1.0":
   version "3.1.0"
@@ -1606,6 +1663,11 @@ bootstrap@^5.3.7:
   resolved "https://registry.npmjs.org/bootstrap/-/bootstrap-5.3.7.tgz"
   integrity sha512-7KgiD8UHjfcPBHEpDNg+zGz8L3LqR3GVwqZiBRFX04a1BCArZOz1r2kjly2HQ0WokqTO0v1nF+QAt8dsW4lKlw==
 
+bowser@^2.8.1:
+  version "2.14.1"
+  resolved "https://registry.npmjs.org/bowser/-/bowser-2.14.1.tgz"
+  integrity sha512-tzPjzCxygAKWFOJP011oxFHs57HzIhOEracIgAePE4pqB3LikALKnSzUyU4MGs9/iCEUuHlAJTjTc5M+u7YEGg==
+
 brace-expansion@^1.1.7:
   version "1.1.12"
   resolved "https://registry.npmjs.org/brace-expansion/-/brace-expansion-1.1.12.tgz"
@@ -2092,6 +2154,11 @@ depd@^2.0.0, depd@2.0.0:
   resolved "https://registry.npmjs.org/depd/-/depd-2.0.0.tgz"
   integrity sha512-g7nH6P6dyDioJogAAGprGpCtVImJhpPk/roCzdb3fIh61/s/nPsfR6onyMwkCAR/OlC3yBC0lESvUoQEAssIrw==
 
+dequal@^2.0.3:
+  version "2.0.3"
+  resolved "https://registry.npmjs.org/dequal/-/dequal-2.0.3.tgz"
+  integrity sha512-0je+qPKHEMohvfRTCEo3CrPG6cAzAYgmzKyxRiYSSDkS6eGJdyVJm7WaYA5ECaAD9wLB2T4EEeymA5aFVcYXCA==
+
 destroy@1.2.0:
   version "1.2.0"
   resolved "https://registry.npmjs.org/destroy/-/destroy-1.2.0.tgz"
@@ -2473,6 +2540,11 @@ eventemitter3@^5.0.1:
   version "5.0.1"
   resolved "https://registry.npmjs.org/eventemitter3/-/eventemitter3-5.0.1.tgz"
   integrity sha512-GWkBvjiSZK87ELrYOSESUYeVIc9mvLLf/nXalMOS5dYrgZq9o5OVkbZAVM06CVxYsCwH9BDZFPlQTlPA1j4ahA==
+
+events@^3.1.0:
+  version "3.3.0"
+  resolved "https://registry.npmjs.org/events/-/events-3.3.0.tgz"
+  integrity sha512-mQw+2fkQbALzQ7V0MY0IqdnXNOeTtP4r0lN9z7AAawCXgqea7bDii20AYrIBrFd/Hx0M2Ocz6S111CaFkUcb0Q==
 
 eventsource-parser@^3.0.0, eventsource-parser@^3.0.1:
   version "3.0.5"

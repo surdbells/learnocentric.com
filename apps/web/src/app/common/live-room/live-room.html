@@ -1,0 +1,21 @@
+<div class="live-room-overlay">
+  <div class="live-room-bar">
+    <div class="d-flex align-items-center gap-2 text-white">
+      <span class="material-symbols-outlined">videocam</span>
+      <span class="fw-semibold">{{ title }}</span>
+      @if (connecting()) { <span class="small opacity-75">connecting…</span> }
+    </div>
+    <button type="button" class="btn btn-sm btn-danger" (click)="leave()">Leave class</button>
+  </div>
+
+  <div class="live-room-stage">
+    @if (error()) {
+      <div class="live-room-message">
+        <span class="material-symbols-outlined mb-2" style="font-size:2rem">error</span>
+        <div>{{ error() }}</div>
+        <button type="button" class="btn btn-light mt-3" (click)="leave()">Close</button>
+      </div>
+    }
+    <div #callContainer class="live-room-frame"></div>
+  </div>
+</div>

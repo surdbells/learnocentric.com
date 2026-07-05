@@ -1,5 +1,9 @@
 <app-page-header icon="video_camera_front" action="Live Classes"></app-page-header>
 
+@if (room(); as r) {
+  <app-live-room [roomUrl]="r.roomUrl" [token]="r.token" [title]="r.title" (closed)="leaveRoom()" />
+}
+
 @if (loading()) {
   <div class="text-body-secondary p-4">Loading…</div>
 } @else if (!classes().length) {

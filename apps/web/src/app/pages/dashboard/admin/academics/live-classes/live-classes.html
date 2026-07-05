@@ -2,6 +2,10 @@
   <app-learno-button text="Schedule Class" icon="add" data-bs-toggle="modal" data-bs-target="#add_live_class" (clicked)="onAdd()"/>
 </app-page-header>
 
+@if (room(); as r) {
+  <app-live-room [roomUrl]="r.roomUrl" [token]="r.token" [title]="r.title" (closed)="leaveRoom()" />
+}
+
 <!-- Create / edit -->
 <app-learno-modal [modalId]="'add_live_class'" [modalAction]="selectClass() ? 'Edit Class' : 'Schedule Class'" [showBtn]="false">
   <app-live-class-form modalForm [select]="selectClass()" [subjects]="subjects()" [classes]="classes()" [topics]="topics()" (submitted)="handleSuccessSubmit($event)"/>
@@ -26,9 +30,9 @@
           </button>
         }
         @if (lc.status === 'live') {
-          <a class="btn btn-sm btn-primary" [href]="lc.room_url" target="_blank" rel="noopener">
-            <span class="material-symbols-outlined align-middle fs-6">videocam</span> Open room
-          </a>
+          <button type="button" class="btn btn-sm btn-primary" [disabled]="busy()" (click)="hostRoom()">
+            <span class="material-symbols-outlined align-middle fs-6">videocam</span> Join room
+          </button>
           <button type="button" class="btn btn-sm btn-outline-danger" [disabled]="busy()" (click)="setStatus('end')">End class</button>
         }
         @if (lc.status === 'ended') {

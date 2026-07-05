@@ -173,6 +173,11 @@ final class LiveClassesAction
         if ($lc === null) {
             return Json::error($response, 'Live class not found.', 404);
         }
+        // Provision a fresh Daily room as the class goes live so the embedded
+        // call always has a real, current room (and a valid token can be issued).
+        if ($status === LiveClass::LIVE) {
+            $this->provisionRoom($lc);
+        }
         $lc->setStatus($status);
         $this->em->flush();
         $this->audit->log('liveclass.' . $status, $request->getAttribute('user'), 'LiveClass', (string) $id, null, ['status' => $status]);
@@ -230,7 +235,7 @@ final class LiveClassesAction
     /** POST /live-classes/{id}/join — student joins; records attendance, returns the room URL. */
     public function join(Request $request, Response $response, array $args): Response
     {
-        $student = $this->currentUser($request);
+        $user = $this->currentUser($request);
         $lc = $this->em->getRepository(LiveClass::class)->find((int) $args['id']);
         if ($lc === null) {
             return Json::error($response, 'Live class not found.', 404);
@@ -238,14 +243,46 @@ final class LiveClassesAction
         if (!$lc->isJoinable()) {
             return Json::error($response, 'This class is not open to join.', 422);
         }
-        $existing = $this->em->getRepository(LiveClassAttendance::class)->findOneBy(['liveClass' => $lc, 'student' => $student]);
-        if ($existing === null) {
-            $this->em->persist(new LiveClassAttendance($lc, $student, new DateTimeImmutable()));
-            $this->em->flush();
-            $this->audit->log('liveclass.join', $student, 'LiveClass', (string) $lc->getId(), null, null);
+
+        $isStaff = in_array($user->getRole()->getCode(), self::STAFF, true);
+
+        // Learners get attendance recorded; staff (the host) do not.
+        if (!$isStaff) {
+            $existing = $this->em->getRepository(LiveClassAttendance::class)->findOneBy(['liveClass' => $lc, 'student' => $user]);
+            if ($existing === null) {
+                $this->em->persist(new LiveClassAttendance($lc, $user, new DateTimeImmutable()));
+                $this->em->flush();
+                $this->audit->log('liveclass.join', $user, 'LiveClass', (string) $lc->getId(), null, null);
+            }
         }
 
-        return Json::write($response, ['room_url' => $lc->getRoomUrl(), 'title' => $lc->getTitle(), 'status' => $lc->getStatus()]);
+        // Issue a per-user meeting token so Prebuilt shows the right name and
+        // grants the host owner privileges (mute/eject/recording). Embedding
+        // still works without a token for a public room, so failures are soft.
+        $token = null;
+        if ($this->daily->isConfigured() && $lc->getRoomName() !== null && $lc->getRoomName() !== '') {
+            try {
+                $exp = $this->sessionExpiry($lc);
+                $token = $this->daily->createMeetingToken([
+                    'room_name' => $lc->getRoomName(),
+                    'user_name' => trim($user->getFirstName() . ' ' . $user->getLastName()),
+                    'is_owner' => $isStaff,
+                    'exp' => $exp,
+                ]);
+            } catch (Throwable) {
+                $token = null;
+            }
+        }
+
+        return Json::write($response, [
+            'room_url' => $lc->getRoomUrl(),
+            'room_name' => $lc->getRoomName(),
+            'token' => $token,
+            'user_name' => trim($user->getFirstName() . ' ' . $user->getLastName()),
+            'is_owner' => $isStaff,
+            'title' => $lc->getTitle(),
+            'status' => $lc->getStatus(),
+        ]);
     }
 
     /** GET /live-classes/{id}/attendance — staff view of who joined. */
@@ -277,8 +314,14 @@ final class LiveClassesAction
         $name = 'learno-' . substr(md5($lc->getTitle() . microtime(true)), 0, 12);
         if ($this->daily->isConfigured()) {
             try {
-                $exp = $lc->getScheduledAt()->modify('+' . ($lc->getDurationMinutes() + 120) . ' minutes')->getTimestamp();
-                $room = $this->daily->createRoom($name, ['exp' => $exp, 'enable_chat' => true]);
+                $exp = $this->sessionExpiry($lc);
+                $room = $this->daily->createRoom($name, [
+                    'exp' => $exp,
+                    'enable_chat' => true,
+                    'enable_screenshare' => true,
+                    'enable_prejoin_ui' => true,
+                    'enable_knocking' => false,
+                ]);
                 $lc->setRoomName($room['name'] ?? $name);
                 $lc->setRoomUrl($room['url'] ?? ('https://learnocentric.daily.co/' . $name));
                 return;
@@ -310,6 +353,17 @@ final class LiveClassesAction
         } catch (Throwable $e) {
             return null;
         }
+    }
+
+    /**
+     * Unix expiry for a class's Daily room / token: covers the session from the
+     * later of now or the scheduled start, plus the duration and a grace buffer.
+     * Basing it on `now` avoids past-dated expiries when a class starts late.
+     */
+    private function sessionExpiry(LiveClass $lc): int
+    {
+        $base = max($lc->getScheduledAt()->getTimestamp(), (new DateTimeImmutable())->getTimestamp());
+        return $base + ($lc->getDurationMinutes() + 120) * 60;
     }
 
     private function currentUser(Request $request): User

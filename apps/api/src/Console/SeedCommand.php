@@ -811,14 +811,16 @@ class SeedCommand extends Command
         $scheduled->setStatus(LiveClass::SCHEDULED);
         $this->em->persist($scheduled);
 
+        // A second class starting soon. Left SCHEDULED (not pre-LIVE): going live
+        // through the app provisions a real Daily room so the embedded call works.
         [$n2, $u2] = $room('Fractions Live Q and A');
-        $live = new LiveClass($subject, 'Fractions — Live Q&A', new DateTimeImmutable('-10 minutes'));
+        $live = new LiveClass($subject, 'Fractions — Live Q&A', new DateTimeImmutable('+30 minutes'));
         $live->setSchoolClass($class);
         $live->setHost($teacher);
         $live->setDurationMinutes(30);
         $live->setRoomName($n2);
         $live->setRoomUrl($u2);
-        $live->setStatus(LiveClass::LIVE);
+        $live->setStatus(LiveClass::SCHEDULED);
         $this->em->persist($live);
         $this->em->flush();
 

@@ -6,6 +6,7 @@ import {LearnoModal} from '../../../../../components/learno-modal/learno-modal';
 import {LearnoButton} from '../../../../../common/learno-button/learno-button';
 import {DataGrid, GridColumn, GridFilter} from '../../../../../components/data-grid/data-grid';
 import {LiveClassForm} from '../../../../../components/forms/live-class-form/live-class-form';
+import {LiveRoom} from '../../../../../common/live-room/live-room';
 import {ApiService} from '../../../../../common/service/api.service';
 
 declare const bootstrap: any;
@@ -15,7 +16,7 @@ const STATUS_COLOR: Record<string, string> = {scheduled: 'info', live: 'success'
 @Component({
   selector: 'app-live-classes',
   standalone: true,
-  imports: [PageHeader, LearnoModal, LearnoButton, DataGrid, LiveClassForm, DatePipe],
+  imports: [PageHeader, LearnoModal, LearnoButton, DataGrid, LiveClassForm, LiveRoom, DatePipe],
   templateUrl: './live-classes.html',
   styleUrl: './live-classes.css',
 })
@@ -33,6 +34,7 @@ export class LiveClasses {
   subjects = signal<any[]>([]);
   classes = signal<any[]>([]);
   topics = signal<any[]>([]);
+  room = signal<{ roomUrl: string; token: string | null; title: string } | null>(null);
 
   columns: GridColumn[] = [
     {key: 'title', label: 'Class', sortable: true},
@@ -96,6 +98,30 @@ export class LiveClasses {
       },
       error: (e) => { this.toast.error(e?.error?.error || 'Action failed'); this.busy.set(false); },
     });
+  }
+
+  /** Host the class in-app (embedded Daily Prebuilt with owner privileges). */
+  hostRoom(): void {
+    const lc = this.manage();
+    if (!lc) return;
+    this.busy.set(true);
+    this.api.post<any>(`/backend/live-classes/${lc.id}/join`, {}).subscribe({
+      next: (res) => {
+        this.busy.set(false);
+        if (res?.room_url) {
+          this.close('live_manage');
+          this.room.set({roomUrl: res.room_url, token: res.token ?? null, title: res.title || lc.title});
+        } else {
+          this.toast.error('This class has no room yet.');
+        }
+      },
+      error: (e) => { this.toast.error(e?.error?.error || 'Could not open the room'); this.busy.set(false); },
+    });
+  }
+
+  leaveRoom(): void {
+    this.room.set(null);
+    this.grid?.refresh();
   }
 
   statusColor(s: string): string { return STATUS_COLOR[s] ?? 'secondary'; }
