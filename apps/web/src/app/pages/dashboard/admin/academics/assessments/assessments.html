@@ -1,0 +1,109 @@
+<app-page-header icon="assignment" action="Assessments">
+  <app-learno-button text="New Assessment" icon="add" data-bs-toggle="modal" data-bs-target="#add_assessment" (clicked)="onAdd()"/>
+</app-page-header>
+
+<!-- Create / edit settings -->
+<app-learno-modal [modalId]="'add_assessment'" [modalAction]="selectAssessment() ? 'Edit Assessment' : 'New Assessment'" [showBtn]="false">
+  <app-assessment-form
+    modalForm
+    [select]="selectAssessment()"
+    [subjects]="subjects()"
+    [topics]="topics()"
+    (submitted)="handleSuccessSubmit($event)"
+  />
+</app-learno-modal>
+
+<!-- Builder -->
+<app-learno-modal [modalId]="'assessment_builder'" [modalAction]="'Assessment builder'" [showBtn]="false">
+  <div modalForm>
+    @if (builder(); as a) {
+      <div class="d-flex align-items-start justify-content-between flex-wrap gap-2 mb-1">
+        <h5 class="fw-semibold mb-0">{{ a.title }}</h5>
+        <span class="badge bg-{{ statusColor(a.approval_status) }}-subtle text-{{ statusColor(a.approval_status) }} text-capitalize px-3 py-2">
+          {{ a.approval_status }}
+        </span>
+      </div>
+      <p class="text-body-secondary small mb-4">
+        {{ a.subject }}{{ a.topic ? ' · ' + a.topic : '' }} · {{ titleCase(a.type) }} ·
+        {{ a.question_count }} question(s) · {{ a.total_marks }} mark(s) · pass {{ a.pass_mark }}%
+      </p>
+
+      <!-- Attached questions -->
+      <label class="form-label text-uppercase small fw-semibold text-body-secondary">Questions</label>
+      @if (a.questions?.length) {
+        <ol class="q-list list-unstyled mb-3">
+          @for (q of a.questions; track q.id) {
+            <li class="d-flex align-items-center gap-2 py-2 border-bottom">
+              <span class="text-body-secondary small" style="width:1.5rem">{{ q.position + 1 }}.</span>
+              <div class="flex-grow-1">
+                <div class="fw-medium">{{ q.stem }}</div>
+                <div class="small text-body-secondary">{{ q.type }} · {{ q.marks }} mark(s)
+                  @if (!q.answer_validated) { <span class="text-warning">· unvalidated</span> }
+                </div>
+              </div>
+              @if (editable()) {
+                <button type="button" class="btn btn-sm btn-icon text-danger" [disabled]="busy()" (click)="detach(q.question_id)" title="Remove">
+                  <span class="material-symbols-outlined">close</span>
+                </button>
+              }
+            </li>
+          }
+        </ol>
+      } @else {
+        <div class="text-body-secondary small mb-3">No questions yet.</div>
+      }
+
+      <!-- Add a validated question -->
+      @if (editable()) {
+        <div class="d-flex gap-2 mb-4">
+          <select class="form-select form-select-sm" [ngModel]="pickId()" (ngModelChange)="pickId.set($event)" [ngModelOptions]="{standalone: true}">
+            <option [ngValue]="null" disabled>Add a validated question…</option>
+            @for (q of available(); track q.id) {
+              <option [ngValue]="q.id">[{{ q.type }}] {{ q.stem }}</option>
+            }
+          </select>
+          <button type="button" class="btn btn-sm btn-primary text-nowrap" [disabled]="!pickId() || busy()" (click)="attach()">Add</button>
+        </div>
+        @if (!available().length) {
+          <div class="form-text mt-n3 mb-4">Only validated questions from this subject can be added. Validate more in the Question Bank.</div>
+        }
+      }
+
+      <!-- Lifecycle -->
+      <label class="form-label text-uppercase small fw-semibold text-body-secondary">Move to</label>
+      @if (availableActions().length) {
+        <div class="d-flex flex-wrap gap-2">
+          @for (act of availableActions(); track act.to) {
+            <button type="button" class="btn btn-sm"
+                    [class.btn-primary]="act.to !== 'archived'"
+                    [class.btn-outline-danger]="act.to === 'archived'"
+                    [disabled]="!act.enabled || busy()"
+                    (click)="transition(act.to)">
+              {{ act.label }}
+            </button>
+          }
+        </div>
+        @if ((a.unvalidated_questions?.length ?? 0) > 0) {
+          <div class="form-text text-warning">Every question must be validated before this assessment can be approved or published.</div>
+        } @else if ((a.question_count ?? 0) === 0) {
+          <div class="form-text">Add at least one question before approving or publishing.</div>
+        }
+      } @else {
+        <div class="text-body-secondary small">No further transitions available from this state.</div>
+      }
+    } @else {
+      <div class="text-body-secondary small">Loading…</div>
+    }
+  </div>
+</app-learno-modal>
+
+<app-data-grid
+  endpoint="/backend/assessment/assessments"
+  [columns]="columns"
+  [filters]="filterDefs()"
+  [actions]="['view', 'edit', 'delete']"
+  searchPlaceholder="Search assessments…"
+  emptyMessage="No assessments yet. Click “New Assessment” to create one."
+  (view)="onView($event)"
+  (edit)="onEdit($event)"
+/>

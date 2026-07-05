@@ -1,0 +1,56 @@
+<form (ngSubmit)="onSubmit()" [formGroup]="form">
+  <div class="modal-body">
+    <div class="row">
+      <div class="col-lg-8">
+        <div learnoInput class="mb-3" [label]="'Assessment title'" [inputType]="'text'" [id]="'a_title'" [formControlName]="'title'"></div>
+      </div>
+      <div class="col-lg-4 mb-3">
+        <label class="form-label" for="a_type">Type</label>
+        <select id="a_type" class="form-select" formControlName="type">
+          <option value="quiz">Quiz</option>
+          <option value="test">Test</option>
+          <option value="exam">Exam</option>
+          <option value="worksheet">Worksheet</option>
+        </select>
+      </div>
+      <div class="col-lg-6 mb-3">
+        <label class="form-label" for="a_subject">Subject</label>
+        <select id="a_subject" class="form-select" formControlName="subjectId">
+          <option [ngValue]="null" disabled>Select a subject</option>
+          @for (s of subjects(); track s.id) {
+            <option [ngValue]="s.id">{{ s.name }}</option>
+          }
+        </select>
+      </div>
+      <div class="col-lg-6 mb-3">
+        <label class="form-label" for="a_topic">Topic (optional)</label>
+        <select id="a_topic" class="form-select" formControlName="topicId">
+          <option [ngValue]="null">Any / none</option>
+          @for (t of subjectTopics(); track t.id) {
+            <option [ngValue]="t.id">{{ t.title }}</option>
+          }
+        </select>
+      </div>
+      <div class="col-lg-4 mb-3">
+        <label class="form-label" for="a_track">Track</label>
+        <select id="a_track" class="form-select" formControlName="track">
+          <option value="academic">Academic performance</option>
+          <option value="competency">Competency transfer</option>
+        </select>
+      </div>
+      <div class="col-lg-4">
+        <div learnoInput class="mb-3" [label]="'Duration (minutes)'" [inputType]="'number'" [id]="'a_dur'" [formControlName]="'durationMinutes'"></div>
+      </div>
+      <div class="col-lg-4">
+        <div learnoInput class="mb-3" [label]="'Pass mark (%)'" [inputType]="'number'" [id]="'a_pass'" [formControlName]="'passMark'"></div>
+      </div>
+      <div class="col-lg-12">
+        <div learnoInput class="mb-3" [label]="'Instructions (optional)'" [inputType]="'text'" [id]="'a_instr'" [formControlName]="'instructions'"></div>
+      </div>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <a class="btn btn-light" data-bs-dismiss="modal">Cancel</a>
+    <app-learno-button [isLoading]="isLoading()" [text]="isEdit() ? 'Update Assessment' : 'Create Assessment'"/>
+  </div>
+</form>
