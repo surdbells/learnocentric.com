@@ -20,6 +20,8 @@ use App\Application\Actions\Assessment\PortfolioAction;
 use App\Application\Actions\Assessment\QuestionsAction;
 use App\Application\Actions\Assessment\WorksheetsAction;
 use App\Application\Actions\Assessment\WorksheetSubmissionsAction;
+use App\Application\Actions\Content\ContentLibraryAction;
+use App\Application\Actions\Content\ContentPackagesAction;
 use App\Application\Actions\Curriculum\DeliveryPacksAction;
 use App\Application\Actions\Curriculum\ReviewQueueAction;
 use App\Application\Actions\Curriculum\TopicsAction;
@@ -165,6 +167,11 @@ return static function (App $app): void {
             $auth->get('/analytics/overview', AnalyticsAction::class . ':overview');
             $auth->get('/analytics/children', AnalyticsAction::class . ':children');
             $auth->get('/analytics/student/{id:[0-9]+}', AnalyticsAction::class . ':student');
+
+            // Content library + packages (super-admin supply chain, licensing/takedown)
+            $auth->map(['GET', 'POST', 'PUT', 'DELETE'], '/content/library', ContentLibraryAction::class);
+            $auth->get('/content/packages/{id:[0-9]+}', ContentPackagesAction::class . ':show');
+            $auth->map(['GET', 'POST', 'DELETE'], '/content/packages', ContentPackagesAction::class);
 
             // Billing (Paystack) — plan catalogue, subscribe/verify, invoices
             $auth->map(['GET', 'POST', 'PUT', 'DELETE'], '/billing/plans', PlansAction::class);

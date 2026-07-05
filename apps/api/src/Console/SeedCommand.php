@@ -10,6 +10,8 @@ use App\Domain\Entity\AssessmentAttempt;
 use App\Domain\Entity\AssessmentQuestion;
 use App\Domain\Entity\AttemptAnswer;
 use App\Domain\Entity\AuditLog;
+use App\Domain\Entity\ContentPackage;
+use App\Domain\Entity\ContentResource;
 use App\Domain\Entity\ContentVersion;
 use App\Domain\Entity\Enrollment;
 use App\Domain\Entity\FeedbackNote;
@@ -85,6 +87,7 @@ class SeedCommand extends Command
         $this->seedLiveClasses($output);
         $this->seedGuardians($output);
         $this->seedBilling($output);
+        $this->seedContent($output);
         $this->seedNotifications($output);
         $this->seedTopicProgress($output);
         $this->seedInterventions($output);
@@ -630,6 +633,52 @@ class SeedCommand extends Command
         $this->em->flush();
 
         $output->writeln('  + 3 plans, 1 active subscription (Standard) + paid invoice');
+    }
+
+    /** Seed the platform content library + one bundled package. */
+    private function seedContent(OutputInterface $output): void
+    {
+        if ($this->em->getRepository(ContentResource::class)->count([]) > 0) {
+            return;
+        }
+        $superAdmin = $this->em->getRepository(User::class)->findOneBy(['email' => 'surdbells@gmail.com']);
+
+        // [title, type, subject, grade, licence, source, premium]
+        $defs = [
+            ['Whole Numbers — teaching slides', 'document', 'Mathematics', 'JSS 1', 'owned', null, false],
+            ['LCM & HCF worked examples (video)', 'video', 'Mathematics', 'JSS 1', 'cc-by', 'Khan Academy', false],
+            ['Fractions practice set', 'assignment', 'Mathematics', 'JSS 1', 'owned', null, false],
+            ['Basic Operations interactive drill', 'interactive', 'Mathematics', 'JSS 1', 'licensed', 'GeoGebra', true],
+            ['Reading comprehension pack', 'document', 'English', 'JSS 1', 'owned', null, false],
+        ];
+        $resources = [];
+        foreach ($defs as [$title, $type, $subject, $grade, $licence, $source, $premium]) {
+            $r = new ContentResource($title, $type);
+            $r->setSubjectArea($subject);
+            $r->setGradeLevel($grade);
+            $r->setLicence($licence);
+            $r->setSource($source);
+            $r->setIsPremium($premium);
+            $r->setDescription($title . ' for the ' . $grade . ' ' . $subject . ' curriculum.');
+            $r->setCreatedBy($superAdmin);
+            $this->em->persist($r);
+            $resources[] = $r;
+        }
+        $this->em->flush();
+
+        $pack = new ContentPackage('JSS 1 Mathematics — Term 1', 'subject_pack');
+        $pack->setSubjectArea('Mathematics');
+        $pack->setGradeLevel('JSS 1');
+        $pack->setDescription('Everything needed to teach JSS 1 Mathematics for the first term.');
+        $pack->setPriceKobo(2500000);
+        $pack->setDurationMonths(4);
+        foreach (array_slice($resources, 0, 4) as $r) {
+            $pack->addResource($r);
+        }
+        $this->em->persist($pack);
+        $this->em->flush();
+
+        $output->writeln('  + 5 content resources, 1 content package');
     }
 
     /** Link the seeded parent account to a student so the parent report works. */
