@@ -25,6 +25,8 @@ use App\Domain\Entity\Term;
 use App\Domain\Entity\Topic;
 use App\Domain\Entity\TopicDeliveryPack;
 use App\Domain\Entity\User;
+use App\Domain\Entity\Worksheet;
+use App\Domain\Entity\WorksheetSubmission;
 use App\Domain\Lifecycle;
 use App\Service\AnswerGrader;
 use App\Service\PasswordService;
@@ -65,6 +67,7 @@ class SeedCommand extends Command
         $this->seedQuestions($output);
         $this->seedAssessments($output);
         $this->seedAttempts($output);
+        $this->seedWorksheets($output);
         $this->seedAuditLogs($users, $output);
 
         $this->em->flush();
@@ -431,6 +434,54 @@ class SeedCommand extends Command
         }
         $this->em->flush();
         $output->writeln("  + {$count} questions (question bank)");
+    }
+
+    /** Seed a published worksheet with one graded and one pending submission. */
+    private function seedWorksheets(OutputInterface $output): void
+    {
+        if ($this->em->getRepository(Worksheet::class)->count([]) > 0) {
+            return;
+        }
+        $topic = $this->em->getRepository(Topic::class)->findOneBy(['title' => 'Whole Numbers']);
+        if ($topic === null) {
+            return;
+        }
+        $worksheet = new Worksheet($topic, 'Whole Numbers — Practice Worksheet');
+        $worksheet->setTrack('academic');
+        $worksheet->setInstructions('Complete all 10 questions in your exercise book, then upload a photo or type your answers.');
+        $worksheet->setTotalMarks(10);
+        $worksheet->setDueDate(new DateTimeImmutable('+7 days'));
+        $worksheet->setApprovalStatus(Lifecycle::PUBLISHED);
+        $this->em->persist($worksheet);
+        $this->em->flush();
+
+        $version = new ContentVersion('Worksheet', (int) $worksheet->getId(), 1, Lifecycle::PUBLISHED, 'seed');
+        $version->setFromStatus(null);
+        $version->setSnapshot($worksheet->toArray());
+        $version->setNote('Baseline version created during seed.');
+        $this->em->persist($version);
+
+        $students = $this->em->createQueryBuilder()->select('u')->from(User::class, 'u')->join('u.role', 'r')
+            ->where('r.code = :s')->andWhere('u.institution = :i')
+            ->setParameter('s', 'student')->setParameter('i', $topic->getSubject()->getInstitution())
+            ->setMaxResults(2)->getQuery()->getResult();
+
+        foreach ($students as $i => $student) {
+            $submission = new WorksheetSubmission($worksheet, $student);
+            $submission->setResponseText('My worked answers for questions 1 to 10.');
+            $submission->setSubmittedAt(new DateTimeImmutable('-1 day'));
+            if ($i === 0) {
+                $submission->setScore(8);
+                $submission->setFeedback('Good work — revisit place value in Q3 and Q7.');
+                $submission->setStatus(WorksheetSubmission::GRADED);
+                $submission->setGradedAt(new DateTimeImmutable('-12 hours'));
+            } else {
+                $submission->setStatus(WorksheetSubmission::SUBMITTED);
+            }
+            $this->em->persist($submission);
+        }
+        $this->em->flush();
+        $output->writeln('  + 1 worksheet (' . count($students) . ' submissions)');
     }
 
     /** Seed graded attempts (pass, borderline, fail) so the gradebook has data. */

@@ -11,6 +11,8 @@ use App\Application\Actions\Assessment\AssessmentsAction;
 use App\Application\Actions\Assessment\AttemptsAction;
 use App\Application\Actions\Assessment\GradebookAction;
 use App\Application\Actions\Assessment\QuestionsAction;
+use App\Application\Actions\Assessment\WorksheetsAction;
+use App\Application\Actions\Assessment\WorksheetSubmissionsAction;
 use App\Application\Actions\Curriculum\ReviewQueueAction;
 use App\Application\Actions\Curriculum\TopicsAction;
 use App\Application\Actions\HealthAction;
@@ -89,6 +91,17 @@ return static function (App $app): void {
             $auth->get('/assessment/gradebook', GradebookAction::class . ':overview');
             $auth->get('/assessment/gradebook/students', GradebookAction::class . ':students');
             $auth->get('/assessment/gradebook/{id:[0-9]+}', GradebookAction::class . ':assessment');
+
+            // Worksheets — topic-linked, staff CRUD + lifecycle, student submit + staff grade
+            $auth->map(['GET', 'POST', 'PUT', 'DELETE'], '/assessment/worksheets', WorksheetsAction::class);
+            $auth->post('/assessment/worksheets/bulk-delete', WorksheetsAction::class . ':bulkDelete');
+            $auth->get('/assessment/worksheets/available', WorksheetSubmissionsAction::class . ':available');
+            $auth->post('/assessment/worksheets/{id:[0-9]+}/transition', WorksheetsAction::class . ':transition');
+            $auth->get('/assessment/worksheets/{id:[0-9]+}/history', WorksheetsAction::class . ':history');
+            $auth->post('/assessment/worksheets/{id:[0-9]+}/submit', WorksheetSubmissionsAction::class . ':submit');
+            $auth->get('/assessment/worksheets/{id:[0-9]+}/submission', WorksheetSubmissionsAction::class . ':mine');
+            $auth->get('/assessment/worksheets/{id:[0-9]+}/submissions', WorksheetSubmissionsAction::class . ':submissions');
+            $auth->post('/assessment/worksheet-submissions/{id:[0-9]+}/grade', WorksheetSubmissionsAction::class . ':grade');
 
             $auth->post('/upload', UploadAction::class);
         })->add(JwtAuthMiddleware::class);
