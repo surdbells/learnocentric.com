@@ -12,6 +12,7 @@ use App\Domain\Entity\AttemptAnswer;
 use App\Domain\Entity\AuditLog;
 use App\Domain\Entity\ContentVersion;
 use App\Domain\Entity\Enrollment;
+use App\Domain\Entity\FeedbackNote;
 use App\Domain\Entity\Institution;
 use App\Domain\Entity\Permission;
 use App\Domain\Entity\PortfolioEntry;
@@ -70,6 +71,7 @@ class SeedCommand extends Command
         $this->seedAttempts($output);
         $this->seedWorksheets($output);
         $this->seedPortfolio($output);
+        $this->seedFeedback($output);
         $this->seedAuditLogs($users, $output);
 
         $this->em->flush();
@@ -436,6 +438,52 @@ class SeedCommand extends Command
         }
         $this->em->flush();
         $output->writeln("  + {$count} questions (question bank)");
+    }
+
+    /** Seed teacher feedback notes (a correction and a praise) closing the loop. */
+    private function seedFeedback(OutputInterface $output): void
+    {
+        if ($this->em->getRepository(FeedbackNote::class)->count([]) > 0) {
+            return;
+        }
+        $topic = $this->em->getRepository(Topic::class)->findOneBy(['title' => 'Whole Numbers']);
+        $institution = $topic?->getSubject()->getInstitution();
+        if ($institution === null) {
+            return;
+        }
+        $teacher = $this->em->createQueryBuilder()->select('u')->from(User::class, 'u')->join('u.role', 'r')
+            ->where('r.code = :t')->andWhere('u.institution = :i')
+            ->setParameter('t', 'teacher')->setParameter('i', $institution)
+            ->setMaxResults(1)->getQuery()->getOneOrNullResult();
+        $students = $this->em->createQueryBuilder()->select('u')->from(User::class, 'u')->join('u.role', 'r')
+            ->where('r.code = :s')->andWhere('u.institution = :i')
+            ->setParameter('s', 'student')->setParameter('i', $institution)
+            ->setMaxResults(2)->getQuery()->getResult();
+        if (empty($students)) {
+            return;
+        }
+
+        // [student index, type, topic?, message, acknowledged]
+        $notes = [
+            [0, 'correction', $topic, 'You mixed up place value in Q3 — remember the hundreds column. Redo questions 3 and 7.', false],
+            [1, 'praise', null, 'Excellent improvement this week — your working is much clearer. Keep it up!', true],
+        ];
+        foreach ($notes as [$idx, $type, $noteTopic, $message, $ack]) {
+            if (!isset($students[$idx])) {
+                continue;
+            }
+            $note = new FeedbackNote($students[$idx], $message);
+            $note->setAuthor($teacher);
+            $note->setType($type);
+            $note->setTopic($noteTopic);
+            if ($ack) {
+                $note->setAcknowledged(true);
+                $note->setAcknowledgedAt(new DateTimeImmutable('-6 hours'));
+            }
+            $this->em->persist($note);
+        }
+        $this->em->flush();
+        $output->writeln('  + 2 feedback notes');
     }
 
     /** Seed portfolio evidence — one reviewed, one pending — for the competency track. */

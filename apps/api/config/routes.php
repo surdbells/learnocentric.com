@@ -9,7 +9,9 @@ use App\Application\Actions\Auth\RegisterAction;
 use App\Application\Actions\Auth\UserProfileAction;
 use App\Application\Actions\Assessment\AssessmentsAction;
 use App\Application\Actions\Assessment\AttemptsAction;
+use App\Application\Actions\Assessment\FeedbackAction;
 use App\Application\Actions\Assessment\GradebookAction;
+use App\Application\Actions\Assessment\InsightsAction;
 use App\Application\Actions\Assessment\PortfolioAction;
 use App\Application\Actions\Assessment\QuestionsAction;
 use App\Application\Actions\Assessment\WorksheetsAction;
@@ -109,6 +111,12 @@ return static function (App $app): void {
             $auth->get('/assessment/portfolio/mine', PortfolioAction::class . ':mine');
             $auth->get('/assessment/portfolio/topics', PortfolioAction::class . ':topics');
             $auth->post('/assessment/portfolio/{id:[0-9]+}/review', PortfolioAction::class . ':review');
+
+            // Feedback + misconception loop
+            $auth->map(['GET', 'POST'], '/assessment/feedback', FeedbackAction::class);
+            $auth->get('/assessment/feedback/mine', FeedbackAction::class . ':mine');
+            $auth->post('/assessment/feedback/{id:[0-9]+}/acknowledge', FeedbackAction::class . ':acknowledge');
+            $auth->get('/assessment/insights', InsightsAction::class);
 
             $auth->post('/upload', UploadAction::class);
         })->add(JwtAuthMiddleware::class);
