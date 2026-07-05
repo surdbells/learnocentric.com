@@ -145,6 +145,7 @@ export class UserPreferenceMenu {
     { name: "Management", icon: "tenancy", link: "super-admin/management",
       children: [
         { name: "Institutions", link: "management/institutions" },
+        { name: "Subjects", link: "management/subjects" },
         { name: "Subscription Plans", link: "management/plans" },
         { name: "Content Library", link: "management/content-library" },
         { name: "Content Packages", link: "management/content-packages" },

@@ -87,10 +87,11 @@ export class ContentPackageForm implements OnInit {
       }
     });
 
-    // Load all available subjects for dropdown
-    this.apiSrv.get('/backend/school/subjects').subscribe({
+    // Load subjects from the platform catalogue (packages scope to these).
+    this.apiSrv.get('/backend/catalog/subjects').subscribe({
       next: (data: any[]) => {
         const arr = Array.isArray(data) ? data : [];
+        this.catalogSubjects = arr;
         this.subjectOptions = arr.map((s: any) => ({
           label: String(s.name || 'Unknown'),
           value: String(s.name ?? '')
@@ -157,8 +158,9 @@ export class ContentPackageForm implements OnInit {
     ];
   
     subjectOptions: IInputOption[] = [
-      // Populated from /backend/school/subjects with name as label and id as value
+      // Populated from /backend/catalog/subjects with name as label/value
     ];
+    catalogSubjects: any[] = [];
   
     gradeOptions: IInputOption[] = [
       // Populated from /backend/school/classes with name as label and id as value
@@ -186,11 +188,13 @@ export class ContentPackageForm implements OnInit {
     // Parse price and duration as numbers
     const priceNum = Number(f.price);
     const durationNum = Number(f.durationMonths);
+    const catalog = this.catalogSubjects.find((c: any) => String(c.name) === String(f.subjectArea));
     const payload = {
       name: f.name,
       type: f.packageType, // API expects 'type'
       description: f.description || '',
       subjectArea: f.subjectArea,
+      catalog_subject_id: catalog?.id ?? null,
       gradeLevel: f.gradeLevel,
       price: isNaN(priceNum) ? null : priceNum,
       durationMonths: isNaN(durationNum) ? null : durationNum,

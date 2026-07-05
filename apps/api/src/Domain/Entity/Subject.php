@@ -31,6 +31,11 @@ class Subject
     #[ORM\Column(length: 30, nullable: true)]
     private ?string $code = null;
 
+    /** The catalogue subject this was adopted from (null for legacy/custom subjects). */
+    #[ORM\ManyToOne(targetEntity: CatalogSubject::class)]
+    #[ORM\JoinColumn(name: 'catalog_subject_id', referencedColumnName: 'id', nullable: true, onDelete: 'SET NULL')]
+    private ?CatalogSubject $catalogSubject = null;
+
     #[ORM\ManyToOne(targetEntity: SchoolClass::class)]
     #[ORM\JoinColumn(name: 'class_id', referencedColumnName: 'id', nullable: true, onDelete: 'SET NULL')]
     private ?SchoolClass $schoolClass = null;
@@ -54,6 +59,8 @@ class Subject
     public function getName(): string { return $this->name; }
     public function setName(string $v): void { $this->name = $v; }
     public function setCode(?string $v): void { $this->code = $v; }
+    public function getCatalogSubject(): ?CatalogSubject { return $this->catalogSubject; }
+    public function setCatalogSubject(?CatalogSubject $v): void { $this->catalogSubject = $v; }
     public function getSchoolClass(): ?SchoolClass { return $this->schoolClass; }
     public function setSchoolClass(?SchoolClass $v): void { $this->schoolClass = $v; }
     public function setCurriculumSource(?string $v): void { $this->curriculumSource = $v; }
@@ -70,6 +77,7 @@ class Subject
             'class_id' => $this->schoolClass?->getId(),
             'class_label' => $this->schoolClass?->getLabel(),
             'curriculum_source' => $this->curriculumSource,
+            'catalog_subject_id' => $this->catalogSubject?->getId(),
             'status' => $this->status,
         ];
     }

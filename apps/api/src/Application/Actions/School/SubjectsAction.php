@@ -7,6 +7,7 @@ namespace App\Application\Actions\School;
 use App\Application\Support\Json;
 use App\Application\Support\ListQuery;
 use App\Application\Support\Paginator;
+use App\Domain\Entity\CatalogSubject;
 use App\Domain\Entity\Institution;
 use App\Domain\Entity\SchoolClass;
 use App\Domain\Entity\Subject;
@@ -151,6 +152,61 @@ final class SubjectsAction
         $this->audit->log('subject.delete', $request->getAttribute('user'), 'Subject', (string) $id, $before, null);
 
         return Json::write($response, ['deleted' => true, 'id' => $id]);
+    }
+
+    /**
+     * GET /school/subjects/available — the catalogue, each entry flagged with
+     * whether this institution has already adopted it.
+     */
+    public function available(Request $request, Response $response): Response
+    {
+        $institution = $this->resolveInstitution($request, $this->em);
+        $catalog = $this->em->getRepository(CatalogSubject::class)->findBy(['isActive' => true], ['name' => 'ASC']);
+
+        $adopted = [];
+        if ($institution !== null) {
+            foreach ($this->em->getRepository(Subject::class)->findBy(['institution' => $institution]) as $s) {
+                if ($s->getCatalogSubject() !== null) {
+                    $adopted[$s->getCatalogSubject()->getId()] = $s->getId();
+                }
+            }
+        }
+
+        $rows = array_map(static function (CatalogSubject $c) use ($adopted) {
+            return $c->toArray() + [
+                'adopted' => isset($adopted[$c->getId()]),
+                'subject_id' => $adopted[$c->getId()] ?? null,
+            ];
+        }, $catalog);
+
+        return Json::write($response, $rows);
+    }
+
+    /** POST /school/subjects/adopt — adopt a catalogue subject into this institution. */
+    public function adopt(Request $request, Response $response): Response
+    {
+        $institution = $this->institutionForWrite($request, (array) $request->getParsedBody());
+        if ($institution === null) {
+            return Json::error($response, 'No institution scope; provide institutionId.', 422);
+        }
+        $catalog = $this->em->getRepository(CatalogSubject::class)->find((int) (($request->getParsedBody()['catalog_subject_id'] ?? 0)));
+        if ($catalog === null || !$catalog->isActive()) {
+            return Json::error($response, 'Catalogue subject not found.', 404);
+        }
+        // Idempotent: don't adopt the same catalogue subject twice.
+        $existing = $this->em->getRepository(Subject::class)->findOneBy(['institution' => $institution, 'catalogSubject' => $catalog]);
+        if ($existing !== null) {
+            return Json::write($response, $existing->toArray());
+        }
+
+        $subject = new Subject($institution, $catalog->getName());
+        $subject->setCode($catalog->getCode());
+        $subject->setCatalogSubject($catalog);
+        $this->em->persist($subject);
+        $this->em->flush();
+        $this->audit->log('subject.adopt', $request->getAttribute('user'), 'Subject', (string) $subject->getId(), null, $subject->toArray());
+
+        return Json::write($response, $subject->toArray(), 201);
     }
 
     private function applyFields(Subject $subject, array $body): void

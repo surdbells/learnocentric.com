@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Application\Actions\Content;
 
 use App\Application\Support\Json;
+use App\Domain\Entity\CatalogSubject;
 use App\Domain\Entity\ContentPackage;
 use App\Domain\Entity\ContentResource;
 use App\Domain\Entity\Institution;
@@ -125,6 +126,15 @@ final class ContentPackagesAction
         $package = new ContentPackage($name, (string) ($body['type'] ?? 'subject_pack'));
         $package->setDescription($this->str($body['description'] ?? null));
         $package->setSubjectArea($this->str($body['subjectArea'] ?? null));
+        if (!empty($body['catalog_subject_id'])) {
+            $catalog = $this->em->getRepository(CatalogSubject::class)->find((int) $body['catalog_subject_id']);
+            if ($catalog !== null) {
+                $package->setCatalogSubject($catalog);
+                if ($package->toArray()['subjectArea'] === null) {
+                    $package->setSubjectArea($catalog->getName());
+                }
+            }
+        }
         $package->setGradeLevel($this->str($body['gradeLevel'] ?? null));
         $package->setPriceKobo((int) round(((float) ($body['price'] ?? 0)) * 100));
         $package->setDurationMonths(isset($body['durationMonths']) && $body['durationMonths'] !== null ? (int) $body['durationMonths'] : null);

@@ -20,6 +20,7 @@ use App\Application\Actions\Assessment\PortfolioAction;
 use App\Application\Actions\Assessment\QuestionsAction;
 use App\Application\Actions\Assessment\WorksheetsAction;
 use App\Application\Actions\Assessment\WorksheetSubmissionsAction;
+use App\Application\Actions\Catalog\CatalogSubjectsAction;
 use App\Application\Actions\Content\ContentLibraryAction;
 use App\Application\Actions\Content\ContentPackagesAction;
 use App\Application\Actions\Curriculum\DeliveryPacksAction;
@@ -74,8 +75,13 @@ return static function (App $app): void {
             $auth->post('/school/students/bulk-delete', StudentsAction::class . ':bulkDelete');
             $auth->map(['GET', 'DELETE'], '/school/teachers', TeachersAction::class);
             $auth->post('/school/teachers/bulk-delete', TeachersAction::class . ':bulkDelete');
+            $auth->get('/school/subjects/available', SubjectsAction::class . ':available');
+            $auth->post('/school/subjects/adopt', SubjectsAction::class . ':adopt');
             $auth->map(['GET', 'POST', 'PUT', 'DELETE'], '/school/subjects', SubjectsAction::class);
             $auth->post('/school/subjects/bulk-delete', SubjectsAction::class . ':bulkDelete');
+
+            // Platform subject catalogue (super-admin owned; read by all for selection)
+            $auth->map(['GET', 'POST', 'PUT', 'DELETE'], '/catalog/subjects', CatalogSubjectsAction::class);
             $auth->map(['GET', 'POST', 'PUT', 'DELETE'], '/school/classes', ClassesAction::class);
             $auth->post('/school/classes/bulk-delete', ClassesAction::class . ':bulkDelete');
             $auth->map(['GET', 'POST', 'PUT', 'DELETE'], '/school/enrollments', EnrollmentsAction::class);

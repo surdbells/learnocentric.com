@@ -1,0 +1,78 @@
+<app-page-header icon="subject" action="Subject Catalogue">
+  <app-learno-button text="New Subject" icon="add" (clicked)="openCreate()"/>
+</app-page-header>
+
+<app-learno-modal [modalId]="'catalog_subject_form'" [modalAction]="editing() ? 'Edit Subject' : 'New Subject'" [showBtn]="false">
+  <form modalForm [formGroup]="form" (ngSubmit)="save()">
+    <div class="modal-body">
+      <div class="row">
+        <div class="col-lg-8 mb-3">
+          <label class="form-label" for="cs_name">Name</label>
+          <input id="cs_name" class="form-control" formControlName="name" placeholder="e.g. Mathematics"/>
+        </div>
+        <div class="col-lg-4 mb-3">
+          <label class="form-label" for="cs_code">Code</label>
+          <input id="cs_code" class="form-control text-uppercase" formControlName="code" placeholder="e.g. MTH"/>
+        </div>
+        <div class="col-lg-6 mb-3">
+          <label class="form-label" for="cs_cur">Curriculum</label>
+          <input id="cs_cur" class="form-control" formControlName="curriculum" placeholder="e.g. NERDC"/>
+        </div>
+        <div class="col-lg-6 mb-3 d-flex align-items-end">
+          <div class="form-check">
+            <input id="cs_active" type="checkbox" class="form-check-input" formControlName="isActive"/>
+            <label class="form-check-label" for="cs_active">Active (offered to schools)</label>
+          </div>
+        </div>
+        <div class="col-12 mb-3">
+          <label class="form-label" for="cs_desc">Description</label>
+          <textarea id="cs_desc" class="form-control" rows="2" formControlName="description"></textarea>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <a class="btn btn-light" data-bs-dismiss="modal">Cancel</a>
+      <app-learno-button [isLoading]="busy()" [text]="editing() ? 'Update Subject' : 'Create Subject'"/>
+    </div>
+  </form>
+</app-learno-modal>
+
+@if (loading()) {
+  <div class="text-body-secondary p-4">Loading…</div>
+} @else if (!subjects().length) {
+  <div class="card border-0 shadow-sm p-5 text-center text-body-secondary">No catalogue subjects yet. Click “New Subject”.</div>
+} @else {
+  <div class="card border-0 shadow-sm">
+    <div class="table-responsive">
+      <table class="table align-middle mb-0">
+        <thead class="table-light">
+          <tr><th>Name</th><th>Code</th><th>Curriculum</th><th>Status</th><th></th></tr>
+        </thead>
+        <tbody>
+          @for (s of subjects(); track s.id) {
+            <tr [class.opacity-50]="!s.is_active">
+              <td>
+                <div class="fw-medium">{{ s.name }}</div>
+                @if (s.description) { <div class="small text-body-secondary">{{ s.description }}</div> }
+              </td>
+              <td class="font-monospace">{{ s.code }}</td>
+              <td class="small">{{ s.curriculum || '—' }}</td>
+              <td>
+                <span class="badge" [class.bg-success-subtle]="s.is_active" [class.text-success]="s.is_active"
+                      [class.bg-secondary-subtle]="!s.is_active" [class.text-secondary]="!s.is_active">
+                  {{ s.is_active ? 'Active' : 'Retired' }}
+                </span>
+              </td>
+              <td class="text-end">
+                <button type="button" class="btn btn-sm btn-outline-primary me-1" (click)="openEdit(s)">Edit</button>
+                @if (s.is_active) {
+                  <button type="button" class="btn btn-sm btn-outline-danger" (click)="retire(s)">Retire</button>
+                }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+}

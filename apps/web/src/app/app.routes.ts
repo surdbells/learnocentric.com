@@ -55,6 +55,7 @@ import {SuperAdminOnboard} from './pages/dashboard/super-admin/institutions/onbo
 import {SuperAdminContentLibrary} from './pages/dashboard/super-admin/content-library/content-library';
 import {SuperAdminContentPackages} from './pages/dashboard/super-admin/content-packages/content-packages';
 import {SuperAdminPlans} from './pages/dashboard/super-admin/plans/plans';
+import {CatalogSubjects} from './pages/dashboard/super-admin/catalog-subjects/catalog-subjects';
 import {Support} from './pages/dashboard/support/support';
 import {Resources} from './pages/dashboard/resources/resources';
 import {Messages} from './pages/dashboard/messages/messages';
@@ -310,6 +311,7 @@ export const routes: Routes = [
           { path: "institutions", component: SuperAdminInstitutions },
           { path: "onboard", component: SuperAdminOnboard },
           { path: "content-library", component: SuperAdminContentLibrary },
+          { path: "subjects", component: CatalogSubjects },
           { path: "content-packages", component: SuperAdminContentPackages },
           { path: "plans", component: SuperAdminPlans },
           { path: "support", component: Support }

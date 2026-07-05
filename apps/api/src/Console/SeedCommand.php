@@ -11,6 +11,7 @@ use App\Domain\Entity\AssessmentQuestion;
 use App\Domain\Entity\AttemptAnswer;
 use App\Domain\Entity\AuditLog;
 use App\Domain\Entity\Announcement;
+use App\Domain\Entity\CatalogSubject;
 use App\Domain\Entity\ContentPackage;
 use App\Domain\Entity\ContentResource;
 use App\Domain\Entity\ContentVersion;
@@ -91,6 +92,7 @@ class SeedCommand extends Command
         $this->seedLiveClasses($output);
         $this->seedGuardians($output);
         $this->seedBilling($output);
+        $this->seedCatalogSubjects($output);
         $this->seedContent($output);
         $this->seedSupport($output);
         $this->seedMessaging($output);
@@ -641,6 +643,45 @@ class SeedCommand extends Command
         $output->writeln('  + 3 plans, 1 active subscription (Standard) + paid invoice');
     }
 
+    /** Seed the platform subject catalogue and link existing school subjects to it. */
+    private function seedCatalogSubjects(OutputInterface $output): void
+    {
+        if ($this->em->getRepository(CatalogSubject::class)->count([]) > 0) {
+            return;
+        }
+        // [name, code, curriculum]
+        $defs = [
+            ['Mathematics', 'MTH', 'NERDC'],
+            ['English Language', 'ENG', 'NERDC'],
+            ['Basic Science', 'BSC', 'NERDC'],
+            ['Basic Technology', 'BTECH', 'NERDC'],
+            ['Social Studies', 'SOS', 'NERDC'],
+            ['Civic Education', 'CIV', 'NERDC'],
+            ['Computer Studies', 'COMP', 'NERDC'],
+            ['Agricultural Science', 'AGRIC', 'NERDC'],
+        ];
+        $byCode = [];
+        foreach ($defs as [$name, $code, $curriculum]) {
+            $c = new CatalogSubject($name, $code);
+            $c->setCurriculum($curriculum);
+            $c->setDescription($name . ' — Nigerian junior-secondary curriculum.');
+            $this->em->persist($c);
+            $byCode[$code] = $c;
+        }
+        $this->em->flush();
+
+        // Link the seeded institution subjects to their catalogue entry by code.
+        foreach ($this->em->getRepository(Subject::class)->findAll() as $subject) {
+            $code = strtoupper((string) ($subject->toArray()['code'] ?? ''));
+            if (isset($byCode[$code])) {
+                $subject->setCatalogSubject($byCode[$code]);
+            }
+        }
+        $this->em->flush();
+
+        $output->writeln('  + ' . count($defs) . ' catalogue subjects (linked to school subjects)');
+    }
+
     /** Seed the platform content library + one bundled package. */
     private function seedContent(OutputInterface $output): void
     {
@@ -674,6 +715,10 @@ class SeedCommand extends Command
 
         $pack = new ContentPackage('JSS 1 Mathematics — Term 1', 'subject_pack');
         $pack->setSubjectArea('Mathematics');
+        $mathCatalog = $this->em->getRepository(CatalogSubject::class)->findOneBy(['code' => 'MTH']);
+        if ($mathCatalog !== null) {
+            $pack->setCatalogSubject($mathCatalog);
+        }
         $pack->setGradeLevel('JSS 1');
         $pack->setDescription('Everything needed to teach JSS 1 Mathematics for the first term.');
         $pack->setPriceKobo(2500000);

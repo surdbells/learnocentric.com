@@ -41,6 +41,11 @@ class ContentPackage
     #[ORM\Column(name: 'subject_area', length: 120, nullable: true)]
     private ?string $subjectArea = null;
 
+    /** The catalogue subject this package is scoped to. */
+    #[ORM\ManyToOne(targetEntity: CatalogSubject::class)]
+    #[ORM\JoinColumn(name: 'catalog_subject_id', referencedColumnName: 'id', nullable: true, onDelete: 'SET NULL')]
+    private ?CatalogSubject $catalogSubject = null;
+
     #[ORM\Column(name: 'grade_level', length: 60, nullable: true)]
     private ?string $gradeLevel = null;
 
@@ -73,6 +78,8 @@ class ContentPackage
     public function setPackageType(string $v): void { $this->packageType = in_array($v, self::TYPES, true) ? $v : $this->packageType; }
     public function setDescription(?string $v): void { $this->description = $v; }
     public function setSubjectArea(?string $v): void { $this->subjectArea = $v; }
+    public function getCatalogSubject(): ?CatalogSubject { return $this->catalogSubject; }
+    public function setCatalogSubject(?CatalogSubject $v): void { $this->catalogSubject = $v; }
     public function setGradeLevel(?string $v): void { $this->gradeLevel = $v; }
     public function getPriceKobo(): int { return $this->priceKobo; }
     public function setPriceKobo(int $v): void { $this->priceKobo = max(0, $v); }
@@ -93,6 +100,8 @@ class ContentPackage
             'package_type' => $this->packageType,
             'description' => $this->description,
             'subjectArea' => $this->subjectArea,
+            'catalog_subject_id' => $this->catalogSubject?->getId(),
+            'catalog_subject' => $this->catalogSubject?->getName(),
             'grade_level' => $this->gradeLevel,
             'gradeLevel' => $this->gradeLevel,
             'price' => $this->priceKobo / 100,

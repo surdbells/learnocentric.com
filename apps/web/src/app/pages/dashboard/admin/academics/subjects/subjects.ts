@@ -1,54 +1,53 @@
-import {Component, signal, ViewChild} from '@angular/core';
+import {Component, inject, signal} from '@angular/core';
+import {ToastrService} from 'ngx-toastr';
 import {PageHeader} from '../../../../../common/layout/page-header/page-header';
-import {LearnoModal} from '../../../../../components/learno-modal/learno-modal';
-import {SubjectForm} from '../../../../../components/forms/subject-form/subject-form';
-import {LearnoButton} from '../../../../../common/learno-button/learno-button';
-import {DataGrid, GridColumn, GridFilter} from '../../../../../components/data-grid/data-grid';
+import {Icon} from '../../../../../common/icon/icon';
+import {ApiService} from '../../../../../common/service/api.service';
 
-declare const bootstrap: any;
-
+/**
+ * Subjects are defined in the platform catalogue by the SaaS admin; a school
+ * chooses which of them it offers. This page lists the catalogue and lets an
+ * admin adopt or remove a subject for their school.
+ */
 @Component({
   selector: 'app-subjects',
   standalone: true,
-  imports: [PageHeader, LearnoModal, SubjectForm, LearnoButton, DataGrid],
+  imports: [PageHeader, Icon],
   templateUrl: './subjects.html',
   styleUrl: './subjects.css',
 })
 export class Subjects {
-  @ViewChild(DataGrid) grid!: DataGrid;
+  private readonly api = inject(ApiService);
+  private readonly toast = inject(ToastrService);
 
-  selectSubject = signal<any | null>(null);
+  loading = signal(true);
+  busy = signal<number | null>(null);
+  catalog = signal<any[]>([]);
 
-  columns: GridColumn[] = [
-    {key: 'name', label: 'Name', sortable: true},
-    {key: 'code', label: 'Code', sortable: true},
-    {key: 'class_label', label: 'Class'},
-    {key: 'status', label: 'Status', type: 'badge'},
-  ];
+  constructor() { this.load(); }
 
-  filterDefs: GridFilter[] = [
-    {key: 'status', label: 'Status', options: [{label: 'Active', value: 'active'}, {label: 'Inactive', value: 'inactive'}]},
-  ];
-
-  onAdd(): void {
-    this.selectSubject.set(null);
+  load(): void {
+    this.loading.set(true);
+    this.api.get<any>('/backend/school/subjects/available').subscribe({
+      next: (res) => { this.catalog.set(Array.isArray(res) ? res : (res?.data ?? [])); this.loading.set(false); },
+      error: () => { this.loading.set(false); this.toast.error('Could not load subjects'); },
+    });
   }
 
-  onEdit(row: any): void {
-    this.selectSubject.set(row);
-    const el = document.getElementById('add_subject');
-    if (el && typeof bootstrap !== 'undefined') {
-      bootstrap.Modal.getOrCreateInstance(el).show();
+  toggle(item: any): void {
+    this.busy.set(item.id);
+    if (item.adopted) {
+      this.api.delete(`/backend/school/subjects?id=${item.subject_id}`, {confirm: false}).subscribe({
+        next: () => { this.toast.success(`${item.name} removed from your school`); this.after(); },
+        error: (e) => { this.toast.error(e?.error?.error || 'Could not remove — it may have topics or classes attached'); this.busy.set(null); },
+      });
+    } else {
+      this.api.post('/backend/school/subjects/adopt', {catalog_subject_id: item.id}).subscribe({
+        next: () => { this.toast.success(`${item.name} added to your school`); this.after(); },
+        error: (e) => { this.toast.error(e?.error?.error || 'Could not add the subject'); this.busy.set(null); },
+      });
     }
   }
 
-  handleSuccessSubmit(event: { success: boolean }): void {
-    if (!event.success) return;
-    const el = document.getElementById('add_subject');
-    if (el && typeof bootstrap !== 'undefined') {
-      bootstrap.Modal.getInstance(el)?.hide();
-    }
-    this.selectSubject.set(null);
-    this.grid?.refresh();
-  }
+  private after(): void { this.busy.set(null); this.load(); }
 }

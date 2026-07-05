@@ -173,7 +173,7 @@ export class SuperAdminContentLibrary implements OnInit {
   }
 
   loadSubjects() {
-    this.apiSrv.get('/backend/school/subjects').subscribe({
+    this.apiSrv.get('/backend/catalog/subjects').subscribe({
       next: (data: any) => {
         const list = Array.isArray(data) ? data : (Array.isArray((data as any)?.items) ? (data as any).items : []);
         const options: IInputOption[] = list.map((s: any) => ({
