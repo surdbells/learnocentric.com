@@ -8,6 +8,8 @@ use App\Application\Actions\Auth\ProfileAction;
 use App\Application\Actions\Auth\RegisterAction;
 use App\Application\Actions\Analytics\AnalyticsAction;
 use App\Application\Actions\Auth\UserProfileAction;
+use App\Application\Actions\Billing\BillingAction;
+use App\Application\Actions\Billing\PlansAction;
 use App\Application\Actions\Assessment\AssessmentsAction;
 use App\Application\Actions\Assessment\AttemptsAction;
 use App\Application\Actions\Assessment\FeedbackAction;
@@ -133,6 +135,13 @@ return static function (App $app): void {
             $auth->get('/analytics/overview', AnalyticsAction::class . ':overview');
             $auth->get('/analytics/children', AnalyticsAction::class . ':children');
             $auth->get('/analytics/student/{id:[0-9]+}', AnalyticsAction::class . ':student');
+
+            // Billing (Paystack) — plan catalogue, subscribe/verify, invoices
+            $auth->map(['GET', 'POST', 'PUT', 'DELETE'], '/billing/plans', PlansAction::class);
+            $auth->get('/billing/subscription', BillingAction::class . ':current');
+            $auth->post('/billing/subscribe', BillingAction::class . ':subscribe');
+            $auth->post('/billing/verify', BillingAction::class . ':verify');
+            $auth->get('/billing/transactions', BillingAction::class . ':transactions');
 
             $auth->post('/upload', UploadAction::class);
         })->add(JwtAuthMiddleware::class);

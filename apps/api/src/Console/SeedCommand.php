@@ -19,7 +19,10 @@ use App\Domain\Entity\LiveClass;
 use App\Domain\Entity\LiveClassAttendance;
 use App\Domain\Entity\Permission;
 use App\Domain\Entity\PortfolioEntry;
+use App\Domain\Entity\BillingTransaction;
 use App\Domain\Entity\Question;
+use App\Domain\Entity\Subscription;
+use App\Domain\Entity\SubscriptionPlan;
 use App\Domain\Entity\Role;
 use App\Domain\Entity\RolePermission;
 use App\Domain\Entity\SchemeOfWork;
@@ -77,6 +80,7 @@ class SeedCommand extends Command
         $this->seedFeedback($output);
         $this->seedLiveClasses($output);
         $this->seedGuardians($output);
+        $this->seedBilling($output);
         $this->seedAuditLogs($users, $output);
 
         $this->em->flush();
@@ -443,6 +447,56 @@ class SeedCommand extends Command
         }
         $this->em->flush();
         $output->writeln("  + {$count} questions (question bank)");
+    }
+
+    /** Seed subscription plans + an active subscription with a paid invoice. */
+    private function seedBilling(OutputInterface $output): void
+    {
+        if ($this->em->getRepository(SubscriptionPlan::class)->count([]) > 0) {
+            return;
+        }
+        // [code, name, price kobo, interval, maxStudents, maxTeachers, features]
+        $defs = [
+            ['starter', 'Starter', 1500000, 'termly', 200, 20, ['Core LMS', 'Quizzes & worksheets', 'Basic reports']],
+            ['standard', 'Standard', 3500000, 'termly', 600, 60, ['Everything in Starter', 'Live classes', 'Portfolio & analytics']],
+            ['premium', 'Premium', 6000000, 'termly', null, null, ['Everything in Standard', 'Unlimited seats', 'Priority support']],
+        ];
+        $plans = [];
+        foreach ($defs as [$code, $name, $price, $interval, $maxS, $maxT, $features]) {
+            $plan = new SubscriptionPlan($code, $name, $price);
+            $plan->setInterval($interval);
+            $plan->setMaxStudents($maxS);
+            $plan->setMaxTeachers($maxT);
+            $plan->setFeatures($features);
+            $plan->setDescription($name . ' plan billed per school term.');
+            $this->em->persist($plan);
+            $plans[$code] = $plan;
+        }
+        $this->em->flush();
+
+        // Put GOF College on an active Standard subscription with a paid invoice.
+        $admin = $this->em->getRepository(User::class)->findOneBy(['email' => 'school@gmail.com']);
+        $institution = $admin?->getInstitution();
+        if ($institution === null) {
+            $output->writeln('  + 3 plans');
+            return;
+        }
+        $standard = $plans['standard'];
+        $now = new DateTimeImmutable();
+        $start = $now->modify('-30 days');
+        $end = $start->add($standard->periodInterval());
+        $sub = new Subscription($institution, $standard, $start, $end);
+        $this->em->persist($sub);
+
+        $txn = new BillingTransaction($institution, $standard, 'LEARNO-SEED000001', $standard->getPriceKobo());
+        $txn->setInitiatedBy($admin);
+        $txn->setStatus(BillingTransaction::SUCCESS);
+        $txn->setChannel('card');
+        $txn->setPaidAt($start);
+        $this->em->persist($txn);
+        $this->em->flush();
+
+        $output->writeln('  + 3 plans, 1 active subscription (Standard) + paid invoice');
     }
 
     /** Link the seeded parent account to a student so the parent report works. */
