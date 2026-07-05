@@ -1,3 +1,23 @@
 :host {
   display: block;
 }
+
+.gauge {
+  max-width: 140px;
+}
+.gauge-val {
+  font-size: 22px;
+  font-weight: 800;
+  fill: var(--bs-body-color, #15231c);
+}
+.gauge-sub {
+  font-size: 9px;
+  fill: var(--bs-secondary-color, #7b8a80);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.spark {
+  display: block;
+  overflow: visible;
+}

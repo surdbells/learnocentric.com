@@ -36,6 +36,57 @@
     </div>
   </div>
 
+  <!-- Progress charts -->
+  <div class="row g-3 mb-4">
+    <div class="col-md-4">
+      <div class="card border-0 shadow-sm h-100"><div class="card-body text-center">
+        <h6 class="fw-semibold mb-3 text-start">Quiz average</h6>
+        <svg viewBox="0 0 120 120" width="140" height="140" class="gauge">
+          <circle cx="60" cy="60" r="52" fill="none" stroke="var(--bs-secondary-bg, #eef1f4)" stroke-width="11"/>
+          <circle cx="60" cy="60" r="52" fill="none" [attr.stroke]="gaugeStroke(scoreColor(d.stats.quiz_average))" stroke-width="11"
+                  stroke-linecap="round" [attr.stroke-dasharray]="gaugeCirc" [attr.stroke-dashoffset]="gaugeOffset(d.stats.quiz_average)"
+                  transform="rotate(-90 60 60)" style="transition: stroke-dashoffset .6s ease"/>
+          <text x="60" y="58" text-anchor="middle" class="gauge-val">{{ pct(d.stats.quiz_average) }}</text>
+          <text x="60" y="76" text-anchor="middle" class="gauge-sub">{{ d.stats.quizzes_taken }} quizzes</text>
+        </svg>
+      </div></div>
+    </div>
+    <div class="col-md-4">
+      <div class="card border-0 shadow-sm h-100"><div class="card-body text-center">
+        <h6 class="fw-semibold mb-3 text-start">Lessons progress</h6>
+        <svg viewBox="0 0 120 120" width="140" height="140" class="gauge">
+          <circle cx="60" cy="60" r="52" fill="none" stroke="var(--bs-secondary-bg, #eef1f4)" stroke-width="11"/>
+          <circle cx="60" cy="60" r="52" fill="none" stroke="#39c645" stroke-width="11"
+                  stroke-linecap="round" [attr.stroke-dasharray]="gaugeCirc" [attr.stroke-dashoffset]="gaugeOffset(lessonPct())"
+                  transform="rotate(-90 60 60)" style="transition: stroke-dashoffset .6s ease"/>
+          <text x="60" y="58" text-anchor="middle" class="gauge-val">{{ lessonPct() }}%</text>
+          <text x="60" y="76" text-anchor="middle" class="gauge-sub">{{ d.stats.lessons_viewed }}/{{ d.stats.topics }} topics</text>
+        </svg>
+      </div></div>
+    </div>
+    <div class="col-md-4">
+      <div class="card border-0 shadow-sm h-100"><div class="card-body">
+        <h6 class="fw-semibold mb-3">Quiz trend</h6>
+        @if (trend(); as t) {
+          <svg [attr.viewBox]="'0 0 ' + t.w + ' ' + t.h" width="100%" [attr.height]="t.h" preserveAspectRatio="none" class="spark">
+            <defs>
+              <linearGradient id="qtrend" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#39c645" stop-opacity="0.28"/>
+                <stop offset="100%" stop-color="#39c645" stop-opacity="0"/>
+              </linearGradient>
+            </defs>
+            <path [attr.d]="t.area" fill="url(#qtrend)"/>
+            <polyline [attr.points]="t.line" fill="none" stroke="#39c645" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+            <circle [attr.cx]="t.last.x" [attr.cy]="t.last.y" r="3.5" fill="#39c645"/>
+          </svg>
+          <div class="small text-body-secondary mt-2">Your last {{ d.recent_quizzes.length }} quiz scores</div>
+        } @else {
+          <div class="text-body-secondary small py-4 text-center">Take a couple of quizzes to see your trend.</div>
+        }
+      </div></div>
+    </div>
+  </div>
+
   <div class="row g-4">
     <!-- To do -->
     <div class="col-lg-5">

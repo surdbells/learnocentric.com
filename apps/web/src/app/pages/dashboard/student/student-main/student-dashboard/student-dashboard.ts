@@ -1,4 +1,4 @@
-import {Component, inject, PLATFORM_ID, signal} from '@angular/core';
+import {Component, computed, inject, PLATFORM_ID, signal} from '@angular/core';
 import {DatePipe, isPlatformBrowser} from '@angular/common';
 import {RouterLink} from '@angular/router';
 import {AuthService} from '../../../../../common/auth/auth.service';
@@ -38,4 +38,37 @@ export class StudentDashboard {
     return 'danger';
   }
   pct(v: number | null): string { return v === null || v === undefined ? '—' : v + '%'; }
+
+  // --- SVG gauges ---
+  readonly gaugeCirc = 2 * Math.PI * 52; // r = 52
+
+  gaugeOffset(pctVal: number | null): number {
+    const p = Math.max(0, Math.min(100, Number(pctVal ?? 0)));
+    return this.gaugeCirc * (1 - p / 100);
+  }
+  gaugeStroke(color: string): string {
+    return ({success: '#22c55e', warning: '#f59e0b', danger: '#ef4444', info: '#0ea5e9'} as Record<string, string>)[color] ?? '#39c645';
+  }
+
+  readonly lessonPct = computed<number>(() => {
+    const s = this.data()?.stats;
+    if (!s || !s.topics) return 0;
+    return Math.round((s.lessons_viewed / s.topics) * 100);
+  });
+
+  /** Recent quiz percentages, oldest→newest, as an SVG area + line path. */
+  readonly trend = computed(() => {
+    const qs = (this.data()?.recent_quizzes ?? []).slice().reverse();
+    if (qs.length < 2) return null;
+    const w = 320, h = 96, pad = 8;
+    const vals = qs.map((q: any) => Math.max(0, Math.min(100, Number(q.percentage) || 0)));
+    const stepX = (w - pad * 2) / (vals.length - 1);
+    const pts = vals.map((v: number, i: number) => ({
+      x: pad + i * stepX,
+      y: pad + (h - pad * 2) * (1 - v / 100),
+    }));
+    const line = pts.map((p: any) => `${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' ');
+    const area = `M${pad},${h - pad} L` + line.split(' ').join(' L') + ` L${(w - pad).toFixed(1)},${h - pad} Z`;
+    return {w, h, line, area, pts, last: pts[pts.length - 1]};
+  });
 }
