@@ -60,6 +60,8 @@ class SchemeOfWork
     }
 
     public function getId(): ?int { return $this->id; }
+    public function getWeekNumber(): int { return $this->weekNumber; }
+    public function setWeekNumber(int $v): void { $this->weekNumber = $v; }
     public function setTerm(?Term $v): void { $this->term = $v; }
     public function setTopic(?Topic $v): void { $this->topic = $v; }
     public function setObjective(?string $v): void { $this->objective = $v; }
