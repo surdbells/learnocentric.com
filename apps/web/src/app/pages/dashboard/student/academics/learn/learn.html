@@ -60,9 +60,10 @@
 
           @if (l.lesson) {
             @if (l.lesson.video_url) {
-              <a class="btn btn-sm btn-outline-primary mb-3" [href]="l.lesson.video_url" target="_blank" rel="noopener">
-                <app-icon name="play_circle" [size]="16" /> Watch video
-              </a>
+              <div class="mb-3">
+                <div class="small text-uppercase fw-semibold text-body-secondary mb-2">Lesson media</div>
+                <app-media-embed [url]="l.lesson.video_url" [title]="l.title" />
+              </div>
             }
             @if (l.lesson.learner_note) {
               <div class="mb-3"><div class="small text-uppercase fw-semibold text-body-secondary">Lesson note</div><p class="lesson-text mb-0">{{ l.lesson.learner_note }}</p></div>

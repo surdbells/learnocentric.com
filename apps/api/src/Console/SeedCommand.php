@@ -201,6 +201,8 @@ class SeedCommand extends Command
                 $pack = new TopicDeliveryPack($topic);
                 $pack->setTeacherGuide('Teacher guide: introduce ' . $title . ' with a diagnostic starter, then guided examples.');
                 $pack->setLearnerNote('Learner note explaining ' . $title . ' in clear Nigerian-context English.');
+                $pack->setVideoUrl('https://www.youtube.com/watch?v=OmJ-4B-mS-Y'); // sample lesson video, embedded in Learn
+                $pack->setWorkedExamples("Worked example: step through a typical " . $title . " problem.");
                 $pack->setParentWording('Your child is learning ' . $title . '. Ask them to show one everyday example.');
                 $pack->setStatus(Lifecycle::PUBLISHED);
                 $this->em->persist($pack);

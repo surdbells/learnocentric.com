@@ -4,13 +4,14 @@ import {ToastrService} from 'ngx-toastr';
 import {PageHeader} from '../../../../../common/layout/page-header/page-header';
 import {ApiService} from '../../../../../common/service/api.service';
 import {Icon} from '../../../../../common/icon/icon';
+import {MediaEmbed} from '../../../../../common/media-embed/media-embed';
 
 const STAGE_ICON: Record<string, string> = {lesson: 'menu_book', quiz: 'quiz', worksheet: 'assignment_turned_in', portfolio: 'folder_special'};
 
 @Component({
   selector: 'app-learn',
   standalone: true,
-  imports: [Icon, PageHeader],
+  imports: [Icon, PageHeader, MediaEmbed],
   templateUrl: './learn.html',
   styleUrl: './learn.css',
 })

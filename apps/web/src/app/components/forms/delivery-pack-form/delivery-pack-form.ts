@@ -2,12 +2,13 @@ import {Component, computed, effect, EventEmitter, inject, input, Output, signal
 import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {ToastrService} from 'ngx-toastr';
 import {LearnoButton} from '../../../common/learno-button/learno-button';
+import {FileUpload, UploadedFile} from '../../../common/file-upload/file-upload';
 import {ApiService} from '../../../common/service/api.service';
 
 @Component({
   selector: 'app-delivery-pack-form',
   standalone: true,
-  imports: [ReactiveFormsModule, LearnoButton],
+  imports: [ReactiveFormsModule, LearnoButton, FileUpload],
   templateUrl: './delivery-pack-form.html',
 })
 export class DeliveryPackForm {
@@ -32,6 +33,9 @@ export class DeliveryPackForm {
   });
 
   readonly editTopicTitle = computed(() => this.select()?.topic ?? '');
+
+  onMediaUploaded(file: UploadedFile): void { this.form.get('videoUrl')!.setValue(file.url); }
+  onMediaCleared(): void { this.form.get('videoUrl')!.setValue(''); }
 
   constructor() {
     effect(() => {

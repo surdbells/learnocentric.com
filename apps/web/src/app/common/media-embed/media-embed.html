@@ -1,0 +1,30 @@
+@switch (kind()) {
+  @case ('youtube') {
+    <div class="media-frame">
+      @if (embedSrc()) { <iframe [src]="embedSrc()" [title]="title()" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen loading="lazy"></iframe> }
+    </div>
+  }
+  @case ('vimeo') {
+    <div class="media-frame">
+      @if (embedSrc()) { <iframe [src]="embedSrc()" [title]="title()" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen loading="lazy"></iframe> }
+    </div>
+  }
+  @case ('video') {
+    <video class="media-video" controls preload="metadata" [src]="url()"></video>
+  }
+  @case ('audio') {
+    <audio class="media-audio w-100" controls preload="metadata" [src]="url()"></audio>
+  }
+  @case ('pdf') {
+    <div class="media-frame media-pdf">
+      @if (embedSrc()) { <iframe [src]="embedSrc()" [title]="title()" loading="lazy"></iframe> }
+    </div>
+    <a class="btn btn-sm btn-outline-secondary mt-2" [href]="url()" target="_blank" rel="noopener">Open PDF in a new tab</a>
+  }
+  @case ('image') {
+    <img class="media-image" [src]="url()" [alt]="title()" loading="lazy"/>
+  }
+  @default {
+    <a class="btn btn-outline-primary" [href]="url()" target="_blank" rel="noopener">Open resource</a>
+  }
+}
