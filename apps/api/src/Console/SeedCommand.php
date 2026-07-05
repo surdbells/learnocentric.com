@@ -581,19 +581,26 @@ class SeedCommand extends Command
         if ($this->em->getRepository(SubscriptionPlan::class)->count([]) > 0) {
             return;
         }
-        // [code, name, price kobo, interval, maxStudents, maxTeachers, features]
+        // [code, name, price kobo, interval, maxStudents, maxTeachers, features, modules]
         $defs = [
-            ['starter', 'Starter', 1500000, 'termly', 200, 20, ['Core LMS', 'Quizzes & worksheets', 'Basic reports']],
-            ['standard', 'Standard', 3500000, 'termly', 600, 60, ['Everything in Starter', 'Live classes', 'Portfolio & analytics']],
-            ['premium', 'Premium', 6000000, 'termly', null, null, ['Everything in Standard', 'Unlimited seats', 'Priority support']],
+            ['starter', 'Starter', 1500000, 'termly', 200, 20,
+                ['Core LMS', 'Quizzes & worksheets', 'Basic reports'],
+                ['worksheets']],
+            ['standard', 'Standard', 3500000, 'termly', 600, 60,
+                ['Everything in Starter', 'Live classes', 'Portfolio & analytics'],
+                ['assessments', 'worksheets', 'portfolio', 'live_classes', 'analytics']],
+            ['premium', 'Premium', 6000000, 'termly', null, null,
+                ['Everything in Standard', 'Unlimited seats', 'Priority support'],
+                SubscriptionPlan::MODULES],
         ];
         $plans = [];
-        foreach ($defs as [$code, $name, $price, $interval, $maxS, $maxT, $features]) {
+        foreach ($defs as [$code, $name, $price, $interval, $maxS, $maxT, $features, $modules]) {
             $plan = new SubscriptionPlan($code, $name, $price);
             $plan->setInterval($interval);
             $plan->setMaxStudents($maxS);
             $plan->setMaxTeachers($maxT);
             $plan->setFeatures($features);
+            $plan->setModules($modules);
             $plan->setDescription($name . ' plan billed per school term.');
             $this->em->persist($plan);
             $plans[$code] = $plan;

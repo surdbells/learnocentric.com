@@ -43,6 +43,7 @@ import {ProgressReport} from './pages/dashboard/student/academics/progress-repor
 import {StudentManagement} from './pages/dashboard/student/management/management';
 import {StudentProfile} from './pages/dashboard/student/management/student-profile/student-profile';
 import {authGuard} from './common/auth/auth-guard';
+import {moduleGuard} from './common/auth/module-guard';
 import {ParentMain} from './pages/dashboard/parent/parent-main/parent-main';
 import {Parent} from './pages/dashboard/parent/parent';
 import {Enrollment} from './pages/dashboard/admin/student/enrollment/enrollment';
@@ -97,15 +98,15 @@ export const routes: Routes = [
           { path: "topics", component: Topics, data: { user: "admin" } },
           { path: "lesson-content", component: LessonContent, data: { user: "admin" } },
           { path: "scheme-of-work", component: SchemeOfWork, data: { user: "admin" } },
-          { path: "question-bank", component: QuestionBank, data: { user: "admin" } },
-          { path: "assessments", component: Assessments, data: { user: "admin" } },
-          { path: "worksheets", component: Worksheets, data: { user: "admin" } },
-          { path: "portfolio", component: Portfolio, data: { user: "admin" } },
-          { path: "live-classes", component: LiveClasses, data: { user: "admin" } },
-          { path: "gradebook", component: Gradebook, data: { user: "admin" } },
+          { path: "question-bank", component: QuestionBank, canActivate: [moduleGuard('assessments')], data: { user: "admin" } },
+          { path: "assessments", component: Assessments, canActivate: [moduleGuard('assessments')], data: { user: "admin" } },
+          { path: "worksheets", component: Worksheets, canActivate: [moduleGuard('worksheets')], data: { user: "admin" } },
+          { path: "portfolio", component: Portfolio, canActivate: [moduleGuard('portfolio')], data: { user: "admin" } },
+          { path: "live-classes", component: LiveClasses, canActivate: [moduleGuard('live_classes')], data: { user: "admin" } },
+          { path: "gradebook", component: Gradebook, canActivate: [moduleGuard('assessments')], data: { user: "admin" } },
           { path: "insights", component: Insights, data: { user: "admin" } },
-          { path: "analytics", component: Analytics, data: { user: "admin" } },
-          { path: "interventions", component: Interventions, data: { user: "admin" } },
+          { path: "analytics", component: Analytics, canActivate: [moduleGuard('analytics')], data: { user: "admin" } },
+          { path: "interventions", component: Interventions, canActivate: [moduleGuard('interventions')], data: { user: "admin" } },
         ]
       },
       {
@@ -113,7 +114,7 @@ export const routes: Routes = [
         children: [
           { path: "school-profile", component: SchoolProfile },
           { path: "billing", component: Billing },
-          { path: "safeguarding", component: Safeguarding },
+          { path: "safeguarding", component: Safeguarding, canActivate: [moduleGuard('safeguarding')] },
         ]
       }
     ]
@@ -148,15 +149,15 @@ export const routes: Routes = [
           { path: "topics", component: Topics },
           { path: "lesson-content", component: LessonContent },
           { path: "scheme-of-work", component: SchemeOfWork },
-          { path: "question-bank", component: QuestionBank },
-          { path: "assessments", component: Assessments },
-          { path: "worksheets", component: Worksheets },
-          { path: "portfolio", component: Portfolio },
-          { path: "live-classes", component: LiveClasses },
-          { path: "gradebook", component: Gradebook },
+          { path: "question-bank", component: QuestionBank, canActivate: [moduleGuard('assessments')] },
+          { path: "assessments", component: Assessments, canActivate: [moduleGuard('assessments')] },
+          { path: "worksheets", component: Worksheets, canActivate: [moduleGuard('worksheets')] },
+          { path: "portfolio", component: Portfolio, canActivate: [moduleGuard('portfolio')] },
+          { path: "live-classes", component: LiveClasses, canActivate: [moduleGuard('live_classes')] },
+          { path: "gradebook", component: Gradebook, canActivate: [moduleGuard('assessments')] },
           { path: "insights", component: Insights },
-          { path: "analytics", component: Analytics },
-          { path: "interventions", component: Interventions },
+          { path: "analytics", component: Analytics, canActivate: [moduleGuard('analytics')] },
+          { path: "interventions", component: Interventions, canActivate: [moduleGuard('interventions')] },
         ]
       },
       {
@@ -165,7 +166,7 @@ export const routes: Routes = [
         children: [
           { path: "academy-profile", component: SchoolProfile },
           { path: "billing", component: Billing },
-          { path: "safeguarding", component: Safeguarding },
+          { path: "safeguarding", component: Safeguarding, canActivate: [moduleGuard('safeguarding')] },
         ]
       }
     ]
@@ -191,16 +192,16 @@ export const routes: Routes = [
           { path: "topics", component: Topics },
           { path: "lesson-content", component: LessonContent },
           { path: "scheme-of-work", component: SchemeOfWork },
-          { path: "question-bank", component: QuestionBank },
-          { path: "assessments", component: Assessments },
-          { path: "worksheets", component: Worksheets },
-          { path: "portfolio", component: Portfolio },
-          { path: "live-classes", component: LiveClasses },
-          { path: "gradebook", component: Gradebook },
+          { path: "question-bank", component: QuestionBank, canActivate: [moduleGuard('assessments')] },
+          { path: "assessments", component: Assessments, canActivate: [moduleGuard('assessments')] },
+          { path: "worksheets", component: Worksheets, canActivate: [moduleGuard('worksheets')] },
+          { path: "portfolio", component: Portfolio, canActivate: [moduleGuard('portfolio')] },
+          { path: "live-classes", component: LiveClasses, canActivate: [moduleGuard('live_classes')] },
+          { path: "gradebook", component: Gradebook, canActivate: [moduleGuard('assessments')] },
           { path: "insights", component: Insights },
-          { path: "analytics", component: Analytics },
-          { path: "interventions", component: Interventions },
-          { path: "safeguarding", component: Safeguarding },
+          { path: "analytics", component: Analytics, canActivate: [moduleGuard('analytics')] },
+          { path: "interventions", component: Interventions, canActivate: [moduleGuard('interventions')] },
+          { path: "safeguarding", component: Safeguarding, canActivate: [moduleGuard('safeguarding')] },
         ]
       },
       {
@@ -230,12 +231,12 @@ export const routes: Routes = [
         component: Academics,
         children: [
           { path: "learn", component: Learn },
-          { path: "assessments", component: MyAssessments },
-          { path: "worksheets", component: MyWorksheets },
-          { path: "portfolio", component: MyPortfolio },
+          { path: "assessments", component: MyAssessments, canActivate: [moduleGuard('assessments')] },
+          { path: "worksheets", component: MyWorksheets, canActivate: [moduleGuard('worksheets')] },
+          { path: "portfolio", component: MyPortfolio, canActivate: [moduleGuard('portfolio')] },
           { path: "feedback", component: MyFeedback },
-          { path: "live-classes", component: MyLiveClasses },
-          { path: "progress-report", component: ProgressReport },
+          { path: "live-classes", component: MyLiveClasses, canActivate: [moduleGuard('live_classes')] },
+          { path: "progress-report", component: ProgressReport, canActivate: [moduleGuard('analytics')] },
         ]
       },
       {
@@ -290,7 +291,7 @@ export const routes: Routes = [
         path: "academics",
         component: Academics,
         children: [
-          { path: "progress-report", component: ProgressReport },
+          { path: "progress-report", component: ProgressReport, canActivate: [moduleGuard('analytics')] },
         ]
       },
       {

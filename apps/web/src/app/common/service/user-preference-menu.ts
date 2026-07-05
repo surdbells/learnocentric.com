@@ -4,6 +4,8 @@ export interface IMenu {
   name: string;
   icon?: string;
   link: string;
+  /** Gateable feature module this item needs; hidden when the plan doesn't grant it. */
+  module?: string;
   children?: IMenu[];
 }
 
@@ -41,15 +43,15 @@ export class UserPreferenceMenu {
         { name: "Topics", link: "/admin/academics/topics" },
         { name: "Lesson Content", link: "/admin/academics/lesson-content" },
         { name: "Scheme of Work", link: "/admin/academics/scheme-of-work" },
-        { name: "Question Bank", link: "/admin/academics/question-bank" },
-        { name: "Assessments", link: "/admin/academics/assessments" },
-        { name: "Worksheets", link: "/admin/academics/worksheets" },
-        { name: "Portfolio", link: "/admin/academics/portfolio" },
-        { name: "Live Classes", link: "/admin/academics/live-classes" },
-        { name: "Gradebook", link: "/admin/academics/gradebook" },
+        { name: "Question Bank", link: "/admin/academics/question-bank", module: "assessments" },
+        { name: "Assessments", link: "/admin/academics/assessments", module: "assessments" },
+        { name: "Worksheets", link: "/admin/academics/worksheets", module: "worksheets" },
+        { name: "Portfolio", link: "/admin/academics/portfolio", module: "portfolio" },
+        { name: "Live Classes", link: "/admin/academics/live-classes", module: "live_classes" },
+        { name: "Gradebook", link: "/admin/academics/gradebook", module: "assessments" },
         { name: "Insights", link: "/admin/academics/insights" },
-        { name: "Analytics", link: "/admin/academics/analytics" },
-        { name: "Interventions", link: "/admin/academics/interventions" },
+        { name: "Analytics", link: "/admin/academics/analytics", module: "analytics" },
+        { name: "Interventions", link: "/admin/academics/interventions", module: "interventions" },
       ]
     },
 
@@ -57,7 +59,7 @@ export class UserPreferenceMenu {
       children: [
         { name: "School Profile", link: "/admin/management/school-profile" },
         { name: "Billing", link: "/admin/management/billing" },
-        { name: "Safeguarding", link: "/admin/management/safeguarding" },
+        { name: "Safeguarding", link: "/admin/management/safeguarding", module: "safeguarding" },
       ]
     },
   ]
@@ -91,15 +93,15 @@ export class UserPreferenceMenu {
         { name: "Topics", link: "/academy/academics/topics" },
         { name: "Lesson Content", link: "/academy/academics/lesson-content" },
         { name: "Scheme of Work", link: "/academy/academics/scheme-of-work" },
-        { name: "Question Bank", link: "/academy/academics/question-bank" },
-        { name: "Assessments", link: "/academy/academics/assessments" },
-        { name: "Worksheets", link: "/academy/academics/worksheets" },
-        { name: "Portfolio", link: "/academy/academics/portfolio" },
-        { name: "Live Classes", link: "/academy/academics/live-classes" },
-        { name: "Gradebook", link: "/academy/academics/gradebook" },
+        { name: "Question Bank", link: "/academy/academics/question-bank", module: "assessments" },
+        { name: "Assessments", link: "/academy/academics/assessments", module: "assessments" },
+        { name: "Worksheets", link: "/academy/academics/worksheets", module: "worksheets" },
+        { name: "Portfolio", link: "/academy/academics/portfolio", module: "portfolio" },
+        { name: "Live Classes", link: "/academy/academics/live-classes", module: "live_classes" },
+        { name: "Gradebook", link: "/academy/academics/gradebook", module: "assessments" },
         { name: "Insights", link: "/academy/academics/insights" },
-        { name: "Analytics", link: "/academy/academics/analytics" },
-        { name: "Interventions", link: "/academy/academics/interventions" },
+        { name: "Analytics", link: "/academy/academics/analytics", module: "analytics" },
+        { name: "Interventions", link: "/academy/academics/interventions", module: "interventions" },
       ]
     },
 
@@ -107,7 +109,7 @@ export class UserPreferenceMenu {
       children: [
         { name: "Academy Profile", link: "/academy/management/academy-profile" },
         { name: "Billing", link: "/academy/management/billing" },
-        { name: "Safeguarding", link: "/academy/management/safeguarding" },
+        { name: "Safeguarding", link: "/academy/management/safeguarding", module: "safeguarding" },
       ]
     },
   ]
@@ -144,16 +146,16 @@ export class UserPreferenceMenu {
         { name: "Topics", link: "/teacher/academics/topics" },
         { name: "Lesson Content", link: "/teacher/academics/lesson-content" },
         { name: "Scheme of Work", link: "/teacher/academics/scheme-of-work" },
-        { name: "Question Bank", link: "/teacher/academics/question-bank" },
-        { name: "Assessments", link: "/teacher/academics/assessments" },
-        { name: "Worksheets", link: "/teacher/academics/worksheets" },
-        { name: "Portfolio", link: "/teacher/academics/portfolio" },
-        { name: "Live Classes", link: "/teacher/academics/live-classes" },
-        { name: "Gradebook", link: "/teacher/academics/gradebook" },
+        { name: "Question Bank", link: "/teacher/academics/question-bank", module: "assessments" },
+        { name: "Assessments", link: "/teacher/academics/assessments", module: "assessments" },
+        { name: "Worksheets", link: "/teacher/academics/worksheets", module: "worksheets" },
+        { name: "Portfolio", link: "/teacher/academics/portfolio", module: "portfolio" },
+        { name: "Live Classes", link: "/teacher/academics/live-classes", module: "live_classes" },
+        { name: "Gradebook", link: "/teacher/academics/gradebook", module: "assessments" },
         { name: "Insights", link: "/teacher/academics/insights" },
-        { name: "Analytics", link: "/teacher/academics/analytics" },
-        { name: "Interventions", link: "/teacher/academics/interventions" },
-        { name: "Safeguarding", link: "/teacher/academics/safeguarding" },
+        { name: "Analytics", link: "/teacher/academics/analytics", module: "analytics" },
+        { name: "Interventions", link: "/teacher/academics/interventions", module: "interventions" },
+        { name: "Safeguarding", link: "/teacher/academics/safeguarding", module: "safeguarding" },
       ]
     },
 
@@ -174,12 +176,12 @@ export class UserPreferenceMenu {
     { name: "Academics", icon: "school", link: "/student/academics",
       children: [
         { name: "Learn", link: "/student/academics/learn" },
-        { name: "Assessments", link: "/student/academics/assessments" },
-        { name: "Worksheets", link: "/student/academics/worksheets" },
-        { name: "Portfolio", link: "/student/academics/portfolio" },
+        { name: "Assessments", link: "/student/academics/assessments", module: "assessments" },
+        { name: "Worksheets", link: "/student/academics/worksheets", module: "worksheets" },
+        { name: "Portfolio", link: "/student/academics/portfolio", module: "portfolio" },
         { name: "Feedback", link: "/student/academics/feedback" },
-        { name: "Live Classes", link: "/student/academics/live-classes" },
-        { name: "Progress Report", link: "/student/academics/progress-report" },
+        { name: "Live Classes", link: "/student/academics/live-classes", module: "live_classes" },
+        { name: "Progress Report", link: "/student/academics/progress-report", module: "analytics" },
       ]
     },
 
@@ -199,7 +201,7 @@ export class UserPreferenceMenu {
 
     { name: "Academics", icon: "school", link: "/parent/academics",
       children: [
-        { name: "Progress Report", link: "/parent/academics/progress-report" },
+        { name: "Progress Report", link: "/parent/academics/progress-report", module: "analytics" },
       ]
     },
 

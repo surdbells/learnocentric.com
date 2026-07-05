@@ -3,6 +3,7 @@ import { AuthSession, AuthUser } from './auth.models';
 
 const TOKEN_KEY = 'auth_token';
 const USER_KEY = 'auth_user';
+const MODULES_KEY = 'granted_modules';
 
 @Injectable({ providedIn: 'root' })
 export class AuthStore {
@@ -23,6 +24,7 @@ export class AuthStore {
       try {
         localStorage.removeItem(TOKEN_KEY);
         localStorage.removeItem(USER_KEY);
+        localStorage.removeItem(MODULES_KEY);
       } catch {}
     }
   }

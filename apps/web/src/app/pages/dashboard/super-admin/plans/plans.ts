@@ -25,6 +25,26 @@ export class SuperAdminPlans {
   plans = signal<any[]>([]);
   editing = signal<any | null>(null);
 
+  /** Gateable feature modules a plan can unlock (mirrors backend SubscriptionPlan::MODULES). */
+  readonly allModules: { key: string; label: string }[] = [
+    {key: 'assessments', label: 'Assessments & question bank'},
+    {key: 'worksheets', label: 'Worksheets'},
+    {key: 'portfolio', label: 'Competency portfolio'},
+    {key: 'live_classes', label: 'Live classes'},
+    {key: 'analytics', label: 'Analytics & progress reports'},
+    {key: 'interventions', label: 'Interventions'},
+    {key: 'safeguarding', label: 'Safeguarding'},
+  ];
+  selectedModules = signal<Set<string>>(new Set());
+
+  hasModule(key: string): boolean { return this.selectedModules().has(key); }
+  toggleModule(key: string): void {
+    const next = new Set(this.selectedModules());
+    next.has(key) ? next.delete(key) : next.add(key);
+    this.selectedModules.set(next);
+  }
+  moduleLabel(key: string): string { return this.allModules.find(m => m.key === key)?.label ?? key; }
+
   form = new FormGroup({
     code: new FormControl('', {nonNullable: true, validators: [Validators.required]}),
     name: new FormControl('', {nonNullable: true, validators: [Validators.required]}),
@@ -51,6 +71,7 @@ export class SuperAdminPlans {
   openCreate(): void {
     this.editing.set(null);
     this.form.reset({interval: 'termly', isActive: true});
+    this.selectedModules.set(new Set());
     this.form.get('code')!.enable();
     this.open();
   }
@@ -66,6 +87,7 @@ export class SuperAdminPlans {
       maxTeachers: plan.max_teachers,
       features: (plan.features ?? []).join('\n'),
     });
+    this.selectedModules.set(new Set(plan.modules ?? []));
     this.form.get('code')!.disable(); // code is the immutable key
     this.open();
   }
@@ -84,6 +106,7 @@ export class SuperAdminPlans {
       max_students: v.maxStudents,
       max_teachers: v.maxTeachers,
       features: String(v.features || '').split('\n').map((f) => f.trim()).filter(Boolean),
+      modules: [...this.selectedModules()],
       is_active: v.isActive,
     };
     this.busy.set(true);

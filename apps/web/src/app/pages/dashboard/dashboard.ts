@@ -1,8 +1,9 @@
-import {Component, HostListener, Inject, OnInit, PLATFORM_ID, signal} from '@angular/core';
+import {Component, computed, HostListener, Inject, inject, OnInit, PLATFORM_ID, signal} from '@angular/core';
 import {RouterOutlet} from '@angular/router';
 import {isPlatformBrowser} from '@angular/common';
 import {IMenu, UserPreferenceMenu} from '../../common/service/user-preference-menu';
 import {AuthUser} from '../../common/auth/auth.models';
+import {ModuleAccessService} from '../../common/auth/module-access.service';
 import {Sidenav} from '../../common/layout/sidenav/sidenav';
 import {Topbar} from '../../common/layout/topbar/topbar';
 
@@ -17,7 +18,11 @@ const COLLAPSE_KEY = 'sidebarCollapsed';
 })
 export class Dashboard implements OnInit {
 
-  menu: IMenu[] = [];
+  private readonly moduleAccess = inject(ModuleAccessService);
+  private readonly fullMenu = signal<IMenu[]>([]);
+
+  /** Menu with items the current plan doesn't grant filtered out. */
+  readonly menu = computed<IMenu[]>(() => this.filterByModules(this.fullMenu()));
 
   /** Desktop rail collapse state (persisted). */
   collapsed = signal<boolean>(false);
@@ -30,7 +35,9 @@ export class Dashboard implements OnInit {
   ) {
     if (isPlatformBrowser(platformId)) {
       const user: AuthUser = JSON.parse(localStorage.getItem('auth_user') || '{}');
-      this.menu = this.userPreferenceMenu[user.role] ?? [];
+      this.fullMenu.set(this.userPreferenceMenu[user.role] ?? []);
+      // Refresh granted modules so the menu reflects the school's current plan.
+      this.moduleAccess.refresh();
     }
   }
 
@@ -38,6 +45,19 @@ export class Dashboard implements OnInit {
     if (isPlatformBrowser(this.platformId)) {
       this.collapsed.set(localStorage.getItem(COLLAPSE_KEY) === '1');
     }
+  }
+
+  /** Drop items whose module isn't granted, then drop any group left with no children. */
+  private filterByModules(menu: IMenu[]): IMenu[] {
+    return menu
+      .map(group => {
+        if (!group.children?.length) {
+          return this.moduleAccess.has(group.module) ? group : null;
+        }
+        const children = group.children.filter(c => this.moduleAccess.has(c.module));
+        return children.length ? {...group, children} : null;
+      })
+      .filter((g): g is IMenu => g !== null);
   }
 
   toggleCollapse(): void {

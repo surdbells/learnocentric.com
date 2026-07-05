@@ -41,6 +41,7 @@ use App\Application\Actions\School\SubjectsAction;
 use App\Application\Actions\School\TeachersAction;
 use App\Application\Actions\Storage\UploadAction;
 use App\Application\Middleware\JwtAuthMiddleware;
+use App\Application\Middleware\ModuleGateMiddleware;
 use Slim\App;
 use Slim\Routing\RouteCollectorProxy;
 
@@ -181,6 +182,6 @@ return static function (App $app): void {
             $auth->post('/notifications/{id:[0-9]+}/read', NotificationsAction::class . ':read');
 
             $auth->post('/upload', UploadAction::class);
-        })->add(JwtAuthMiddleware::class);
+        })->add(ModuleGateMiddleware::class)->add(JwtAuthMiddleware::class);
     });
 };

@@ -4,6 +4,7 @@ import {ToastrService} from "ngx-toastr";
 import {Router} from "@angular/router";
 import {AuthResponse, AuthUser} from '../../../common/auth/auth.models';
 import {AuthService} from '../../../common/auth/auth.service';
+import {ModuleAccessService} from '../../../common/auth/module-access.service';
 import {ApiService} from '../../../common/service/api.service';
 import {Loader} from '../../../common/loader/loader';
 import {NgIf} from '@angular/common';
@@ -35,6 +36,7 @@ export class SignIn {
         private toast: ToastrService,
         private router: Router,
         private authService: AuthService,
+        private moduleAccess: ModuleAccessService,
         private apiService: ApiService,
     ) { }
 
@@ -53,6 +55,7 @@ export class SignIn {
             console.log(val);
             this.auth = val
             this.authService.persistLogin(this.auth);
+            this.moduleAccess.refresh(); // load the school's granted feature modules
             this.isLoading.set(false)
             this.form.reset()
             this.toast.success('Login Successful');

@@ -111,6 +111,7 @@ final class PlansAction
         if (array_key_exists('max_students', $body)) { $plan->setMaxStudents($body['max_students'] !== null && $body['max_students'] !== '' ? (int) $body['max_students'] : null); }
         if (array_key_exists('max_teachers', $body)) { $plan->setMaxTeachers($body['max_teachers'] !== null && $body['max_teachers'] !== '' ? (int) $body['max_teachers'] : null); }
         if (array_key_exists('features', $body)) { $plan->setFeatures(is_array($body['features']) ? $body['features'] : null); }
+        if (array_key_exists('modules', $body)) { $plan->setModules(is_array($body['modules']) ? $body['modules'] : null); }
         if (isset($body['is_active'])) { $plan->setIsActive((bool) $body['is_active']); }
     }
 

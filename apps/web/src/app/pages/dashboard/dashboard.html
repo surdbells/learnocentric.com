@@ -1,7 +1,7 @@
 <div class="app-shell" [class.is-collapsed]="collapsed()" [class.is-mobile-open]="mobileOpen()">
 
   <app-sidenav
-    [menu]="menu"
+    [menu]="menu()"
     [collapsed]="collapsed()"
     (itemClick)="closeMobile()"
   ></app-sidenav>

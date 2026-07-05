@@ -18,6 +18,12 @@ class SubscriptionPlan
 
     public const INTERVALS = ['monthly', 'termly', 'yearly'];
 
+    /** Gateable feature modules a plan may grant (core features are always on). */
+    public const MODULES = [
+        'assessments', 'worksheets', 'portfolio', 'live_classes',
+        'analytics', 'interventions', 'safeguarding',
+    ];
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: Types::INTEGER)]
@@ -48,6 +54,10 @@ class SubscriptionPlan
     #[ORM\Column(type: Types::JSON, nullable: true)]
     private ?array $features = null;
 
+    /** Feature modules this plan unlocks; a subset of self::MODULES. */
+    #[ORM\Column(type: Types::JSON, nullable: true)]
+    private ?array $modules = null;
+
     #[ORM\Column(name: 'is_active', type: Types::BOOLEAN, options: ['default' => true])]
     private bool $isActive = true;
 
@@ -71,6 +81,18 @@ class SubscriptionPlan
     public function setMaxStudents(?int $v): void { $this->maxStudents = $v; }
     public function setMaxTeachers(?int $v): void { $this->maxTeachers = $v; }
     public function setFeatures(?array $v): void { $this->features = $v; }
+
+    /** @return string[] the granted module keys (validated subset of self::MODULES). */
+    public function getModules(): array
+    {
+        return array_values(array_intersect(self::MODULES, $this->modules ?? []));
+    }
+
+    public function setModules(?array $v): void
+    {
+        $this->modules = $v === null ? null : array_values(array_intersect(self::MODULES, $v));
+    }
+
     public function isActive(): bool { return $this->isActive; }
     public function setIsActive(bool $v): void { $this->isActive = $v; }
 
@@ -97,6 +119,8 @@ class SubscriptionPlan
             'max_students' => $this->maxStudents,
             'max_teachers' => $this->maxTeachers,
             'features' => $this->features,
+            'modules' => $this->getModules(),
+            'all_modules' => self::MODULES,
             'is_active' => $this->isActive,
         ];
     }

@@ -44,6 +44,21 @@
           <label class="form-label" for="pl_feat">Features (one per line)</label>
           <textarea id="pl_feat" class="form-control" rows="4" formControlName="features"></textarea>
         </div>
+        <div class="col-lg-12 mb-1">
+          <label class="form-label d-block">Modules unlocked by this plan</label>
+          <div class="small text-body-secondary mb-2">Only the modules you tick are available to schools on this plan. Core tools (roster, curriculum authoring, learning, billing) are always included.</div>
+          <div class="row g-2">
+            @for (m of allModules; track m.key) {
+              <div class="col-md-6">
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" [id]="'mod_' + m.key"
+                         [checked]="hasModule(m.key)" (change)="toggleModule(m.key)"/>
+                  <label class="form-check-label" [for]="'mod_' + m.key">{{ m.label }}</label>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
       </div>
     </div>
     <div class="modal-footer">
@@ -72,9 +87,18 @@
             </div>
             <div class="small text-body-secondary">{{ p.code }}</div>
             <div class="my-2"><span class="fs-4 fw-bold">₦{{ p.price_naira | number }}</span><span class="small text-body-secondary"> / {{ p.interval }}</span></div>
-            <div class="small text-body-secondary mb-3">
+            <div class="small text-body-secondary mb-2">
               {{ p.max_students ? p.max_students + ' students' : 'Unlimited students' }} ·
               {{ p.max_teachers ? p.max_teachers + ' teachers' : 'Unlimited teachers' }}
+            </div>
+            <div class="d-flex flex-wrap gap-1 mb-3">
+              @if (p.modules?.length) {
+                @for (m of p.modules; track m) {
+                  <span class="badge bg-primary-subtle text-primary fw-normal">{{ moduleLabel(m) }}</span>
+                }
+              } @else {
+                <span class="small text-body-secondary fst-italic">Core modules only</span>
+              }
             </div>
             <div class="mt-auto d-flex gap-2">
               <button type="button" class="btn btn-sm btn-outline-primary" (click)="openEdit(p)">Edit</button>
