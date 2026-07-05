@@ -27,6 +27,7 @@ final class FeedbackAction
     public function __construct(
         private readonly EntityManagerInterface $em,
         private readonly AuditLogger $audit,
+        private readonly \App\Service\NotificationService $notify,
     ) {
     }
 
@@ -101,6 +102,13 @@ final class FeedbackAction
             $note->setTopic($this->em->getRepository(Topic::class)->find((int) $body['topic_id']));
         }
         $this->em->persist($note);
+        $this->notify->notify(
+            $student,
+            'feedback',
+            'New feedback from ' . $author->getFirstName() . ' ' . $author->getLastName(),
+            $note->getMessage(),
+            '/student/academics/feedback',
+        );
         $this->em->flush();
         $this->audit->log('feedback.send', $author, 'FeedbackNote', (string) $note->getId(), null, ['student_id' => $student->getId(), 'type' => $note->getType()]);
 

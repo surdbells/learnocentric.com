@@ -24,6 +24,7 @@ use App\Application\Actions\Curriculum\TopicsAction;
 use App\Application\Actions\HealthAction;
 use App\Application\Actions\Institution\GetInstitutionAction;
 use App\Application\Actions\Live\LiveClassesAction;
+use App\Application\Actions\Notification\NotificationsAction;
 use App\Application\Actions\Institution\ListInstitutionsAction;
 use App\Application\Actions\Institution\OnboardInstitutionAction;
 use App\Application\Actions\School\ClassesAction;
@@ -142,6 +143,11 @@ return static function (App $app): void {
             $auth->post('/billing/subscribe', BillingAction::class . ':subscribe');
             $auth->post('/billing/verify', BillingAction::class . ':verify');
             $auth->get('/billing/transactions', BillingAction::class . ':transactions');
+
+            // Notifications (in-app inbox)
+            $auth->get('/notifications', NotificationsAction::class . ':mine');
+            $auth->post('/notifications/read-all', NotificationsAction::class . ':readAll');
+            $auth->post('/notifications/{id:[0-9]+}/read', NotificationsAction::class . ':read');
 
             $auth->post('/upload', UploadAction::class);
         })->add(JwtAuthMiddleware::class);

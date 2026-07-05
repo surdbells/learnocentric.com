@@ -33,6 +33,7 @@ final class PortfolioAction
     public function __construct(
         private readonly EntityManagerInterface $em,
         private readonly AuditLogger $audit,
+        private readonly \App\Service\NotificationService $notify,
     ) {
     }
 
@@ -211,6 +212,13 @@ final class PortfolioAction
         $entry->setReviewedBy($this->currentUser($request));
         $entry->setStatus(PortfolioEntry::REVIEWED);
         $entry->setReviewedAt(new DateTimeImmutable());
+        $this->notify->notify(
+            $entry->getStudent(),
+            'portfolio',
+            'Portfolio evidence reviewed: ' . $entry->getTitle(),
+            'Your competency was rated "' . $rating . '".',
+            '/student/academics/portfolio',
+        );
         $this->em->flush();
         $this->audit->log('portfolio.review', $request->getAttribute('user'), 'PortfolioEntry', (string) $entry->getId(), null, ['rating' => $rating]);
 

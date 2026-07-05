@@ -17,6 +17,7 @@ use App\Domain\Entity\GuardianLink;
 use App\Domain\Entity\Institution;
 use App\Domain\Entity\LiveClass;
 use App\Domain\Entity\LiveClassAttendance;
+use App\Domain\Entity\Notification;
 use App\Domain\Entity\Permission;
 use App\Domain\Entity\PortfolioEntry;
 use App\Domain\Entity\BillingTransaction;
@@ -81,6 +82,7 @@ class SeedCommand extends Command
         $this->seedLiveClasses($output);
         $this->seedGuardians($output);
         $this->seedBilling($output);
+        $this->seedNotifications($output);
         $this->seedAuditLogs($users, $output);
 
         $this->em->flush();
@@ -447,6 +449,40 @@ class SeedCommand extends Command
         }
         $this->em->flush();
         $output->writeln("  + {$count} questions (question bank)");
+    }
+
+    /** Seed a few in-app notifications so the inbox has content. */
+    private function seedNotifications(OutputInterface $output): void
+    {
+        if ($this->em->getRepository(Notification::class)->count([]) > 0) {
+            return;
+        }
+        $find = fn (string $email) => $this->em->getRepository(User::class)->findOneBy(['email' => $email]);
+        // [email, type, title, message, link, read]
+        $defs = [
+            ['student3@gmail.com', 'feedback', 'New feedback from Ngozi Okafor', 'You mixed up place value in Q3 — remember the hundreds column. Redo questions 3 and 7.', '/student/academics/feedback', false],
+            ['student2@gmail.com', 'grade', 'Worksheet graded: Whole Numbers — Practice Worksheet', 'You scored 8/10. Good work — revisit place value in Q3 and Q7.', '/student/academics/worksheets', false],
+            ['student@gmail.com', 'live', 'Live class starting soon', 'Fractions — Live Q&A begins shortly. Join from your dashboard.', '/student/academics/live-classes', true],
+            ['school@gmail.com', 'billing', 'Payment received — Standard plan', 'We received your payment of ₦35,000. Your subscription is active.', '/admin/management/billing', true],
+        ];
+        $count = 0;
+        foreach ($defs as [$email, $type, $title, $message, $link, $read]) {
+            $user = $find($email);
+            if ($user === null) {
+                continue;
+            }
+            $n = new Notification($user, $type, $title);
+            $n->setMessage($message);
+            $n->setLink($link);
+            $n->setRead($read);
+            if ($read) {
+                $n->setReadAt(new DateTimeImmutable('-2 hours'));
+            }
+            $this->em->persist($n);
+            $count++;
+        }
+        $this->em->flush();
+        $output->writeln("  + {$count} notifications");
     }
 
     /** Seed subscription plans + an active subscription with a paid invoice. */

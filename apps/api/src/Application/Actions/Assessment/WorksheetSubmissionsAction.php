@@ -24,6 +24,7 @@ final class WorksheetSubmissionsAction
     public function __construct(
         private readonly EntityManagerInterface $em,
         private readonly AuditLogger $audit,
+        private readonly \App\Service\NotificationService $notify,
     ) {
     }
 
@@ -146,6 +147,13 @@ final class WorksheetSubmissionsAction
         $submission->setFeedback(isset($body['feedback']) && $body['feedback'] !== '' ? (string) $body['feedback'] : null);
         $submission->setStatus(WorksheetSubmission::GRADED);
         $submission->setGradedAt(new DateTimeImmutable());
+        $this->notify->notify(
+            $submission->getStudent(),
+            'grade',
+            'Worksheet graded: ' . $submission->getWorksheet()->getTitle(),
+            'You scored ' . $score . '/' . $max . '.' . ($submission->getFeedback() ? ' ' . $submission->getFeedback() : ''),
+            '/student/academics/worksheets',
+        );
         $this->em->flush();
         $this->audit->log('worksheet.grade', $request->getAttribute('user'), 'WorksheetSubmission', (string) $submission->getId(), null, ['score' => $score]);
 

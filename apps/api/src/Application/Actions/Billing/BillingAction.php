@@ -34,6 +34,7 @@ final class BillingAction
         private readonly EntityManagerInterface $em,
         private readonly AuditLogger $audit,
         private readonly PaystackClient $paystack,
+        private readonly \App\Service\NotificationService $notify,
     ) {
     }
 
@@ -152,6 +153,15 @@ final class BillingAction
         $txn->setChannel($channel);
         $txn->setPaidAt(new DateTimeImmutable());
         $sub = $this->activate($txn->getInstitution(), $txn->getPlan());
+        /** @var User $actor */
+        $actor = $request->getAttribute('user');
+        $this->notify->notify(
+            $actor,
+            'billing',
+            'Payment received — ' . $txn->getPlan()->getName() . ' plan',
+            'We received your payment of ₦' . number_format($txn->getAmountKobo() / 100) . '. Your subscription is active until ' . $sub->getPeriodEnd()->format('j M Y') . '.',
+            '/admin/management/billing',
+        );
         $this->em->flush();
         $this->audit->log('billing.paid', $request->getAttribute('user'), 'BillingTransaction', (string) $txn->getId(), null, ['reference' => $reference, 'channel' => $channel]);
 
