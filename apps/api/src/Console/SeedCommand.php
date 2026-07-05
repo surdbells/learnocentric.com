@@ -14,6 +14,8 @@ use App\Domain\Entity\ContentVersion;
 use App\Domain\Entity\Enrollment;
 use App\Domain\Entity\FeedbackNote;
 use App\Domain\Entity\Institution;
+use App\Domain\Entity\LiveClass;
+use App\Domain\Entity\LiveClassAttendance;
 use App\Domain\Entity\Permission;
 use App\Domain\Entity\PortfolioEntry;
 use App\Domain\Entity\Question;
@@ -72,6 +74,7 @@ class SeedCommand extends Command
         $this->seedWorksheets($output);
         $this->seedPortfolio($output);
         $this->seedFeedback($output);
+        $this->seedLiveClasses($output);
         $this->seedAuditLogs($users, $output);
 
         $this->em->flush();
@@ -438,6 +441,63 @@ class SeedCommand extends Command
         }
         $this->em->flush();
         $output->writeln("  + {$count} questions (question bank)");
+    }
+
+    /** Seed live classes — one scheduled, one live with an attendee. */
+    private function seedLiveClasses(OutputInterface $output): void
+    {
+        if ($this->em->getRepository(LiveClass::class)->count([]) > 0) {
+            return;
+        }
+        $topic = $this->em->getRepository(Topic::class)->findOneBy(['title' => 'Whole Numbers']);
+        if ($topic === null) {
+            return;
+        }
+        $subject = $topic->getSubject();
+        $class = $topic->getSchoolClass();
+        $institution = $subject->getInstitution();
+        $teacher = $this->em->createQueryBuilder()->select('u')->from(User::class, 'u')->join('u.role', 'r')
+            ->where('r.code = :t')->andWhere('u.institution = :i')
+            ->setParameter('t', 'teacher')->setParameter('i', $institution)
+            ->setMaxResults(1)->getQuery()->getOneOrNullResult();
+
+        $room = static function (string $title): array {
+            $name = 'learno-' . substr(md5($title), 0, 12);
+            return [$name, 'https://learnocentric.daily.co/' . $name];
+        };
+
+        // A scheduled class (tomorrow) and one currently live.
+        [$n1, $u1] = $room('Whole Numbers Revision');
+        $scheduled = new LiveClass($subject, 'Whole Numbers — Live Revision', new DateTimeImmutable('tomorrow 10:00'));
+        $scheduled->setSchoolClass($class);
+        $scheduled->setTopic($topic);
+        $scheduled->setHost($teacher);
+        $scheduled->setDurationMinutes(45);
+        $scheduled->setRoomName($n1);
+        $scheduled->setRoomUrl($u1);
+        $scheduled->setStatus(LiveClass::SCHEDULED);
+        $this->em->persist($scheduled);
+
+        [$n2, $u2] = $room('Fractions Live Q and A');
+        $live = new LiveClass($subject, 'Fractions — Live Q&A', new DateTimeImmutable('-10 minutes'));
+        $live->setSchoolClass($class);
+        $live->setHost($teacher);
+        $live->setDurationMinutes(30);
+        $live->setRoomName($n2);
+        $live->setRoomUrl($u2);
+        $live->setStatus(LiveClass::LIVE);
+        $this->em->persist($live);
+        $this->em->flush();
+
+        $student = $this->em->createQueryBuilder()->select('u')->from(User::class, 'u')->join('u.role', 'r')
+            ->where('r.code = :s')->andWhere('u.institution = :i')
+            ->setParameter('s', 'student')->setParameter('i', $institution)
+            ->setMaxResults(1)->getQuery()->getOneOrNullResult();
+        if ($student !== null) {
+            $this->em->persist(new LiveClassAttendance($live, $student, new DateTimeImmutable('-8 minutes')));
+            $this->em->flush();
+        }
+        $output->writeln('  + 2 live classes (1 attendee)');
     }
 
     /** Seed teacher feedback notes (a correction and a praise) closing the loop. */

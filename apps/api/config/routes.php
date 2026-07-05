@@ -20,6 +20,7 @@ use App\Application\Actions\Curriculum\ReviewQueueAction;
 use App\Application\Actions\Curriculum\TopicsAction;
 use App\Application\Actions\HealthAction;
 use App\Application\Actions\Institution\GetInstitutionAction;
+use App\Application\Actions\Live\LiveClassesAction;
 use App\Application\Actions\Institution\ListInstitutionsAction;
 use App\Application\Actions\Institution\OnboardInstitutionAction;
 use App\Application\Actions\School\ClassesAction;
@@ -117,6 +118,15 @@ return static function (App $app): void {
             $auth->get('/assessment/feedback/mine', FeedbackAction::class . ':mine');
             $auth->post('/assessment/feedback/{id:[0-9]+}/acknowledge', FeedbackAction::class . ':acknowledge');
             $auth->get('/assessment/insights', InsightsAction::class);
+
+            // Live classes (Daily.co) — schedule, run, join, attendance
+            $auth->map(['GET', 'POST', 'PUT', 'DELETE'], '/live-classes', LiveClassesAction::class);
+            $auth->post('/live-classes/bulk-delete', LiveClassesAction::class . ':bulkDelete');
+            $auth->get('/live-classes/upcoming', LiveClassesAction::class . ':upcoming');
+            $auth->post('/live-classes/{id:[0-9]+}/start', LiveClassesAction::class . ':start');
+            $auth->post('/live-classes/{id:[0-9]+}/end', LiveClassesAction::class . ':end');
+            $auth->post('/live-classes/{id:[0-9]+}/join', LiveClassesAction::class . ':join');
+            $auth->get('/live-classes/{id:[0-9]+}/attendance', LiveClassesAction::class . ':attendance');
 
             $auth->post('/upload', UploadAction::class);
         })->add(JwtAuthMiddleware::class);

@@ -88,6 +88,7 @@ class Topic implements LifecycleAware
 
     public function getId(): ?int { return $this->id; }
     public function getSubject(): Subject { return $this->subject; }
+    public function getSchoolClass(): ?SchoolClass { return $this->schoolClass; }
     public function getTitle(): string { return $this->title; }
     public function setTitle(string $v): void { $this->title = $v; }
     public function setSchoolClass(?SchoolClass $v): void { $this->schoolClass = $v; }
