@@ -15,6 +15,7 @@ use App\Domain\Entity\Enrollment;
 use App\Domain\Entity\FeedbackNote;
 use App\Domain\Entity\GuardianLink;
 use App\Domain\Entity\Institution;
+use App\Domain\Entity\Intervention;
 use App\Domain\Entity\LiveClass;
 use App\Domain\Entity\LiveClassAttendance;
 use App\Domain\Entity\Notification;
@@ -85,6 +86,7 @@ class SeedCommand extends Command
         $this->seedBilling($output);
         $this->seedNotifications($output);
         $this->seedTopicProgress($output);
+        $this->seedInterventions($output);
         $this->seedAuditLogs($users, $output);
 
         $this->em->flush();
@@ -451,6 +453,45 @@ class SeedCommand extends Command
         }
         $this->em->flush();
         $output->writeln("  + {$count} questions (question bank)");
+    }
+
+    /** Seed interventions off the seeded low quiz scores. */
+    private function seedInterventions(OutputInterface $output): void
+    {
+        if ($this->em->getRepository(Intervention::class)->count([]) > 0) {
+            return;
+        }
+        $find = fn (string $email) => $this->em->getRepository(User::class)->findOneBy(['email' => $email]);
+        $tunde = $find('student3@gmail.com');   // scored 0% on the quiz
+        $chiamaka = $find('student2@gmail.com'); // scored 50%
+        $teacher = $find('teacher@gmail.com');
+        $lead = $find('school@gmail.com');
+        $topic = $this->em->getRepository(Topic::class)->findOneBy(['title' => 'Whole Numbers']);
+        $subject = $topic?->getSubject();
+        if ($tunde === null || $teacher === null) {
+            return;
+        }
+
+        $one = new Intervention($tunde, 'Scored 0% on the Whole Numbers quiz — needs place-value support.');
+        $one->setSubject($subject);
+        $one->setTopic($topic);
+        $one->setRaisedBy($lead);
+        $one->setAssignedTo($teacher);
+        $one->setStatus(Intervention::IN_PROGRESS);
+        $one->setDueDate(new DateTimeImmutable('+5 days'));
+        $this->em->persist($one);
+
+        if ($chiamaka !== null) {
+            $two = new Intervention($chiamaka, 'Borderline pass (50%) — monitor and revisit fractions.');
+            $two->setSubject($subject);
+            $two->setRaisedBy($teacher);
+            $two->setAssignedTo($teacher);
+            $two->setStatus(Intervention::OPEN);
+            $two->setDueDate(new DateTimeImmutable('+10 days'));
+            $this->em->persist($two);
+        }
+        $this->em->flush();
+        $output->writeln('  + 2 interventions');
     }
 
     /** Seed lesson-viewed progress so a student is mid-journey. */
