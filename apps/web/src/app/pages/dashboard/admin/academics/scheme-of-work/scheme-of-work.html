@@ -1,0 +1,26 @@
+<app-page-header icon="calendar_month" action="Scheme of Work">
+  <app-learno-button text="Add Week" icon="add" data-bs-toggle="modal" data-bs-target="#add_week" (clicked)="onAdd()"/>
+</app-page-header>
+
+<app-learno-modal [modalId]="'add_week'" [modalAction]="selectScheme() ? 'Edit Week' : 'Add Week'" [showBtn]="false">
+  <app-scheme-form
+    modalForm
+    [select]="selectScheme()"
+    [classes]="classes()"
+    [subjects]="subjects()"
+    [terms]="terms()"
+    [topics]="topics()"
+    [teachers]="teachers()"
+    (submitted)="handleSuccessSubmit($event)"
+  />
+</app-learno-modal>
+
+<app-data-grid
+  endpoint="/backend/school/scheme-of-work"
+  [columns]="columns"
+  [filters]="filterDefs()"
+  [actions]="['edit', 'delete']"
+  searchPlaceholder="Search objectives…"
+  emptyMessage="No scheme yet. Click “Add Week” to plan the term."
+  (edit)="onEdit($event)"
+/>

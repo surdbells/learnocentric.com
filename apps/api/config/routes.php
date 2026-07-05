@@ -33,6 +33,7 @@ use App\Application\Actions\School\ClassesAction;
 use App\Application\Actions\School\EnrollmentsAction;
 use App\Application\Actions\School\SchemeOfWorkAction;
 use App\Application\Actions\School\StudentsAction;
+use App\Application\Actions\School\TermsAction;
 use App\Application\Actions\School\SubjectsAction;
 use App\Application\Actions\School\TeachersAction;
 use App\Application\Actions\Storage\UploadAction;
@@ -70,6 +71,7 @@ return static function (App $app): void {
             $auth->map(['GET', 'POST', 'PUT', 'DELETE'], '/school/enrollments', EnrollmentsAction::class);
             $auth->map(['GET', 'POST', 'PUT', 'DELETE'], '/school/scheme-of-work', SchemeOfWorkAction::class);
             $auth->post('/school/scheme-of-work/bulk-delete', SchemeOfWorkAction::class . ':bulkDelete');
+            $auth->get('/school/terms', TermsAction::class);
 
             // Curriculum + content lifecycle
             $auth->map(['GET', 'POST', 'PUT', 'DELETE'], '/curriculum/topics', TopicsAction::class);

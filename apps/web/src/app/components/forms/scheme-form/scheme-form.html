@@ -1,0 +1,70 @@
+<form (ngSubmit)="onSubmit()" [formGroup]="form">
+  <div class="modal-body">
+    <div class="row">
+      <div class="col-lg-4 mb-3">
+        <label class="form-label" for="sw_class">Class</label>
+        <select id="sw_class" class="form-select" formControlName="classId">
+          <option [ngValue]="null" disabled>Select class</option>
+          @for (c of classes(); track c.id) {
+            <option [ngValue]="c.id">{{ c.label || c.name }}</option>
+          }
+        </select>
+      </div>
+      <div class="col-lg-4 mb-3">
+        <label class="form-label" for="sw_subject">Subject</label>
+        <select id="sw_subject" class="form-select" formControlName="subjectId">
+          <option [ngValue]="null" disabled>Select subject</option>
+          @for (s of subjects(); track s.id) {
+            <option [ngValue]="s.id">{{ s.name }}</option>
+          }
+        </select>
+      </div>
+      <div class="col-lg-4 mb-3">
+        <label class="form-label" for="sw_term">Term</label>
+        <select id="sw_term" class="form-select" formControlName="termId">
+          <option [ngValue]="null">Any / none</option>
+          @for (t of terms(); track t.id) {
+            <option [ngValue]="t.id">{{ t.name }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="col-lg-3">
+        <div learnoInput class="mb-3" [label]="'Week'" [inputType]="'number'" [id]="'sw_week'" [formControlName]="'weekNumber'"></div>
+      </div>
+      <div class="col-lg-5 mb-3">
+        <label class="form-label" for="sw_topic">Topic</label>
+        <select id="sw_topic" class="form-select" formControlName="topicId">
+          <option [ngValue]="null">No topic yet</option>
+          @for (t of subjectTopics(); track t.id) {
+            <option [ngValue]="t.id">{{ t.title }}</option>
+          }
+        </select>
+      </div>
+      <div class="col-lg-4 mb-3">
+        <label class="form-label" for="sw_teacher">Assigned teacher</label>
+        <select id="sw_teacher" class="form-select" formControlName="assignedTeacherId">
+          <option [ngValue]="null">Unassigned</option>
+          @for (t of teachers(); track t.id) {
+            <option [ngValue]="t.id">{{ t.first_name }} {{ t.last_name }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="col-lg-9">
+        <div learnoInput class="mb-3" [label]="'Objective'" [inputType]="'text'" [id]="'sw_obj'" [formControlName]="'objective'"></div>
+      </div>
+      <div class="col-lg-3 mb-3">
+        <label class="form-label" for="sw_status">Status</label>
+        <select id="sw_status" class="form-select" formControlName="status">
+          <option value="draft">Draft</option>
+          <option value="published">Published</option>
+        </select>
+      </div>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <a class="btn btn-light" data-bs-dismiss="modal">Cancel</a>
+    <app-learno-button [isLoading]="isLoading()" [text]="isEdit() ? 'Update Week' : 'Add Week'"/>
+  </div>
+</form>

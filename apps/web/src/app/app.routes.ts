@@ -16,6 +16,7 @@ import {SchoolClasses} from "./pages/dashboard/admin/academics/school-classes/sc
 import {Subjects} from "./pages/dashboard/admin/academics/subjects/subjects";
 import {Topics} from "./pages/dashboard/admin/academics/topics/topics";
 import {LessonContent} from "./pages/dashboard/admin/academics/lesson-content/lesson-content";
+import {SchemeOfWork} from "./pages/dashboard/admin/academics/scheme-of-work/scheme-of-work";
 import {QuestionBank} from "./pages/dashboard/admin/academics/question-bank/question-bank";
 import {Assessments} from "./pages/dashboard/admin/academics/assessments/assessments";
 import {Gradebook} from "./pages/dashboard/admin/academics/gradebook/gradebook";
@@ -155,6 +156,7 @@ export const routes: Routes = [
               { path: "subjects", component: Subjects, data: { user: "admin" }  },
               { path: "topics", component: Topics, data: { user: "admin" }  },
               { path: "lesson-content", component: LessonContent, data: { user: "admin" }  },
+              { path: "scheme-of-work", component: SchemeOfWork, data: { user: "admin" }  },
               { path: "question-bank", component: QuestionBank, data: { user: "admin" }  },
               { path: "assessments", component: Assessments, data: { user: "admin" }  },
               { path: "worksheets", component: Worksheets, data: { user: "admin" }  },
@@ -213,6 +215,7 @@ export const routes: Routes = [
             { path: "subjects", component: Subjects },
             { path: "topics", component: Topics },
             { path: "lesson-content", component: LessonContent },
+            { path: "scheme-of-work", component: SchemeOfWork },
             { path: "question-bank", component: QuestionBank },
             { path: "assessments", component: Assessments },
             { path: "worksheets", component: Worksheets },
@@ -291,6 +294,7 @@ export const routes: Routes = [
             { path: "subjects", component: Subjects },
             { path: "topics", component: Topics },
             { path: "lesson-content", component: LessonContent },
+            { path: "scheme-of-work", component: SchemeOfWork },
             { path: "question-bank", component: QuestionBank },
             { path: "assessments", component: Assessments },
             { path: "worksheets", component: Worksheets },
