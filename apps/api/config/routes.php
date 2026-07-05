@@ -39,6 +39,7 @@ use App\Application\Actions\School\InterventionsAction;
 use App\Application\Actions\School\SafeguardingAction;
 use App\Application\Actions\School\SchemeOfWorkAction;
 use App\Application\Actions\School\SchoolProfileAction;
+use App\Application\Actions\School\SchoolSettingsAction;
 use App\Application\Actions\School\StudentsAction;
 use App\Application\Actions\School\TermsAction;
 use App\Application\Actions\School\SubjectsAction;
@@ -82,6 +83,7 @@ return static function (App $app): void {
             $auth->post('/school/scheme-of-work/bulk-delete', SchemeOfWorkAction::class . ':bulkDelete');
             $auth->get('/school/terms', TermsAction::class);
             $auth->map(['GET', 'PUT'], '/school/profile', SchoolProfileAction::class);
+            $auth->map(['GET', 'PUT'], '/school/settings', SchoolSettingsAction::class);
             $auth->map(['GET', 'POST', 'PUT', 'DELETE'], '/school/interventions', InterventionsAction::class);
             $auth->post('/school/interventions/bulk-delete', InterventionsAction::class . ':bulkDelete');
             $auth->map(['GET', 'POST', 'PUT'], '/safeguarding/cases', SafeguardingAction::class);

@@ -36,6 +36,10 @@ class Institution
     #[ORM\Column(name: 'admin_contact', type: Types::JSON, nullable: true)]
     private ?array $adminContact = null;
 
+    /** Institution settings: grading policy + safeguarding config. */
+    #[ORM\Column(type: Types::JSON, nullable: true)]
+    private ?array $settings = null;
+
     #[ORM\Column(name: 'subscription_id', nullable: true)]
     private ?int $subscriptionId = null;
 
@@ -81,6 +85,8 @@ class Institution
     public function setStatus(string $status): void { $this->status = $status; }
     public function getAssignedPackageId(): ?int { return $this->assignedPackageId; }
     public function setAssignedPackageId(?int $id): void { $this->assignedPackageId = $id; }
+    public function getSettings(): ?array { return $this->settings; }
+    public function setSettings(?array $settings): void { $this->settings = $settings; }
 
     public function toArray(): array
     {
@@ -92,6 +98,7 @@ class Institution
             'logo_url' => $this->logoUrl,
             'branding' => $this->branding,
             'admin_contact' => $this->adminContact,
+            'settings' => $this->settings,
             'subscription_id' => $this->subscriptionId,
             'assigned_package_id' => $this->assignedPackageId,
             'status' => $this->status,

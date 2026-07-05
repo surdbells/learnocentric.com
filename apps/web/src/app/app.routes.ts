@@ -9,6 +9,7 @@ import {NewTeacher} from "./pages/dashboard/admin/teacher/new-teacher/new-teache
 import {SchoolProfile} from "./pages/dashboard/admin/management/school-profile/school-profile";
 import {Billing} from "./pages/dashboard/admin/management/billing/billing";
 import {Safeguarding} from "./pages/dashboard/admin/management/safeguarding/safeguarding";
+import {SchoolSettings} from "./pages/dashboard/admin/management/school-settings/school-settings";
 import {SchoolClasses} from "./pages/dashboard/admin/academics/school-classes/school-classes";
 import {Subjects} from "./pages/dashboard/admin/academics/subjects/subjects";
 import {Topics} from "./pages/dashboard/admin/academics/topics/topics";
@@ -118,6 +119,7 @@ export const routes: Routes = [
         path: "management",
         children: [
           { path: "school-profile", component: SchoolProfile },
+          { path: "settings", component: SchoolSettings },
           { path: "billing", component: Billing },
           { path: "safeguarding", component: Safeguarding, canActivate: [moduleGuard('safeguarding')] },
           { path: "support", component: Support },
@@ -179,6 +181,7 @@ export const routes: Routes = [
         data: { user: "tutor_admin" },
         children: [
           { path: "academy-profile", component: SchoolProfile },
+          { path: "settings", component: SchoolSettings },
           { path: "billing", component: Billing },
           { path: "safeguarding", component: Safeguarding, canActivate: [moduleGuard('safeguarding')] },
           { path: "support", component: Support },
