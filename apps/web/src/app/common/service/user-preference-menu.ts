@@ -47,6 +47,7 @@ export class UserPreferenceMenu {
         { name: "Question Bank", link: "/admin/academics/question-bank" },
         { name: "Assessments", link: "/admin/academics/assessments" },
         { name: "Worksheets", link: "/admin/academics/worksheets" },
+        { name: "Portfolio", link: "/admin/academics/portfolio" },
         { name: "Gradebook", link: "/admin/academics/gradebook" },
         { name: "Result", link: "/admin/academics/results" },
       ]
@@ -96,6 +97,7 @@ export class UserPreferenceMenu {
         { name: "Question Bank", link: "/academy/academics/question-bank" },
         { name: "Assessments", link: "/academy/academics/assessments" },
         { name: "Worksheets", link: "/academy/academics/worksheets" },
+        { name: "Portfolio", link: "/academy/academics/portfolio" },
         { name: "Gradebook", link: "/academy/academics/gradebook" },
         { name: "Result", link: "/academy/academics/results" },
       ]
@@ -154,6 +156,7 @@ export class UserPreferenceMenu {
         { name: "Question Bank", link: "/teacher/academics/question-bank" },
         { name: "Assessments", link: "/teacher/academics/assessments" },
         { name: "Worksheets", link: "/teacher/academics/worksheets" },
+        { name: "Portfolio", link: "/teacher/academics/portfolio" },
         { name: "Gradebook", link: "/teacher/academics/gradebook" },
         // { name: "Lesson Plans", link: "/teacher/academics/lesson-plans" },
         // { name: "Assessments", link: "/teacher/academics/assessments" },
@@ -191,6 +194,7 @@ export class UserPreferenceMenu {
         // { name: "Lesson Plans", link: "/student/academics/lesson-plans" },
         { name: "Assessments", link: "/student/academics/assessments" },
         { name: "Worksheets", link: "/student/academics/worksheets" },
+        { name: "Portfolio", link: "/student/academics/portfolio" },
         { name: "Performance", link: "/student/academics/performance" },
       ]
     },

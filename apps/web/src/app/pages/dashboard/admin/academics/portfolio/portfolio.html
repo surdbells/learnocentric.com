@@ -1,0 +1,60 @@
+<app-page-header icon="folder_special" action="Portfolio Evidence"></app-page-header>
+
+<!-- Review -->
+<app-learno-modal [modalId]="'portfolio_review'" [modalAction]="'Review evidence'" [showBtn]="false">
+  <div modalForm>
+    @if (review(); as e) {
+      <div class="d-flex align-items-start justify-content-between flex-wrap gap-2 mb-1">
+        <h5 class="fw-semibold mb-0">{{ e.title }}</h5>
+        <span class="badge text-capitalize" [class.bg-success-subtle]="e.status === 'reviewed'" [class.text-success]="e.status === 'reviewed'"
+              [class.bg-info-subtle]="e.status === 'submitted'" [class.text-info]="e.status === 'submitted'">{{ e.status }}</span>
+      </div>
+      <p class="text-body-secondary small mb-3">{{ e.student }} · {{ e.topic }} · {{ e.subject }}</p>
+
+      @if (e.competency_expected) {
+        <div class="alert alert-light border py-2 px-3 small mb-3"><b>Expected evidence:</b> {{ e.competency_expected }}</div>
+      }
+
+      <label class="form-label small text-body-secondary">Student's evidence</label>
+      <div class="border rounded-3 p-3 mb-2">{{ e.description }}</div>
+      @if (e.evidence_url) { <a class="small" [href]="e.evidence_url" target="_blank" rel="noopener">View attached evidence</a> }
+
+      <hr class="my-4"/>
+
+      <label class="form-label text-uppercase small fw-semibold text-body-secondary">Competency rating</label>
+      <div class="d-flex flex-wrap gap-2 mb-3">
+        @for (r of ratings; track r) {
+          <button type="button" class="btn btn-sm text-capitalize"
+                  [class]="rating() === r ? 'btn-' + ratingColor(r) : 'btn-outline-' + ratingColor(r)"
+                  (click)="rating.set(r)">{{ r }}</button>
+        }
+      </div>
+
+      <label class="form-label small" for="p_fb">Feedback</label>
+      <textarea id="p_fb" class="form-control mb-3" rows="3" [ngModel]="feedback()" (ngModelChange)="feedback.set($event)"
+                [ngModelOptions]="{standalone: true}" placeholder="Encouragement and one thing to improve…"></textarea>
+
+      <div class="d-flex gap-2">
+        <button type="button" class="btn btn-primary" [disabled]="busy() || !rating()" (click)="submitReview()">
+          {{ e.status === 'reviewed' ? 'Update review' : 'Submit review' }}
+        </button>
+        <a class="btn btn-light" data-bs-dismiss="modal">Close</a>
+      </div>
+
+      @if (e.reviewed_by && e.status === 'reviewed') {
+        <div class="small text-body-secondary mt-3">Last reviewed by {{ e.reviewed_by }}@if (e.reviewed_at) { · {{ e.reviewed_at | date:'medium' }} }</div>
+      }
+    }
+  </div>
+</app-learno-modal>
+
+<app-data-grid
+  endpoint="/backend/assessment/portfolio"
+  [columns]="columns"
+  [filters]="filterDefs()"
+  [actions]="['view']"
+  [selectable]="false"
+  searchPlaceholder="Search evidence…"
+  emptyMessage="No portfolio evidence submitted yet."
+  (view)="onView($event)"
+/>
