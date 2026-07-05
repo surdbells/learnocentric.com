@@ -1,4 +1,4 @@
-import {Component, inject, signal} from '@angular/core';
+import {Component, computed, inject, signal} from '@angular/core';
 import {DatePipe} from '@angular/common';
 import {Router} from '@angular/router';
 import {ToastrService} from 'ngx-toastr';
@@ -33,6 +33,9 @@ export class Learn {
   noteSaving = signal(false);
   noteSavedAt = signal<string | null>(null);
 
+  // Lesson content tabs
+  activeTab = signal<string>('lesson');
+
   constructor() {
     this.load();
   }
@@ -44,6 +47,19 @@ export class Learn {
     if (Array.isArray(l.media) && l.media.length) return l.media;
     return l.video_url ? [{url: l.video_url, name: 'Lesson video'}] : [];
   }
+
+  /** The tabs to show for the current lesson, based on what content exists. */
+  readonly tabs = computed<{ key: string; label: string; icon: string }[]>(() => {
+    const l = this.lesson();
+    if (!l) return [];
+    const tabs = [{key: 'lesson', label: 'Lesson', icon: 'menu_book'}];
+    if (this.lessonMedia().length) tabs.push({key: 'media', label: 'Media', icon: 'play_circle'});
+    if (l.lesson?.worked_examples) tabs.push({key: 'examples', label: 'Worked examples', icon: 'assignment'});
+    tabs.push({key: 'notes', label: 'My notes', icon: 'edit_square'});
+    return tabs;
+  });
+
+  setTab(key: string): void { this.activeTab.set(key); }
 
   load(): void {
     this.loading.set(true);
@@ -57,6 +73,7 @@ export class Learn {
     this.busy.set(true);
     this.noteBody.set('');
     this.noteSavedAt.set(null);
+    this.activeTab.set('lesson');
     this.api.get<any>(`/backend/learn/topics/${topic.id}`).subscribe({
       next: (res) => { this.lesson.set(res); this.mode.set('lesson'); this.busy.set(false); this.loadNote(topic.id); },
       error: () => { this.toast.error('Could not open the lesson'); this.busy.set(false); },

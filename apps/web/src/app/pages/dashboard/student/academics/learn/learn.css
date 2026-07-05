@@ -23,6 +23,67 @@
   line-height: 1.6;
 }
 
+/* Premium lesson tabs */
+.lesson-tabs {
+  display: flex;
+  gap: 0.25rem;
+  overflow-x: auto;
+  scrollbar-width: none;
+  border-bottom: 1px solid var(--bs-border-color, #e2e9e3);
+  margin: 0 -0.25rem;
+  padding: 0 0.25rem;
+}
+.lesson-tabs::-webkit-scrollbar { display: none; }
+
+.lesson-tab {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex: none;
+  border: 0;
+  background: transparent;
+  color: var(--bs-secondary-color, #6c757d);
+  font-size: 0.9rem;
+  font-weight: 600;
+  padding: 0.65rem 0.9rem;
+  cursor: pointer;
+  white-space: nowrap;
+  border-radius: 10px 10px 0 0;
+  transition: color .15s ease, background-color .15s ease;
+}
+.lesson-tab:hover {
+  color: var(--bs-body-color, #15231c);
+  background: var(--bs-tertiary-bg, #f6faf6);
+}
+.lesson-tab.active {
+  color: var(--bs-primary, #1e8a2e);
+}
+/* sliding underline indicator */
+.lesson-tab::after {
+  content: "";
+  position: absolute;
+  left: 0.6rem;
+  right: 0.6rem;
+  bottom: -1px;
+  height: 3px;
+  border-radius: 3px 3px 0 0;
+  background: var(--bs-primary, #1e8a2e);
+  transform: scaleX(0);
+  transform-origin: center;
+  transition: transform .2s ease;
+}
+.lesson-tab.active::after { transform: scaleX(1); }
+
+.tab-label {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-weight: 600;
+  color: var(--bs-secondary-color, #7b8a80);
+  margin-bottom: 0.25rem;
+}
+
 .stage-row.clickable {
   cursor: pointer;
 }
