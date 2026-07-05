@@ -13,6 +13,7 @@ use App\Domain\Entity\AuditLog;
 use App\Domain\Entity\ContentVersion;
 use App\Domain\Entity\Enrollment;
 use App\Domain\Entity\FeedbackNote;
+use App\Domain\Entity\GuardianLink;
 use App\Domain\Entity\Institution;
 use App\Domain\Entity\LiveClass;
 use App\Domain\Entity\LiveClassAttendance;
@@ -75,6 +76,7 @@ class SeedCommand extends Command
         $this->seedPortfolio($output);
         $this->seedFeedback($output);
         $this->seedLiveClasses($output);
+        $this->seedGuardians($output);
         $this->seedAuditLogs($users, $output);
 
         $this->em->flush();
@@ -441,6 +443,23 @@ class SeedCommand extends Command
         }
         $this->em->flush();
         $output->writeln("  + {$count} questions (question bank)");
+    }
+
+    /** Link the seeded parent account to a student so the parent report works. */
+    private function seedGuardians(OutputInterface $output): void
+    {
+        if ($this->em->getRepository(GuardianLink::class)->count([]) > 0) {
+            return;
+        }
+        $find = fn (string $email) => $this->em->getRepository(User::class)->findOneBy(['email' => $email]);
+        $parent = $find('parent@gmail.com');
+        $student = $find('student@gmail.com');
+        if ($parent === null || $student === null) {
+            return;
+        }
+        $this->em->persist(new GuardianLink($parent, $student, 'parent'));
+        $this->em->flush();
+        $output->writeln('  + 1 guardian link (parent@ → student@)');
     }
 
     /** Seed live classes — one scheduled, one live with an attendee. */

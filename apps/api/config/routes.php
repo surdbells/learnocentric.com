@@ -6,6 +6,7 @@ use App\Application\Actions\Auth\LoginAction;
 use App\Application\Actions\Auth\MeAction;
 use App\Application\Actions\Auth\ProfileAction;
 use App\Application\Actions\Auth\RegisterAction;
+use App\Application\Actions\Analytics\AnalyticsAction;
 use App\Application\Actions\Auth\UserProfileAction;
 use App\Application\Actions\Assessment\AssessmentsAction;
 use App\Application\Actions\Assessment\AttemptsAction;
@@ -127,6 +128,11 @@ return static function (App $app): void {
             $auth->post('/live-classes/{id:[0-9]+}/end', LiveClassesAction::class . ':end');
             $auth->post('/live-classes/{id:[0-9]+}/join', LiveClassesAction::class . ':join');
             $auth->get('/live-classes/{id:[0-9]+}/attendance', LiveClassesAction::class . ':attendance');
+
+            // Analytics — school overview (staff) + student progress report (self/guardian/staff)
+            $auth->get('/analytics/overview', AnalyticsAction::class . ':overview');
+            $auth->get('/analytics/children', AnalyticsAction::class . ':children');
+            $auth->get('/analytics/student/{id:[0-9]+}', AnalyticsAction::class . ':student');
 
             $auth->post('/upload', UploadAction::class);
         })->add(JwtAuthMiddleware::class);
