@@ -10,9 +10,11 @@ use App\Domain\Entity\AssessmentAttempt;
 use App\Domain\Entity\AssessmentQuestion;
 use App\Domain\Entity\AttemptAnswer;
 use App\Domain\Entity\AuditLog;
+use App\Domain\Entity\Announcement;
 use App\Domain\Entity\ContentPackage;
 use App\Domain\Entity\ContentResource;
 use App\Domain\Entity\ContentVersion;
+use App\Domain\Entity\Message;
 use App\Domain\Entity\SupportMessage;
 use App\Domain\Entity\SupportTicket;
 use App\Domain\Entity\Enrollment;
@@ -91,6 +93,7 @@ class SeedCommand extends Command
         $this->seedBilling($output);
         $this->seedContent($output);
         $this->seedSupport($output);
+        $this->seedMessaging($output);
         $this->seedNotifications($output);
         $this->seedTopicProgress($output);
         $this->seedInterventions($output);
@@ -725,6 +728,35 @@ class SeedCommand extends Command
 
         $this->em->flush();
         $output->writeln('  + 2 support tickets');
+    }
+
+    /** Seed a short teacher↔student thread and a couple of announcements. */
+    private function seedMessaging(OutputInterface $output): void
+    {
+        if ($this->em->getRepository(Announcement::class)->count([]) > 0) {
+            return;
+        }
+        $repo = $this->em->getRepository(User::class);
+        $admin = $repo->findOneBy(['email' => 'school@gmail.com']);
+        $teacher = $repo->findOneBy(['email' => 'teacher@gmail.com']);
+        $student = $repo->findOneBy(['email' => 'student@gmail.com']);
+        $institution = $admin?->getInstitution();
+        if ($institution === null) {
+            return;
+        }
+
+        if ($teacher !== null && $student !== null) {
+            $m1 = new Message($institution, $teacher, $student, 'Hi, please remember to submit your fractions worksheet by Friday.');
+            $m1->markRead();
+            $this->em->persist($m1);
+            $this->em->persist(new Message($institution, $student, $teacher, 'Okay sir, I will submit it today.'));
+        }
+
+        $this->em->persist(new Announcement($institution, $admin, 'Mid-term break', 'School closes for mid-term on Friday and resumes the following Monday.', 'all'));
+        $this->em->persist(new Announcement($institution, $admin, 'Staff briefing', 'All teachers, please meet in the staff room at 8am tomorrow.', 'staff'));
+        $this->em->flush();
+
+        $output->writeln('  + 2 messages, 2 announcements');
     }
 
     /** Link the seeded parent account to a student so the parent report works. */

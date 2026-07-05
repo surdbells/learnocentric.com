@@ -28,6 +28,7 @@ use App\Application\Actions\Curriculum\TopicsAction;
 use App\Application\Actions\HealthAction;
 use App\Application\Actions\Institution\GetInstitutionAction;
 use App\Application\Actions\Learn\LearnAction;
+use App\Application\Actions\Messaging\MessagingAction;
 use App\Application\Actions\Live\LiveClassesAction;
 use App\Application\Actions\Notification\NotificationsAction;
 use App\Application\Actions\Institution\ListInstitutionsAction;
@@ -187,6 +188,14 @@ return static function (App $app): void {
             $auth->get('/learn/topics', LearnAction::class . ':topics');
             $auth->get('/learn/topics/{id:[0-9]+}', LearnAction::class . ':lesson');
             $auth->post('/learn/topics/{id:[0-9]+}/complete-lesson', LearnAction::class . ':completeLesson');
+
+            // Governed messaging + school announcements
+            $auth->get('/messaging/contacts', MessagingAction::class . ':contacts');
+            $auth->get('/messaging/conversations', MessagingAction::class . ':conversations');
+            $auth->get('/messaging/conversations/{id:[0-9]+}', MessagingAction::class . ':thread');
+            $auth->post('/messaging/messages', MessagingAction::class . ':send');
+            $auth->get('/messaging/announcements', MessagingAction::class . ':announcements');
+            $auth->post('/messaging/announcements', MessagingAction::class . ':postAnnouncement');
 
             // Notifications (in-app inbox)
             $auth->get('/notifications', NotificationsAction::class . ':mine');

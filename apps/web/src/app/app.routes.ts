@@ -56,6 +56,8 @@ import {SuperAdminContentPackages} from './pages/dashboard/super-admin/content-p
 import {SuperAdminPlans} from './pages/dashboard/super-admin/plans/plans';
 import {Support} from './pages/dashboard/support/support';
 import {Resources} from './pages/dashboard/resources/resources';
+import {Messages} from './pages/dashboard/messages/messages';
+import {Announcements} from './pages/dashboard/announcements/announcements';
 
 export const routes: Routes = [
   {
@@ -120,6 +122,13 @@ export const routes: Routes = [
           { path: "safeguarding", component: Safeguarding, canActivate: [moduleGuard('safeguarding')] },
           { path: "support", component: Support },
         ]
+      },
+      {
+        path: "communication",
+        children: [
+          { path: "messages", component: Messages },
+          { path: "announcements", component: Announcements },
+        ]
       }
     ]
   },
@@ -174,6 +183,14 @@ export const routes: Routes = [
           { path: "safeguarding", component: Safeguarding, canActivate: [moduleGuard('safeguarding')] },
           { path: "support", component: Support },
         ]
+      },
+      {
+        path: "communication",
+        data: { user: "tutor_admin" },
+        children: [
+          { path: "messages", component: Messages },
+          { path: "announcements", component: Announcements },
+        ]
       }
     ]
   },
@@ -217,6 +234,13 @@ export const routes: Routes = [
         children: [
           { path: "profile", component: TeacherProfile },
         ]
+      },
+      {
+        path: "communication",
+        children: [
+          { path: "messages", component: Messages },
+          { path: "announcements", component: Announcements },
+        ]
       }
     ]
   },
@@ -252,6 +276,13 @@ export const routes: Routes = [
         component: StudentManagement,
         children: [
           { path: "profile", component: StudentProfile },
+        ]
+      },
+      {
+        path: "communication",
+        children: [
+          { path: "messages", component: Messages },
+          { path: "announcements", component: Announcements },
         ]
       }
     ]
@@ -308,6 +339,13 @@ export const routes: Routes = [
         component: StudentManagement,
         children: [
           { path: "profile", component: StudentProfile },
+        ]
+      },
+      {
+        path: "communication",
+        children: [
+          { path: "messages", component: Messages },
+          { path: "announcements", component: Announcements },
         ]
       }
     ]

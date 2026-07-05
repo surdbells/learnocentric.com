@@ -64,6 +64,13 @@ export class UserPreferenceMenu {
         { name: "Support", link: "/admin/management/support" },
       ]
     },
+
+    { name: "Communication", icon: "forum", link: "admin/communication",
+      children: [
+        { name: "Messages", link: "/admin/communication/messages" },
+        { name: "Announcements", link: "/admin/communication/announcements" },
+      ]
+    },
   ]
 
   tutor_admin: IMenu[]= [
@@ -116,6 +123,13 @@ export class UserPreferenceMenu {
         { name: "Support", link: "/academy/management/support" },
       ]
     },
+
+    { name: "Communication", icon: "forum", link: "academy/communication",
+      children: [
+        { name: "Messages", link: "/academy/communication/messages" },
+        { name: "Announcements", link: "/academy/communication/announcements" },
+      ]
+    },
   ]
 
 
@@ -165,6 +179,13 @@ export class UserPreferenceMenu {
       ]
     },
 
+    { name: "Communication", icon: "forum", link: "teacher/communication",
+      children: [
+        { name: "Messages", link: "/teacher/communication/messages" },
+        { name: "Announcements", link: "/teacher/communication/announcements" },
+      ]
+    },
+
     { name: "Management", icon: "tenancy", link: "teacher/management",
       children: [
         { name: "Profile", link: "/teacher/management/profile" },
@@ -192,6 +213,13 @@ export class UserPreferenceMenu {
       ]
     },
 
+    { name: "Communication", icon: "forum", link: "student/communication",
+      children: [
+        { name: "Messages", link: "/student/communication/messages" },
+        { name: "Announcements", link: "/student/communication/announcements" },
+      ]
+    },
+
     { name: "Management", icon: "tenancy", link: "student/management",
       children: [
         { name: "Profile", link: "/student/management/profile" },
@@ -209,6 +237,13 @@ export class UserPreferenceMenu {
     { name: "Academics", icon: "school", link: "/parent/academics",
       children: [
         { name: "Progress Report", link: "/parent/academics/progress-report", module: "analytics" },
+      ]
+    },
+
+    { name: "Communication", icon: "forum", link: "parent/communication",
+      children: [
+        { name: "Messages", link: "/parent/communication/messages" },
+        { name: "Announcements", link: "/parent/communication/announcements" },
       ]
     },
 

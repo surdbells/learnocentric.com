@@ -1,0 +1,75 @@
+<app-page-header icon="forum" action="Messages">
+  <button type="button" class="btn btn-primary btn-sm" (click)="picking.set(!picking())">
+    <span class="material-symbols-outlined align-middle me-1" style="font-size:1.1rem">edit_square</span> New message
+  </button>
+</app-page-header>
+
+<div class="row g-3">
+  <!-- Conversation / contact list -->
+  <div class="col-lg-4">
+    <div class="card border-0 shadow-sm h-100">
+      <div class="card-body p-0">
+        @if (picking()) {
+          <div class="p-3 border-bottom fw-semibold small text-body-secondary">Start a conversation</div>
+          @if (!contacts().length) {
+            <div class="p-4 text-body-secondary small">No one is available to message.</div>
+          } @else {
+            @for (c of contacts(); track c.id) {
+              <button type="button" class="list-item w-100 text-start" (click)="startWith(c)">
+                <div class="fw-medium">{{ c.name }}</div>
+                <div class="small text-body-secondary">{{ roleLabel(c.role) }}</div>
+              </button>
+            }
+          }
+        } @else if (loading()) {
+          <div class="p-4 text-body-secondary">Loading…</div>
+        } @else if (!conversations().length) {
+          <div class="p-4 text-center text-body-secondary small">No conversations yet. Start one with “New message”.</div>
+        } @else {
+          @for (t of conversations(); track t.contact.id) {
+            <button type="button" class="list-item w-100 text-start" [class.active]="active()?.contact?.id === t.contact.id" (click)="openThread(t.contact.id)">
+              <div class="d-flex justify-content-between align-items-start">
+                <div class="fw-medium">{{ t.contact.name }}</div>
+                @if (t.unread) { <span class="badge bg-primary rounded-pill">{{ t.unread }}</span> }
+              </div>
+              <div class="small text-body-secondary text-truncate">{{ t.last.mine ? 'You: ' : '' }}{{ t.last.body }}</div>
+            </button>
+          }
+        }
+      </div>
+    </div>
+  </div>
+
+  <!-- Thread -->
+  <div class="col-lg-8">
+    <div class="card border-0 shadow-sm h-100 d-flex flex-column">
+      @if (!active()) {
+        <div class="card-body d-flex align-items-center justify-content-center text-body-secondary">
+          Select a conversation, or start a new one.
+        </div>
+      } @else {
+        <div class="card-header bg-body border-bottom">
+          <div class="fw-semibold">{{ active().contact.name }}</div>
+          <div class="small text-body-secondary">{{ roleLabel(active().contact.role) }}</div>
+        </div>
+        <div class="card-body d-flex flex-column gap-2 overflow-auto" style="max-height: 55vh;">
+          @for (m of active().messages; track m.id) {
+            <div class="d-flex" [class.justify-content-end]="m.mine">
+              <div class="p-2 px-3 rounded-3 {{ m.mine ? 'bg-primary text-white' : 'bg-light' }}" style="max-width: 75%;">
+                <div style="white-space: pre-wrap;">{{ m.body }}</div>
+                <div class="small {{ m.mine ? 'text-white-50' : 'text-body-secondary' }} mt-1">{{ m.created_at | date:'short' }}</div>
+              </div>
+            </div>
+          }
+          @if (!active().messages.length) { <div class="text-body-secondary small text-center my-4">No messages yet — say hello.</div> }
+        </div>
+        <div class="card-footer bg-body border-top">
+          <form class="d-flex gap-2" (ngSubmit)="send()">
+            <input class="form-control" placeholder="Write a message…" [ngModel]="draft()" (ngModelChange)="draft.set($event)" name="draft" [disabled]="busy()"/>
+            <button type="submit" class="btn btn-primary" [disabled]="busy() || !draft().trim()">Send</button>
+          </form>
+        </div>
+      }
+    </div>
+  </div>
+</div>
