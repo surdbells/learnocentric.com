@@ -10,6 +10,7 @@ use App\Application\Actions\Auth\UserProfileAction;
 use App\Application\Actions\Assessment\AssessmentsAction;
 use App\Application\Actions\Assessment\AttemptsAction;
 use App\Application\Actions\Assessment\GradebookAction;
+use App\Application\Actions\Assessment\PortfolioAction;
 use App\Application\Actions\Assessment\QuestionsAction;
 use App\Application\Actions\Assessment\WorksheetsAction;
 use App\Application\Actions\Assessment\WorksheetSubmissionsAction;
@@ -102,6 +103,12 @@ return static function (App $app): void {
             $auth->get('/assessment/worksheets/{id:[0-9]+}/submission', WorksheetSubmissionsAction::class . ':mine');
             $auth->get('/assessment/worksheets/{id:[0-9]+}/submissions', WorksheetSubmissionsAction::class . ':submissions');
             $auth->post('/assessment/worksheet-submissions/{id:[0-9]+}/grade', WorksheetSubmissionsAction::class . ':grade');
+
+            // Portfolio — competency-track evidence (student submit, staff review)
+            $auth->map(['GET', 'POST', 'PUT', 'DELETE'], '/assessment/portfolio', PortfolioAction::class);
+            $auth->get('/assessment/portfolio/mine', PortfolioAction::class . ':mine');
+            $auth->get('/assessment/portfolio/topics', PortfolioAction::class . ':topics');
+            $auth->post('/assessment/portfolio/{id:[0-9]+}/review', PortfolioAction::class . ':review');
 
             $auth->post('/upload', UploadAction::class);
         })->add(JwtAuthMiddleware::class);

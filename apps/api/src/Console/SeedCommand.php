@@ -14,6 +14,7 @@ use App\Domain\Entity\ContentVersion;
 use App\Domain\Entity\Enrollment;
 use App\Domain\Entity\Institution;
 use App\Domain\Entity\Permission;
+use App\Domain\Entity\PortfolioEntry;
 use App\Domain\Entity\Question;
 use App\Domain\Entity\Role;
 use App\Domain\Entity\RolePermission;
@@ -68,6 +69,7 @@ class SeedCommand extends Command
         $this->seedAssessments($output);
         $this->seedAttempts($output);
         $this->seedWorksheets($output);
+        $this->seedPortfolio($output);
         $this->seedAuditLogs($users, $output);
 
         $this->em->flush();
@@ -434,6 +436,51 @@ class SeedCommand extends Command
         }
         $this->em->flush();
         $output->writeln("  + {$count} questions (question bank)");
+    }
+
+    /** Seed portfolio evidence — one reviewed, one pending — for the competency track. */
+    private function seedPortfolio(OutputInterface $output): void
+    {
+        if ($this->em->getRepository(PortfolioEntry::class)->count([]) > 0) {
+            return;
+        }
+        $topic = $this->em->getRepository(Topic::class)->findOneBy(['title' => 'Whole Numbers']);
+        if ($topic === null) {
+            return;
+        }
+        $reviewer = $this->em->createQueryBuilder()->select('u')->from(User::class, 'u')->join('u.role', 'r')
+            ->where('r.code = :t')->andWhere('u.institution = :i')
+            ->setParameter('t', 'teacher')->setParameter('i', $topic->getSubject()->getInstitution())
+            ->setMaxResults(1)->getQuery()->getOneOrNullResult();
+        $students = $this->em->createQueryBuilder()->select('u')->from(User::class, 'u')->join('u.role', 'r')
+            ->where('r.code = :s')->andWhere('u.institution = :i')
+            ->setParameter('s', 'student')->setParameter('i', $topic->getSubject()->getInstitution())
+            ->setMaxResults(2)->getQuery()->getResult();
+        if (empty($students)) {
+            return;
+        }
+
+        foreach ($students as $i => $student) {
+            $entry = new PortfolioEntry(
+                $topic,
+                $student,
+                'Counting money at the market',
+                'I helped my mother count change at the market and used place value to check the totals were correct.'
+            );
+            $entry->setSubmittedAt(new DateTimeImmutable('-3 days'));
+            if ($i === 0) {
+                $entry->setCompetencyRating('proficient');
+                $entry->setReviewerFeedback('Strong real-life application of place value. Try a larger transaction next time.');
+                $entry->setReviewedBy($reviewer);
+                $entry->setStatus(PortfolioEntry::REVIEWED);
+                $entry->setReviewedAt(new DateTimeImmutable('-1 day'));
+            } else {
+                $entry->setStatus(PortfolioEntry::SUBMITTED);
+            }
+            $this->em->persist($entry);
+        }
+        $this->em->flush();
+        $output->writeln('  + ' . count($students) . ' portfolio entries');
     }
 
     /** Seed a published worksheet with one graded and one pending submission. */
