@@ -1,0 +1,88 @@
+<app-page-header icon="menu_book" action="Topics">
+  <app-learno-button text="Add Topic" icon="add" data-bs-toggle="modal" data-bs-target="#add_topic" (clicked)="onAdd()"/>
+</app-page-header>
+
+<!-- Create / edit -->
+<app-learno-modal [modalId]="'add_topic'" [modalAction]="selectTopic() ? 'Edit Topic' : 'Add Topic'" [showBtn]="false">
+  <app-topic-form
+    modalForm
+    [select]="selectTopic()"
+    [subjects]="subjects()"
+    (submitted)="handleSuccessSubmit($event)"
+  />
+</app-learno-modal>
+
+<!-- Lifecycle / approval workflow -->
+<app-learno-modal [modalId]="'topic_lifecycle'" [modalAction]="'Topic lifecycle'" [showBtn]="false">
+  <div modalForm>
+    @if (lifecycleTopic(); as t) {
+      <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-1">
+        <h5 class="fw-semibold mb-0">{{ t.title }}</h5>
+        <span class="badge bg-{{ statusColor(t.approval_status) }}-subtle text-{{ statusColor(t.approval_status) }} text-capitalize px-3 py-2">
+          {{ t.approval_status }}
+        </span>
+      </div>
+      <p class="text-body-secondary small mb-4">{{ t.subject }} · Week {{ t.week_number || '—' }} · v{{ t.version_count || 0 }}</p>
+
+      <div class="mb-4">
+        <label class="form-label text-uppercase small fw-semibold text-body-secondary">Move to</label>
+        @if (availableActions().length) {
+          <div class="d-flex flex-wrap gap-2">
+            @for (a of availableActions(); track a.to) {
+              <button type="button" class="btn btn-sm"
+                      [class.btn-primary]="a.to !== 'archived'"
+                      [class.btn-outline-danger]="a.to === 'archived'"
+                      [disabled]="!a.enabled || transitioning()"
+                      (click)="transition(a.to)">
+                {{ a.label }}
+              </button>
+            }
+          </div>
+          @if (!isApprover()) {
+            <div class="form-text">Approving, publishing and archiving are limited to academic leads and admins.</div>
+          }
+        } @else {
+          <div class="text-body-secondary small">No further transitions available from this state.</div>
+        }
+      </div>
+
+      <label class="form-label text-uppercase small fw-semibold text-body-secondary">History</label>
+      @if (historyLoading()) {
+        <div class="text-body-secondary small">Loading history…</div>
+      } @else if (history().length) {
+        <ul class="timeline list-unstyled mb-0">
+          @for (v of history(); track v.id) {
+            <li class="d-flex gap-3 pb-3">
+              <span class="dot bg-{{ statusColor(v.to_status) }} mt-1"></span>
+              <div>
+                <div class="fw-medium text-capitalize">
+                  {{ v.action }}
+                  <span class="text-body-secondary fw-normal">
+                    {{ v.from_status ? v.from_status + ' → ' + v.to_status : v.to_status }}
+                  </span>
+                </div>
+                <div class="small text-body-secondary">
+                  v{{ v.version }} · {{ v.actor_name || 'System' }} · {{ v.created_at | date:'medium' }}
+                </div>
+                @if (v.note) { <div class="small fst-italic">“{{ v.note }}”</div> }
+              </div>
+            </li>
+          }
+        </ul>
+      } @else {
+        <div class="text-body-secondary small">No history yet.</div>
+      }
+    }
+  </div>
+</app-learno-modal>
+
+<app-data-grid
+  endpoint="/backend/curriculum/topics"
+  [columns]="columns"
+  [filters]="filterDefs()"
+  [actions]="['view', 'edit', 'delete']"
+  searchPlaceholder="Search topics…"
+  emptyMessage="No topics yet. Click “Add Topic” to create a draft."
+  (view)="onView($event)"
+  (edit)="onEdit($event)"
+/>
