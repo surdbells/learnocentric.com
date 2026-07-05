@@ -25,6 +25,7 @@ import {Portfolio} from "./pages/dashboard/admin/academics/portfolio/portfolio";
 import {Insights} from "./pages/dashboard/admin/academics/insights/insights";
 import {LiveClasses} from "./pages/dashboard/admin/academics/live-classes/live-classes";
 import {Analytics} from "./pages/dashboard/admin/academics/analytics/analytics";
+import {Interventions} from "./pages/dashboard/admin/academics/interventions/interventions";
 import {Checkout} from "./pages/dashboard/admin/management/payment/checkout/checkout";
 import {Result} from "./pages/dashboard/admin/academics/result/result";
 import {Chat} from "./pages/apps/chat/chat";
@@ -164,6 +165,7 @@ export const routes: Routes = [
               { path: "insights", component: Insights, data: { user: "admin" }  },
               { path: "live-classes", component: LiveClasses, data: { user: "admin" }  },
               { path: "analytics", component: Analytics, data: { user: "admin" }  },
+              { path: "interventions", component: Interventions, data: { user: "admin" }  },
               { path: "gradebook", component: Gradebook, data: { user: "admin" }  },
               { path: "results", component: Result, data: { user: "admin" }  },
             ]
@@ -223,6 +225,7 @@ export const routes: Routes = [
             { path: "insights", component: Insights },
             { path: "live-classes", component: LiveClasses },
             { path: "analytics", component: Analytics },
+            { path: "interventions", component: Interventions },
             { path: "gradebook", component: Gradebook },
             { path: "results", component: Result },
           ]
@@ -302,6 +305,7 @@ export const routes: Routes = [
             { path: "insights", component: Insights },
             { path: "live-classes", component: LiveClasses },
             { path: "analytics", component: Analytics },
+            { path: "interventions", component: Interventions },
             { path: "gradebook", component: Gradebook },
             { path: "results", component: Result },
             { path: "pending-task", component: PendingTask },

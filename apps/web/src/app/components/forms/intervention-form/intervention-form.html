@@ -1,0 +1,75 @@
+<form (ngSubmit)="onSubmit()" [formGroup]="form">
+  <div class="modal-body">
+    <div class="row">
+      <div class="col-lg-6 mb-3">
+        <label class="form-label" for="iv_student">Student</label>
+        @if (isEdit()) {
+          <input class="form-control" [value]="select()?.student" disabled/>
+        } @else {
+          <select id="iv_student" class="form-select" formControlName="studentId">
+            <option [ngValue]="null" disabled>Select student</option>
+            @for (s of students(); track s.id) {
+              <option [ngValue]="s.id">{{ s.first_name }} {{ s.last_name }}</option>
+            }
+          </select>
+        }
+      </div>
+      <div class="col-lg-6 mb-3">
+        <label class="form-label" for="iv_teacher">Assign to</label>
+        <select id="iv_teacher" class="form-select" formControlName="assignedToId">
+          <option [ngValue]="null">Unassigned</option>
+          @for (t of teachers(); track t.id) {
+            <option [ngValue]="t.id">{{ t.first_name }} {{ t.last_name }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="col-lg-6 mb-3">
+        <label class="form-label" for="iv_subject">Subject (optional)</label>
+        <select id="iv_subject" class="form-select" formControlName="subjectId">
+          <option [ngValue]="null">None</option>
+          @for (s of subjects(); track s.id) {
+            <option [ngValue]="s.id">{{ s.name }}</option>
+          }
+        </select>
+      </div>
+      <div class="col-lg-6 mb-3">
+        <label class="form-label" for="iv_topic">Topic (optional)</label>
+        <select id="iv_topic" class="form-select" formControlName="topicId">
+          <option [ngValue]="null">None</option>
+          @for (t of subjectTopics(); track t.id) {
+            <option [ngValue]="t.id">{{ t.title }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="col-lg-12 mb-3">
+        <label class="form-label" for="iv_reason">Concern / weak area</label>
+        <textarea id="iv_reason" class="form-control" rows="3" formControlName="reason" placeholder="What needs attention and why?"></textarea>
+      </div>
+
+      <div class="col-lg-6">
+        <div learnoInput class="mb-3" [label]="'Due date'" [inputType]="'date'" [id]="'iv_due'" [formControlName]="'dueDate'"></div>
+      </div>
+      <div class="col-lg-6 mb-3">
+        <label class="form-label" for="iv_status">Status</label>
+        <select id="iv_status" class="form-select" formControlName="status">
+          <option value="open">Open</option>
+          <option value="in_progress">In progress</option>
+          <option value="resolved">Resolved</option>
+        </select>
+      </div>
+
+      @if (isEdit()) {
+        <div class="col-lg-12 mb-3">
+          <label class="form-label" for="iv_outcome">Outcome</label>
+          <textarea id="iv_outcome" class="form-control" rows="2" formControlName="outcome" placeholder="What was done / the result…"></textarea>
+        </div>
+      }
+    </div>
+  </div>
+  <div class="modal-footer">
+    <a class="btn btn-light" data-bs-dismiss="modal">Cancel</a>
+    <app-learno-button [isLoading]="isLoading()" [text]="isEdit() ? 'Update' : 'Create Intervention'"/>
+  </div>
+</form>

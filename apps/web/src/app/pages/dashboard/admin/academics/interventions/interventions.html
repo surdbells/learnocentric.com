@@ -1,0 +1,25 @@
+<app-page-header icon="support" action="Interventions">
+  <app-learno-button text="New Intervention" icon="add" data-bs-toggle="modal" data-bs-target="#add_intervention" (clicked)="onAdd()"/>
+</app-page-header>
+
+<app-learno-modal [modalId]="'add_intervention'" [modalAction]="selectIntervention() ? 'Edit Intervention' : 'New Intervention'" [showBtn]="false">
+  <app-intervention-form
+    modalForm
+    [select]="selectIntervention()"
+    [students]="students()"
+    [subjects]="subjects()"
+    [topics]="topics()"
+    [teachers]="teachers()"
+    (submitted)="handleSuccessSubmit($event)"
+  />
+</app-learno-modal>
+
+<app-data-grid
+  endpoint="/backend/school/interventions"
+  [columns]="columns"
+  [filters]="filterDefs()"
+  [actions]="['edit', 'delete']"
+  searchPlaceholder="Search concerns…"
+  emptyMessage="No interventions yet. Flag a struggling student to start."
+  (edit)="onEdit($event)"
+/>
