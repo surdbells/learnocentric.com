@@ -4,6 +4,7 @@ import {ToastrService} from 'ngx-toastr';
 import {PageHeader} from '../../../../../common/layout/page-header/page-header';
 import {ApiService} from '../../../../../common/service/api.service';
 import {AuthService} from '../../../../../common/auth/auth.service';
+import {PdfService} from '../../../../../common/service/pdf-service';
 
 const RATING_COLOR: Record<string, string> = {emerging: 'secondary', developing: 'info', proficient: 'primary', mastery: 'success'};
 
@@ -18,12 +19,14 @@ export class ProgressReport {
   private readonly api = inject(ApiService);
   private readonly toast = inject(ToastrService);
   private readonly auth = inject(AuthService);
+  private readonly pdf = inject(PdfService);
 
   loading = signal(true);
   report = signal<any | null>(null);
   children = signal<any[]>([]);
   selectedChild = signal<number | null>(null);
   isParent = signal(false);
+  downloading = signal(false);
 
   constructor() {
     const user = this.auth.getAuthSession()?.user;
@@ -60,6 +63,20 @@ export class ProgressReport {
     if (pct >= 70) return 'success';
     if (pct >= 50) return 'warning';
     return 'danger';
+  }
+
+  async downloadPdf(): Promise<void> {
+    const r = this.report();
+    if (!r) return;
+    this.downloading.set(true);
+    try {
+      const who = String(r.student?.name ?? 'student').replace(/[^a-z0-9]+/gi, '-').toLowerCase();
+      await this.pdf.generateHtmlPdf(`progress-report-${who}.pdf`, 'progressReportArea');
+    } catch {
+      this.toast.error('Could not generate the PDF');
+    } finally {
+      this.downloading.set(false);
+    }
   }
 
   ratingColor(r: string | null): string { return r ? (RATING_COLOR[r] ?? 'secondary') : 'secondary'; }

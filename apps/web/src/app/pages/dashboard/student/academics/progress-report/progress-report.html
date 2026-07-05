@@ -16,6 +16,14 @@
 } @else if (isParent() && !children().length) {
   <div class="card border-0 shadow-sm p-5 text-center text-body-secondary">No student is linked to your account yet. Ask the school to link your child.</div>
 } @else if (report(); as r) {
+  <div class="d-flex justify-content-end mb-3">
+    <button type="button" class="btn btn-outline-primary btn-sm" [disabled]="downloading()" (click)="downloadPdf()">
+      <span class="material-symbols-outlined align-middle me-1" style="font-size:1.1rem">download</span>
+      {{ downloading() ? 'Preparing…' : 'Download PDF' }}
+    </button>
+  </div>
+
+  <div id="progressReportArea">
   <div class="card border-0 shadow-sm mb-4">
     <div class="card-body d-flex align-items-center justify-content-between flex-wrap gap-3">
       <div>
@@ -127,5 +135,6 @@
         }
       </div></div>
     </div>
+  </div>
   </div>
 }
