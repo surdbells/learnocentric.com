@@ -43,6 +43,7 @@ use App\Application\Actions\School\TermsAction;
 use App\Application\Actions\School\SubjectsAction;
 use App\Application\Actions\School\TeachersAction;
 use App\Application\Actions\Storage\UploadAction;
+use App\Application\Actions\Support\SupportAction;
 use App\Application\Middleware\JwtAuthMiddleware;
 use App\Application\Middleware\ModuleGateMiddleware;
 use Slim\App;
@@ -189,6 +190,13 @@ return static function (App $app): void {
             $auth->get('/notifications', NotificationsAction::class . ':mine');
             $auth->post('/notifications/read-all', NotificationsAction::class . ':readAll');
             $auth->post('/notifications/{id:[0-9]+}/read', NotificationsAction::class . ':read');
+
+            // Support centre — tickets, SLA, threaded replies, escalation
+            $auth->get('/support/tickets', SupportAction::class . ':list');
+            $auth->post('/support/tickets', SupportAction::class . ':create');
+            $auth->get('/support/tickets/{id:[0-9]+}', SupportAction::class . ':show');
+            $auth->post('/support/tickets/{id:[0-9]+}/reply', SupportAction::class . ':reply');
+            $auth->post('/support/tickets/{id:[0-9]+}/transition', SupportAction::class . ':transition');
 
             $auth->post('/upload', UploadAction::class);
         })->add(ModuleGateMiddleware::class)->add(JwtAuthMiddleware::class);

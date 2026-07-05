@@ -13,6 +13,8 @@ use App\Domain\Entity\AuditLog;
 use App\Domain\Entity\ContentPackage;
 use App\Domain\Entity\ContentResource;
 use App\Domain\Entity\ContentVersion;
+use App\Domain\Entity\SupportMessage;
+use App\Domain\Entity\SupportTicket;
 use App\Domain\Entity\Enrollment;
 use App\Domain\Entity\FeedbackNote;
 use App\Domain\Entity\GuardianLink;
@@ -88,6 +90,7 @@ class SeedCommand extends Command
         $this->seedGuardians($output);
         $this->seedBilling($output);
         $this->seedContent($output);
+        $this->seedSupport($output);
         $this->seedNotifications($output);
         $this->seedTopicProgress($output);
         $this->seedInterventions($output);
@@ -679,6 +682,42 @@ class SeedCommand extends Command
         $this->em->flush();
 
         $output->writeln('  + 5 content resources, 1 content package');
+    }
+
+    /** Seed a couple of support tickets so the support centre isn't empty. */
+    private function seedSupport(OutputInterface $output): void
+    {
+        if ($this->em->getRepository(SupportTicket::class)->count([]) > 0) {
+            return;
+        }
+        $admin = $this->em->getRepository(User::class)->findOneBy(['email' => 'school@gmail.com']);
+        $superAdmin = $this->em->getRepository(User::class)->findOneBy(['email' => 'surdbells@gmail.com']);
+        if ($admin === null) {
+            return;
+        }
+
+        // An open, unanswered ticket.
+        $t1 = new SupportTicket('Cannot publish an assessment', $admin, 'LEARNO-TKT-000001');
+        $t1->setCategory('technical');
+        $t1->setPriority('high');
+        $t1->addMessage(new SupportMessage($t1, $admin, 'When I try to publish a quiz it says a question is not validated, but they all look validated.', false));
+        $this->em->persist($t1);
+
+        // A ticket that support has answered and resolved.
+        $t2 = new SupportTicket('Invoice for last term', $admin, 'LEARNO-TKT-000002');
+        $t2->setCategory('billing');
+        $t2->setPriority('normal');
+        $t2->addMessage(new SupportMessage($t2, $admin, 'Please can I get the invoice for our last term subscription?', false));
+        if ($superAdmin !== null) {
+            $t2->addMessage(new SupportMessage($t2, $superAdmin, 'Your invoice is under Billing → Transactions. Let us know if you need a PDF copy.', true));
+            $t2->markStaffResponded();
+            $t2->setAssignedTo($superAdmin);
+        }
+        $t2->setStatus(SupportTicket::RESOLVED);
+        $this->em->persist($t2);
+
+        $this->em->flush();
+        $output->writeln('  + 2 support tickets');
     }
 
     /** Link the seeded parent account to a student so the parent report works. */

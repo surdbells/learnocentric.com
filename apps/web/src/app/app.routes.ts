@@ -54,6 +54,7 @@ import {SuperAdminOnboard} from './pages/dashboard/super-admin/institutions/onbo
 import {SuperAdminContentLibrary} from './pages/dashboard/super-admin/content-library/content-library';
 import {SuperAdminContentPackages} from './pages/dashboard/super-admin/content-packages/content-packages';
 import {SuperAdminPlans} from './pages/dashboard/super-admin/plans/plans';
+import {Support} from './pages/dashboard/support/support';
 
 export const routes: Routes = [
   {
@@ -115,6 +116,7 @@ export const routes: Routes = [
           { path: "school-profile", component: SchoolProfile },
           { path: "billing", component: Billing },
           { path: "safeguarding", component: Safeguarding, canActivate: [moduleGuard('safeguarding')] },
+          { path: "support", component: Support },
         ]
       }
     ]
@@ -167,6 +169,7 @@ export const routes: Routes = [
           { path: "academy-profile", component: SchoolProfile },
           { path: "billing", component: Billing },
           { path: "safeguarding", component: Safeguarding, canActivate: [moduleGuard('safeguarding')] },
+          { path: "support", component: Support },
         ]
       }
     ]
@@ -269,7 +272,8 @@ export const routes: Routes = [
           { path: "onboard", component: SuperAdminOnboard },
           { path: "content-library", component: SuperAdminContentLibrary },
           { path: "content-packages", component: SuperAdminContentPackages },
-          { path: "plans", component: SuperAdminPlans }
+          { path: "plans", component: SuperAdminPlans },
+          { path: "support", component: Support }
         ]
       }
     ]

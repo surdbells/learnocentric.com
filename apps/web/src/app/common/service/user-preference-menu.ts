@@ -60,6 +60,7 @@ export class UserPreferenceMenu {
         { name: "School Profile", link: "/admin/management/school-profile" },
         { name: "Billing", link: "/admin/management/billing" },
         { name: "Safeguarding", link: "/admin/management/safeguarding", module: "safeguarding" },
+        { name: "Support", link: "/admin/management/support" },
       ]
     },
   ]
@@ -110,6 +111,7 @@ export class UserPreferenceMenu {
         { name: "Academy Profile", link: "/academy/management/academy-profile" },
         { name: "Billing", link: "/academy/management/billing" },
         { name: "Safeguarding", link: "/academy/management/safeguarding", module: "safeguarding" },
+        { name: "Support", link: "/academy/management/support" },
       ]
     },
   ]
@@ -128,6 +130,7 @@ export class UserPreferenceMenu {
         { name: "Subscription Plans", link: "management/plans" },
         { name: "Content Library", link: "management/content-library" },
         { name: "Content Packages", link: "management/content-packages" },
+        { name: "Support Centre", link: "management/support" },
       ]
     },
   ]
