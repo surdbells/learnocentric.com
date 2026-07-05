@@ -1,17 +1,19 @@
 import {Component, inject, signal} from '@angular/core';
+import {DatePipe} from '@angular/common';
 import {Router} from '@angular/router';
 import {ToastrService} from 'ngx-toastr';
 import {PageHeader} from '../../../../../common/layout/page-header/page-header';
 import {ApiService} from '../../../../../common/service/api.service';
 import {Icon} from '../../../../../common/icon/icon';
 import {MediaEmbed} from '../../../../../common/media-embed/media-embed';
+import {FormsModule} from '@angular/forms';
 
 const STAGE_ICON: Record<string, string> = {lesson: 'menu_book', quiz: 'quiz', worksheet: 'assignment_turned_in', portfolio: 'folder_special'};
 
 @Component({
   selector: 'app-learn',
   standalone: true,
-  imports: [Icon, PageHeader, MediaEmbed],
+  imports: [Icon, PageHeader, MediaEmbed, FormsModule, DatePipe],
   templateUrl: './learn.html',
   styleUrl: './learn.css',
 })
@@ -26,8 +28,21 @@ export class Learn {
   topics = signal<any[]>([]);
   lesson = signal<any | null>(null);
 
+  // Note-taking while learning
+  noteBody = signal('');
+  noteSaving = signal(false);
+  noteSavedAt = signal<string | null>(null);
+
   constructor() {
     this.load();
+  }
+
+  /** Combined media: the media[] list, falling back to a lone video_url. */
+  lessonMedia(): { url: string; name?: string }[] {
+    const l = this.lesson()?.lesson;
+    if (!l) return [];
+    if (Array.isArray(l.media) && l.media.length) return l.media;
+    return l.video_url ? [{url: l.video_url, name: 'Lesson video'}] : [];
   }
 
   load(): void {
@@ -40,9 +55,28 @@ export class Learn {
 
   openLesson(topic: any): void {
     this.busy.set(true);
+    this.noteBody.set('');
+    this.noteSavedAt.set(null);
     this.api.get<any>(`/backend/learn/topics/${topic.id}`).subscribe({
-      next: (res) => { this.lesson.set(res); this.mode.set('lesson'); this.busy.set(false); },
+      next: (res) => { this.lesson.set(res); this.mode.set('lesson'); this.busy.set(false); this.loadNote(topic.id); },
       error: () => { this.toast.error('Could not open the lesson'); this.busy.set(false); },
+    });
+  }
+
+  private loadNote(topicId: number): void {
+    this.api.get<any>(`/backend/learn/topics/${topicId}/note`).subscribe({
+      next: (res) => { this.noteBody.set(res?.body ?? ''); this.noteSavedAt.set(res?.updated_at ?? null); },
+      error: () => {},
+    });
+  }
+
+  saveNote(): void {
+    const l = this.lesson();
+    if (!l) return;
+    this.noteSaving.set(true);
+    this.api.put<any>(`/backend/learn/topics/${l.id}/note`, {body: this.noteBody()}).subscribe({
+      next: (res) => { this.noteSavedAt.set(res?.updated_at ?? new Date().toISOString()); this.noteSaving.set(false); this.toast.success('Note saved'); },
+      error: () => { this.toast.error('Could not save note'); this.noteSaving.set(false); },
     });
   }
 

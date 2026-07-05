@@ -25,13 +25,18 @@
   width: 40px;
   height: 40px;
   border: 0;
-  border-radius: var(--bs-border-radius);
+  border-radius: 10px;
   background: transparent;
   color: var(--bs-secondary-color);
   cursor: pointer;
   transition: background-color 0.15s ease, color 0.15s ease;
 }
 .tb-icon-btn:hover { background: rgba(var(--brand-rgb), 0.1); color: var(--brand-700); }
+.tb-icon-btn:focus { outline: none; box-shadow: none; }
+.tb-icon-btn:focus-visible { outline: 2px solid rgba(var(--brand-rgb), 0.45); outline-offset: 2px; }
+/* Active state while a dropdown (e.g. notifications) is open */
+.tb-icon-btn.show,
+.tb-icon-btn[aria-expanded="true"] { background: rgba(var(--brand-rgb), 0.12); color: var(--brand-700); }
 
 .tb-title {
   font-size: 1.05rem;

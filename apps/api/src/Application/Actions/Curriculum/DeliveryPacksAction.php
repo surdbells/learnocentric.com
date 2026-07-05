@@ -181,6 +181,9 @@ final class DeliveryPacksAction
                 $pack->{$setter}($body[$key] !== '' ? (string) $body[$key] : null);
             }
         }
+        if (array_key_exists('media', $body)) {
+            $pack->setMedia(is_array($body['media']) ? $body['media'] : null);
+        }
         if (isset($body['version']) && $body['version'] !== '') {
             $pack->setVersion((string) $body['version']);
         }

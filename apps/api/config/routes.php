@@ -196,6 +196,7 @@ return static function (App $app): void {
             $auth->get('/learn/topics', LearnAction::class . ':topics');
             $auth->get('/learn/topics/{id:[0-9]+}', LearnAction::class . ':lesson');
             $auth->post('/learn/topics/{id:[0-9]+}/complete-lesson', LearnAction::class . ':completeLesson');
+            $auth->map(['GET', 'PUT'], '/learn/topics/{id:[0-9]+}/note', LearnAction::class . ':note');
 
             // Governed messaging + school announcements
             $auth->get('/messaging/contacts', MessagingAction::class . ':contacts');

@@ -40,6 +40,10 @@ class TopicDeliveryPack implements LifecycleAware
     #[ORM\Column(name: 'video_url', length: 1024, nullable: true)]
     private ?string $videoUrl = null;
 
+    /** Additional lesson media: array of {url, name}. Any type — video, audio, PDF, image. */
+    #[ORM\Column(type: Types::JSON, nullable: true)]
+    private ?array $media = null;
+
     #[ORM\Column(name: 'worked_examples', type: Types::TEXT, nullable: true)]
     private ?string $workedExamples = null;
 
@@ -63,6 +67,18 @@ class TopicDeliveryPack implements LifecycleAware
     public function setTeacherGuide(?string $v): void { $this->teacherGuide = $v; }
     public function setLearnerNote(?string $v): void { $this->learnerNote = $v; }
     public function setVideoUrl(?string $v): void { $this->videoUrl = $v; }
+    public function getMedia(): array { return $this->media ?? []; }
+    public function setMedia(?array $v): void
+    {
+        if ($v === null) { $this->media = null; return; }
+        $clean = [];
+        foreach ($v as $item) {
+            $url = trim((string) ($item['url'] ?? ''));
+            if ($url === '') { continue; }
+            $clean[] = ['url' => $url, 'name' => trim((string) ($item['name'] ?? ''))];
+        }
+        $this->media = $clean === [] ? null : $clean;
+    }
     public function setWorkedExamples(?string $v): void { $this->workedExamples = $v; }
     public function setParentWording(?string $v): void { $this->parentWording = $v; }
     public function getStatus(): string { return $this->status; }
@@ -84,6 +100,7 @@ class TopicDeliveryPack implements LifecycleAware
             'teacher_guide' => $this->teacherGuide,
             'learner_note' => $this->learnerNote,
             'video_url' => $this->videoUrl,
+            'media' => $this->media ?? [],
             'worked_examples' => $this->workedExamples,
             'parent_wording' => $this->parentWording,
             'status' => $this->status,

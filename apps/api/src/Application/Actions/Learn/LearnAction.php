@@ -9,6 +9,7 @@ use App\Domain\Entity\Assessment;
 use App\Domain\Entity\AssessmentAttempt;
 use App\Domain\Entity\Enrollment;
 use App\Domain\Entity\PortfolioEntry;
+use App\Domain\Entity\StudentTopicNote;
 use App\Domain\Entity\Topic;
 use App\Domain\Entity\TopicDeliveryPack;
 use App\Domain\Entity\TopicProgress;
@@ -65,6 +66,7 @@ final class LearnAction
             $learnerPack = [
                 'learner_note' => $data['learner_note'],
                 'video_url' => $data['video_url'],
+                'media' => $data['media'],
                 'worked_examples' => $data['worked_examples'],
             ];
         }
@@ -97,6 +99,29 @@ final class LearnAction
         $this->em->flush();
 
         return Json::write($response, $this->summary($topic, $this->stages($topic, $student)));
+    }
+
+    /** GET/PUT /learn/topics/{id}/note — the learner's personal notes for a topic. */
+    public function note(Request $request, Response $response, array $args): Response
+    {
+        $student = $this->currentUser($request);
+        $topic = $this->em->getRepository(Topic::class)->find((int) $args['id']);
+        if ($topic === null) {
+            return Json::error($response, 'Topic not found.', 404);
+        }
+        $note = $this->em->getRepository(StudentTopicNote::class)->findOneBy(['student' => $student, 'topic' => $topic]);
+
+        if (strtoupper($request->getMethod()) === 'PUT') {
+            $body = trim((string) (((array) $request->getParsedBody())['body'] ?? ''));
+            if ($note === null) {
+                $note = new StudentTopicNote($student, $topic);
+                $this->em->persist($note);
+            }
+            $note->setBody($body);
+            $this->em->flush();
+        }
+
+        return Json::write($response, $note?->toArray() ?? ['body' => '', 'updated_at' => null]);
     }
 
     // --- journey computation ---

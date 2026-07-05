@@ -59,10 +59,17 @@
           }
 
           @if (l.lesson) {
-            @if (l.lesson.video_url) {
+            @if (lessonMedia().length) {
               <div class="mb-3">
                 <div class="small text-uppercase fw-semibold text-body-secondary mb-2">Lesson media</div>
-                <app-media-embed [url]="l.lesson.video_url" [title]="l.title" />
+                <div class="d-flex flex-column gap-3">
+                  @for (m of lessonMedia(); track $index) {
+                    <div>
+                      @if (m.name) { <div class="small fw-medium mb-1">{{ m.name }}</div> }
+                      <app-media-embed [url]="m.url" [title]="m.name || l.title" />
+                    </div>
+                  }
+                </div>
               </div>
             }
             @if (l.lesson.learner_note) {
@@ -80,6 +87,23 @@
               <b>Why it matters:</b> {{ l.real_life_relevance }}
             </div>
           }
+        </div>
+      </div>
+
+      <!-- My notes -->
+      <div class="card border-0 shadow-sm mt-4">
+        <div class="card-body">
+          <div class="d-flex align-items-center justify-content-between mb-2">
+            <h6 class="fw-semibold mb-0"><app-icon name="edit_square" [size]="16" class="me-1 text-primary" /> My notes</h6>
+            @if (noteSavedAt()) { <span class="small text-body-secondary">Saved {{ noteSavedAt() | date:'MMM d, h:mm a' }}</span> }
+          </div>
+          <textarea class="form-control note-area" rows="6" placeholder="Jot down key points, questions or reminders as you learn…"
+                    [ngModel]="noteBody()" (ngModelChange)="noteBody.set($event)"></textarea>
+          <div class="d-flex justify-content-end mt-2">
+            <button type="button" class="btn btn-sm btn-primary" [disabled]="noteSaving()" (click)="saveNote()">
+              {{ noteSaving() ? 'Saving…' : 'Save note' }}
+            </button>
+          </div>
         </div>
       </div>
     </div>

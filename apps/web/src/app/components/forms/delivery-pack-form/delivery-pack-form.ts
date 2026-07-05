@@ -3,12 +3,15 @@ import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/
 import {ToastrService} from 'ngx-toastr';
 import {LearnoButton} from '../../../common/learno-button/learno-button';
 import {FileUpload, UploadedFile} from '../../../common/file-upload/file-upload';
+import {FormsModule} from '@angular/forms';
 import {ApiService} from '../../../common/service/api.service';
+
+interface MediaItem { url: string; name: string; }
 
 @Component({
   selector: 'app-delivery-pack-form',
   standalone: true,
-  imports: [ReactiveFormsModule, LearnoButton, FileUpload],
+  imports: [ReactiveFormsModule, LearnoButton, FileUpload, FormsModule],
   templateUrl: './delivery-pack-form.html',
 })
 export class DeliveryPackForm {
@@ -34,14 +37,26 @@ export class DeliveryPackForm {
 
   readonly editTopicTitle = computed(() => this.select()?.topic ?? '');
 
-  onMediaUploaded(file: UploadedFile): void { this.form.get('videoUrl')!.setValue(file.url); }
-  onMediaCleared(): void { this.form.get('videoUrl')!.setValue(''); }
+  /** Multiple lesson media items — video, audio, PDF or image; URL or uploaded. */
+  media = signal<MediaItem[]>([]);
+
+  addMedia(): void { this.media.set([...this.media(), {url: '', name: ''}]); }
+  removeMedia(i: number): void { this.media.set(this.media().filter((_, idx) => idx !== i)); }
+  setMediaUrl(i: number, url: string): void { this.media.set(this.media().map((m, idx) => idx === i ? {...m, url} : m)); }
+  setMediaName(i: number, name: string): void { this.media.set(this.media().map((m, idx) => idx === i ? {...m, name} : m)); }
+  onMediaUploaded(i: number, file: UploadedFile): void {
+    this.media.set(this.media().map((m, idx) => idx === i ? {url: file.url, name: m.name || file.name} : m));
+  }
 
   constructor() {
     effect(() => {
       const s = this.select();
-      if (!s || !s['id']) { this.form.reset(); this.form.get('topicId')!.enable(); this.isEdit.set(false); return; }
+      if (!s || !s['id']) { this.form.reset(); this.form.get('topicId')!.enable(); this.isEdit.set(false); this.media.set([]); return; }
       this.form.reset();
+      const existingMedia: MediaItem[] = Array.isArray(s['media']) && s['media'].length
+        ? s['media'].map((m: any) => ({url: m.url ?? '', name: m.name ?? ''}))
+        : (s['video_url'] ? [{url: s['video_url'], name: 'Lesson video'}] : []);
+      this.media.set(existingMedia);
       this.form.patchValue({
         topicId: s['topic_id'] ?? null,
         learnerNote: s['learner_note'] ?? '',
@@ -61,10 +76,12 @@ export class DeliveryPackForm {
       return;
     }
     const v = this.form.getRawValue();
+    const cleanMedia = this.media().filter((m) => m.url.trim());
     const body: any = {
       topic_id: v.topicId,
       learner_note: v.learnerNote,
-      video_url: v.videoUrl,
+      media: cleanMedia,
+      video_url: cleanMedia[0]?.url ?? v.videoUrl ?? '', // back-compat: first item
       worked_examples: v.workedExamples,
       teacher_guide: v.teacherGuide,
       parent_wording: v.parentWording,

@@ -202,6 +202,11 @@ class SeedCommand extends Command
                 $pack->setTeacherGuide('Teacher guide: introduce ' . $title . ' with a diagnostic starter, then guided examples.');
                 $pack->setLearnerNote('Learner note explaining ' . $title . ' in clear Nigerian-context English.');
                 $pack->setVideoUrl('https://www.youtube.com/watch?v=OmJ-4B-mS-Y'); // sample lesson video, embedded in Learn
+                $pack->setMedia([
+                    ['url' => 'https://www.youtube.com/watch?v=OmJ-4B-mS-Y', 'name' => 'Lesson video'],
+                    ['url' => 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3', 'name' => 'Audio recap'],
+                    ['url' => 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf', 'name' => 'Reference PDF'],
+                ]);
                 $pack->setWorkedExamples("Worked example: step through a typical " . $title . " problem.");
                 $pack->setParentWording('Your child is learning ' . $title . '. Ask them to show one everyday example.');
                 $pack->setStatus(Lifecycle::PUBLISHED);
@@ -645,43 +650,83 @@ class SeedCommand extends Command
         $output->writeln('  + 3 plans, 1 active subscription (Standard) + paid invoice');
     }
 
-    /** Seed the platform subject catalogue and link existing school subjects to it. */
+    /** Seed the platform subject catalogue (full Nigerian curriculum) and link school subjects. */
     private function seedCatalogSubjects(OutputInterface $output): void
     {
-        if ($this->em->getRepository(CatalogSubject::class)->count([]) > 0) {
-            return;
-        }
-        // [name, code, curriculum]
+        // [name, code, level] — the NERDC junior + senior secondary curriculum.
         $defs = [
-            ['Mathematics', 'MTH', 'NERDC'],
-            ['English Language', 'ENG', 'NERDC'],
-            ['Basic Science', 'BSC', 'NERDC'],
-            ['Basic Technology', 'BTECH', 'NERDC'],
-            ['Social Studies', 'SOS', 'NERDC'],
-            ['Civic Education', 'CIV', 'NERDC'],
-            ['Computer Studies', 'COMP', 'NERDC'],
-            ['Agricultural Science', 'AGRIC', 'NERDC'],
+            // Junior secondary (JSS) core
+            ['Mathematics', 'MTH', 'Junior/Senior'],
+            ['English Language', 'ENG', 'Junior/Senior'],
+            ['English Studies', 'ENGS', 'Junior'],
+            ['Basic Science', 'BSC', 'Junior'],
+            ['Basic Technology', 'BTECH', 'Junior'],
+            ['Social Studies', 'SOS', 'Junior'],
+            ['Civic Education', 'CIV', 'Junior/Senior'],
+            ['Cultural and Creative Arts', 'CCA', 'Junior'],
+            ['Business Studies', 'BST', 'Junior'],
+            ['Agricultural Science', 'AGRIC', 'Junior/Senior'],
+            ['Home Economics', 'HEC', 'Junior'],
+            ['Computer Studies / ICT', 'COMP', 'Junior'],
+            ['Physical and Health Education', 'PHE', 'Junior/Senior'],
+            ['Christian Religious Studies', 'CRS', 'Junior/Senior'],
+            ['Islamic Religious Studies', 'IRS', 'Junior/Senior'],
+            ['French', 'FRE', 'Junior/Senior'],
+            ['Arabic', 'ARB', 'Junior/Senior'],
+            ['Hausa', 'HAU', 'Junior/Senior'],
+            ['Igbo', 'IGB', 'Junior/Senior'],
+            ['Yoruba', 'YOR', 'Junior/Senior'],
+            ['History', 'HIS', 'Junior/Senior'],
+            // Senior secondary (SSS) sciences
+            ['Biology', 'BIO', 'Senior'],
+            ['Chemistry', 'CHE', 'Senior'],
+            ['Physics', 'PHY', 'Senior'],
+            ['Further Mathematics', 'FMTH', 'Senior'],
+            ['Agricultural Science (SSS)', 'AGRICS', 'Senior'],
+            ['Health Education', 'HED', 'Senior'],
+            ['Computer Science', 'CSC', 'Senior'],
+            ['Technical Drawing', 'TDR', 'Senior'],
+            ['Food and Nutrition', 'FDN', 'Senior'],
+            // Senior secondary humanities & commercial
+            ['Literature-in-English', 'LIT', 'Senior'],
+            ['Government', 'GOV', 'Senior'],
+            ['Economics', 'ECO', 'Senior'],
+            ['Geography', 'GEO', 'Senior'],
+            ['Commerce', 'COM', 'Senior'],
+            ['Financial Accounting', 'ACC', 'Senior'],
+            ['Marketing', 'MKT', 'Senior'],
+            ['Fine Arts', 'ART', 'Senior'],
+            ['Music', 'MUS', 'Senior'],
         ];
+
+        $repo = $this->em->getRepository(CatalogSubject::class);
         $byCode = [];
-        foreach ($defs as [$name, $code, $curriculum]) {
+        $added = 0;
+        foreach ($defs as [$name, $code, $level]) {
+            $existing = $repo->findOneBy(['code' => $code]);
+            if ($existing !== null) {
+                $byCode[$code] = $existing;
+                continue;
+            }
             $c = new CatalogSubject($name, $code);
-            $c->setCurriculum($curriculum);
-            $c->setDescription($name . ' — Nigerian junior-secondary curriculum.');
+            $c->setCurriculum('NERDC');
+            $c->setDescription($name . ' — Nigerian ' . strtolower($level) . ' secondary curriculum.');
             $this->em->persist($c);
             $byCode[$code] = $c;
+            $added++;
         }
         $this->em->flush();
 
         // Link the seeded institution subjects to their catalogue entry by code.
         foreach ($this->em->getRepository(Subject::class)->findAll() as $subject) {
             $code = strtoupper((string) ($subject->toArray()['code'] ?? ''));
-            if (isset($byCode[$code])) {
+            if (isset($byCode[$code]) && $subject->getCatalogSubject() === null) {
                 $subject->setCatalogSubject($byCode[$code]);
             }
         }
         $this->em->flush();
 
-        $output->writeln('  + ' . count($defs) . ' catalogue subjects (linked to school subjects)');
+        $output->writeln('  + ' . $added . ' catalogue subjects added (' . count($defs) . ' in the Nigerian curriculum)');
     }
 
     /** Seed the platform content library + one bundled package. */

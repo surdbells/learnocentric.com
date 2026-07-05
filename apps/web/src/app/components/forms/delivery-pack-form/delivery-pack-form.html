@@ -23,16 +23,35 @@
         <label class="form-label" for="dp_note">Lesson note</label>
         <textarea id="dp_note" class="form-control" rows="4" formControlName="learnerNote" placeholder="Explain the topic in clear, student-friendly language…"></textarea>
       </div>
-      <div class="col-lg-6 mb-3">
-        <label class="form-label" for="dp_video">Lesson media</label>
-        <input id="dp_video" type="url" class="form-control mb-2" formControlName="videoUrl" placeholder="Paste a YouTube/Vimeo or file URL…"/>
-        <app-file-upload
-          [value]="form.get('videoUrl')!.value || null"
-          label="…or upload a video, audio, PDF or image"
-          hint="Students see it embedded in the lesson"
-          (uploaded)="onMediaUploaded($event)"
-          (cleared)="onMediaCleared()"
-        />
+      <div class="col-12 mb-3">
+        <label class="form-label d-block">Lesson media</label>
+        <div class="small text-body-secondary mb-2">Add any mix of video, audio, PDF or images — paste a YouTube/Vimeo/file URL or upload a file. Students see them embedded in order.</div>
+        <div class="d-flex flex-column gap-3">
+          @for (m of media(); track $index) {
+            <div class="border rounded-3 p-3">
+              <div class="row g-2 align-items-start">
+                <div class="col-md-4">
+                  <input type="text" class="form-control" placeholder="Label (e.g. Intro video)"
+                         [ngModel]="m.name" (ngModelChange)="setMediaName($index, $event)" [ngModelOptions]="{standalone: true}"/>
+                </div>
+                <div class="col-md-7">
+                  <input type="url" class="form-control mb-2" placeholder="Paste a URL…"
+                         [ngModel]="m.url" (ngModelChange)="setMediaUrl($index, $event)" [ngModelOptions]="{standalone: true}"/>
+                  <app-file-upload
+                    [value]="m.url || null"
+                    label="…or upload video / audio / PDF / image"
+                    (uploaded)="onMediaUploaded($index, $event)"
+                    (cleared)="setMediaUrl($index, '')"
+                  />
+                </div>
+                <div class="col-md-1 text-end">
+                  <button type="button" class="btn btn-sm btn-outline-danger" (click)="removeMedia($index)" title="Remove">×</button>
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+        <button type="button" class="btn btn-sm btn-outline-secondary mt-2" (click)="addMedia()">+ Add media</button>
       </div>
       <div class="col-lg-6 mb-3">
         <label class="form-label" for="dp_worked">Worked examples</label>
