@@ -10,6 +10,7 @@ use App\Domain\Entity\ContentVersion;
 use App\Domain\Entity\Enrollment;
 use App\Domain\Entity\Institution;
 use App\Domain\Entity\Permission;
+use App\Domain\Entity\Question;
 use App\Domain\Entity\Role;
 use App\Domain\Entity\RolePermission;
 use App\Domain\Entity\SchemeOfWork;
@@ -55,6 +56,7 @@ class SeedCommand extends Command
         $this->seedAcademicSpine($users, $output);
         $this->seedEnrollments($users, $output);
         $this->seedContentVersions($output);
+        $this->seedQuestions($output);
         $this->seedAuditLogs($users, $output);
 
         $this->em->flush();
@@ -356,6 +358,71 @@ class SeedCommand extends Command
         }
         $this->em->flush();
         $output->writeln("  + {$count} enrollments");
+    }
+
+    /** Seed the question bank (JSS 1 Maths) — including one draft that fails the answer gate. */
+    private function seedQuestions(OutputInterface $output): void
+    {
+        if ($this->em->getRepository(Question::class)->count([]) > 0) {
+            return;
+        }
+        $repo = $this->em->getRepository(Topic::class);
+        $whole = $repo->findOneBy(['title' => 'Whole Numbers']);
+        $lcm = $repo->findOneBy(['title' => 'LCM (Lowest Common Multiple)']);
+        $hcf = $repo->findOneBy(['title' => 'HCF (Highest Common Factor)']);
+        $frac = $repo->findOneBy(['title' => 'Fractions']);
+        if ($whole === null) {
+            return;
+        }
+
+        $mcq = static fn (array $opts) => array_map(static fn ($k, $t) => ['key' => $k, 'text' => $t], array_keys($opts), $opts);
+
+        // [topic, type, track, difficulty, stem, options, correct, explanation, marks, status, validated]
+        $defs = [
+            [$whole, 'mcq', 'academic', 'easy', 'What is the place value of 7 in 4,750?',
+                $mcq(['a' => '7', 'b' => '70', 'c' => '700', 'd' => '7,000']), 'c',
+                '7 sits in the hundreds column, so its place value is 700.', 1, Lifecycle::PUBLISHED, true],
+            [$whole, 'numeric', 'academic', 'easy', 'Write “two thousand and five” in figures.',
+                null, ['value' => 2005, 'tolerance' => 0],
+                'Two thousand = 2000, and five units = 5, giving 2005.', 1, Lifecycle::PUBLISHED, true],
+            [$lcm, 'mcq', 'academic', 'medium', 'What is the LCM of 4 and 6?',
+                $mcq(['a' => '12', 'b' => '24', 'c' => '2', 'd' => '10']), 'a',
+                'Multiples of 4 and 6 first meet at 12.', 2, Lifecycle::PUBLISHED, true],
+            [$hcf, 'mcq', 'academic', 'medium', 'What is the HCF of 12 and 18?',
+                $mcq(['a' => '3', 'b' => '6', 'c' => '9', 'd' => '36']), 'b',
+                'The largest factor common to 12 and 18 is 6.', 2, Lifecycle::PUBLISHED, true],
+            [$hcf, 'true_false', 'academic', 'hard', 'The HCF of any two different prime numbers is always 1.',
+                null, 'true',
+                'Distinct primes share no factor other than 1.', 1, Lifecycle::APPROVED, true],
+            [$frac, 'short', 'academic', 'easy', 'Simplify 4/8 to its lowest term.',
+                null, null, // deliberately no answer yet — must fail the validation gate
+                null, 1, Lifecycle::DRAFT, false],
+        ];
+
+        $count = 0;
+        foreach ($defs as [$topic, $type, $track, $difficulty, $stem, $options, $correct, $explanation, $marks, $status, $validated]) {
+            $q = new Question($topic, $stem);
+            $q->setType($type);
+            $q->setTrack($track);
+            $q->setDifficulty($difficulty);
+            $q->setOptions($options);
+            $q->setCorrectAnswer($correct);
+            $q->setExplanation($explanation);
+            $q->setMarks($marks);
+            $q->setAnswerValidated($validated);
+            $q->setApprovalStatus($status);
+            $this->em->persist($q);
+            $this->em->flush();
+
+            $version = new ContentVersion('Question', (int) $q->getId(), 1, $status, 'seed');
+            $version->setFromStatus(null);
+            $version->setSnapshot($q->toArray());
+            $version->setNote('Baseline version created during seed.');
+            $this->em->persist($version);
+            $count++;
+        }
+        $this->em->flush();
+        $output->writeln("  + {$count} questions (question bank)");
     }
 
     /** Seed a baseline content version per topic (so content_versions has data). */

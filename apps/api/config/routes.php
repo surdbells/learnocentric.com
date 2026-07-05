@@ -7,6 +7,7 @@ use App\Application\Actions\Auth\MeAction;
 use App\Application\Actions\Auth\ProfileAction;
 use App\Application\Actions\Auth\RegisterAction;
 use App\Application\Actions\Auth\UserProfileAction;
+use App\Application\Actions\Assessment\QuestionsAction;
 use App\Application\Actions\Curriculum\ReviewQueueAction;
 use App\Application\Actions\Curriculum\TopicsAction;
 use App\Application\Actions\HealthAction;
@@ -58,6 +59,13 @@ return static function (App $app): void {
             $auth->post('/curriculum/topics/{id:[0-9]+}/transition', TopicsAction::class . ':transition');
             $auth->get('/curriculum/topics/{id:[0-9]+}/history', TopicsAction::class . ':history');
             $auth->get('/curriculum/review-queue', ReviewQueueAction::class);
+
+            // Assessment — question bank (answer-validation gate) + lifecycle
+            $auth->map(['GET', 'POST', 'PUT', 'DELETE'], '/assessment/questions', QuestionsAction::class);
+            $auth->post('/assessment/questions/bulk-delete', QuestionsAction::class . ':bulkDelete');
+            $auth->post('/assessment/questions/{id:[0-9]+}/validate', QuestionsAction::class . ':validate');
+            $auth->post('/assessment/questions/{id:[0-9]+}/transition', QuestionsAction::class . ':transition');
+            $auth->get('/assessment/questions/{id:[0-9]+}/history', QuestionsAction::class . ':history');
 
             $auth->post('/upload', UploadAction::class);
         })->add(JwtAuthMiddleware::class);
