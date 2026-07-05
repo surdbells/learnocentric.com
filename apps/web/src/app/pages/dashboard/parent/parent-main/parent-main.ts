@@ -1,32 +1,40 @@
-import {Component, signal} from '@angular/core';
-import UserIntro from '../../../../common/user-intro/user-intro';
-import {Loader} from '../../../../common/loader/loader';
-import {PageHeader} from '../../../../common/layout/page-header/page-header';
+import {Component, inject, PLATFORM_ID, signal} from '@angular/core';
+import {isPlatformBrowser} from '@angular/common';
+import {RouterLink} from '@angular/router';
 import {AuthService} from '../../../../common/auth/auth.service';
-import {AuthUser} from '../../../../common/auth/auth.models';
-import {DataTable} from '../../../../components/data-table/data-table';
+import {ApiService} from '../../../../common/service/api.service';
 
 @Component({
   selector: 'app-parent-main',
-  imports: [
-    UserIntro,
-    Loader,
-    PageHeader,
-    DataTable
-  ],
+  standalone: true,
+  imports: [RouterLink],
   templateUrl: './parent-main.html',
-  styleUrl: './parent-main.css'
+  styleUrl: './parent-main.css',
 })
 export class ParentMain {
+  private readonly auth = inject(AuthService);
+  private readonly api = inject(ApiService);
+  private readonly platformId = inject(PLATFORM_ID);
 
-  isLoading = signal(false);
-  user = signal<AuthUser|null>(null);
+  loading = signal(true);
+  children = signal<any[]>([]);
+  firstName = signal('');
 
-  constructor(
-    private readonly authSrv: AuthService,
-  ) {
-    this.user.set(this.authSrv.getAuthSession().user)
+  constructor() {
+    this.firstName.set(this.auth.getAuthSession()?.user?.firstName ?? 'there');
+    if (isPlatformBrowser(this.platformId)) {
+      this.api.get<any>('/backend/dashboard/parent').subscribe({
+        next: (res) => { this.children.set(res?.children ?? []); this.loading.set(false); },
+        error: () => this.loading.set(false),
+      });
+    }
   }
 
-
+  scoreColor(p: number | null): string {
+    if (p === null || p === undefined) return 'secondary';
+    if (p >= 70) return 'success';
+    if (p >= 50) return 'warning';
+    return 'danger';
+  }
+  pct(v: number | null): string { return v === null || v === undefined ? '—' : v + '%'; }
 }

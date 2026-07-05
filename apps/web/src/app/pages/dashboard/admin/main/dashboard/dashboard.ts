@@ -1,84 +1,61 @@
-import {Component, OnInit, signal} from '@angular/core';
-import UserIntro from "../../../../../common/user-intro/user-intro";
-import {RouterLink, RouterOutlet} from "@angular/router";
-import {AppStatCard} from '../../../../../common/app-stat-card/app-stat-card';
-import {AttendanceStat} from '../../../../../components/admin/overview/attendance-stat/attendance-stat';
-import {DashboardCard} from '../../../../../common/dashboard-card/dashboard-card';
-import {AuthSession} from '../../../../../common/auth/auth.models';
+import {afterNextRender, Component, ElementRef, inject, signal, ViewChild} from '@angular/core';
+import {RouterLink} from '@angular/router';
 import {AuthService} from '../../../../../common/auth/auth.service';
 import {ApiService} from '../../../../../common/service/api.service';
-import {forkJoin, Subject, takeUntil} from 'rxjs';
-import {Loader} from '../../../../../common/loader/loader';
-import {SkeletonLoader} from '../../../../../common/skeleton-loader/skeleton-loader';
-import {DatePipe} from '@angular/common';
 
 @Component({
   selector: 'app-dashboard',
-  imports: [
-    UserIntro,
-    RouterOutlet,
-    AppStatCard,
-    AttendanceStat,
-    DashboardCard,
-    Loader,
-    SkeletonLoader,
-    RouterLink,
-    DatePipe
-  ],
+  standalone: true,
+  imports: [RouterLink],
   templateUrl: './dashboard.html',
-  styleUrl: './dashboard.css'
+  styleUrl: './dashboard.css',
 })
-export class AdminDashboard implements OnInit {
+export class AdminDashboard {
+  @ViewChild('quizChart') quizChart!: ElementRef<HTMLDivElement>;
 
+  private readonly auth = inject(AuthService);
+  private readonly api = inject(ApiService);
 
-  readonly user = signal<AuthSession | null>(null);
-  isLoading = signal(false);
-  // public destroy$ = new Subject<void>();
+  loading = signal(true);
+  data = signal<any | null>(null);
+  firstName = signal('');
+  base = signal('/admin/academics');
+  mgmt = signal('/admin/management');
+  private chart: any = null;
 
-  classesCount: number = 0;
-  subjectsCount: number = 0;
-  studentsCount: number = 0;
-  teachersCount: number = 0;
-
-  constructor(
-    private readonly authService: AuthService,
-    private readonly apiSrv: ApiService,
-    // private readonly router: Router
-  ) {
-    this.user.set(this.authService.getAuthSession());
+  constructor() {
+    const user = this.auth.getAuthSession()?.user;
+    this.firstName.set(user?.firstName ?? 'there');
+    const academy = user?.role === 'tutor_admin';
+    this.base.set(academy ? '/academy/academics' : '/admin/academics');
+    this.mgmt.set(academy ? '/academy/management' : '/admin/management');
+    afterNextRender(() => this.load());
   }
 
-  ngOnInit(): void {
-    this.isLoading.set(true);
-    const schoolData$ = forkJoin({
-      classes: this.apiSrv.get<any[]>('/backend/school/classes'),
-      subjects: this.apiSrv.get<any[]>('/backend/school/subjects'),
-      students: this.apiSrv.get<any[]>('/backend/school/students'),
-      teachers: this.apiSrv.get<any[]>('/backend/school/teachers')
-    });
-
-    schoolData$
-    //   .pipe(
-    //   takeUntil(this.destroy$)
-    // )
-      .subscribe({
-      next: (data) => {
-        this.classesCount = data.classes.length;
-        this.subjectsCount = data.subjects.length;
-        this.studentsCount = data.students.length;
-        this.teachersCount = data.teachers.length;
-      },
-      error: (error) => {
-        console.error('Error fetching school data:', error);
-        this.isLoading.set(false);
-      },
-        complete: () => {
-        this.isLoading.set(false);
-        }
+  private load(): void {
+    this.api.get<any>('/backend/dashboard/admin').subscribe({
+      next: (res) => { this.data.set(res); this.loading.set(false); setTimeout(() => this.renderChart(res)); },
+      error: () => this.loading.set(false),
     });
   }
 
-  // Stable reference — computed once so it doesn't trigger NG0100 on each change-detection pass.
-  readonly getTodayDate = new Date();
+  private async renderChart(d: any): Promise<void> {
+    if (!this.quizChart?.nativeElement || !d.quiz_by_subject?.length) return;
+    const {default: ApexCharts} = await import('apexcharts');
+    this.chart?.destroy();
+    this.chart = new ApexCharts(this.quizChart.nativeElement, {
+      chart: {type: 'bar', height: 260, toolbar: {show: false}, fontFamily: 'inherit'},
+      series: [{name: 'Average', data: d.quiz_by_subject.map((q: any) => q.average)}],
+      xaxis: {categories: d.quiz_by_subject.map((q: any) => q.subject)},
+      yaxis: {max: 100},
+      colors: ['#39c645'],
+      plotOptions: {bar: {borderRadius: 6, columnWidth: '45%'}},
+      dataLabels: {enabled: true, formatter: (v: number) => v + '%'},
+      grid: {borderColor: 'rgba(128,128,128,.15)'},
+      tooltip: {y: {formatter: (v: number) => v + '%'}},
+    });
+    this.chart.render();
+  }
 
+  pct(v: number | null): string { return v === null || v === undefined ? '—' : v + '%'; }
 }

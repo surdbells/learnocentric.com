@@ -466,3 +466,24 @@ html, .offcanvas-body {
   transition: all ease 0.5s;
   border: 1px solid var(--brand-500);
 }
+
+/* ---- Shared dashboard widgets ---- */
+.dash-hero { padding: 4px 0; }
+.dash-skel { height: 84px; border-radius: 8px;
+  background: linear-gradient(90deg, var(--bs-tertiary-bg) 25%, var(--bs-secondary-bg) 37%, var(--bs-tertiary-bg) 63%);
+  background-size: 400% 100%; animation: dashShimmer 1.4s ease infinite; }
+@keyframes dashShimmer { 0% { background-position: 100% 0; } 100% { background-position: 0 0; } }
+@media (prefers-reduced-motion: reduce) { .dash-skel { animation: none; } }
+
+.stat-card { transition: transform .12s ease, box-shadow .12s ease; color: inherit; }
+.stat-card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,.08) !important; }
+.stat-ic { width: 40px; height: 40px; border-radius: 11px; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 10px; }
+.stat-ic .material-symbols-outlined { font-size: 22px; }
+.stat-val { font-size: 1.7rem; font-weight: 700; line-height: 1.1; }
+.stat-lbl { font-size: .78rem; color: var(--bs-secondary-color); }
+
+.action-row { display: flex; align-items: center; gap: 12px; padding: 12px 4px; border-bottom: 1px solid var(--bs-border-color);
+  text-decoration: none; color: inherit; cursor: pointer; }
+.action-row:hover { color: var(--brand-600, #2ea339); }
+.action-ic { width: 34px; height: 34px; border-radius: 9px; display: inline-flex; align-items: center; justify-content: center; flex: 0 0 auto; }
+.action-ic .material-symbols-outlined { font-size: 19px; }

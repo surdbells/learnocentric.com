@@ -1,22 +1,47 @@
-<app-loader [isLoading]="isLoading()" />
+<div class="dash-hero mb-4">
+  <h4 class="fw-bold mb-1">Hello, {{ firstName() }} 👋</h4>
+  <p class="text-body-secondary mb-0">Your children's learning at a glance.</p>
+</div>
 
-<app-page-header [action]="'Dashboard'" [icon]="'person'" />
-<app-user-intro>
-  <div class="d-flex align-items-xl-center justify-content-xl-between flex-xl-row flex-column">
-    <div class="mb-3 mb-xl-0">
-      <div class="d-flex align-items-center flex-wrap mb-2">
-        <h1 class="me-2">Welcome Back, Mr/Mrs {{user()?.firstName}}</h1>
-      </div>
-      <p class="">Have a Good day!!!</p>
-    </div>
-    <p class=""><span class="material-symbols-outlined me-1 fs-6">calendar_today</span>Updated Recently on 15 Jun
-      2024</p>
+@if (loading()) {
+  <div class="row g-3">
+    @for (i of [1,2]; track i) { <div class="col-md-6"><div class="card border-0 shadow-sm"><div class="card-body dash-skel"></div></div></div> }
   </div>
-</app-user-intro>
-
-
-<app-data-table
-    [tableHeads]="['Name', 'class', 'School']"
-    [dataFields]="['subject', 'teacher', 'class', 'time']"
-    [tableRows]="[]"
-  />
+} @else if (!children().length) {
+  <div class="card border-0 shadow-sm p-5 text-center text-body-secondary">
+    No child is linked to your account yet. Please ask the school to link your child.
+  </div>
+} @else {
+  <div class="row g-3">
+    @for (c of children(); track c.student_id) {
+      <div class="col-md-6 col-xl-4">
+        <div class="card border-0 shadow-sm h-100">
+          <div class="card-body">
+            <div class="d-flex align-items-center gap-3 mb-3">
+              <span class="stat-ic bg-primary-subtle text-primary mb-0"><span class="material-symbols-outlined">face</span></span>
+              <div>
+                <h6 class="fw-semibold mb-0">{{ c.name }}</h6>
+                <span class="small text-body-secondary">{{ c.quizzes_taken }} quiz(zes) taken</span>
+              </div>
+            </div>
+            <div class="row g-2 text-center mb-3">
+              <div class="col-6">
+                <div class="p-2 rounded-3 bg-body-tertiary">
+                  <div class="fw-bold fs-5 text-{{ scoreColor(c.quiz_average) }}">{{ pct(c.quiz_average) }}</div>
+                  <div class="small text-body-secondary">Quiz average</div>
+                </div>
+              </div>
+              <div class="col-6">
+                <div class="p-2 rounded-3 bg-body-tertiary">
+                  <div class="fw-bold fs-5">{{ c.unread_feedback }}</div>
+                  <div class="small text-body-secondary">Unread feedback</div>
+                </div>
+              </div>
+            </div>
+            <a class="btn btn-sm btn-primary w-100" [routerLink]="['/parent/academics/progress-report']">View full report</a>
+          </div>
+        </div>
+      </div>
+    }
+  </div>
+}

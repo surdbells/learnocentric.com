@@ -1,53 +1,82 @@
-<app-user-intro>
-  <div class="d-flex align-items-xl-center justify-content-xl-between flex-xl-row flex-column">
-    <div class="mb-3 mb-xl-0">
-      <div class="d-flex align-items-center flex-wrap mb-2">
-        <h1 class="me-2">Welcome Back, {{ user()?.user?.firstName }}</h1>
-      </div>
-      <p class="">Super Admin Overview</p>
-    </div>
-    <p class=""><span class="material-symbols-outlined me-1 fs-6">calendar_today</span>{{ getTodayDate | date }}</p>
-  </div>
-</app-user-intro>
-
-<div class="row mb-8">
-  <div class="col-12 col-md-6 col-xxl-3 mb-4">
-    <app-skeleton-loader [isLoading]="isLoading()" variant="card">
-      <app-stat-card [link]="'/super-admin/management/institutions'" label="Institutions" [value]="totalInstitutions" icon="domain" />
-    </app-skeleton-loader>
-  </div>
-  <div class="col-12 col-md-6 col-xxl-3 mb-4">
-    <app-skeleton-loader [isLoading]="isLoading()" variant="card">
-      <app-stat-card [link]="'/super-admin/management/institutions?type=school'" label="Schools" [value]="totalSchools" icon="shield" />
-    </app-skeleton-loader>
-  </div>
-  <div class="col-12 col-md-6 col-xxl-3  mb-4">
-    <app-skeleton-loader [isLoading]="isLoading()" variant="card">
-      <app-stat-card [link]="'/super-admin/management/institutions?type=tutoring_academy'" label="Academy" [value]="totalTutoringAcademies" icon="supervisor_account" />
-    </app-skeleton-loader>
-  </div>
-  <div class="col-12 col-md-6 col-xxl-3 mb-4">
-    <app-skeleton-loader [isLoading]="isLoading()" variant="card">
-      <app-stat-card [link]="'/super-admin/management/users'" label="Active Users" [value]="activeUsers" icon="local_library" />
-    </app-skeleton-loader>
-  </div>
-
-  <div class="col-12 col-md-6 col-xxl-3 mb-4">
-    <app-skeleton-loader [isLoading]="isLoading()" variant="card">
-      <app-stat-card [link]="'/super-admin/management/subscriptions'" label="Subscriptions" [value]="totalSubscriptions" icon="local_library" />
-    </app-skeleton-loader>
-  </div>
-
-    <div class="col-12 col-md-6 col-xxl-3 mb-4">
-    <app-skeleton-loader [isLoading]="isLoading()" variant="card">
-      <app-stat-card [link]="'/super-admin/management/content-library-items'"label="Content" [value]="totalContentLibraryItems" icon="local_library" />
-    </app-skeleton-loader>
-  </div>
-
-    <div class="col-12 col-md-6 col-xxl-3 mb-4">
-    <app-skeleton-loader [isLoading]="isLoading()" variant="card">
-      <app-stat-card [link]="'/super-admin/management/content-packages'" label="Content Packeage" [value]="totalContentPackages" icon="local_library" />
-    </app-skeleton-loader>
-  </div>
-
+<div class="dash-hero mb-4">
+  <h4 class="fw-bold mb-1">Platform overview</h4>
+  <p class="text-body-secondary mb-0">Institutions, subscriptions and reach across LearnoCentric.</p>
 </div>
+
+@if (loading()) {
+  <div class="row g-3">
+    @for (i of [1,2,3,4,5,6]; track i) { <div class="col-6 col-md-4 col-xl-2"><div class="card border-0 shadow-sm"><div class="card-body dash-skel"></div></div></div> }
+  </div>
+} @else if (data(); as d) {
+  <div class="row g-3 mb-4">
+    <div class="col-6 col-md-4 col-xl-2">
+      <a class="stat-card card border-0 shadow-sm h-100 text-decoration-none" [routerLink]="['/super-admin/management/institutions']"><div class="card-body">
+        <span class="stat-ic bg-primary-subtle text-primary"><span class="material-symbols-outlined">apartment</span></span>
+        <div class="stat-val">{{ d.stats.institutions }}</div><div class="stat-lbl">Institutions</div>
+      </div></a>
+    </div>
+    <div class="col-6 col-md-4 col-xl-2">
+      <div class="stat-card card border-0 shadow-sm h-100"><div class="card-body">
+        <span class="stat-ic bg-success-subtle text-success"><span class="material-symbols-outlined">verified</span></span>
+        <div class="stat-val">{{ d.stats.active_subscriptions }}</div><div class="stat-lbl">Active subs</div>
+      </div></div>
+    </div>
+    <div class="col-6 col-md-4 col-xl-2">
+      <a class="stat-card card border-0 shadow-sm h-100 text-decoration-none" [routerLink]="['/super-admin/management/plans']"><div class="card-body">
+        <span class="stat-ic bg-info-subtle text-info"><span class="material-symbols-outlined">sell</span></span>
+        <div class="stat-val">{{ d.stats.plans }}</div><div class="stat-lbl">Active plans</div>
+      </div></a>
+    </div>
+    <div class="col-6 col-md-4 col-xl-2">
+      <div class="stat-card card border-0 shadow-sm h-100"><div class="card-body">
+        <span class="stat-ic bg-primary-subtle text-primary"><span class="material-symbols-outlined">group</span></span>
+        <div class="stat-val">{{ d.stats.students }}</div><div class="stat-lbl">Students</div>
+      </div></div>
+    </div>
+    <div class="col-6 col-md-4 col-xl-2">
+      <div class="stat-card card border-0 shadow-sm h-100"><div class="card-body">
+        <span class="stat-ic bg-warning-subtle text-warning"><span class="material-symbols-outlined">supervisor_account</span></span>
+        <div class="stat-val">{{ d.stats.teachers }}</div><div class="stat-lbl">Teachers</div>
+      </div></div>
+    </div>
+    <div class="col-6 col-md-4 col-xl-2">
+      <div class="stat-card card border-0 shadow-sm h-100"><div class="card-body">
+        <span class="stat-ic bg-success-subtle text-success"><span class="material-symbols-outlined">payments</span></span>
+        <div class="stat-val">₦{{ d.stats.billed_naira | number }}</div><div class="stat-lbl">Billed</div>
+      </div></div>
+    </div>
+  </div>
+
+  <div class="row g-4">
+    <div class="col-lg-6">
+      <div class="card border-0 shadow-sm h-100"><div class="card-body">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h6 class="fw-semibold mb-0">Institutions</h6>
+          <a class="small text-decoration-none" [routerLink]="['/super-admin/management/institutions']">All →</a>
+        </div>
+        @if (!d.institutions?.length) { <div class="text-body-secondary small py-3">No institutions yet.</div> }
+        @for (i of d.institutions; track i.id) {
+          <div class="d-flex align-items-center gap-3 py-2 border-bottom">
+            <span class="action-ic bg-primary-subtle text-primary"><span class="material-symbols-outlined">school</span></span>
+            <span class="fw-medium flex-grow-1">{{ i.name }}</span>
+          </div>
+        }
+      </div></div>
+    </div>
+
+    <div class="col-lg-6">
+      <div class="card border-0 shadow-sm h-100"><div class="card-body">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h6 class="fw-semibold mb-0">Plan subscribers</h6>
+          <a class="small text-decoration-none" [routerLink]="['/super-admin/management/plans']">Plans →</a>
+        </div>
+        @for (p of d.plans; track p.name) {
+          <div class="d-flex align-items-center justify-content-between py-2 border-bottom">
+            <span class="fw-medium">{{ p.name }}</span>
+            <span class="badge bg-primary-subtle text-primary">{{ p.subscribers }} subscriber{{ p.subscribers === 1 ? '' : 's' }}</span>
+          </div>
+        }
+      </div></div>
+    </div>
+  </div>
+}

@@ -1,2 +1,3 @@
-/* Super Admin Dashboard styles */
-:host { display: block; }
+:host {
+  display: block;
+}
