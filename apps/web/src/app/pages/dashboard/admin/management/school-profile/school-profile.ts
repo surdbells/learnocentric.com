@@ -1,27 +1,19 @@
-import {Component, signal} from '@angular/core';
-import {PageHeader} from "../../../../../common/layout/page-header/page-header";
-import {SchoolProfileForm} from '../../../../../components/admin/school-profile-form/school-profile-form';
-import {GradeForm} from '../../../../../components/forms/grade-form/grade-form';
+import {Component} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
+import {PageHeader} from '../../../../../common/layout/page-header/page-header';
+import {SchoolProfileForm} from '../../../../../components/admin/school-profile-form/school-profile-form';
 
 @Component({
   selector: 'app-school-profile',
-  imports: [
-    PageHeader,
-    SchoolProfileForm,
-    GradeForm
-  ],
+  standalone: true,
+  imports: [PageHeader, SchoolProfileForm],
   templateUrl: './school-profile.html',
-  styleUrl: './school-profile.css'
+  styleUrl: './school-profile.css',
 })
 export class SchoolProfile {
+  userRole = '';
 
-  userRole = ""
-
-  constructor(
-    private route: ActivatedRoute
-  ) {
-    this.userRole = this.route.snapshot.data['user'];
+  constructor(private route: ActivatedRoute) {
+    this.userRole = this.route.snapshot.data['user'] ?? '';
   }
-
 }

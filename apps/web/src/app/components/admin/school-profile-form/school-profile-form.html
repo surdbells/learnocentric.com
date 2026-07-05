@@ -1,88 +1,63 @@
-<form [formGroup]="form" (ngSubmit)="onSubmit()">
-  <section class="card card-line  border mb-5">
-    <div class="card-body">
-      <h3 class="fs-5 mb-1">General</h3>
-      <p class="text-body-secondary mb-5">General information about the school.</p>
-      <hr />
-      <div class="mb-4" learnoInput [label]="'Name'" [inputType]="'text'" [id]="'name'" [formControlName]="'name'"></div>
-      <div class="mb-4" learnoInput [label]="'Email Address'" [inputType]="'email'" [id]="'email'" [formControlName]="'email'"></div>
-      <div class="mb-4" learnoInput [label]="'Address'" [inputType]="'text'" [id]="'address'" [formControlName]="'address'"></div>
-    </div>
-  </section>
-
-  <section class="card card-line  border mb-5">
-    <div class="card-body">
-      <h3 class="fs-5 mb-1">General</h3>
-      <p class="text-body-secondary mb-5">Institution Branding</p>
-      <hr />
-<!--      <div class="mb-4" learnoInput [label]="'Name'" [inputType]="'text'" [id]="'name'" [formControlName]="'name'"></div>-->
-<!--      <div class="mb-4" learnoInput [label]="'Email Address'" [inputType]="'email'" [id]="'email'" [formControlName]="'email'"></div>-->
-<!--      <div class="mb-4" learnoInput [label]="'Address'" [inputType]="'color'" [id]="'address'" [formControlName]="'address'"></div>-->
-      <input type="file" id="dropzon  e" class="form-control" multiple />
-    </div>
-  </section>
-
-  <section class="card card-line  border-transparent mb-5">
-    <div class="card-body">
-      <h3 class="fs-5 mb-1">Files</h3>
-      <p class="text-body-secondary mb-5">Starting files for the project.</p>
-      <hr />
-      <div class="mb-0">
-        <label for="dropzone">Files</label>
+@if (loading()) {
+  <div class="text-body-secondary p-4">Loading…</div>
+} @else {
+  <form [formGroup]="form" (ngSubmit)="onSubmit()">
+    <section class="card border-0 shadow-sm mb-4">
+      <div class="card-body">
+        <h3 class="fs-5 mb-1 text-capitalize">{{ noun() }} details</h3>
+        <p class="text-body-secondary mb-4">The name, type and address shown across the {{ noun() }}.</p>
+        <div class="row">
+          <div class="col-lg-8 mb-3" learnoInput [label]="'Name'" [inputType]="'text'" [id]="'sp_name'" [formControlName]="'name'"></div>
+          <div class="col-lg-4 mb-3">
+            <label class="form-label" for="sp_type">Type</label>
+            <select id="sp_type" class="form-select" formControlName="type">
+              <option value="school">School</option>
+              <option value="academy">Academy</option>
+            </select>
+          </div>
+          <div class="col-lg-12 mb-3" learnoInput [label]="'Address'" [inputType]="'text'" [id]="'sp_addr'" [formControlName]="'address'"></div>
+        </div>
       </div>
+    </section>
+
+    <section class="card border-0 shadow-sm mb-4">
+      <div class="card-body">
+        <h3 class="fs-5 mb-1">Branding</h3>
+        <p class="text-body-secondary mb-4">Your logo and brand colour.</p>
+        <div class="row align-items-start">
+          <div class="col-lg-4 mb-3">
+            <label class="form-label" for="sp_color">Brand colour</label>
+            <input id="sp_color" type="color" class="form-control form-control-color" formControlName="brandColor" title="Brand colour"/>
+          </div>
+          <div class="col-lg-8 mb-3">
+            <label class="form-label d-block">Logo</label>
+            <app-file-upload
+              [value]="logoUrl()"
+              label="Upload your logo (PNG or JPG)"
+              accept="image/*"
+              hint="A square image works best"
+              (uploaded)="onLogoUploaded($event)"
+              (cleared)="onLogoCleared()"
+            />
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="card border-0 shadow-sm mb-4">
+      <div class="card-body">
+        <h3 class="fs-5 mb-1">Primary contact</h3>
+        <p class="text-body-secondary mb-4">Who we reach for account matters.</p>
+        <div class="row">
+          <div class="col-lg-4 mb-3" learnoInput [label]="'Contact name'" [inputType]="'text'" [id]="'sp_cname'" [formControlName]="'contactName'"></div>
+          <div class="col-lg-4 mb-3" learnoInput [label]="'Contact email'" [inputType]="'email'" [id]="'sp_cemail'" [formControlName]="'contactEmail'"></div>
+          <div class="col-lg-4 mb-3" learnoInput [label]="'Contact phone'" [inputType]="'text'" [id]="'sp_cphone'" [formControlName]="'contactPhone'"></div>
+        </div>
+      </div>
+    </section>
+
+    <div class="d-flex justify-content-end">
+      <app-learno-button [isLoading]="saving()" [text]="'Save profile'"/>
     </div>
-  </section>
-<!--  <section class="card bg-body-tertiary border-transparent mb-7">-->
-<!--    <div class="card-body">-->
-<!--      <h3 class="fs-5 mb-1">Team</h3>-->
-<!--      <p class="text-body-secondary mb-5">Team members working on the project.</p>-->
-<!--      <hr />-->
-<!--      <div class="mb-4">-->
-<!--        <label class="form-label" for="teamTitle">Team title</label>-->
-<!--        <input class="form-control bg-body" id="teamTitle" type="text" />-->
-<!--      </div>-->
-<!--      <div class="mb-0">-->
-<!--        <label class="form-label" for="teamMembers">Team members</label>-->
-<!--        <select-->
-<!--          class="form-select bg-body"-->
-<!--          id="teamMembers"-->
-<!--          data-choices='{"searchEnabled": false, "choices": [-->
-<!--                {-->
-<!--                  "value": "Emily Thompson",-->
-<!--                  "label": "Emily Thompson",-->
-<!--                  "customProperties": {-->
-<!--                    "avatarSrc": "../assets/img/photos/photo-1.jpg"-->
-<!--                  }-->
-<!--                },-->
-<!--                {-->
-<!--                  "value": "Michael Johnson",-->
-<!--                  "label": "Michael Johnson",-->
-<!--                  "customProperties": {-->
-<!--                    "avatarSrc": "../assets/img/photos/photo-2.jpg"-->
-<!--                  }-->
-<!--                },-->
-<!--                {-->
-<!--                  "value": "Robert Garcia",-->
-<!--                  "label": "Robert Garcia",-->
-<!--                  "customProperties": {-->
-<!--                    "avatarSrc": "../assets/img/photos/photo-3.jpg"-->
-<!--                  }-->
-<!--                },-->
-<!--                {-->
-<!--                  "value": "Jessica Miller",-->
-<!--                  "label": "Jessica Miller",-->
-<!--                  "customProperties": {-->
-<!--                    "avatarSrc": "../assets/img/photos/photo-4.jpg"-->
-<!--                  }-->
-<!--                }-->
-<!--              ]}'-->
-<!--        ></select>-->
-<!--      </div>-->
-<!--    </div>-->
-<!--  </section>-->
-<!--  <button type="submit" class="btn btn-secondary w-100">Save project</button>-->
-<!--  <button type="reset" class="btn btn-link w-100 mt-3">Reset form</button>-->
-</form>
-
-
-<!--<app-grade-form-->
+  </form>
+}

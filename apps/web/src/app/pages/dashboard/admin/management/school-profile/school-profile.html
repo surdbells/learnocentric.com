@@ -1,5 +1,3 @@
-<app-page-header icon="home_and_garden" [action]="userRole== 'tutor_admin' ? 'Academy Profile' : 'School Profile'" />
+<app-page-header icon="home_and_garden" [action]="userRole === 'tutor_admin' ? 'Academy Profile' : 'School Profile'" />
 
-<!-- Page content -->
-<app-school-profile-form />
-<!--<app-grade-form />-->
+<app-school-profile-form [role]="userRole" />
