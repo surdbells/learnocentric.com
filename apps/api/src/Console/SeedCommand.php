@@ -6,7 +6,9 @@ namespace App\Console;
 
 use App\Domain\Entity\AcademicSession;
 use App\Domain\Entity\Assessment;
+use App\Domain\Entity\AssessmentAttempt;
 use App\Domain\Entity\AssessmentQuestion;
+use App\Domain\Entity\AttemptAnswer;
 use App\Domain\Entity\AuditLog;
 use App\Domain\Entity\ContentVersion;
 use App\Domain\Entity\Enrollment;
@@ -24,6 +26,7 @@ use App\Domain\Entity\Topic;
 use App\Domain\Entity\TopicDeliveryPack;
 use App\Domain\Entity\User;
 use App\Domain\Lifecycle;
+use App\Service\AnswerGrader;
 use App\Service\PasswordService;
 use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
@@ -40,6 +43,7 @@ class SeedCommand extends Command
     public function __construct(
         private readonly EntityManagerInterface $em,
         private readonly PasswordService $passwords,
+        private readonly AnswerGrader $grader,
     ) {
         parent::__construct('app:seed');
     }
@@ -60,6 +64,7 @@ class SeedCommand extends Command
         $this->seedContentVersions($output);
         $this->seedQuestions($output);
         $this->seedAssessments($output);
+        $this->seedAttempts($output);
         $this->seedAuditLogs($users, $output);
 
         $this->em->flush();
@@ -426,6 +431,76 @@ class SeedCommand extends Command
         }
         $this->em->flush();
         $output->writeln("  + {$count} questions (question bank)");
+    }
+
+    /** Seed graded attempts (pass, borderline, fail) so the gradebook has data. */
+    private function seedAttempts(OutputInterface $output): void
+    {
+        if ($this->em->getRepository(AssessmentAttempt::class)->count([]) > 0) {
+            return;
+        }
+        $quiz = $this->em->getRepository(Assessment::class)->findOneBy(['approvalStatus' => Lifecycle::PUBLISHED]);
+        if ($quiz === null || $quiz->getItems()->count() === 0) {
+            return;
+        }
+        $students = $this->em->createQueryBuilder()->select('u')->from(User::class, 'u')->join('u.role', 'r')
+            ->where('r.code = :s')->andWhere('u.institution = :i')
+            ->setParameter('s', 'student')->setParameter('i', $quiz->getSubject()->getInstitution())
+            ->setMaxResults(3)->getQuery()->getResult();
+        if (empty($students)) {
+            return;
+        }
+
+        $items = array_values($quiz->getItems()->toArray());
+        // How many of the questions each student answers correctly: full, half, none.
+        $strategies = [count($items), (int) floor(count($items) / 2), 0];
+
+        $count = 0;
+        foreach ($students as $i => $student) {
+            $correctUpTo = $strategies[$i] ?? 0;
+            $attempt = new AssessmentAttempt($quiz, $student);
+            $attempt->setTrack($quiz->getTrack());
+            $attempt->setStartedAt(new DateTimeImmutable('-2 days'));
+            $this->em->persist($attempt);
+
+            $score = 0;
+            $total = 0;
+            foreach ($items as $idx => $item) {
+                $question = $item->getQuestion();
+                $total += $item->effectiveMarks();
+                $response = $idx < $correctUpTo ? $this->correctResponse($question) : null;
+                $graded = $this->grader->grade($question, $response);
+                $awarded = $graded['correct'] ? $item->effectiveMarks() : 0;
+
+                $answer = new AttemptAnswer($attempt, $question);
+                $answer->setResponse($response);
+                $answer->setCorrect($graded['correct']);
+                $answer->setMarksAwarded($awarded);
+                $this->em->persist($answer);
+                $score += $awarded;
+            }
+
+            $percentage = $total > 0 ? round($score / $total * 100, 1) : 0.0;
+            $attempt->setTotalMarks($total);
+            $attempt->setScore($score);
+            $attempt->setPercentage($percentage);
+            $attempt->setPassed($percentage >= $quiz->getPassMark());
+            $attempt->setStatus(AssessmentAttempt::GRADED);
+            $attempt->setSubmittedAt(new DateTimeImmutable('-2 days'));
+            $count++;
+        }
+        $this->em->flush();
+        $output->writeln("  + {$count} graded attempts");
+    }
+
+    private function correctResponse(\App\Domain\Entity\Question $q): mixed
+    {
+        $answer = $q->getCorrectAnswer();
+        return match ($q->getType()) {
+            'short' => is_array($answer) ? ($answer[0] ?? '') : $answer,
+            'numeric' => is_array($answer) ? ($answer['value'] ?? null) : $answer,
+            default => $answer,
+        };
     }
 
     /** Seed a published diagnostic quiz built from validated Whole Numbers questions. */

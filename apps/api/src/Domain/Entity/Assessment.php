@@ -89,9 +89,12 @@ class Assessment implements LifecycleAware
     public function setTerm(?Term $v): void { $this->term = $v; }
     public function getTitle(): string { return $this->title; }
     public function setTitle(string $v): void { $this->title = $v; }
+    public function getType(): string { return $this->type; }
     public function setType(string $v): void { $this->type = in_array($v, self::TYPES, true) ? $v : 'quiz'; }
+    public function getTrack(): string { return $this->track; }
     public function setTrack(string $v): void { $this->track = in_array($v, self::TRACKS, true) ? $v : 'academic'; }
     public function setDurationMinutes(?int $v): void { $this->durationMinutes = $v; }
+    public function getPassMark(): int { return $this->passMark; }
     public function setPassMark(int $v): void { $this->passMark = max(0, min(100, $v)); }
     public function setInstructions(?string $v): void { $this->instructions = $v; }
     public function getApprovalStatus(): string { return $this->approvalStatus; }

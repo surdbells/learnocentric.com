@@ -8,6 +8,7 @@ use App\Application\Actions\Auth\ProfileAction;
 use App\Application\Actions\Auth\RegisterAction;
 use App\Application\Actions\Auth\UserProfileAction;
 use App\Application\Actions\Assessment\AssessmentsAction;
+use App\Application\Actions\Assessment\AttemptsAction;
 use App\Application\Actions\Assessment\QuestionsAction;
 use App\Application\Actions\Curriculum\ReviewQueueAction;
 use App\Application\Actions\Curriculum\TopicsAction;
@@ -76,6 +77,12 @@ return static function (App $app): void {
             $auth->delete('/assessment/assessments/{id:[0-9]+}/questions/{qid:[0-9]+}', AssessmentsAction::class . ':detach');
             $auth->post('/assessment/assessments/{id:[0-9]+}/transition', AssessmentsAction::class . ':transition');
             $auth->get('/assessment/assessments/{id:[0-9]+}/history', AssessmentsAction::class . ':history');
+
+            // Assessment — learner attempts (take + auto-grade)
+            $auth->get('/assessment/attempts/available', AttemptsAction::class . ':available');
+            $auth->post('/assessment/attempts', AttemptsAction::class . ':start');
+            $auth->get('/assessment/attempts/{id:[0-9]+}', AttemptsAction::class . ':show');
+            $auth->post('/assessment/attempts/{id:[0-9]+}/submit', AttemptsAction::class . ':submit');
 
             $auth->post('/upload', UploadAction::class);
         })->add(JwtAuthMiddleware::class);

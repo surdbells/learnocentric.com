@@ -47,6 +47,6 @@ $app->addCommands([
 ]);
 
 // Application commands.
-$app->add(new SeedCommand($em, $container->get(PasswordService::class)));
+$app->add(new SeedCommand($em, $container->get(PasswordService::class), $container->get(App\Service\AnswerGrader::class)));
 
 $app->run();
