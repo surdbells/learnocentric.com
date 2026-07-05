@@ -1,0 +1,67 @@
+<app-page-header icon="menu_book" action="Lesson Content">
+  <app-learno-button text="Add Pack" icon="add" data-bs-toggle="modal" data-bs-target="#add_pack" (clicked)="onAdd()"/>
+</app-page-header>
+
+<!-- Create / edit -->
+<app-learno-modal [modalId]="'add_pack'" [modalAction]="selectPack() ? 'Edit Lesson Pack' : 'Add Lesson Pack'" [showBtn]="false">
+  <app-delivery-pack-form modalForm [select]="selectPack()" [availableTopics]="availableTopics()" (submitted)="handleSuccessSubmit($event)"/>
+</app-learno-modal>
+
+<!-- Lifecycle -->
+<app-learno-modal [modalId]="'pack_lifecycle'" [modalAction]="'Lesson pack'" [showBtn]="false">
+  <div modalForm>
+    @if (lifecyclePack(); as p) {
+      <div class="d-flex align-items-start justify-content-between flex-wrap gap-2 mb-1">
+        <h5 class="fw-semibold mb-0">{{ p.topic }}</h5>
+        <span class="badge bg-{{ statusColor(p.status) }}-subtle text-{{ statusColor(p.status) }} text-capitalize px-3 py-2">{{ p.status }}</span>
+      </div>
+      <p class="text-body-secondary small mb-4">{{ p.subject }} · v{{ p.version }}</p>
+
+      @if (p.learner_note) {
+        <div class="mb-3"><div class="small text-uppercase fw-semibold text-body-secondary">Lesson note</div><p class="small mb-0">{{ p.learner_note }}</p></div>
+      }
+
+      <label class="form-label text-uppercase small fw-semibold text-body-secondary">Move to</label>
+      @if (availableActions().length) {
+        <div class="d-flex flex-wrap gap-2 mb-4">
+          @for (a of availableActions(); track a.to) {
+            <button type="button" class="btn btn-sm" [class.btn-primary]="a.to !== 'archived'" [class.btn-outline-danger]="a.to === 'archived'"
+                    [disabled]="!a.enabled || transitioning()" (click)="transition(a.to)">{{ a.label }}</button>
+          }
+        </div>
+      } @else {
+        <div class="text-body-secondary small mb-4">No further transitions from this state.</div>
+      }
+
+      <label class="form-label text-uppercase small fw-semibold text-body-secondary">History</label>
+      @if (history().length) {
+        <ul class="timeline list-unstyled mb-0">
+          @for (v of history(); track v.id) {
+            <li class="d-flex gap-3 pb-3">
+              <span class="dot bg-{{ statusColor(v.to_status) }} mt-1"></span>
+              <div>
+                <div class="fw-medium text-capitalize">{{ v.action }}
+                  <span class="text-body-secondary fw-normal">{{ v.from_status ? v.from_status + ' → ' + v.to_status : v.to_status }}</span>
+                </div>
+                <div class="small text-body-secondary">v{{ v.version }} · {{ v.actor_name || 'System' }} · {{ v.created_at | date:'medium' }}</div>
+              </div>
+            </li>
+          }
+        </ul>
+      } @else {
+        <div class="text-body-secondary small">No history yet.</div>
+      }
+    }
+  </div>
+</app-learno-modal>
+
+<app-data-grid
+  endpoint="/backend/curriculum/delivery-packs"
+  [columns]="columns"
+  [filters]="filterDefs()"
+  [actions]="['view', 'edit', 'delete']"
+  searchPlaceholder="Search by topic…"
+  emptyMessage="No lesson packs yet. Click “Add Pack” to author one."
+  (view)="onView($event)"
+  (edit)="onEdit($event)"
+/>
