@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Console;
 
 use App\Domain\Entity\AcademicSession;
+use App\Domain\Entity\Assessment;
+use App\Domain\Entity\AssessmentQuestion;
 use App\Domain\Entity\AuditLog;
 use App\Domain\Entity\ContentVersion;
 use App\Domain\Entity\Enrollment;
@@ -57,6 +59,7 @@ class SeedCommand extends Command
         $this->seedEnrollments($users, $output);
         $this->seedContentVersions($output);
         $this->seedQuestions($output);
+        $this->seedAssessments($output);
         $this->seedAuditLogs($users, $output);
 
         $this->em->flush();
@@ -423,6 +426,48 @@ class SeedCommand extends Command
         }
         $this->em->flush();
         $output->writeln("  + {$count} questions (question bank)");
+    }
+
+    /** Seed a published diagnostic quiz built from validated Whole Numbers questions. */
+    private function seedAssessments(OutputInterface $output): void
+    {
+        if ($this->em->getRepository(Assessment::class)->count([]) > 0) {
+            return;
+        }
+        $topic = $this->em->getRepository(Topic::class)->findOneBy(['title' => 'Whole Numbers']);
+        if ($topic === null) {
+            return;
+        }
+        $questions = $this->em->getRepository(Question::class)->findBy(['topic' => $topic]);
+        $validated = array_values(array_filter($questions, static fn (Question $q) => $q->isAnswerValidated()));
+        if (empty($validated)) {
+            return;
+        }
+
+        $quiz = new Assessment($topic->getSubject(), 'Whole Numbers — Diagnostic Quiz');
+        $quiz->setTopic($topic);
+        $quiz->setType('quiz');
+        $quiz->setTrack('academic');
+        $quiz->setDurationMinutes(15);
+        $quiz->setPassMark(50);
+        $quiz->setInstructions('Answer all questions. Show your reasoning where asked.');
+        $quiz->setApprovalStatus(Lifecycle::PUBLISHED);
+        $this->em->persist($quiz);
+
+        $pos = 0;
+        foreach ($validated as $q) {
+            $this->em->persist(new AssessmentQuestion($quiz, $q, $pos++));
+        }
+        $this->em->flush();
+
+        $version = new ContentVersion('Assessment', (int) $quiz->getId(), 1, Lifecycle::PUBLISHED, 'seed');
+        $version->setFromStatus(null);
+        $version->setSnapshot($quiz->toArray());
+        $version->setNote('Baseline version created during seed.');
+        $this->em->persist($version);
+        $this->em->flush();
+
+        $output->writeln('  + 1 assessment (' . count($validated) . ' questions)');
     }
 
     /** Seed a baseline content version per topic (so content_versions has data). */

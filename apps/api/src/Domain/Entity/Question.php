@@ -78,7 +78,9 @@ class Question implements LifecycleAware
     public function getTopic(): Topic { return $this->topic; }
     public function getType(): string { return $this->type; }
     public function setType(string $v): void { $this->type = in_array($v, self::TYPES, true) ? $v : 'mcq'; }
+    public function getTrack(): string { return $this->track; }
     public function setTrack(string $v): void { $this->track = in_array($v, self::TRACKS, true) ? $v : 'academic'; }
+    public function getDifficulty(): string { return $this->difficulty; }
     public function setDifficulty(string $v): void { $this->difficulty = in_array($v, self::DIFFICULTIES, true) ? $v : 'medium'; }
     public function getStem(): string { return $this->stem; }
     public function setStem(string $v): void { $this->stem = $v; }

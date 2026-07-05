@@ -7,6 +7,7 @@ use App\Application\Actions\Auth\MeAction;
 use App\Application\Actions\Auth\ProfileAction;
 use App\Application\Actions\Auth\RegisterAction;
 use App\Application\Actions\Auth\UserProfileAction;
+use App\Application\Actions\Assessment\AssessmentsAction;
 use App\Application\Actions\Assessment\QuestionsAction;
 use App\Application\Actions\Curriculum\ReviewQueueAction;
 use App\Application\Actions\Curriculum\TopicsAction;
@@ -66,6 +67,15 @@ return static function (App $app): void {
             $auth->post('/assessment/questions/{id:[0-9]+}/validate', QuestionsAction::class . ':validate');
             $auth->post('/assessment/questions/{id:[0-9]+}/transition', QuestionsAction::class . ':transition');
             $auth->get('/assessment/questions/{id:[0-9]+}/history', QuestionsAction::class . ':history');
+
+            // Assessment — quiz/test builder assembled from validated questions
+            $auth->map(['GET', 'POST', 'PUT', 'DELETE'], '/assessment/assessments', AssessmentsAction::class);
+            $auth->post('/assessment/assessments/bulk-delete', AssessmentsAction::class . ':bulkDelete');
+            $auth->get('/assessment/assessments/{id:[0-9]+}', AssessmentsAction::class . ':show');
+            $auth->post('/assessment/assessments/{id:[0-9]+}/questions', AssessmentsAction::class . ':attach');
+            $auth->delete('/assessment/assessments/{id:[0-9]+}/questions/{qid:[0-9]+}', AssessmentsAction::class . ':detach');
+            $auth->post('/assessment/assessments/{id:[0-9]+}/transition', AssessmentsAction::class . ':transition');
+            $auth->get('/assessment/assessments/{id:[0-9]+}/history', AssessmentsAction::class . ':history');
 
             $auth->post('/upload', UploadAction::class);
         })->add(JwtAuthMiddleware::class);
