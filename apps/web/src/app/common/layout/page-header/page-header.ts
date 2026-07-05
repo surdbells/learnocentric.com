@@ -1,32 +1,27 @@
-import {Component, input} from '@angular/core';
-import {Router} from "@angular/router";
-
-
+import {Component, computed, inject, input} from '@angular/core';
+import {Router} from '@angular/router';
 
 @Component({
   selector: 'app-page-header',
   standalone: true,
   imports: [],
   templateUrl: './page-header.html',
-  styleUrl: './page-header.css'
+  styleUrl: './page-header.css',
 })
 export class PageHeader {
+  private readonly router = inject(Router);
 
-    // title: string = "";
-    // subTitle: string = "";
-    icon = input<string>("");
-    breadcrumbs: any[] = [];
-    action = input<string>("");
+  icon = input<string>('');
+  action = input<string>('');
 
-
-    constructor(
-        private router: Router
-    ) {
-        this.breadcrumbs = this.router.url.split("/").map((el) => this.toUpperCase(el));
-    }
-
-
-    private toUpperCase(el: string) {
-        return el.charAt(0).toUpperCase() + el.slice(1);
-    }
+  /** Readable breadcrumb trail derived from the URL (no dead links). */
+  readonly crumbs = computed<string[]>(() => {
+    return this.router.url
+      .split('?')[0]
+      .split('/')
+      .filter(Boolean)
+      .map((seg) => seg
+        .replace(/-/g, ' ')
+        .replace(/\b\w/g, (c) => c.toUpperCase()));
+  });
 }
