@@ -39,12 +39,21 @@ export class ProfileForm implements OnInit{
 
   @ViewChild('passportFile', { static: false }) passportFileInput!: ElementRef<HTMLInputElement>;
 
+  fullName = signal<string>('');
+  roleLabel = signal<string>('');
+  initials = signal<string>('');
+
   constructor(
     private toastService: ToastrService,
     private apiSrv: ApiService,
     private authSrv: AuthService
   ) {
-    console.log(this.form.value);
+    const u = this.authSrv.getAuthSession()?.user;
+    const name = [u?.firstName, u?.lastName].filter(Boolean).join(' ') || (u?.email ?? 'Your profile');
+    this.fullName.set(name);
+    this.initials.set(name.split(' ').map((p: string) => p[0]).slice(0, 2).join('').toUpperCase());
+    const roles: Record<string, string> = {school_admin: 'School Administrator', tutor_admin: 'Academy Administrator', teacher: 'Teacher', student: 'Student', parent: 'Parent', super_admin: 'Platform Admin'};
+    this.roleLabel.set(roles[u?.role ?? ''] ?? '');
   }
 
   ngOnInit(): void {
@@ -128,7 +137,7 @@ export class ProfileForm implements OnInit{
     this.apiSrv.post('/backend/upload', fd)
       .subscribe({
         next: (res: any) => {
-          const uploadUrl = res?.fileUrl ?? res?.data?.url ?? res?.location ?? res?.path ?? '';
+          const uploadUrl = res?.url ?? res?.fileUrl ?? res?.data?.url ?? res?.location ?? res?.path ?? '';
           if (uploadUrl) {
             this.form.get('profileImageUrl')?.setValue(uploadUrl as any);
             this.toastService.success('Passport uploaded');
@@ -170,7 +179,7 @@ export class ProfileForm implements OnInit{
     this.apiSrv.post('/backend/upload', fd)
       .subscribe({
         next: (res: any) => {
-          const uploadUrl = res?.fileUrl ?? res?.data?.url ?? res?.location ?? res?.path ?? '';
+          const uploadUrl = res?.url ?? res?.fileUrl ?? res?.data?.url ?? res?.location ?? res?.path ?? '';
           if (uploadUrl) {
             this.form.get('profileImageUrl')?.setValue(uploadUrl as any);
             this.toastService.success('Passport uploaded');

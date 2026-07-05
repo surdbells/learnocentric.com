@@ -1,44 +1,64 @@
 <form [formGroup]="form" (ngSubmit)="onSubmit()">
-  <div class="passport-upload shadow border p-0 mb-4" [class.drag-over]="isDragOver()" (dragover)="onDragOver($event)" (dragleave)="onDragLeave($event)" (drop)="onDropPassport($event)" (click)="passportFile.click()">
-    <label for="passportFile" class="d-flex p-0 flex-column align-items-center justify-content-between w-100 h-100">
-
-      @if(!passportPreviewUrl()){
-        <div>
-          <div class="form-label">Passport Photo</div>
-          <div class="text-muted small">Drag & drop here or click to select</div>
+  <div class="row g-4">
+    <!-- Summary / photo -->
+    <div class="col-lg-4">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-body text-center">
+          <div class="avatar-wrap mx-auto mb-3"
+               [class.drag-over]="isDragOver()"
+               (dragover)="onDragOver($event)" (dragleave)="onDragLeave($event)" (drop)="onDropPassport($event)"
+               (click)="passportFile.click()">
+            @if (passportPreviewUrl()) {
+              <img [src]="passportPreviewUrl()" alt="Profile photo" class="avatar-img"/>
+            } @else {
+              <span class="avatar-initials">{{ initials() || '?' }}</span>
+            }
+            <span class="avatar-edit">Change photo</span>
+            @if (imageUploading()) { <span class="avatar-uploading">Uploading…</span> }
+            <input #passportFile type="file" accept="image/*" hidden (change)="onPassportFileSelected($event)" [disabled]="imageUploading()"/>
+          </div>
+          <h5 class="fw-semibold mb-0">{{ fullName() }}</h5>
+          @if (roleLabel()) { <div class="small text-body-secondary">{{ roleLabel() }}</div> }
+          <div class="small text-body-secondary mt-2">Tap the photo to upload a new one.</div>
+        </div>
       </div>
-      }
-      @if (passportPreviewUrl()) {
-        <div class="preview w-100 h-100 ">
-          <img [src]="passportPreviewUrl()" alt="Passport Preview" class="object-fit-contain" />
-      </div>
-      }
-          <input #passportFile type="file" accept="image/*" hidden (change)="onPassportFileSelected($event)" [disabled]="imageUploading()" />
+    </div>
 
-    </label>
-    @if (imageUploading()) {
-      <div class="mt-2 text-muted">Uploading...</div>
-    }
+    <!-- Details -->
+    <div class="col-lg-8">
+      <div class="card border-0 shadow-sm">
+        <div class="card-body">
+          <h6 class="fw-semibold mb-1">Personal details</h6>
+          <p class="text-body-secondary small mb-4">Keep your information up to date.</p>
+
+          <div class="row">
+            <app-skeleton-loader class="col-md-6" [isLoading]="isLoading()" variant="input">
+              <div learnoInput class="mb-3" [label]="'First name'" [inputType]="'text'" [id]="'firstName'" [formControlName]="'firstName'"></div>
+            </app-skeleton-loader>
+            <app-skeleton-loader class="col-md-6" [isLoading]="isLoading()" variant="input">
+              <div learnoInput class="mb-3" [label]="'Last name'" [inputType]="'text'" [id]="'lastName'" [formControlName]="'lastName'"></div>
+            </app-skeleton-loader>
+            <app-skeleton-loader class="col-12" [isLoading]="isLoading()" variant="input">
+              <div learnoInput class="mb-3" [label]="'Email'" [inputType]="'email'" [id]="'email'" [formControlName]="'_email'" [disabled]="true"></div>
+            </app-skeleton-loader>
+            <app-skeleton-loader class="col-md-6" [isLoading]="isLoading()" variant="input">
+              <div learnoInput class="mb-3" [label]="'Phone'" [inputType]="'text'" [id]="'phone'" [formControlName]="'phone'"></div>
+            </app-skeleton-loader>
+            <app-skeleton-loader class="col-md-6" [isLoading]="isLoading()" variant="input">
+              <div learnoInput class="mb-3" [label]="'Date of birth'" [inputType]="'date'" [id]="'dateOfBirth'" [formControlName]="'dateOfBirth'"></div>
+            </app-skeleton-loader>
+            <app-skeleton-loader class="col-12" [isLoading]="isLoading()" variant="input">
+              <div learnoInput class="mb-3" [label]="'Address'" [inputType]="'text'" [id]="'address'" [formControlName]="'address'"></div>
+            </app-skeleton-loader>
+          </div>
+
+          @if (!isLoading()) {
+            <div class="d-flex justify-content-end mt-2">
+              <app-learno-button text="Save changes" [isLoading]="isLoading()"/>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
   </div>
-  <app-skeleton-loader [isLoading]="isLoading()" variant="input" >
-    <div learnoInput class="mb-4" [label]="'Email'" [inputType]="'email'" [id]="'email'" [formControlName]="'_email'" [disabled]="true"></div>
-  </app-skeleton-loader>
-<app-skeleton-loader [isLoading]="isLoading()" variant="input" >
-  <div learnoInput class="mb-4" [label]="'First Name'" [inputType]="'text'" [id]="'firstName'" [formControlName]="'firstName'"></div>
-</app-skeleton-loader>
-  <app-skeleton-loader [isLoading]="isLoading()" variant="input" >
-    <div learnoInput class="mb-4" [label]="'Last Name'" [inputType]="'text'" [id]="'lastName'" [formControlName]="'lastName'"></div>
-  </app-skeleton-loader>
-  <app-skeleton-loader [isLoading]="isLoading()" variant="input" >
-    <div learnoInput class="mb-4" [label]="'Phone'" [inputType]="'text'" [id]="'phone'" [formControlName]="'phone'"></div>
-  </app-skeleton-loader>
-  <app-skeleton-loader [isLoading]="isLoading()" variant="input" >
-    <div learnoInput class="mb-4" [label]="'Date of Birth'" [inputType]="'date'" [id]="'dateOfBirth'" [formControlName]="'dateOfBirth'"></div>
-  </app-skeleton-loader>
-  <app-skeleton-loader [isLoading]="isLoading()" variant="input" >
-    <div learnoInput class="mb-4" [label]="'Address'" [inputType]="'text'" [id]="'address'" [formControlName]="'address'"></div>
-  </app-skeleton-loader>
-  @if (!isLoading()) {
-    <app-learno-button class="mt-4" text="Update Profile"  [isLoading]="isLoading()" />
-  }
 </form>
