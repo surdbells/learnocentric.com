@@ -23,6 +23,7 @@ use App\Application\Actions\Curriculum\ReviewQueueAction;
 use App\Application\Actions\Curriculum\TopicsAction;
 use App\Application\Actions\HealthAction;
 use App\Application\Actions\Institution\GetInstitutionAction;
+use App\Application\Actions\Learn\LearnAction;
 use App\Application\Actions\Live\LiveClassesAction;
 use App\Application\Actions\Notification\NotificationsAction;
 use App\Application\Actions\Institution\ListInstitutionsAction;
@@ -143,6 +144,11 @@ return static function (App $app): void {
             $auth->post('/billing/subscribe', BillingAction::class . ':subscribe');
             $auth->post('/billing/verify', BillingAction::class . ':verify');
             $auth->get('/billing/transactions', BillingAction::class . ':transactions');
+
+            // Learn — student topic journey (lesson + stage progress)
+            $auth->get('/learn/topics', LearnAction::class . ':topics');
+            $auth->get('/learn/topics/{id:[0-9]+}', LearnAction::class . ':lesson');
+            $auth->post('/learn/topics/{id:[0-9]+}/complete-lesson', LearnAction::class . ':completeLesson');
 
             // Notifications (in-app inbox)
             $auth->get('/notifications', NotificationsAction::class . ':mine');

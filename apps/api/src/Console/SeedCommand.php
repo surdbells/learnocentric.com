@@ -33,6 +33,7 @@ use App\Domain\Entity\TeacherAssignment;
 use App\Domain\Entity\Term;
 use App\Domain\Entity\Topic;
 use App\Domain\Entity\TopicDeliveryPack;
+use App\Domain\Entity\TopicProgress;
 use App\Domain\Entity\User;
 use App\Domain\Entity\Worksheet;
 use App\Domain\Entity\WorksheetSubmission;
@@ -83,6 +84,7 @@ class SeedCommand extends Command
         $this->seedGuardians($output);
         $this->seedBilling($output);
         $this->seedNotifications($output);
+        $this->seedTopicProgress($output);
         $this->seedAuditLogs($users, $output);
 
         $this->em->flush();
@@ -449,6 +451,25 @@ class SeedCommand extends Command
         }
         $this->em->flush();
         $output->writeln("  + {$count} questions (question bank)");
+    }
+
+    /** Seed lesson-viewed progress so a student is mid-journey. */
+    private function seedTopicProgress(OutputInterface $output): void
+    {
+        if ($this->em->getRepository(TopicProgress::class)->count([]) > 0) {
+            return;
+        }
+        $student = $this->em->getRepository(User::class)->findOneBy(['email' => 'student@gmail.com']);
+        $topic = $this->em->getRepository(Topic::class)->findOneBy(['title' => 'Whole Numbers']);
+        if ($student === null || $topic === null) {
+            return;
+        }
+        $progress = new TopicProgress($topic, $student);
+        $progress->setLessonViewed(true);
+        $progress->setLessonViewedAt(new DateTimeImmutable('-3 days'));
+        $this->em->persist($progress);
+        $this->em->flush();
+        $output->writeln('  + 1 topic progress (lesson viewed)');
     }
 
     /** Seed a few in-app notifications so the inbox has content. */
