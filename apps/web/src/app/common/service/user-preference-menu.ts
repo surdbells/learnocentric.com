@@ -63,6 +63,7 @@ export class UserPreferenceMenu {
       children: [
         { name: "School Profile", link: "/admin/management/school-profile" },
         { name: "Billing", link: "/admin/management/billing" },
+        { name: "Safeguarding", link: "/admin/management/safeguarding" },
         { name: "Payment", link: "/admin/management/payment" },
         { name: "Fees", link: "/admin/management/fees" },
       ]
@@ -120,6 +121,7 @@ export class UserPreferenceMenu {
       children: [
         { name: "Academy Profile", link: "/academy/management/academy-profile" },
         { name: "Billing", link: "/academy/management/billing" },
+        { name: "Safeguarding", link: "/academy/management/safeguarding" },
         { name: "Payment", link: "/academy/management/payment" },
         { name: "Subscription", link: "/academy/management/subscription" },
 
@@ -178,6 +180,7 @@ export class UserPreferenceMenu {
         { name: "Live Classes", link: "/teacher/academics/live-classes" },
         { name: "Analytics", link: "/teacher/academics/analytics" },
         { name: "Interventions", link: "/teacher/academics/interventions" },
+        { name: "Safeguarding", link: "/teacher/academics/safeguarding" },
         { name: "Gradebook", link: "/teacher/academics/gradebook" },
         // { name: "Lesson Plans", link: "/teacher/academics/lesson-plans" },
         // { name: "Assessments", link: "/teacher/academics/assessments" },

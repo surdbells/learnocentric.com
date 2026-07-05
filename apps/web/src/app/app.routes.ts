@@ -8,6 +8,7 @@ import {Teachers} from "./pages/dashboard/admin/teacher/teachers/teachers";
 import {NewTeacher} from "./pages/dashboard/admin/teacher/new-teacher/new-teacher";
 import {SchoolProfile} from "./pages/dashboard/admin/management/school-profile/school-profile";
 import {Billing} from "./pages/dashboard/admin/management/billing/billing";
+import {Safeguarding} from "./pages/dashboard/admin/management/safeguarding/safeguarding";
 import {Payment} from "./pages/dashboard/admin/management/payment/payment";
 import {ClassRoutine} from "./pages/dashboard/admin/academics/class-routine/class-routine";
 import {ELibrary} from "./pages/dashboard/admin/academics/e-library/e-library";
@@ -239,6 +240,7 @@ export const routes: Routes = [
             { path: "payment/checkout", component: Checkout },
             { path: "subscription", component: Fees },
             { path: "billing", component: Billing },
+            { path: "safeguarding", component: Safeguarding },
           ]
         }
 
@@ -255,6 +257,7 @@ export const routes: Routes = [
                 { path: "payment/checkout", component: Checkout },
                 { path: "fees", component: Fees },
                 { path: "billing", component: Billing },
+                { path: "safeguarding", component: Safeguarding },
         ]
     },
 
@@ -309,6 +312,7 @@ export const routes: Routes = [
             { path: "gradebook", component: Gradebook },
             { path: "results", component: Result },
             { path: "pending-task", component: PendingTask },
+            { path: "safeguarding", component: Safeguarding },
             { path: "assignments", component: Assignment, data: { user: "teacher" } },
             { path: "attendance", component: Attendance },
             { path: "assessments", component: Assessment },
