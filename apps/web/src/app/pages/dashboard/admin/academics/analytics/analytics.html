@@ -1,0 +1,105 @@
+<app-page-header icon="monitoring" action="Analytics"></app-page-header>
+
+@if (loading()) {
+  <div class="text-body-secondary p-4">Loading…</div>
+} @else if (data(); as d) {
+  <!-- Headline counts -->
+  <div class="row g-3 mb-4">
+    <div class="col-6 col-md-4 col-xl-2">
+      <div class="card border-0 shadow-sm h-100"><div class="card-body py-3">
+        <div class="small text-body-secondary">Students</div>
+        <div class="fs-4 fw-bold">{{ d.counts.students }}</div>
+      </div></div>
+    </div>
+    <div class="col-6 col-md-4 col-xl-2">
+      <div class="card border-0 shadow-sm h-100"><div class="card-body py-3">
+        <div class="small text-body-secondary">Teachers</div>
+        <div class="fs-4 fw-bold">{{ d.counts.teachers }}</div>
+      </div></div>
+    </div>
+    <div class="col-6 col-md-4 col-xl-2">
+      <div class="card border-0 shadow-sm h-100"><div class="card-body py-3">
+        <div class="small text-body-secondary">Published topics</div>
+        <div class="fs-4 fw-bold">{{ d.counts.published_topics }}</div>
+      </div></div>
+    </div>
+    <div class="col-6 col-md-4 col-xl-2">
+      <div class="card border-0 shadow-sm h-100"><div class="card-body py-3">
+        <div class="small text-body-secondary">Assessments</div>
+        <div class="fs-4 fw-bold">{{ d.counts.published_assessments }}</div>
+      </div></div>
+    </div>
+    <div class="col-6 col-md-4 col-xl-2">
+      <div class="card border-0 shadow-sm h-100"><div class="card-body py-3">
+        <div class="small text-body-secondary">Worksheets</div>
+        <div class="fs-4 fw-bold">{{ d.counts.published_worksheets }}</div>
+      </div></div>
+    </div>
+    <div class="col-6 col-md-4 col-xl-2">
+      <div class="card border-0 shadow-sm h-100"><div class="card-body py-3">
+        <div class="small text-body-secondary">Live classes</div>
+        <div class="fs-4 fw-bold">{{ d.counts.live_classes }}</div>
+      </div></div>
+    </div>
+  </div>
+
+  <div class="row g-4">
+    <!-- Quiz performance per subject -->
+    <div class="col-lg-7">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-body">
+          <h6 class="fw-semibold mb-1">Quiz performance by subject</h6>
+          <p class="small text-body-secondary mb-2">Academic track · average score and pass rate</p>
+          @if (d.quiz_by_subject?.length) {
+            <div #quizChart></div>
+          } @else {
+            <div class="text-body-secondary small py-5 text-center">No graded quiz attempts yet.</div>
+          }
+        </div>
+      </div>
+    </div>
+
+    <!-- Portfolio ratings -->
+    <div class="col-lg-5">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-body">
+          <h6 class="fw-semibold mb-1">Competency ratings</h6>
+          <p class="small text-body-secondary mb-2">Portfolio evidence · {{ d.portfolio.pending }} awaiting review</p>
+          <div #portfolioChart></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Secondary stats -->
+    <div class="col-md-4">
+      <div class="card border-0 shadow-sm h-100"><div class="card-body">
+        <h6 class="fw-semibold mb-2">Worksheets</h6>
+        <div class="fs-3 fw-bold">{{ pct(d.worksheets.average) }}</div>
+        <div class="small text-body-secondary">average score · {{ d.worksheets.graded }}/{{ d.worksheets.submissions }} graded</div>
+        <div class="progress mt-2" style="height:6px">
+          <div class="progress-bar bg-success" [style.width.%]="d.worksheets.submissions ? (d.worksheets.graded / d.worksheets.submissions * 100) : 0"></div>
+        </div>
+      </div></div>
+    </div>
+    <div class="col-md-4">
+      <div class="card border-0 shadow-sm h-100"><div class="card-body">
+        <h6 class="fw-semibold mb-2">Live attendance</h6>
+        <div class="fs-3 fw-bold">{{ pct(d.attendance.rate) }}</div>
+        <div class="small text-body-secondary">{{ d.attendance.joins }} join(s) across {{ d.attendance.classes_held }} class(es)</div>
+        <div class="progress mt-2" style="height:6px">
+          <div class="progress-bar bg-info" [style.width.%]="d.attendance.rate ?? 0"></div>
+        </div>
+      </div></div>
+    </div>
+    <div class="col-md-4">
+      <div class="card border-0 shadow-sm h-100"><div class="card-body">
+        <h6 class="fw-semibold mb-2">Feedback loop</h6>
+        <div class="fs-3 fw-bold">{{ pct(d.feedback.ack_rate) }}</div>
+        <div class="small text-body-secondary">{{ d.feedback.acknowledged }}/{{ d.feedback.sent }} notes acknowledged</div>
+        <div class="progress mt-2" style="height:6px">
+          <div class="progress-bar" [style.width.%]="d.feedback.ack_rate ?? 0"></div>
+        </div>
+      </div></div>
+    </div>
+  </div>
+}

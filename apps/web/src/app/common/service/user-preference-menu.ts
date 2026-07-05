@@ -50,6 +50,7 @@ export class UserPreferenceMenu {
         { name: "Portfolio", link: "/admin/academics/portfolio" },
         { name: "Insights", link: "/admin/academics/insights" },
         { name: "Live Classes", link: "/admin/academics/live-classes" },
+        { name: "Analytics", link: "/admin/academics/analytics" },
         { name: "Gradebook", link: "/admin/academics/gradebook" },
         { name: "Result", link: "/admin/academics/results" },
       ]
@@ -102,6 +103,7 @@ export class UserPreferenceMenu {
         { name: "Portfolio", link: "/academy/academics/portfolio" },
         { name: "Insights", link: "/academy/academics/insights" },
         { name: "Live Classes", link: "/academy/academics/live-classes" },
+        { name: "Analytics", link: "/academy/academics/analytics" },
         { name: "Gradebook", link: "/academy/academics/gradebook" },
         { name: "Result", link: "/academy/academics/results" },
       ]
@@ -163,6 +165,7 @@ export class UserPreferenceMenu {
         { name: "Portfolio", link: "/teacher/academics/portfolio" },
         { name: "Insights", link: "/teacher/academics/insights" },
         { name: "Live Classes", link: "/teacher/academics/live-classes" },
+        { name: "Analytics", link: "/teacher/academics/analytics" },
         { name: "Gradebook", link: "/teacher/academics/gradebook" },
         // { name: "Lesson Plans", link: "/teacher/academics/lesson-plans" },
         // { name: "Assessments", link: "/teacher/academics/assessments" },
@@ -203,6 +206,7 @@ export class UserPreferenceMenu {
         { name: "Portfolio", link: "/student/academics/portfolio" },
         { name: "Feedback", link: "/student/academics/feedback" },
         { name: "Live Classes", link: "/student/academics/live-classes" },
+        { name: "Progress Report", link: "/student/academics/progress-report" },
         { name: "Performance", link: "/student/academics/performance" },
       ]
     },
@@ -225,6 +229,11 @@ export class UserPreferenceMenu {
       ]
     },
 
+    { name: "Academics", icon: "school", link: "/student/academics",
+      children: [
+        { name: "Progress Report", link: "/student/academics/progress-report" },
+      ]
+    },
 
     { name: "Management", icon: "tenancy", link: "student/management",
       children: [

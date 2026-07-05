@@ -20,6 +20,7 @@ import {Worksheets} from "./pages/dashboard/admin/academics/worksheets/worksheet
 import {Portfolio} from "./pages/dashboard/admin/academics/portfolio/portfolio";
 import {Insights} from "./pages/dashboard/admin/academics/insights/insights";
 import {LiveClasses} from "./pages/dashboard/admin/academics/live-classes/live-classes";
+import {Analytics} from "./pages/dashboard/admin/academics/analytics/analytics";
 import {Checkout} from "./pages/dashboard/admin/management/payment/checkout/checkout";
 import {Result} from "./pages/dashboard/admin/academics/result/result";
 import {Chat} from "./pages/apps/chat/chat";
@@ -57,6 +58,7 @@ import {MyWorksheets} from './pages/dashboard/student/academics/my-worksheets/my
 import {MyPortfolio} from './pages/dashboard/student/academics/my-portfolio/my-portfolio';
 import {MyFeedback} from './pages/dashboard/student/academics/my-feedback/my-feedback';
 import {MyLiveClasses} from './pages/dashboard/student/academics/my-live-classes/my-live-classes';
+import {ProgressReport} from './pages/dashboard/student/academics/progress-report/progress-report';
 import {StudentPerformance} from './pages/dashboard/student/academics/student-performance/student-performance';
 import {StudentManagement} from './pages/dashboard/student/management/management';
 import {StudentProfile} from './pages/dashboard/student/management/student-profile/student-profile';
@@ -144,6 +146,7 @@ export const routes: Routes = [
               { path: "portfolio", component: Portfolio, data: { user: "admin" }  },
               { path: "insights", component: Insights, data: { user: "admin" }  },
               { path: "live-classes", component: LiveClasses, data: { user: "admin" }  },
+              { path: "analytics", component: Analytics, data: { user: "admin" }  },
               { path: "gradebook", component: Gradebook, data: { user: "admin" }  },
               { path: "results", component: Result, data: { user: "admin" }  },
             ]
@@ -200,6 +203,7 @@ export const routes: Routes = [
             { path: "portfolio", component: Portfolio },
             { path: "insights", component: Insights },
             { path: "live-classes", component: LiveClasses },
+            { path: "analytics", component: Analytics },
             { path: "gradebook", component: Gradebook },
             { path: "results", component: Result },
           ]
@@ -274,6 +278,7 @@ export const routes: Routes = [
             { path: "portfolio", component: Portfolio },
             { path: "insights", component: Insights },
             { path: "live-classes", component: LiveClasses },
+            { path: "analytics", component: Analytics },
             { path: "gradebook", component: Gradebook },
             { path: "results", component: Result },
             { path: "pending-task", component: PendingTask },
@@ -338,6 +343,7 @@ export const routes: Routes = [
             { path: "portfolio", component: MyPortfolio },
             { path: "feedback", component: MyFeedback },
             { path: "live-classes", component: MyLiveClasses },
+            { path: "progress-report", component: ProgressReport },
             { path: "performance", component: StudentPerformance }
           ]
         },
