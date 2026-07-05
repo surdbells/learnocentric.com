@@ -7,6 +7,7 @@ use App\Application\Actions\Auth\MeAction;
 use App\Application\Actions\Auth\ProfileAction;
 use App\Application\Actions\Auth\RegisterAction;
 use App\Application\Actions\Analytics\AnalyticsAction;
+use App\Application\Actions\Dashboard\DashboardAction;
 use App\Application\Actions\Auth\UserProfileAction;
 use App\Application\Actions\Billing\BillingAction;
 use App\Application\Actions\Billing\PlansAction;
@@ -149,6 +150,13 @@ return static function (App $app): void {
             $auth->post('/live-classes/{id:[0-9]+}/end', LiveClassesAction::class . ':end');
             $auth->post('/live-classes/{id:[0-9]+}/join', LiveClassesAction::class . ':join');
             $auth->get('/live-classes/{id:[0-9]+}/attendance', LiveClassesAction::class . ':attendance');
+
+            // Dashboards (per role)
+            $auth->get('/dashboard/admin', DashboardAction::class . ':admin');
+            $auth->get('/dashboard/teacher', DashboardAction::class . ':teacher');
+            $auth->get('/dashboard/student', DashboardAction::class . ':student');
+            $auth->get('/dashboard/super-admin', DashboardAction::class . ':superAdmin');
+            $auth->get('/dashboard/parent', DashboardAction::class . ':parent');
 
             // Analytics — school overview (staff) + student progress report (self/guardian/staff)
             $auth->get('/analytics/overview', AnalyticsAction::class . ':overview');
