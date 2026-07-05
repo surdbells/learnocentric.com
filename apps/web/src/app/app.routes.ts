@@ -47,6 +47,7 @@ import {StudentMain} from './pages/dashboard/student/student-main/student-main';
 import {StudentDashboard} from './pages/dashboard/student/student-main/student-dashboard/student-dashboard';
 import {Classmate} from './pages/dashboard/student/student-main/classmate/classmate';
 import {StudentAssessment} from './pages/dashboard/student/academics/student-assessment/student-assessment';
+import {MyAssessments} from './pages/dashboard/student/academics/my-assessments/my-assessments';
 import {StudentPerformance} from './pages/dashboard/student/academics/student-performance/student-performance';
 import {StudentManagement} from './pages/dashboard/student/management/management';
 import {StudentProfile} from './pages/dashboard/student/management/student-profile/student-profile';
@@ -308,7 +309,7 @@ export const routes: Routes = [
             { path: "lesson-plans", component: LessonPlans, data: { user: "student" } },
             { path: "grades", component: Grade },
             { path: "assignments", component: Assignment, data: { user: "student" } },
-            { path: "assessments", component: StudentAssessment },
+            { path: "assessments", component: MyAssessments },
             { path: "performance", component: StudentPerformance }
           ]
         },

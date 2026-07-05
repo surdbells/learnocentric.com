@@ -1,0 +1,150 @@
+<app-page-header icon="quiz" action="My Assessments"></app-page-header>
+
+<!-- LIST -->
+@if (mode() === 'list') {
+  @if (loading()) {
+    <div class="text-body-secondary p-4">Loading…</div>
+  } @else if (!available().length) {
+    <div class="card border-0 shadow-sm p-5 text-center text-body-secondary">
+      No assessments are open for you right now.
+    </div>
+  } @else {
+    <div class="row g-3">
+      @for (a of available(); track a.id) {
+        <div class="col-md-6 col-xl-4">
+          <div class="card border-0 shadow-sm h-100">
+            <div class="card-body d-flex flex-column">
+              <div class="d-flex justify-content-between align-items-start gap-2">
+                <h6 class="fw-semibold mb-1">{{ a.title }}</h6>
+                <span class="badge bg-primary-subtle text-primary text-capitalize">{{ a.type }}</span>
+              </div>
+              <div class="text-body-secondary small mb-3">
+                {{ a.subject }} · {{ a.question_count }} question(s) · {{ a.total_marks }} mark(s)
+                @if (a.duration_minutes) { · {{ a.duration_minutes }} min }
+              </div>
+
+              @if (a.attempt && a.attempt.status === 'graded') {
+                <div class="alert py-2 px-3 mb-3 d-flex align-items-center gap-2"
+                     [class.alert-success]="a.attempt.passed" [class.alert-danger]="!a.attempt.passed">
+                  <span class="material-symbols-outlined">{{ a.attempt.passed ? 'check_circle' : 'cancel' }}</span>
+                  <span>You scored <b>{{ a.attempt.percentage }}%</b> ({{ a.attempt.score }}/{{ a.attempt.total_marks }})</span>
+                </div>
+              }
+
+              <div class="mt-auto d-flex gap-2">
+                <button type="button" class="btn btn-primary btn-sm" [disabled]="busy()" (click)="start(a)">
+                  {{ a.attempt && a.attempt.status === 'graded' ? 'Retake' : 'Start' }}
+                </button>
+                @if (a.attempt && a.attempt.status === 'graded') {
+                  <button type="button" class="btn btn-outline-secondary btn-sm" [disabled]="busy()" (click)="viewResult(a.attempt.id)">
+                    View result
+                  </button>
+                }
+              </div>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  }
+}
+
+<!-- TAKE -->
+@if (mode() === 'take' && current(); as att) {
+  <div class="card border-0 shadow-sm">
+    <div class="card-body">
+      <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-1">
+        <h5 class="fw-semibold mb-0">{{ att.assessment }}</h5>
+        <span class="text-body-secondary small">{{ answered() }} / {{ att.questions.length }} answered</span>
+      </div>
+      <p class="text-body-secondary small mb-4">Answer the questions below, then submit for instant marking.</p>
+
+      @for (q of att.questions; track q.question_id) {
+        <div class="q-block py-3 border-top">
+          <div class="fw-medium mb-2">{{ q.position + 1 }}. {{ q.stem }}
+            <span class="text-body-secondary fw-normal small">({{ q.marks }} mark(s))</span>
+          </div>
+
+          @switch (q.type) {
+            @case ('mcq') {
+              @for (opt of q.options; track opt.key) {
+                <div class="form-check">
+                  <input class="form-check-input" type="radio" [name]="'q' + q.question_id" [id]="'q' + q.question_id + opt.key"
+                         [value]="opt.key" [ngModel]="responses()[q.question_id]" (ngModelChange)="setResponse(q.question_id, $event)"/>
+                  <label class="form-check-label" [for]="'q' + q.question_id + opt.key">{{ opt.key.toUpperCase() }}. {{ opt.text }}</label>
+                </div>
+              }
+            }
+            @case ('true_false') {
+              @for (tf of ['true', 'false']; track tf) {
+                <div class="form-check">
+                  <input class="form-check-input" type="radio" [name]="'q' + q.question_id" [id]="'q' + q.question_id + tf"
+                         [value]="tf" [ngModel]="responses()[q.question_id]" (ngModelChange)="setResponse(q.question_id, $event)"/>
+                  <label class="form-check-label text-capitalize" [for]="'q' + q.question_id + tf">{{ tf }}</label>
+                </div>
+              }
+            }
+            @case ('numeric') {
+              <input type="number" class="form-control w-auto" placeholder="Your answer"
+                     [ngModel]="responses()[q.question_id]" (ngModelChange)="setResponse(q.question_id, $event)"/>
+            }
+            @default {
+              <input type="text" class="form-control" placeholder="Your answer"
+                     [ngModel]="responses()[q.question_id]" (ngModelChange)="setResponse(q.question_id, $event)"/>
+            }
+          }
+        </div>
+      }
+
+      <div class="d-flex gap-2 mt-4">
+        <button type="button" class="btn btn-primary" [disabled]="busy()" (click)="submit()">Submit for marking</button>
+        <button type="button" class="btn btn-light" [disabled]="busy()" (click)="backToList()">Cancel</button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- RESULT -->
+@if (mode() === 'result' && result(); as res) {
+  <div class="card border-0 shadow-sm">
+    <div class="card-body">
+      <div class="text-center py-3">
+        <div class="score-ring mx-auto mb-2" [class.pass]="res.passed" [class.fail]="!res.passed">
+          <span class="fs-3 fw-bold">{{ res.percentage }}%</span>
+        </div>
+        <h5 class="fw-semibold mb-1">{{ res.assessment }}</h5>
+        <p class="mb-0">
+          <span class="badge px-3 py-2" [class.bg-success]="res.passed" [class.bg-danger]="!res.passed">
+            {{ res.passed ? 'Passed' : 'Not passed' }}
+          </span>
+          <span class="text-body-secondary ms-2">{{ res.score }} / {{ res.total_marks }} marks</span>
+        </p>
+        @if (res.submitted_at) { <div class="text-body-secondary small mt-1">Submitted {{ res.submitted_at | date:'medium' }}</div> }
+      </div>
+
+      <hr/>
+      @for (a of res.answers; track a.question_id) {
+        <div class="py-3 border-top">
+          <div class="d-flex align-items-start gap-2">
+            <span class="material-symbols-outlined" [class.text-success]="a.is_correct" [class.text-danger]="!a.is_correct">
+              {{ a.is_correct ? 'check_circle' : 'cancel' }}
+            </span>
+            <div class="flex-grow-1">
+              <div class="fw-medium">{{ a.stem }}</div>
+              <div class="small">
+                Your answer: <b>{{ a.response ?? '—' }}</b>
+                @if (!a.is_correct) {
+                  <span class="text-success ms-2">Correct: {{ answerText(a) }}</span>
+                }
+              </div>
+              @if (a.explanation) { <div class="small text-body-secondary fst-italic mt-1">{{ a.explanation }}</div> }
+            </div>
+            <span class="small text-body-secondary">+{{ a.marks_awarded }}/{{ a.marks }}</span>
+          </div>
+        </div>
+      }
+
+      <button type="button" class="btn btn-primary mt-4" (click)="backToList()">Back to my assessments</button>
+    </div>
+  </div>
+}

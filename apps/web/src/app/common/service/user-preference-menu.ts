@@ -183,8 +183,8 @@ export class UserPreferenceMenu {
         { name: "Student Routine", link: "/student/academics/class-routine" },
         { name: "E-Library", link: "/student/academics/e-library" },
         // { name: "Lesson Plans", link: "/student/academics/lesson-plans" },
+        { name: "Assessments", link: "/student/academics/assessments" },
         { name: "Performance", link: "/student/academics/performance" },
-        // { name: "Assessments", link: "/student/academics/assessments" },
       ]
     },
 

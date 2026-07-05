@@ -1,0 +1,23 @@
+.score-ring {
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 6px solid var(--bs-border-color);
+}
+
+.score-ring.pass {
+  border-color: var(--bs-success);
+  color: var(--bs-success);
+}
+
+.score-ring.fail {
+  border-color: var(--bs-danger);
+  color: var(--bs-danger);
+}
+
+.q-block:first-of-type {
+  border-top: 0 !important;
+}
