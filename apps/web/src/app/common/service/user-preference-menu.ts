@@ -46,6 +46,7 @@ export class UserPreferenceMenu {
         { name: "Topics", link: "/admin/academics/topics" },
         { name: "Question Bank", link: "/admin/academics/question-bank" },
         { name: "Assessments", link: "/admin/academics/assessments" },
+        { name: "Gradebook", link: "/admin/academics/gradebook" },
         { name: "Result", link: "/admin/academics/results" },
       ]
     },
@@ -93,6 +94,7 @@ export class UserPreferenceMenu {
         { name: "Topics", link: "/academy/academics/topics" },
         { name: "Question Bank", link: "/academy/academics/question-bank" },
         { name: "Assessments", link: "/academy/academics/assessments" },
+        { name: "Gradebook", link: "/academy/academics/gradebook" },
         { name: "Result", link: "/academy/academics/results" },
       ]
     },
@@ -149,6 +151,7 @@ export class UserPreferenceMenu {
         { name: "Topics", link: "/teacher/academics/topics" },
         { name: "Question Bank", link: "/teacher/academics/question-bank" },
         { name: "Assessments", link: "/teacher/academics/assessments" },
+        { name: "Gradebook", link: "/teacher/academics/gradebook" },
         // { name: "Lesson Plans", link: "/teacher/academics/lesson-plans" },
         // { name: "Assessments", link: "/teacher/academics/assessments" },
         // { name: "Virtual Class", link: "/teacher/academics/virtual-class" },

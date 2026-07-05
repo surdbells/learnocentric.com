@@ -15,6 +15,7 @@ import {Subjects} from "./pages/dashboard/admin/academics/subjects/subjects";
 import {Topics} from "./pages/dashboard/admin/academics/topics/topics";
 import {QuestionBank} from "./pages/dashboard/admin/academics/question-bank/question-bank";
 import {Assessments} from "./pages/dashboard/admin/academics/assessments/assessments";
+import {Gradebook} from "./pages/dashboard/admin/academics/gradebook/gradebook";
 import {Checkout} from "./pages/dashboard/admin/management/payment/checkout/checkout";
 import {Result} from "./pages/dashboard/admin/academics/result/result";
 import {Chat} from "./pages/apps/chat/chat";
@@ -131,6 +132,7 @@ export const routes: Routes = [
               { path: "topics", component: Topics, data: { user: "admin" }  },
               { path: "question-bank", component: QuestionBank, data: { user: "admin" }  },
               { path: "assessments", component: Assessments, data: { user: "admin" }  },
+              { path: "gradebook", component: Gradebook, data: { user: "admin" }  },
               { path: "results", component: Result, data: { user: "admin" }  },
             ]
           }
@@ -182,6 +184,7 @@ export const routes: Routes = [
             { path: "topics", component: Topics },
             { path: "question-bank", component: QuestionBank },
             { path: "assessments", component: Assessments },
+            { path: "gradebook", component: Gradebook },
             { path: "results", component: Result },
           ]
         },
@@ -251,6 +254,7 @@ export const routes: Routes = [
             { path: "topics", component: Topics },
             { path: "question-bank", component: QuestionBank },
             { path: "assessments", component: Assessments },
+            { path: "gradebook", component: Gradebook },
             { path: "results", component: Result },
             { path: "pending-task", component: PendingTask },
             { path: "assignments", component: Assignment, data: { user: "teacher" } },
