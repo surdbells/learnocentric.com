@@ -1,0 +1,70 @@
+<app-page-header icon="video_camera_front" action="Live Classes">
+  <app-learno-button text="Schedule Class" icon="add" data-bs-toggle="modal" data-bs-target="#add_live_class" (clicked)="onAdd()"/>
+</app-page-header>
+
+<!-- Create / edit -->
+<app-learno-modal [modalId]="'add_live_class'" [modalAction]="selectClass() ? 'Edit Class' : 'Schedule Class'" [showBtn]="false">
+  <app-live-class-form modalForm [select]="selectClass()" [subjects]="subjects()" [classes]="classes()" [topics]="topics()" (submitted)="handleSuccessSubmit($event)"/>
+</app-learno-modal>
+
+<!-- Manage: run + attendance -->
+<app-learno-modal [modalId]="'live_manage'" [modalAction]="'Live class'" [showBtn]="false">
+  <div modalForm>
+    @if (manage(); as lc) {
+      <div class="d-flex align-items-start justify-content-between flex-wrap gap-2 mb-1">
+        <h5 class="fw-semibold mb-0">{{ lc.title }}</h5>
+        <span class="badge bg-{{ statusColor(lc.status) }}-subtle text-{{ statusColor(lc.status) }} text-capitalize px-3 py-2">{{ lc.status }}</span>
+      </div>
+      <p class="text-body-secondary small mb-4">
+        {{ lc.subject }}{{ lc.class_label ? ' · ' + lc.class_label : '' }} · {{ lc.scheduled_at | date:'medium' }} · {{ lc.duration_minutes }} min
+      </p>
+
+      <div class="d-flex flex-wrap gap-2 mb-4">
+        @if (lc.status === 'scheduled') {
+          <button type="button" class="btn btn-sm btn-success" [disabled]="busy()" (click)="setStatus('start')">
+            <span class="material-symbols-outlined align-middle fs-6">play_arrow</span> Go live
+          </button>
+        }
+        @if (lc.status === 'live') {
+          <a class="btn btn-sm btn-primary" [href]="lc.room_url" target="_blank" rel="noopener">
+            <span class="material-symbols-outlined align-middle fs-6">videocam</span> Open room
+          </a>
+          <button type="button" class="btn btn-sm btn-outline-danger" [disabled]="busy()" (click)="setStatus('end')">End class</button>
+        }
+        @if (lc.status === 'ended') {
+          <span class="text-body-secondary small">This class has ended.</span>
+        }
+      </div>
+
+      <div class="d-flex align-items-center justify-content-between mb-2">
+        <label class="form-label text-uppercase small fw-semibold text-body-secondary mb-0">Attendance</label>
+        @if (summary(); as s) {
+          <span class="small text-body-secondary">{{ s.attended }} attended@if (s.enrolled !== null) { of {{ s.enrolled }} enrolled }</span>
+        }
+      </div>
+      @if (!attendance().length) {
+        <div class="text-body-secondary small">No one has joined yet.</div>
+      } @else {
+        <ul class="list-unstyled mb-0">
+          @for (a of attendance(); track a.id) {
+            <li class="d-flex justify-content-between py-2 border-bottom">
+              <span class="fw-medium">{{ a.student }}</span>
+              <span class="small text-body-secondary">{{ a.joined_at | date:'shortTime' }}</span>
+            </li>
+          }
+        </ul>
+      }
+    }
+  </div>
+</app-learno-modal>
+
+<app-data-grid
+  endpoint="/backend/live-classes"
+  [columns]="columns"
+  [filters]="filterDefs()"
+  [actions]="['view', 'edit', 'delete']"
+  searchPlaceholder="Search classes…"
+  emptyMessage="No live classes yet. Click “Schedule Class” to create one."
+  (view)="onView($event)"
+  (edit)="onEdit($event)"
+/>

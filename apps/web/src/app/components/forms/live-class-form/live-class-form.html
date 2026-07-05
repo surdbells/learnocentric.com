@@ -1,0 +1,46 @@
+<form (ngSubmit)="onSubmit()" [formGroup]="form">
+  <div class="modal-body">
+    <div class="row">
+      <div class="col-lg-8">
+        <div learnoInput class="mb-3" [label]="'Class title'" [inputType]="'text'" [id]="'lc_title'" [formControlName]="'title'"></div>
+      </div>
+      <div class="col-lg-4">
+        <div learnoInput class="mb-3" [label]="'Duration (min)'" [inputType]="'number'" [id]="'lc_dur'" [formControlName]="'durationMinutes'"></div>
+      </div>
+      <div class="col-lg-6 mb-3">
+        <label class="form-label" for="lc_subject">Subject</label>
+        <select id="lc_subject" class="form-select" formControlName="subjectId">
+          <option [ngValue]="null" disabled>Select a subject</option>
+          @for (s of subjects(); track s.id) {
+            <option [ngValue]="s.id">{{ s.name }}</option>
+          }
+        </select>
+      </div>
+      <div class="col-lg-6 mb-3">
+        <label class="form-label" for="lc_class">Class (optional)</label>
+        <select id="lc_class" class="form-select" formControlName="classId">
+          <option [ngValue]="null">Any / whole subject</option>
+          @for (c of classes(); track c.id) {
+            <option [ngValue]="c.id">{{ c.label || c.name }}</option>
+          }
+        </select>
+      </div>
+      <div class="col-lg-6 mb-3">
+        <label class="form-label" for="lc_topic">Topic (optional)</label>
+        <select id="lc_topic" class="form-select" formControlName="topicId">
+          <option [ngValue]="null">None</option>
+          @for (t of subjectTopics(); track t.id) {
+            <option [ngValue]="t.id">{{ t.title }}</option>
+          }
+        </select>
+      </div>
+      <div class="col-lg-6">
+        <div learnoInput class="mb-3" [label]="'Starts at'" [inputType]="'datetime-local'" [id]="'lc_when'" [formControlName]="'scheduledAt'"></div>
+      </div>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <a class="btn btn-light" data-bs-dismiss="modal">Cancel</a>
+    <app-learno-button [isLoading]="isLoading()" [text]="isEdit() ? 'Update Class' : 'Schedule Class'"/>
+  </div>
+</form>
