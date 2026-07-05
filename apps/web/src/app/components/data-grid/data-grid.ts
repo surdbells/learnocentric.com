@@ -5,6 +5,7 @@ import {FormsModule} from '@angular/forms';
 import {Subject, debounceTime, distinctUntilChanged} from 'rxjs';
 import {ToastrService} from 'ngx-toastr';
 import {ApiService} from '../../common/service/api.service';
+import {Icon} from '../../common/icon/icon';
 
 export interface GridColumn {
   key: string;
@@ -31,7 +32,7 @@ interface GridMeta { total: number; page: number; per_page: number; total_pages:
 @Component({
   selector: 'app-data-grid',
   standalone: true,
-  imports: [DatePipe, FormsModule],
+  imports: [Icon, DatePipe, FormsModule],
   templateUrl: './data-grid.html',
   styleUrl: './data-grid.css',
 })

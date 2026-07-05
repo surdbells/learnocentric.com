@@ -3,7 +3,7 @@
     <!-- Uploading -->
     <div class="fu-progress">
       <div class="d-flex align-items-center gap-2 mb-1">
-        <span class="material-symbols-outlined text-primary">upload_file</span>
+        <app-icon name="upload_file" class="text-primary" />
         <span class="small text-truncate flex-grow-1">{{ fileName() }}</span>
         <span class="small fw-semibold">{{ progress() }}%</span>
       </div>
@@ -17,21 +17,21 @@
       @if (isImage()) {
         <a [href]="url" target="_blank" rel="noopener"><img [src]="url" class="fu-thumb" alt="attachment"/></a>
       } @else {
-        <span class="fu-doc"><span class="material-symbols-outlined">description</span></span>
+        <span class="fu-doc"><app-icon name="description" /></span>
       }
       <div class="flex-grow-1 min-w-0">
         <a class="fu-name text-truncate d-block" [href]="url" target="_blank" rel="noopener">{{ displayName() }}</a>
         <span class="small text-body-secondary">Uploaded</span>
       </div>
       <button type="button" class="btn btn-sm btn-icon text-danger" (click)="remove()" title="Remove">
-        <span class="material-symbols-outlined">close</span>
+        <app-icon name="close" />
       </button>
     </div>
   } @else {
     <!-- Empty dropzone -->
     <label class="fu-drop">
       <input type="file" class="d-none" [accept]="accept()" (change)="onSelect($event)"/>
-      <span class="material-symbols-outlined fu-drop-ic">cloud_upload</span>
+      <app-icon name="cloud_upload" class="fu-drop-ic" />
       <span class="fw-medium">{{ label() }}</span>
       <span class="small text-body-secondary">{{ hint() }}</span>
     </label>

@@ -4,13 +4,14 @@ import {ToastrService} from 'ngx-toastr';
 import {PageHeader} from '../../../../../common/layout/page-header/page-header';
 import {LiveRoom} from '../../../../../common/live-room/live-room';
 import {ApiService} from '../../../../../common/service/api.service';
+import {Icon} from '../../../../../common/icon/icon';
 
 const STATUS_COLOR: Record<string, string> = {scheduled: 'info', live: 'success', ended: 'secondary', cancelled: 'dark'};
 
 @Component({
   selector: 'app-my-live-classes',
   standalone: true,
-  imports: [PageHeader, DatePipe, LiveRoom],
+  imports: [Icon, PageHeader, DatePipe, LiveRoom],
   templateUrl: './my-live-classes.html',
   styleUrl: './my-live-classes.css',
 })

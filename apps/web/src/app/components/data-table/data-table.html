@@ -86,7 +86,7 @@
               @if(shouldShowAction()){
                 <td style="width: 0px" class="py-0 text-end">
                   <button class="btn btn-sm btn-icon text-body-secondary" type="button" [id]="'preview-btn-' + row.id" data-bs-toggle="offcanvas" [attr.data-bs-target]="'#' + 'productModal'" [attr.aria-controls]="'productModal'" (click)="preview.emit({ row: row, anchorSelector: '#' + ('preview-btn-' + row.id) })" aria-label="Preview">
-                    <span class="material-symbols-outlined">visibility</span>
+                    <app-icon name="visibility" />
                   </button>
                 </td>
               }
@@ -99,7 +99,7 @@
 
   @if (dataFields().length > 0 && visibleRows().length === 0) {
     <div class="empty-state">
-      <span class="material-symbols-outlined">inbox</span>
+      <app-icon name="inbox" />
       <p class="mb-0">No records to display.</p>
     </div>
   }

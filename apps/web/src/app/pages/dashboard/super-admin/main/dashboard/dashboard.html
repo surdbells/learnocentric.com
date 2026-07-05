@@ -11,37 +11,37 @@
   <div class="row g-3 mb-4">
     <div class="col-6 col-md-4 col-xl-2">
       <a class="stat-card card border-0 shadow-sm h-100 text-decoration-none" [routerLink]="['/super-admin/management/institutions']"><div class="card-body">
-        <span class="stat-ic bg-primary-subtle text-primary"><span class="material-symbols-outlined">apartment</span></span>
+        <span class="stat-ic bg-primary-subtle text-primary"><app-icon name="apartment" /></span>
         <div class="stat-val">{{ d.stats.institutions }}</div><div class="stat-lbl">Institutions</div>
       </div></a>
     </div>
     <div class="col-6 col-md-4 col-xl-2">
       <div class="stat-card card border-0 shadow-sm h-100"><div class="card-body">
-        <span class="stat-ic bg-success-subtle text-success"><span class="material-symbols-outlined">verified</span></span>
+        <span class="stat-ic bg-success-subtle text-success"><app-icon name="verified" /></span>
         <div class="stat-val">{{ d.stats.active_subscriptions }}</div><div class="stat-lbl">Active subs</div>
       </div></div>
     </div>
     <div class="col-6 col-md-4 col-xl-2">
       <a class="stat-card card border-0 shadow-sm h-100 text-decoration-none" [routerLink]="['/super-admin/management/plans']"><div class="card-body">
-        <span class="stat-ic bg-info-subtle text-info"><span class="material-symbols-outlined">sell</span></span>
+        <span class="stat-ic bg-info-subtle text-info"><app-icon name="sell" /></span>
         <div class="stat-val">{{ d.stats.plans }}</div><div class="stat-lbl">Active plans</div>
       </div></a>
     </div>
     <div class="col-6 col-md-4 col-xl-2">
       <div class="stat-card card border-0 shadow-sm h-100"><div class="card-body">
-        <span class="stat-ic bg-primary-subtle text-primary"><span class="material-symbols-outlined">group</span></span>
+        <span class="stat-ic bg-primary-subtle text-primary"><app-icon name="group" /></span>
         <div class="stat-val">{{ d.stats.students }}</div><div class="stat-lbl">Students</div>
       </div></div>
     </div>
     <div class="col-6 col-md-4 col-xl-2">
       <div class="stat-card card border-0 shadow-sm h-100"><div class="card-body">
-        <span class="stat-ic bg-warning-subtle text-warning"><span class="material-symbols-outlined">supervisor_account</span></span>
+        <span class="stat-ic bg-warning-subtle text-warning"><app-icon name="supervisor_account" /></span>
         <div class="stat-val">{{ d.stats.teachers }}</div><div class="stat-lbl">Teachers</div>
       </div></div>
     </div>
     <div class="col-6 col-md-4 col-xl-2">
       <div class="stat-card card border-0 shadow-sm h-100"><div class="card-body">
-        <span class="stat-ic bg-success-subtle text-success"><span class="material-symbols-outlined">payments</span></span>
+        <span class="stat-ic bg-success-subtle text-success"><app-icon name="payments" /></span>
         <div class="stat-val">₦{{ d.stats.billed_naira | number }}</div><div class="stat-lbl">Billed</div>
       </div></div>
     </div>
@@ -57,7 +57,7 @@
         @if (!d.institutions?.length) { <div class="text-body-secondary small py-3">No institutions yet.</div> }
         @for (i of d.institutions; track i.id) {
           <div class="d-flex align-items-center gap-3 py-2 border-bottom">
-            <span class="action-ic bg-primary-subtle text-primary"><span class="material-symbols-outlined">school</span></span>
+            <span class="action-ic bg-primary-subtle text-primary"><app-icon name="school" /></span>
             <span class="fw-medium flex-grow-1">{{ i.name }}</span>
           </div>
         }

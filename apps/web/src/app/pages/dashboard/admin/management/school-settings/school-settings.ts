@@ -3,6 +3,7 @@ import {FormsModule} from '@angular/forms';
 import {ToastrService} from 'ngx-toastr';
 import {PageHeader} from '../../../../../common/layout/page-header/page-header';
 import {ApiService} from '../../../../../common/service/api.service';
+import {Icon} from '../../../../../common/icon/icon';
 
 interface Band { grade: string; min: number; }
 
@@ -14,7 +15,7 @@ interface Band { grade: string; min: number; }
 @Component({
   selector: 'app-school-settings',
   standalone: true,
-  imports: [PageHeader, FormsModule],
+  imports: [Icon, PageHeader, FormsModule],
   templateUrl: './school-settings.html',
   styleUrl: './school-settings.css',
 })

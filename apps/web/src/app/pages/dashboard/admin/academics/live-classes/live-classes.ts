@@ -8,6 +8,7 @@ import {DataGrid, GridColumn, GridFilter} from '../../../../../components/data-g
 import {LiveClassForm} from '../../../../../components/forms/live-class-form/live-class-form';
 import {LiveRoom} from '../../../../../common/live-room/live-room';
 import {ApiService} from '../../../../../common/service/api.service';
+import {Icon} from '../../../../../common/icon/icon';
 
 declare const bootstrap: any;
 
@@ -16,7 +17,7 @@ const STATUS_COLOR: Record<string, string> = {scheduled: 'info', live: 'success'
 @Component({
   selector: 'app-live-classes',
   standalone: true,
-  imports: [PageHeader, LearnoModal, LearnoButton, DataGrid, LiveClassForm, LiveRoom, DatePipe],
+  imports: [Icon, PageHeader, LearnoModal, LearnoButton, DataGrid, LiveClassForm, LiveRoom, DatePipe],
   templateUrl: './live-classes.html',
   styleUrl: './live-classes.css',
 })

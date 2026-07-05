@@ -1,6 +1,6 @@
 
   <button class="nav-link flex-xl-column" role="button" data-bs-toggle="dropdown" data-bs-settings-switcher aria-expanded="false">
-    <span class="material-symbols-outlined">settings</span> <span class="d-xl-none ms-3">{{ 'settings' | t }}</span>
+    <app-icon name="settings" /> <span class="d-xl-none ms-3">{{ 'settings' | t }}</span>
   </button>
   <div class="dropdown-menu dropdown-menu-end">
     <!-- Color mode -->
@@ -12,7 +12,7 @@
         [class.active]="themeOption.name.toLocaleLowerCase() === currentTheme"
         (click)="setTheme(themeOption.name.toLowerCase())"
       >
-        <span class="material-symbols-outlined me-2">{{themeOption.icon}}</span> {{themeOption.name}}
+        <app-icon [name]="themeOption.icon" class="me-2" /> {{themeOption.name}}
       </button>
     }
 

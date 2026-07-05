@@ -5,6 +5,7 @@ import {ToastrService} from 'ngx-toastr';
 import {PageHeader} from '../../../common/layout/page-header/page-header';
 import {ApiService} from '../../../common/service/api.service';
 import {AuthService} from '../../../common/auth/auth.service';
+import {Icon} from '../../../common/icon/icon';
 
 /**
  * School announcements feed. Staff (admins + teachers) can post to an audience;
@@ -13,7 +14,7 @@ import {AuthService} from '../../../common/auth/auth.service';
 @Component({
   selector: 'app-announcements',
   standalone: true,
-  imports: [PageHeader, DatePipe, FormsModule],
+  imports: [Icon, PageHeader, DatePipe, FormsModule],
   templateUrl: './announcements.html',
   styleUrl: './announcements.css',
 })

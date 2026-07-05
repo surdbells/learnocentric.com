@@ -18,7 +18,7 @@
 } @else if (report(); as r) {
   <div class="d-flex justify-content-end mb-3">
     <button type="button" class="btn btn-outline-primary btn-sm" [disabled]="downloading()" (click)="downloadPdf()">
-      <span class="material-symbols-outlined align-middle me-1" style="font-size:1.1rem">download</span>
+      <app-icon name="download" [size]="18" class="me-1" />
       {{ downloading() ? 'Preparing…' : 'Download PDF' }}
     </button>
   </div>

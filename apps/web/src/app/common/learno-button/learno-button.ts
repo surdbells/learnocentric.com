@@ -1,9 +1,10 @@
 import {Component, EventEmitter, input, Output} from '@angular/core';
+import {Icon} from '../icon/icon';
 
 @Component({
   selector: 'app-learno-button',
   standalone: true,
-  imports: [],
+  imports: [Icon, ],
   templateUrl: './learno-button.html',
   styleUrl: './learno-button.css'
 })

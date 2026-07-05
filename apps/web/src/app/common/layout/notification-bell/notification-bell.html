@@ -1,7 +1,7 @@
 <div class="dropdown nb-wrap">
   <button type="button" class="tb-icon-btn nb-btn" data-bs-toggle="dropdown" data-bs-display="static"
           data-bs-auto-close="outside" aria-expanded="false" aria-label="Notifications">
-    <span class="material-symbols-outlined">notifications</span>
+    <app-icon name="notifications" />
     @if (unread() > 0) {
       <span class="nb-badge">{{ unread() > 9 ? '9+' : unread() }}</span>
     }
@@ -21,7 +21,7 @@
       <div class="nb-list">
         @for (n of notifications(); track n.id) {
           <button type="button" class="nb-item" [class.nb-unread]="!n.read" (click)="open(n)">
-            <span class="nb-icon material-symbols-outlined">{{ icon(n.type) }}</span>
+            <app-icon [name]="icon(n.type)" class="nb-icon" />
             <span class="nb-body">
               <span class="nb-title">{{ n.title }}</span>
               @if (n.message) { <span class="nb-msg">{{ n.message }}</span> }

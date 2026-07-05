@@ -3,11 +3,12 @@ import {DecimalPipe, isPlatformBrowser} from '@angular/common';
 import {RouterLink} from '@angular/router';
 import {AuthService} from '../../../../../common/auth/auth.service';
 import {ApiService} from '../../../../../common/service/api.service';
+import {Icon} from '../../../../../common/icon/icon';
 
 @Component({
   selector: 'app-super-admin-dashboard',
   standalone: true,
-  imports: [RouterLink, DecimalPipe],
+  imports: [Icon, RouterLink, DecimalPipe],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.css',
 })

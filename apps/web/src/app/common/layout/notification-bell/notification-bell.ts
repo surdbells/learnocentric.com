@@ -2,6 +2,7 @@ import {Component, inject, PLATFORM_ID, signal} from '@angular/core';
 import {DatePipe, isPlatformBrowser} from '@angular/common';
 import {Router} from '@angular/router';
 import {ApiService} from '../../service/api.service';
+import {Icon} from '../../icon/icon';
 
 const TYPE_ICON: Record<string, string> = {
   feedback: 'forum', grade: 'grading', portfolio: 'folder_special',
@@ -11,7 +12,7 @@ const TYPE_ICON: Record<string, string> = {
 @Component({
   selector: 'app-notification-bell',
   standalone: true,
-  imports: [DatePipe],
+  imports: [Icon, DatePipe],
   templateUrl: './notification-bell.html',
   styleUrl: './notification-bell.css',
 })

@@ -3,6 +3,7 @@ import {DatePipe} from '@angular/common';
 import {ToastrService} from 'ngx-toastr';
 import {PageHeader} from '../../../../../common/layout/page-header/page-header';
 import {ApiService} from '../../../../../common/service/api.service';
+import {Icon} from '../../../../../common/icon/icon';
 
 const TYPE_COLOR: Record<string, string> = {praise: 'success', correction: 'warning', reteach: 'info', general: 'secondary'};
 const TYPE_ICON: Record<string, string> = {praise: 'celebration', correction: 'edit_note', reteach: 'menu_book', general: 'chat'};
@@ -10,7 +11,7 @@ const TYPE_ICON: Record<string, string> = {praise: 'celebration', correction: 'e
 @Component({
   selector: 'app-my-feedback',
   standalone: true,
-  imports: [PageHeader, DatePipe],
+  imports: [Icon, PageHeader, DatePipe],
   templateUrl: './my-feedback.html',
   styleUrl: './my-feedback.css',
 })

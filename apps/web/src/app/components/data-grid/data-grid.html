@@ -3,7 +3,7 @@
   <div class="dg-toolbar">
     @if (searchable) {
       <div class="dg-search">
-        <span class="material-symbols-outlined">search</span>
+        <app-icon name="search" />
         <input type="search" class="form-control" [placeholder]="searchPlaceholder"
                (input)="onSearch($any($event.target).value)" />
       </div>
@@ -26,7 +26,7 @@
         <button type="button" class="btn btn-sm btn-outline-secondary" (click)="clearSelection()">Clear</button>
         @if (actions.includes('delete')) {
           <button type="button" class="btn btn-sm btn-danger" (click)="bulkDelete()">
-            <span class="material-symbols-outlined fs-6">delete</span> Delete
+            <app-icon name="delete" [size]="16" /> Delete
           </button>
         }
       </div>
@@ -48,8 +48,7 @@
             <th [class.dg-sortable]="col.sortable" (click)="toggleSort(col)">
               <span>{{ col.label }}</span>
               @if (col.sortable) {
-                <span class="material-symbols-outlined dg-sort-ic"
-                      [class.active]="sort() === col.key">{{ sort() === col.key ? (order() === 'asc' ? 'arrow_upward' : 'arrow_downward') : 'unfold_more' }}</span>
+                <app-icon [name]="sort() === col.key ? (order() === 'asc' ? 'arrow_upward' : 'arrow_downward') : 'unfold_more'" class="dg-sort-ic" [class.active]="sort() === col.key" />
               }
             </th>
           }
@@ -70,7 +69,7 @@
           <tr>
             <td [attr.colspan]="columns.length + (selectable ? 1 : 0) + (actions.length ? 1 : 0)">
               <div class="empty-state">
-                <span class="material-symbols-outlined">inbox</span>
+                <app-icon name="inbox" />
                 <p class="mb-0">{{ emptyMessage }}</p>
               </div>
             </td>
@@ -100,17 +99,17 @@
                 <td class="text-end dg-actions">
                   @if (actions.includes('view')) {
                     <button type="button" class="btn btn-sm btn-icon" title="View" (click)="view.emit(row)">
-                      <span class="material-symbols-outlined">visibility</span>
+                      <app-icon name="visibility" />
                     </button>
                   }
                   @if (actions.includes('edit')) {
                     <button type="button" class="btn btn-sm btn-icon" title="Edit" (click)="edit.emit(row)">
-                      <span class="material-symbols-outlined">edit</span>
+                      <app-icon name="edit" />
                     </button>
                   }
                   @if (actions.includes('delete')) {
                     <button type="button" class="btn btn-sm btn-icon text-danger" title="Delete" (click)="onDelete(row)">
-                      <span class="material-symbols-outlined">delete</span>
+                      <app-icon name="delete" />
                     </button>
                   }
                 </td>
@@ -130,13 +129,13 @@
     @if (meta().total_pages > 1) {
       <nav class="dg-pager" aria-label="Pagination">
         <button type="button" class="dg-page-btn" [disabled]="meta().page <= 1" (click)="goToPage(meta().page - 1)" aria-label="Previous">
-          <span class="material-symbols-outlined">chevron_left</span>
+          <app-icon name="chevron_left" />
         </button>
         @for (p of pageWindow(); track p) {
           <button type="button" class="dg-page-btn" [class.active]="p === meta().page" (click)="goToPage(p)">{{ p }}</button>
         }
         <button type="button" class="dg-page-btn" [disabled]="meta().page >= meta().total_pages" (click)="goToPage(meta().page + 1)" aria-label="Next">
-          <span class="material-symbols-outlined">chevron_right</span>
+          <app-icon name="chevron_right" />
         </button>
       </nav>
     }

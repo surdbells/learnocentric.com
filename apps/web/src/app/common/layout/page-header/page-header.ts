@@ -1,10 +1,11 @@
 import {Component, computed, inject, input} from '@angular/core';
 import {Router} from '@angular/router';
+import {Icon} from '../../icon/icon';
 
 @Component({
   selector: 'app-page-header',
   standalone: true,
-  imports: [],
+  imports: [Icon, ],
   templateUrl: './page-header.html',
   styleUrl: './page-header.css',
 })

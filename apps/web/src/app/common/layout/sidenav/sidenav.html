@@ -23,9 +23,9 @@
             [attr.aria-expanded]="isOpen(group)"
             [attr.data-title]="group.name"
           >
-            <span class="material-symbols-outlined sb-icon">{{ group.icon }}</span>
+            <app-icon [name]="group.icon" class="sb-icon" />
             <span class="sb-text">{{ group.name }}</span>
-            <span class="material-symbols-outlined sb-caret">expand_more</span>
+            <app-icon name="expand_more" class="sb-caret" />
           </button>
 
           <!-- Submenu (accordion when expanded, flyout when rail) -->
@@ -54,7 +54,7 @@
             (click)="onItemClick()"
             [attr.data-title]="group.name"
           >
-            <span class="material-symbols-outlined sb-icon">{{ group.icon }}</span>
+            <app-icon [name]="group.icon" class="sb-icon" />
             <span class="sb-text">{{ group.name }}</span>
           </a>
         }

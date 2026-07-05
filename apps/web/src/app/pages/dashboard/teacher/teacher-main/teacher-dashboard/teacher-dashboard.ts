@@ -3,11 +3,12 @@ import {DatePipe, isPlatformBrowser} from '@angular/common';
 import {RouterLink} from '@angular/router';
 import {AuthService} from '../../../../../common/auth/auth.service';
 import {ApiService} from '../../../../../common/service/api.service';
+import {Icon} from '../../../../../common/icon/icon';
 
 @Component({
   selector: 'app-teacher-dashboard',
   standalone: true,
-  imports: [RouterLink, DatePipe],
+  imports: [Icon, RouterLink, DatePipe],
   templateUrl: './teacher-dashboard.html',
   styleUrl: './teacher-dashboard.css',
 })

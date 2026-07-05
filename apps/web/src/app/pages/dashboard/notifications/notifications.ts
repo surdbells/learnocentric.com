@@ -3,6 +3,7 @@ import {DatePipe, isPlatformBrowser} from '@angular/common';
 import {Router} from '@angular/router';
 import {PageHeader} from '../../../common/layout/page-header/page-header';
 import {ApiService} from '../../../common/service/api.service';
+import {Icon} from '../../../common/icon/icon';
 
 const TYPE_ICON: Record<string, string> = {
   feedback: 'forum', grade: 'grading', portfolio: 'folder_special',
@@ -15,7 +16,7 @@ const TYPE_COLOR: Record<string, string> = {
 @Component({
   selector: 'app-notifications',
   standalone: true,
-  imports: [PageHeader, DatePipe],
+  imports: [Icon, PageHeader, DatePipe],
   templateUrl: './notifications.html',
   styleUrl: './notifications.css',
 })

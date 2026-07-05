@@ -8,6 +8,7 @@ import {DataGrid, GridColumn, GridFilter} from '../../../../../components/data-g
 import {QuestionForm} from '../../../../../components/forms/question-form/question-form';
 import {ApiService} from '../../../../../common/service/api.service';
 import {AuthService} from '../../../../../common/auth/auth.service';
+import {Icon} from '../../../../../common/icon/icon';
 
 declare const bootstrap: any;
 
@@ -20,7 +21,7 @@ const APPROVER_ROLES = ['academic_lead', 'school_admin', 'tutor_admin', 'super_a
 @Component({
   selector: 'app-question-bank',
   standalone: true,
-  imports: [PageHeader, LearnoModal, LearnoButton, DataGrid, QuestionForm, DatePipe],
+  imports: [Icon, PageHeader, LearnoModal, LearnoButton, DataGrid, QuestionForm, DatePipe],
   templateUrl: './question-bank.html',
   styleUrl: './question-bank.css',
 })

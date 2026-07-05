@@ -9,6 +9,7 @@ import {LearnoButton} from '../../../../../common/learno-button/learno-button';
 import {DataGrid, GridColumn, GridFilter} from '../../../../../components/data-grid/data-grid';
 import {ApiService} from '../../../../../common/service/api.service';
 import {AuthService} from '../../../../../common/auth/auth.service';
+import {Icon} from '../../../../../common/icon/icon';
 
 declare const bootstrap: any;
 
@@ -20,7 +21,7 @@ const CATEGORIES = ['welfare', 'bullying', 'abuse', 'attendance', 'mental_health
 @Component({
   selector: 'app-safeguarding',
   standalone: true,
-  imports: [PageHeader, LearnoModal, LearnoButton, DataGrid, ReactiveFormsModule, FormsModule, DatePipe],
+  imports: [Icon, PageHeader, LearnoModal, LearnoButton, DataGrid, ReactiveFormsModule, FormsModule, DatePipe],
   templateUrl: './safeguarding.html',
   styleUrl: './safeguarding.css',
 })

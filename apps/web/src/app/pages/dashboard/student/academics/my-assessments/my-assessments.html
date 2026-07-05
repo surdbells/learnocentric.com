@@ -26,7 +26,7 @@
               @if (a.attempt && a.attempt.status === 'graded') {
                 <div class="alert py-2 px-3 mb-3 d-flex align-items-center gap-2"
                      [class.alert-success]="a.attempt.passed" [class.alert-danger]="!a.attempt.passed">
-                  <span class="material-symbols-outlined">{{ a.attempt.passed ? 'check_circle' : 'cancel' }}</span>
+                  <app-icon [name]="a.attempt.passed ? 'check_circle' : 'cancel'" />
                   <span>You scored <b>{{ a.attempt.percentage }}%</b> ({{ a.attempt.score }}/{{ a.attempt.total_marks }})</span>
                 </div>
               }
@@ -126,9 +126,7 @@
       @for (a of res.answers; track a.question_id) {
         <div class="py-3 border-top">
           <div class="d-flex align-items-start gap-2">
-            <span class="material-symbols-outlined" [class.text-success]="a.is_correct" [class.text-danger]="!a.is_correct">
-              {{ a.is_correct ? 'check_circle' : 'cancel' }}
-            </span>
+            <app-icon [name]="a.is_correct ? 'check_circle' : 'cancel'" [class.text-success]="a.is_correct" [class.text-danger]="!a.is_correct" />
             <div class="flex-grow-1">
               <div class="fw-medium">{{ a.stem }}</div>
               <div class="small">

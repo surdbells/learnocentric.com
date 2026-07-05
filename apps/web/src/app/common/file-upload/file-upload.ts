@@ -1,6 +1,7 @@
 import {Component, EventEmitter, inject, input, Output, signal} from '@angular/core';
 import {HttpClient, HttpEventType} from '@angular/common/http';
 import {ToastrService} from 'ngx-toastr';
+import {Icon} from '../icon/icon';
 
 export interface UploadedFile {
   url: string;
@@ -16,7 +17,7 @@ export interface UploadedFile {
 @Component({
   selector: 'app-file-upload',
   standalone: true,
-  imports: [],
+  imports: [Icon, ],
   templateUrl: './file-upload.html',
   styleUrl: './file-upload.css',
 })

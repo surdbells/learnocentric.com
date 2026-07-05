@@ -25,11 +25,7 @@
 
               <div class="d-flex gap-1 mb-3">
                 @for (s of t.stages; track s.key) {
-                  <span class="stage-pip material-symbols-outlined"
-                        [class.done]="s.done" [class.avail]="s.available && !s.done" [class.na]="!s.available"
-                        [attr.title]="s.label + (s.available ? (s.done ? ' — done' : ' — to do') : ' — not available')">
-                    {{ stageIcon(s.key) }}
-                  </span>
+                  <app-icon [name]="stageIcon(s.key)" class="stage-pip" [class.done]="s.done" [class.avail]="s.available && !s.done" [class.na]="!s.available" [attr.title]="s.label + (s.available ? (s.done ? ' — done' : ' — to do') : ' — not available')" />
                 }
               </div>
 
@@ -48,7 +44,7 @@
 <!-- LESSON viewer -->
 @if (mode() === 'lesson' && lesson(); as l) {
   <button type="button" class="btn btn-sm btn-light mb-3" (click)="backToList()">
-    <span class="material-symbols-outlined align-middle fs-6">arrow_back</span> All lessons
+    <app-icon name="arrow_back" [size]="16" /> All lessons
   </button>
 
   <div class="row g-4">
@@ -65,7 +61,7 @@
           @if (l.lesson) {
             @if (l.lesson.video_url) {
               <a class="btn btn-sm btn-outline-primary mb-3" [href]="l.lesson.video_url" target="_blank" rel="noopener">
-                <span class="material-symbols-outlined align-middle fs-6">play_circle</span> Watch video
+                <app-icon name="play_circle" [size]="16" /> Watch video
               </a>
             }
             @if (l.lesson.learner_note) {
@@ -99,12 +95,10 @@
             @for (s of l.stages; track s.key) {
               <li class="d-flex align-items-center gap-2 py-2 border-bottom stage-row"
                   [class.text-body-secondary]="!s.available" [class.clickable]="s.available && s.link" (click)="s.available && goToStage(s)">
-                <span class="material-symbols-outlined" [class.text-success]="s.done" [class.text-primary]="s.available && !s.done">
-                  {{ s.done ? 'check_circle' : (s.available ? 'radio_button_unchecked' : 'block') }}
-                </span>
+                <app-icon [name]="s.done ? 'check_circle' : (s.available ? 'radio_button_unchecked' : 'block')" [class.text-success]="s.done" [class.text-primary]="s.available && !s.done" />
                 <span class="flex-grow-1">{{ s.label }}</span>
                 @if (s.detail) { <span class="small badge bg-light text-body-secondary">{{ s.detail }}</span> }
-                @if (s.available && s.link) { <span class="material-symbols-outlined fs-6 text-body-secondary">chevron_right</span> }
+                @if (s.available && s.link) { <app-icon name="chevron_right" [size]="16" class="text-body-secondary" /> }
               </li>
             }
           </ul>
@@ -112,7 +106,7 @@
           @if (!lessonStageDone()) {
             <button type="button" class="btn btn-primary w-100" [disabled]="busy()" (click)="completeLesson()">Mark lesson complete</button>
           } @else if (l.complete) {
-            <div class="text-center text-success"><span class="material-symbols-outlined align-middle">verified</span> Topic complete!</div>
+            <div class="text-center text-success"><app-icon name="verified" /> Topic complete!</div>
           } @else {
             <div class="text-center small text-body-secondary">Lesson done — continue with the stages above.</div>
           }

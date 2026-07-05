@@ -43,7 +43,7 @@
               </div>
               @if (editable()) {
                 <button type="button" class="btn btn-sm btn-icon text-danger" [disabled]="busy()" (click)="detach(q.question_id)" title="Remove">
-                  <span class="material-symbols-outlined">close</span>
+                  <app-icon name="close" />
                 </button>
               }
             </li>

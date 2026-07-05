@@ -3,6 +3,7 @@ import {NgOptimizedImage} from '@angular/common';
 import {Router, RouterLink, RouterLinkActive} from '@angular/router';
 import {IMenu} from '../../service/user-preference-menu';
 import {Preferences} from '../../service/preferences';
+import {Icon} from '../../icon/icon';
 
 /**
  * Modern, collapsible sidebar navigation.
@@ -13,7 +14,7 @@ import {Preferences} from '../../service/preferences';
 @Component({
   selector: 'app-sidenav',
   standalone: true,
-  imports: [RouterLink, RouterLinkActive, NgOptimizedImage],
+  imports: [Icon, RouterLink, RouterLinkActive, NgOptimizedImage],
   templateUrl: './sidenav.html',
   styleUrl: './sidenav.css',
   host: {

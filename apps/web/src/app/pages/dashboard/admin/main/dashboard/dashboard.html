@@ -17,7 +17,7 @@
     <div class="col-6 col-md-4 col-xl-2">
       <a class="stat-card card border-0 shadow-sm h-100 text-decoration-none" [routerLink]="['/admin/students']">
         <div class="card-body">
-          <span class="stat-ic bg-primary-subtle text-primary"><span class="material-symbols-outlined">group</span></span>
+          <span class="stat-ic bg-primary-subtle text-primary"><app-icon name="group" /></span>
           <div class="stat-val">{{ d.stats.students }}</div><div class="stat-lbl">Students</div>
         </div>
       </a>
@@ -25,7 +25,7 @@
     <div class="col-6 col-md-4 col-xl-2">
       <a class="stat-card card border-0 shadow-sm h-100 text-decoration-none" [routerLink]="['/admin/teachers']">
         <div class="card-body">
-          <span class="stat-ic bg-info-subtle text-info"><span class="material-symbols-outlined">supervisor_account</span></span>
+          <span class="stat-ic bg-info-subtle text-info"><app-icon name="supervisor_account" /></span>
           <div class="stat-val">{{ d.stats.teachers }}</div><div class="stat-lbl">Teachers</div>
         </div>
       </a>
@@ -33,7 +33,7 @@
     <div class="col-6 col-md-4 col-xl-2">
       <a class="stat-card card border-0 shadow-sm h-100 text-decoration-none" [routerLink]="[base(), 'subjects']">
         <div class="card-body">
-          <span class="stat-ic bg-warning-subtle text-warning"><span class="material-symbols-outlined">subject</span></span>
+          <span class="stat-ic bg-warning-subtle text-warning"><app-icon name="subject" /></span>
           <div class="stat-val">{{ d.stats.subjects }}</div><div class="stat-lbl">Subjects</div>
         </div>
       </a>
@@ -41,7 +41,7 @@
     <div class="col-6 col-md-4 col-xl-2">
       <a class="stat-card card border-0 shadow-sm h-100 text-decoration-none" [routerLink]="[base(), 'classes']">
         <div class="card-body">
-          <span class="stat-ic bg-success-subtle text-success"><span class="material-symbols-outlined">meeting_room</span></span>
+          <span class="stat-ic bg-success-subtle text-success"><app-icon name="meeting_room" /></span>
           <div class="stat-val">{{ d.stats.classes }}</div><div class="stat-lbl">Classes</div>
         </div>
       </a>
@@ -49,7 +49,7 @@
     <div class="col-6 col-md-4 col-xl-2">
       <a class="stat-card card border-0 shadow-sm h-100 text-decoration-none" [routerLink]="[base(), 'topics']">
         <div class="card-body">
-          <span class="stat-ic bg-primary-subtle text-primary"><span class="material-symbols-outlined">menu_book</span></span>
+          <span class="stat-ic bg-primary-subtle text-primary"><app-icon name="menu_book" /></span>
           <div class="stat-val">{{ d.stats.published_topics }}</div><div class="stat-lbl">Published topics</div>
         </div>
       </a>
@@ -57,7 +57,7 @@
     <div class="col-6 col-md-4 col-xl-2">
       <a class="stat-card card border-0 shadow-sm h-100 text-decoration-none" [routerLink]="[base(), 'live-classes']">
         <div class="card-body">
-          <span class="stat-ic bg-danger-subtle text-danger"><span class="material-symbols-outlined">video_camera_front</span></span>
+          <span class="stat-ic bg-danger-subtle text-danger"><app-icon name="video_camera_front" /></span>
           <div class="stat-val">{{ d.stats.live_classes }}</div><div class="stat-lbl">Live classes</div>
         </div>
       </a>
@@ -86,22 +86,22 @@
         <div class="card-body">
           <h6 class="fw-semibold mb-3">Needs attention</h6>
           <a class="action-row" [routerLink]="[base(), 'worksheets']">
-            <span class="action-ic bg-warning-subtle text-warning"><span class="material-symbols-outlined">assignment_turned_in</span></span>
+            <span class="action-ic bg-warning-subtle text-warning"><app-icon name="assignment_turned_in" /></span>
             <span class="flex-grow-1">Worksheets to grade</span>
             <span class="badge" [class.bg-warning]="d.action_items.worksheets_to_grade" [class.bg-light]="!d.action_items.worksheets_to_grade" [class.text-body-secondary]="!d.action_items.worksheets_to_grade">{{ d.action_items.worksheets_to_grade }}</span>
           </a>
           <a class="action-row" [routerLink]="[base(), 'portfolio']">
-            <span class="action-ic bg-primary-subtle text-primary"><span class="material-symbols-outlined">folder_special</span></span>
+            <span class="action-ic bg-primary-subtle text-primary"><app-icon name="folder_special" /></span>
             <span class="flex-grow-1">Portfolio to review</span>
             <span class="badge" [class.bg-primary]="d.action_items.portfolio_to_review" [class.bg-light]="!d.action_items.portfolio_to_review" [class.text-body-secondary]="!d.action_items.portfolio_to_review">{{ d.action_items.portfolio_to_review }}</span>
           </a>
           <a class="action-row" [routerLink]="[base(), 'interventions']">
-            <span class="action-ic bg-info-subtle text-info"><span class="material-symbols-outlined">support</span></span>
+            <span class="action-ic bg-info-subtle text-info"><app-icon name="support" /></span>
             <span class="flex-grow-1">Open interventions</span>
             <span class="badge" [class.bg-info]="d.action_items.interventions_open" [class.bg-light]="!d.action_items.interventions_open" [class.text-body-secondary]="!d.action_items.interventions_open">{{ d.action_items.interventions_open }}</span>
           </a>
           <a class="action-row border-0" [routerLink]="[mgmt(), 'safeguarding']">
-            <span class="action-ic bg-danger-subtle text-danger"><span class="material-symbols-outlined">shield</span></span>
+            <span class="action-ic bg-danger-subtle text-danger"><app-icon name="shield" /></span>
             <span class="flex-grow-1">Open safeguarding cases</span>
             <span class="badge" [class.bg-danger]="d.action_items.safeguarding_open" [class.bg-light]="!d.action_items.safeguarding_open" [class.text-body-secondary]="!d.action_items.safeguarding_open">{{ d.action_items.safeguarding_open }}</span>
           </a>

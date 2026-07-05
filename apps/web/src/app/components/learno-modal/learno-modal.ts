@@ -1,9 +1,10 @@
 import {Component, input} from '@angular/core';
 import {LearnoButton} from '../../common/learno-button/learno-button';
+import {Icon} from '../../common/icon/icon';
 
 @Component({
   selector: 'app-learno-modal',
-  imports: [
+  imports: [Icon, 
     LearnoButton
   ],
   templateUrl: './learno-modal.html',

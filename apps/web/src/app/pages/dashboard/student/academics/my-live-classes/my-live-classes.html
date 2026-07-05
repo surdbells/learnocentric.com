@@ -22,7 +22,7 @@
             </div>
             <div class="text-body-secondary small mb-1">{{ lc.subject }}{{ lc.topic ? ' · ' + lc.topic : '' }}</div>
             <div class="text-body-secondary small mb-3">
-              <span class="material-symbols-outlined align-middle fs-6">schedule</span>
+              <app-icon name="schedule" [size]="16" />
               {{ lc.scheduled_at | date:'EEE, MMM d · h:mm a' }} · {{ lc.duration_minutes }} min
               @if (lc.host) { · {{ lc.host }} }
             </div>
@@ -30,16 +30,16 @@
             <div class="mt-auto d-flex align-items-center gap-2">
               @if (lc.status === 'live') {
                 <button type="button" class="btn btn-sm btn-success" [disabled]="busy() === lc.id" (click)="join(lc)">
-                  <span class="material-symbols-outlined align-middle fs-6">videocam</span> Join now
+                  <app-icon name="videocam" [size]="16" /> Join now
                 </button>
               } @else if (lc.status === 'scheduled') {
                 <button type="button" class="btn btn-sm btn-outline-secondary" disabled>
-                  <span class="material-symbols-outlined align-middle fs-6">schedule</span> Waiting for host to start
+                  <app-icon name="schedule" [size]="16" /> Waiting for host to start
                 </button>
               } @else {
                 <span class="small text-body-secondary">This class has ended.</span>
               }
-              @if (lc.joined) { <span class="small text-success"><span class="material-symbols-outlined align-middle fs-6">check</span> Joined</span> }
+              @if (lc.joined) { <span class="small text-success"><app-icon name="check" [size]="16" /> Joined</span> }
             </div>
           </div>
         </div>

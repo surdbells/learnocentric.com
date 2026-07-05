@@ -15,7 +15,7 @@
         <button type="button" class="list-group-item list-group-item-action d-flex align-items-start gap-3 py-3"
                 [class.n-unread]="!n.read" (click)="open(n)">
           <span class="n-icon bg-{{ color(n.type) }}-subtle text-{{ color(n.type) }}">
-            <span class="material-symbols-outlined">{{ icon(n.type) }}</span>
+            <app-icon [name]="icon(n.type)" />
           </span>
           <span class="flex-grow-1 text-start">
             <span class="d-flex justify-content-between gap-2">

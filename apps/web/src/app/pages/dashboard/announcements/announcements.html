@@ -1,7 +1,7 @@
 <app-page-header icon="campaign" action="Announcements">
   @if (canPost()) {
     <button type="button" class="btn btn-primary btn-sm" (click)="composing.set(!composing())">
-      <span class="material-symbols-outlined align-middle me-1" style="font-size:1.1rem">add</span> New announcement
+      <app-icon name="add" [size]="18" class="me-1" /> New announcement
     </button>
   }
 </app-page-header>

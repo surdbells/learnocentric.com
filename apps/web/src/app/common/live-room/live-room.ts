@@ -1,5 +1,6 @@
 import {afterNextRender, Component, ElementRef, EventEmitter, inject, Input, OnDestroy, Output, signal, ViewChild} from '@angular/core';
 import {ToastrService} from 'ngx-toastr';
+import {Icon} from '../icon/icon';
 
 /**
  * Embedded Daily Prebuilt call. Instead of redirecting to the *.daily.co room,
@@ -12,7 +13,7 @@ import {ToastrService} from 'ngx-toastr';
 @Component({
   selector: 'app-live-room',
   standalone: true,
-  imports: [],
+  imports: [Icon, ],
   templateUrl: './live-room.html',
   styleUrl: './live-room.css',
 })

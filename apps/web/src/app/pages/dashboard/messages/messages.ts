@@ -4,6 +4,7 @@ import {FormsModule} from '@angular/forms';
 import {ToastrService} from 'ngx-toastr';
 import {PageHeader} from '../../../common/layout/page-header/page-header';
 import {ApiService} from '../../../common/service/api.service';
+import {Icon} from '../../../common/icon/icon';
 
 /**
  * Governed direct messaging. Shows the caller's conversations, a thread with a
@@ -13,7 +14,7 @@ import {ApiService} from '../../../common/service/api.service';
 @Component({
   selector: 'app-messages',
   standalone: true,
-  imports: [PageHeader, DatePipe, FormsModule],
+  imports: [Icon, PageHeader, DatePipe, FormsModule],
   templateUrl: './messages.html',
   styleUrl: './messages.css',
 })

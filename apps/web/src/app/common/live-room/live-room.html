@@ -1,7 +1,7 @@
 <div class="live-room-overlay">
   <div class="live-room-bar">
     <div class="d-flex align-items-center gap-2 text-white">
-      <span class="material-symbols-outlined">videocam</span>
+      <app-icon name="videocam" />
       <span class="fw-semibold">{{ title }}</span>
       @if (connecting()) { <span class="small opacity-75">connecting…</span> }
     </div>
@@ -11,7 +11,7 @@
   <div class="live-room-stage">
     @if (error()) {
       <div class="live-room-message">
-        <span class="material-symbols-outlined mb-2" style="font-size:2rem">error</span>
+        <app-icon name="error" [size]="32" class="mb-2" />
         <div>{{ error() }}</div>
         <button type="button" class="btn btn-light mt-3" (click)="leave()">Close</button>
       </div>

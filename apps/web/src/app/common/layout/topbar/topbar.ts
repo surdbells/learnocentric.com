@@ -7,11 +7,12 @@ import {ApiService} from '../../service/api.service';
 import {PreferenceSetting} from '../preference-setting/preference-setting';
 import {NotificationBell} from '../notification-bell/notification-bell';
 import {Preferences} from '../../service/preferences';
+import {Icon} from '../../icon/icon';
 
 @Component({
   selector: 'app-topbar',
   standalone: true,
-  imports: [PreferenceSetting, NotificationBell],
+  imports: [Icon, PreferenceSetting, NotificationBell],
   templateUrl: './topbar.html',
   styleUrl: './topbar.css',
   host: { 'class': 'app-topbar' },

@@ -26,12 +26,12 @@
       <div class="d-flex flex-wrap gap-2 mb-4">
         @if (lc.status === 'scheduled') {
           <button type="button" class="btn btn-sm btn-success" [disabled]="busy()" (click)="setStatus('start')">
-            <span class="material-symbols-outlined align-middle fs-6">play_arrow</span> Go live
+            <app-icon name="play_arrow" [size]="16" /> Go live
           </button>
         }
         @if (lc.status === 'live') {
           <button type="button" class="btn btn-sm btn-primary" [disabled]="busy()" (click)="hostRoom()">
-            <span class="material-symbols-outlined align-middle fs-6">videocam</span> Join room
+            <app-icon name="videocam" [size]="16" /> Join room
           </button>
           <button type="button" class="btn btn-sm btn-outline-danger" [disabled]="busy()" (click)="setStatus('end')">End class</button>
         }

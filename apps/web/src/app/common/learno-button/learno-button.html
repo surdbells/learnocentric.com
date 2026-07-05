@@ -5,7 +5,7 @@
   (click)="clicked.emit()" [disabled]="isLoading()">
   @if (!isLoading()){
     @if (icon()){
-      <span class="material-symbols-outlined fs-6">{{ icon() }}</span>
+      <app-icon [name]="icon()" [size]="16" />
     }
     {{text()}}
   } @else {

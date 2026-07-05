@@ -1,10 +1,11 @@
 import { Component } from '@angular/core';
 import {Preferences} from '../../service/preferences';
 import { TranslatePipe } from '../../pipe/t.pipe';
+import {Icon} from '../../icon/icon';
 
 @Component({
   selector: 'div[preferenceSetting]',
-  imports: [TranslatePipe],
+  imports: [Icon, TranslatePipe],
   templateUrl: './preference-setting.html',
   styleUrl: './preference-setting.css',
   standalone: true

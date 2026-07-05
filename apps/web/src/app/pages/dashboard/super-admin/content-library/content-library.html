@@ -125,7 +125,7 @@
               <div class="card" [class]="typeCardClass(opt.value)" role="button" tabindex="0" (click)="onTypeCardClick(opt.value)">
                 <div class="card-body p-4" [class.border]="filterType() === opt.value" [class.border-primary]="filterType() === opt.value">
                   <div class="d-flex align-items-center py-4 my-3">
-                    <i class="material-symbols-outlined fs-45" [class.text-primary]="opt.value === 'video'" [class.text-danger]="opt.value === 'document' || opt.value === 'assignment'" [class.text-success]="opt.value === 'interactive'" [class.text-primary-div]="opt.value === 'quiz'">{{ typeIcon(opt.value) }}</i>
+                    <app-icon [name]="typeIcon(opt.value)" [size]="40" [class.text-primary]="opt.value === 'video'" [class.text-danger]="opt.value === 'document' || opt.value === 'assignment'" [class.text-success]="opt.value === 'interactive'" [class.text-primary-div]="opt.value === 'quiz'" />
                     <span class="fs-15 fw-bold text-secondary ms-2 position-relative top-2">{{ opt.label }}</span>
                   </div>
                   <div class="d-flex justify-content-between">

@@ -23,7 +23,7 @@
           <div class="card border-0 shadow-sm h-100">
             <div class="card-body d-flex flex-column">
               <div class="d-flex align-items-start gap-3 mb-2">
-                <span class="material-symbols-outlined text-{{ typeColor(r.contentType) }}">{{ typeIcon(r.contentType) }}</span>
+                <app-icon [name]="typeIcon(r.contentType)" class="text-{{ typeColor(r.contentType) }}" />
                 <div class="flex-grow-1">
                   <h6 class="fw-semibold mb-0">{{ r.title }}</h6>
                   <div class="small text-body-secondary text-capitalize">{{ r.contentType }}@if (r.subjectArea) { · {{ r.subjectArea }} }@if (r.gradeLevel) { · {{ r.gradeLevel }} }</div>

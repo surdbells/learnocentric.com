@@ -28,7 +28,7 @@
                        [ngModel]="b.min" (ngModelChange)="setBand($index, {min: +$event})"/>
                 <span class="text-body-secondary small">%+</span>
                 <button type="button" class="btn btn-sm btn-outline-danger" (click)="removeBand($index)" title="Remove">
-                  <span class="material-symbols-outlined" style="font-size:1rem">close</span>
+                  <app-icon name="close" [size]="16" />
                 </button>
               </div>
             }

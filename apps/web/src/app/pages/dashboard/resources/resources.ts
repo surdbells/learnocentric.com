@@ -2,6 +2,7 @@ import {Component, inject, signal} from '@angular/core';
 import {ToastrService} from 'ngx-toastr';
 import {PageHeader} from '../../../common/layout/page-header/page-header';
 import {ApiService} from '../../../common/service/api.service';
+import {Icon} from '../../../common/icon/icon';
 
 /**
  * Learning resources available to the institution through its assigned content
@@ -10,7 +11,7 @@ import {ApiService} from '../../../common/service/api.service';
 @Component({
   selector: 'app-resources',
   standalone: true,
-  imports: [PageHeader],
+  imports: [Icon, PageHeader],
   templateUrl: './resources.html',
   styleUrl: './resources.css',
 })

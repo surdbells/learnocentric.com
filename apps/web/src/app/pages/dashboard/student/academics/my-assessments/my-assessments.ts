@@ -4,11 +4,12 @@ import {FormsModule} from '@angular/forms';
 import {ToastrService} from 'ngx-toastr';
 import {PageHeader} from '../../../../../common/layout/page-header/page-header';
 import {ApiService} from '../../../../../common/service/api.service';
+import {Icon} from '../../../../../common/icon/icon';
 
 @Component({
   selector: 'app-my-assessments',
   standalone: true,
-  imports: [PageHeader, FormsModule, DatePipe],
+  imports: [Icon, PageHeader, FormsModule, DatePipe],
   templateUrl: './my-assessments.html',
   styleUrl: './my-assessments.css',
 })

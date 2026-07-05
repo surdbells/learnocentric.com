@@ -3,13 +3,14 @@ import {Router} from '@angular/router';
 import {ToastrService} from 'ngx-toastr';
 import {PageHeader} from '../../../../../common/layout/page-header/page-header';
 import {ApiService} from '../../../../../common/service/api.service';
+import {Icon} from '../../../../../common/icon/icon';
 
 const STAGE_ICON: Record<string, string> = {lesson: 'menu_book', quiz: 'quiz', worksheet: 'assignment_turned_in', portfolio: 'folder_special'};
 
 @Component({
   selector: 'app-learn',
   standalone: true,
-  imports: [PageHeader],
+  imports: [Icon, PageHeader],
   templateUrl: './learn.html',
   styleUrl: './learn.css',
 })

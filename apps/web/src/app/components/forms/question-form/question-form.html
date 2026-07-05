@@ -35,7 +35,7 @@
       <!-- Type-specific answer editor -->
       <div class="col-lg-12 mb-3">
         <label class="form-label d-flex align-items-center gap-2">
-          <span class="material-symbols-outlined fs-6 text-success">verified</span> Correct answer
+          <app-icon name="verified" [size]="16" class="text-success" /> Correct answer
         </label>
 
         @if (type() === 'mcq') {
@@ -48,7 +48,7 @@
                 <span class="badge bg-light text-body-secondary">{{ letter($index) }}</span>
                 <input class="form-control" formControlName="text" [placeholder]="'Option ' + letter($index)"/>
                 <button type="button" class="btn btn-sm btn-icon text-danger" (click)="removeOption($index)" [disabled]="options.length <= 2" title="Remove">
-                  <span class="material-symbols-outlined">close</span>
+                  <app-icon name="close" />
                 </button>
               </div>
             }

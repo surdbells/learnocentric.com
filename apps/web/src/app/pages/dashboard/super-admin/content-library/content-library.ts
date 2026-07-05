@@ -14,11 +14,12 @@ import { ToastrService } from 'ngx-toastr';
 import { DatePipe } from '@angular/common';
 import { UtilService } from '../../../../common/service/util.service';
 import { LearnoOffset } from "../../../../components/learno-offset/learno-offset";
+import {Icon} from '../../../../common/icon/icon';
 
 @Component({
   selector: 'app-super-admin-content-library',
   standalone: true,
-  imports: [
+  imports: [Icon, 
     PageHeader,
     TableSearch,
     DataTable,

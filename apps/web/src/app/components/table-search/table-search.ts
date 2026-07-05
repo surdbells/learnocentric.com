@@ -1,9 +1,10 @@
 import {Component, EventEmitter, Output, input} from '@angular/core';
 import {FormsModule} from '@angular/forms';
+import {Icon} from '../../common/icon/icon';
 
 @Component({
   selector: 'app-table-search',
-  imports: [FormsModule],
+  imports: [Icon, FormsModule],
   standalone: true,
   templateUrl: './table-search.html',
   styleUrl: './table-search.css'

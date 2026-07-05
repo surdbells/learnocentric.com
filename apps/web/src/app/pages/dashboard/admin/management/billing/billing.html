@@ -76,7 +76,7 @@
             </div>
             <ul class="list-unstyled small flex-grow-1 mb-3">
               @for (f of p.features; track f) {
-                <li class="mb-1"><span class="material-symbols-outlined align-middle fs-6 text-success">check</span> {{ f }}</li>
+                <li class="mb-1"><app-icon name="check" [size]="16" class="text-success" /> {{ f }}</li>
               }
             </ul>
             <button type="button" class="btn btn-sm" [class.btn-primary]="!isCurrent(p)" [class.btn-outline-secondary]="isCurrent(p)"

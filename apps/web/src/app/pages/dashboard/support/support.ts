@@ -5,6 +5,7 @@ import {ToastrService} from 'ngx-toastr';
 import {PageHeader} from '../../../common/layout/page-header/page-header';
 import {ApiService} from '../../../common/service/api.service';
 import {AuthService} from '../../../common/auth/auth.service';
+import {Icon} from '../../../common/icon/icon';
 
 /**
  * Support centre — list tickets, open a new one, and work a thread. Requesters
@@ -14,7 +15,7 @@ import {AuthService} from '../../../common/auth/auth.service';
 @Component({
   selector: 'app-support',
   standalone: true,
-  imports: [PageHeader, DatePipe, FormsModule],
+  imports: [Icon, PageHeader, DatePipe, FormsModule],
   templateUrl: './support.html',
   styleUrl: './support.css',
 })

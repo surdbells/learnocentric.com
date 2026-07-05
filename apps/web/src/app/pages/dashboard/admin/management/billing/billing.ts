@@ -3,13 +3,14 @@ import {DatePipe, DecimalPipe} from '@angular/common';
 import {ToastrService} from 'ngx-toastr';
 import {PageHeader} from '../../../../../common/layout/page-header/page-header';
 import {ApiService} from '../../../../../common/service/api.service';
+import {Icon} from '../../../../../common/icon/icon';
 
 const STATUS_COLOR: Record<string, string> = {active: 'success', grace: 'warning', expired: 'danger', cancelled: 'secondary', none: 'secondary'};
 
 @Component({
   selector: 'app-billing',
   standalone: true,
-  imports: [PageHeader, DatePipe, DecimalPipe],
+  imports: [Icon, PageHeader, DatePipe, DecimalPipe],
   templateUrl: './billing.html',
   styleUrl: './billing.css',
 })

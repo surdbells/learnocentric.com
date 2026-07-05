@@ -1,10 +1,11 @@
 import {Component, input} from '@angular/core';
 import {RouterLink} from '@angular/router';
+import {Icon} from '../icon/icon';
 
 @Component({
   selector: 'app-stat-card',
   standalone: true,
-  imports: [
+  imports: [Icon, 
     RouterLink
   ],
   templateUrl: './app-stat-card.html',

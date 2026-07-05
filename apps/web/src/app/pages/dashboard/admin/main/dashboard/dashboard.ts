@@ -2,11 +2,12 @@ import {afterNextRender, Component, ElementRef, inject, signal, ViewChild} from 
 import {RouterLink} from '@angular/router';
 import {AuthService} from '../../../../../common/auth/auth.service';
 import {ApiService} from '../../../../../common/service/api.service';
+import {Icon} from '../../../../../common/icon/icon';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [RouterLink],
+  imports: [Icon, RouterLink],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.css',
 })

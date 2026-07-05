@@ -8,6 +8,7 @@ import {DataGrid, GridColumn, GridFilter} from '../../../../../components/data-g
 import {AssessmentForm} from '../../../../../components/forms/assessment-form/assessment-form';
 import {ApiService} from '../../../../../common/service/api.service';
 import {AuthService} from '../../../../../common/auth/auth.service';
+import {Icon} from '../../../../../common/icon/icon';
 
 declare const bootstrap: any;
 
@@ -18,7 +19,7 @@ const APPROVER_ROLES = ['academic_lead', 'school_admin', 'tutor_admin', 'super_a
 @Component({
   selector: 'app-assessments',
   standalone: true,
-  imports: [PageHeader, LearnoModal, LearnoButton, DataGrid, AssessmentForm, FormsModule],
+  imports: [Icon, PageHeader, LearnoModal, LearnoButton, DataGrid, AssessmentForm, FormsModule],
   templateUrl: './assessments.html',
   styleUrl: './assessments.css',
 })
