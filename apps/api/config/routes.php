@@ -9,6 +9,7 @@ use App\Application\Actions\Auth\RegisterAction;
 use App\Application\Actions\Auth\UserProfileAction;
 use App\Application\Actions\Assessment\AssessmentsAction;
 use App\Application\Actions\Assessment\AttemptsAction;
+use App\Application\Actions\Assessment\GradebookAction;
 use App\Application\Actions\Assessment\QuestionsAction;
 use App\Application\Actions\Curriculum\ReviewQueueAction;
 use App\Application\Actions\Curriculum\TopicsAction;
@@ -83,6 +84,11 @@ return static function (App $app): void {
             $auth->post('/assessment/attempts', AttemptsAction::class . ':start');
             $auth->get('/assessment/attempts/{id:[0-9]+}', AttemptsAction::class . ':show');
             $auth->post('/assessment/attempts/{id:[0-9]+}/submit', AttemptsAction::class . ':submit');
+
+            // Assessment — gradebook (staff)
+            $auth->get('/assessment/gradebook', GradebookAction::class . ':overview');
+            $auth->get('/assessment/gradebook/students', GradebookAction::class . ':students');
+            $auth->get('/assessment/gradebook/{id:[0-9]+}', GradebookAction::class . ':assessment');
 
             $auth->post('/upload', UploadAction::class);
         })->add(JwtAuthMiddleware::class);
