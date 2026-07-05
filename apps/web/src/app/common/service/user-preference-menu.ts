@@ -48,6 +48,7 @@ export class UserPreferenceMenu {
         { name: "Assessments", link: "/admin/academics/assessments" },
         { name: "Worksheets", link: "/admin/academics/worksheets" },
         { name: "Portfolio", link: "/admin/academics/portfolio" },
+        { name: "Insights", link: "/admin/academics/insights" },
         { name: "Gradebook", link: "/admin/academics/gradebook" },
         { name: "Result", link: "/admin/academics/results" },
       ]
@@ -98,6 +99,7 @@ export class UserPreferenceMenu {
         { name: "Assessments", link: "/academy/academics/assessments" },
         { name: "Worksheets", link: "/academy/academics/worksheets" },
         { name: "Portfolio", link: "/academy/academics/portfolio" },
+        { name: "Insights", link: "/academy/academics/insights" },
         { name: "Gradebook", link: "/academy/academics/gradebook" },
         { name: "Result", link: "/academy/academics/results" },
       ]
@@ -157,6 +159,7 @@ export class UserPreferenceMenu {
         { name: "Assessments", link: "/teacher/academics/assessments" },
         { name: "Worksheets", link: "/teacher/academics/worksheets" },
         { name: "Portfolio", link: "/teacher/academics/portfolio" },
+        { name: "Insights", link: "/teacher/academics/insights" },
         { name: "Gradebook", link: "/teacher/academics/gradebook" },
         // { name: "Lesson Plans", link: "/teacher/academics/lesson-plans" },
         // { name: "Assessments", link: "/teacher/academics/assessments" },
@@ -195,6 +198,7 @@ export class UserPreferenceMenu {
         { name: "Assessments", link: "/student/academics/assessments" },
         { name: "Worksheets", link: "/student/academics/worksheets" },
         { name: "Portfolio", link: "/student/academics/portfolio" },
+        { name: "Feedback", link: "/student/academics/feedback" },
         { name: "Performance", link: "/student/academics/performance" },
       ]
     },

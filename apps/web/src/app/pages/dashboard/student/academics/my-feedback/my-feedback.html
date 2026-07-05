@@ -1,0 +1,39 @@
+<app-page-header icon="forum" action="My Feedback"></app-page-header>
+
+@if (loading()) {
+  <div class="text-body-secondary p-4">Loading…</div>
+} @else if (!notes().length) {
+  <div class="card border-0 shadow-sm p-5 text-center text-body-secondary">No feedback yet. Your teachers' notes will appear here.</div>
+} @else {
+  @if (unread()) {
+    <div class="alert alert-info py-2 px-3 mb-3">You have <b>{{ unread() }}</b> unread note(s).</div>
+  }
+  <div class="d-flex flex-column gap-3">
+    @for (n of notes(); track n.id) {
+      <div class="card border-0 shadow-sm" [class.border-start-0]="true">
+        <div class="card-body d-flex gap-3">
+          <span class="material-symbols-outlined text-{{ typeColor(n.type) }} fs-3">{{ typeIcon(n.type) }}</span>
+          <div class="flex-grow-1">
+            <div class="d-flex justify-content-between align-items-center gap-2 mb-1 flex-wrap">
+              <div>
+                <span class="badge bg-{{ typeColor(n.type) }}-subtle text-{{ typeColor(n.type) }} text-capitalize">{{ n.type }}</span>
+                @if (n.topic) { <span class="small text-body-secondary ms-2">{{ n.topic }}</span> }
+                @if (!n.acknowledged) { <span class="badge bg-primary ms-2">New</span> }
+              </div>
+              <span class="small text-body-secondary">{{ n.created_at | date:'medium' }}</span>
+            </div>
+            <p class="mb-2">{{ n.message }}</p>
+            <div class="d-flex justify-content-between align-items-center">
+              <span class="small text-body-secondary">{{ n.author ? 'From ' + n.author : '' }}</span>
+              @if (!n.acknowledged) {
+                <button type="button" class="btn btn-sm btn-outline-primary" (click)="acknowledge(n)">Mark as read</button>
+              } @else {
+                <span class="small text-success"><span class="material-symbols-outlined align-middle fs-6">done_all</span> Read</span>
+              }
+            </div>
+          </div>
+        </div>
+      </div>
+    }
+  </div>
+}
