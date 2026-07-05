@@ -19,6 +19,7 @@ use App\Application\Actions\Assessment\PortfolioAction;
 use App\Application\Actions\Assessment\QuestionsAction;
 use App\Application\Actions\Assessment\WorksheetsAction;
 use App\Application\Actions\Assessment\WorksheetSubmissionsAction;
+use App\Application\Actions\Curriculum\DeliveryPacksAction;
 use App\Application\Actions\Curriculum\ReviewQueueAction;
 use App\Application\Actions\Curriculum\TopicsAction;
 use App\Application\Actions\HealthAction;
@@ -73,6 +74,12 @@ return static function (App $app): void {
             $auth->post('/curriculum/topics/{id:[0-9]+}/transition', TopicsAction::class . ':transition');
             $auth->get('/curriculum/topics/{id:[0-9]+}/history', TopicsAction::class . ':history');
             $auth->get('/curriculum/review-queue', ReviewQueueAction::class);
+
+            // Delivery packs — author lesson content (staff), lifecycle-governed
+            $auth->map(['GET', 'POST', 'PUT', 'DELETE'], '/curriculum/delivery-packs', DeliveryPacksAction::class);
+            $auth->post('/curriculum/delivery-packs/bulk-delete', DeliveryPacksAction::class . ':bulkDelete');
+            $auth->post('/curriculum/delivery-packs/{id:[0-9]+}/transition', DeliveryPacksAction::class . ':transition');
+            $auth->get('/curriculum/delivery-packs/{id:[0-9]+}/history', DeliveryPacksAction::class . ':history');
 
             // Assessment — question bank (answer-validation gate) + lifecycle
             $auth->map(['GET', 'POST', 'PUT', 'DELETE'], '/assessment/questions', QuestionsAction::class);
