@@ -5,12 +5,13 @@ import {AuthService} from '../../auth/auth.service';
 import {AuthUser} from '../../auth/auth.models';
 import {ApiService} from '../../service/api.service';
 import {PreferenceSetting} from '../preference-setting/preference-setting';
+import {NotificationBell} from '../notification-bell/notification-bell';
 import {Preferences} from '../../service/preferences';
 
 @Component({
   selector: 'app-topbar',
   standalone: true,
-  imports: [PreferenceSetting],
+  imports: [PreferenceSetting, NotificationBell],
   templateUrl: './topbar.html',
   styleUrl: './topbar.css',
   host: { 'class': 'app-topbar' },

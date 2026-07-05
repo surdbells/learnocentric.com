@@ -1,0 +1,40 @@
+<div class="dropdown nb-wrap">
+  <button type="button" class="tb-icon-btn nb-btn" data-bs-toggle="dropdown" data-bs-display="static"
+          data-bs-auto-close="outside" aria-expanded="false" aria-label="Notifications">
+    <span class="material-symbols-outlined">notifications</span>
+    @if (unread() > 0) {
+      <span class="nb-badge">{{ unread() > 9 ? '9+' : unread() }}</span>
+    }
+  </button>
+
+  <div class="dropdown-menu dropdown-menu-end nb-menu p-0">
+    <div class="d-flex align-items-center justify-content-between px-3 py-2 border-bottom">
+      <span class="fw-semibold">Notifications</span>
+      @if (unread() > 0) {
+        <button type="button" class="btn btn-sm btn-link p-0 text-decoration-none" (click)="markAll($event)">Mark all read</button>
+      }
+    </div>
+
+    @if (!notifications().length) {
+      <div class="text-body-secondary small text-center py-4">You're all caught up.</div>
+    } @else {
+      <div class="nb-list">
+        @for (n of notifications(); track n.id) {
+          <button type="button" class="nb-item" [class.nb-unread]="!n.read" (click)="open(n)">
+            <span class="nb-icon material-symbols-outlined">{{ icon(n.type) }}</span>
+            <span class="nb-body">
+              <span class="nb-title">{{ n.title }}</span>
+              @if (n.message) { <span class="nb-msg">{{ n.message }}</span> }
+              <span class="nb-time">{{ n.created_at | date:'MMM d, h:mm a' }}</span>
+            </span>
+            @if (!n.read) { <span class="nb-dot"></span> }
+          </button>
+        }
+      </div>
+    }
+
+    <div class="border-top text-center py-2">
+      <a class="small text-decoration-none" role="button" (click)="router.navigateByUrl('/notifications')">View all</a>
+    </div>
+  </div>
+</div>

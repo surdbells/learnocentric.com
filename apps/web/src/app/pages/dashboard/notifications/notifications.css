@@ -1,0 +1,22 @@
+.n-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+}
+
+.n-unread {
+  background: color-mix(in srgb, var(--bs-primary) 5%, transparent);
+}
+
+.n-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--bs-primary);
+  flex: 0 0 auto;
+  margin-top: 6px;
+}

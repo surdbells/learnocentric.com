@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 import {SignIn} from './pages/authentication/sign-in/sign-in';
 import {Dashboard} from './pages/dashboard/dashboard';
+import {Notifications} from './pages/dashboard/notifications/notifications';
 import {Students} from "./pages/dashboard/admin/student/students/students";
 import {NewStudent} from "./pages/dashboard/admin/student/new-student/new-student";
 import {Teachers} from "./pages/dashboard/admin/teacher/teachers/teachers";
@@ -97,6 +98,15 @@ export const routes: Routes = [
     path: "",
     children: [
       { path: "", component: SignIn },
+    ]
+  },
+
+  {
+    path: "notifications",
+    component: Dashboard,
+    canActivate: [authGuard],
+    children: [
+      { path: "", component: Notifications },
     ]
   },
 
