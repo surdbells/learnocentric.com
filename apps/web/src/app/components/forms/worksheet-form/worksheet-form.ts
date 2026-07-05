@@ -3,12 +3,13 @@ import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/
 import {ToastrService} from 'ngx-toastr';
 import {LearnoInput} from '../../../common/learno-input/learno-input';
 import {LearnoButton} from '../../../common/learno-button/learno-button';
+import {FileUpload, UploadedFile} from '../../../common/file-upload/file-upload';
 import {ApiService} from '../../../common/service/api.service';
 
 @Component({
   selector: 'app-worksheet-form',
   standalone: true,
-  imports: [ReactiveFormsModule, LearnoInput, LearnoButton],
+  imports: [ReactiveFormsModule, LearnoInput, LearnoButton, FileUpload],
   templateUrl: './worksheet-form.html',
 })
 export class WorksheetForm {
@@ -29,9 +30,13 @@ export class WorksheetForm {
     totalMarks: new FormControl(10, {nonNullable: true}),
     dueDate: new FormControl(''),
     instructions: new FormControl(''),
+    attachmentUrl: new FormControl(''),
   });
 
   readonly topicList = computed(() => this.topics());
+
+  onFileUploaded(file: UploadedFile): void { this.form.get('attachmentUrl')!.setValue(file.url); }
+  onFileCleared(): void { this.form.get('attachmentUrl')!.setValue(''); }
 
   constructor() {
     effect(() => {
@@ -45,6 +50,7 @@ export class WorksheetForm {
         totalMarks: s['total_marks'] ?? 10,
         dueDate: s['due_date'] ?? '',
         instructions: s['instructions'] ?? '',
+        attachmentUrl: s['attachment_url'] ?? '',
       });
       this.isEdit.set(true);
     });
@@ -63,6 +69,7 @@ export class WorksheetForm {
       total_marks: v.totalMarks,
       due_date: v.dueDate || null,
       instructions: v.instructions,
+      attachment_url: v.attachmentUrl || null,
     };
     this.isLoading.set(true);
     const req = this.isEdit()

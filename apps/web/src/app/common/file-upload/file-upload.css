@@ -1,0 +1,64 @@
+.fu-drop {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  text-align: center;
+  padding: 20px;
+  border: 1.5px dashed var(--bs-border-color);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: border-color .15s ease, background .15s ease;
+}
+
+.fu-drop:hover {
+  border-color: var(--brand-500, #39c645);
+  background: color-mix(in srgb, var(--brand-500, #39c645) 4%, transparent);
+}
+
+.fu-drop-ic {
+  font-size: 30px;
+  color: var(--brand-500, #39c645);
+}
+
+.fu-progress,
+.fu-file {
+  border: 1px solid var(--bs-border-color);
+  border-radius: 12px;
+  padding: 12px 14px;
+}
+
+.fu-file {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.fu-thumb {
+  width: 44px;
+  height: 44px;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+.fu-doc {
+  width: 44px;
+  height: 44px;
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bs-tertiary-bg);
+  color: var(--bs-secondary-color);
+  flex: 0 0 auto;
+}
+
+.fu-name {
+  font-weight: 500;
+  font-size: .875rem;
+  color: inherit;
+}
+
+.min-w-0 {
+  min-width: 0;
+}

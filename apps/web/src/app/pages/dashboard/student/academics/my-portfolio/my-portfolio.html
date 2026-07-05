@@ -75,8 +75,12 @@
           <textarea id="p_desc" class="form-control" rows="6" formControlName="description" placeholder="Describe how you applied the skill…"></textarea>
         </div>
         <div class="mb-3">
-          <label class="form-label" for="p_url">Evidence link (optional)</label>
-          <input id="p_url" type="url" class="form-control" formControlName="evidenceUrl" placeholder="Link to a photo, doc or video"/>
+          <label class="form-label">Evidence (optional)</label>
+          <app-file-upload
+            label="Upload a photo, document or video"
+            (uploaded)="onEvidenceUploaded($event)"
+            (cleared)="onEvidenceCleared()"
+          />
         </div>
         <div class="d-flex gap-2">
           <button type="submit" class="btn btn-primary" [disabled]="busy()">Submit evidence</button>

@@ -3,6 +3,7 @@ import {DatePipe} from '@angular/common';
 import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {ToastrService} from 'ngx-toastr';
 import {PageHeader} from '../../../../../common/layout/page-header/page-header';
+import {FileUpload, UploadedFile} from '../../../../../common/file-upload/file-upload';
 import {ApiService} from '../../../../../common/service/api.service';
 
 const RATING_COLOR: Record<string, string> = {emerging: 'secondary', developing: 'info', proficient: 'primary', mastery: 'success'};
@@ -10,7 +11,7 @@ const RATING_COLOR: Record<string, string> = {emerging: 'secondary', developing:
 @Component({
   selector: 'app-my-portfolio',
   standalone: true,
-  imports: [PageHeader, ReactiveFormsModule, DatePipe],
+  imports: [PageHeader, ReactiveFormsModule, DatePipe, FileUpload],
   templateUrl: './my-portfolio.html',
   styleUrl: './my-portfolio.css',
 })
@@ -35,6 +36,9 @@ export class MyPortfolio {
     this.load();
     this.api.get<any>('/backend/assessment/portfolio/topics').subscribe({next: (r) => this.topics.set(r?.data ?? [])});
   }
+
+  onEvidenceUploaded(file: UploadedFile): void { this.form.get('evidenceUrl')!.setValue(file.url); }
+  onEvidenceCleared(): void { this.form.get('evidenceUrl')!.setValue(''); }
 
   load(): void {
     this.loading.set(true);

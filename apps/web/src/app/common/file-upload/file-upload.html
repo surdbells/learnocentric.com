@@ -1,0 +1,39 @@
+<div class="fu-wrap">
+  @if (progress() !== null) {
+    <!-- Uploading -->
+    <div class="fu-progress">
+      <div class="d-flex align-items-center gap-2 mb-1">
+        <span class="material-symbols-outlined text-primary">upload_file</span>
+        <span class="small text-truncate flex-grow-1">{{ fileName() }}</span>
+        <span class="small fw-semibold">{{ progress() }}%</span>
+      </div>
+      <div class="progress" style="height:6px">
+        <div class="progress-bar bg-success" [style.width.%]="progress()"></div>
+      </div>
+    </div>
+  } @else if (displayUrl(); as url) {
+    <!-- Uploaded -->
+    <div class="fu-file">
+      @if (isImage()) {
+        <a [href]="url" target="_blank" rel="noopener"><img [src]="url" class="fu-thumb" alt="attachment"/></a>
+      } @else {
+        <span class="fu-doc"><span class="material-symbols-outlined">description</span></span>
+      }
+      <div class="flex-grow-1 min-w-0">
+        <a class="fu-name text-truncate d-block" [href]="url" target="_blank" rel="noopener">{{ displayName() }}</a>
+        <span class="small text-body-secondary">Uploaded</span>
+      </div>
+      <button type="button" class="btn btn-sm btn-icon text-danger" (click)="remove()" title="Remove">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+    </div>
+  } @else {
+    <!-- Empty dropzone -->
+    <label class="fu-drop">
+      <input type="file" class="d-none" [accept]="accept()" (change)="onSelect($event)"/>
+      <span class="material-symbols-outlined fu-drop-ic">cloud_upload</span>
+      <span class="fw-medium">{{ label() }}</span>
+      <span class="small text-body-secondary">{{ hint() }}</span>
+    </label>
+  }
+</div>

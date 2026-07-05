@@ -29,6 +29,15 @@
       <div class="col-lg-12">
         <div learnoInput class="mb-3" [label]="'Instructions'" [inputType]="'text'" [id]="'w_instr'" [formControlName]="'instructions'"></div>
       </div>
+      <div class="col-lg-12 mb-3">
+        <label class="form-label">Worksheet file (optional)</label>
+        <app-file-upload
+          [value]="form.get('attachmentUrl')!.value || null"
+          label="Upload the worksheet (PDF or document)"
+          (uploaded)="onFileUploaded($event)"
+          (cleared)="onFileCleared()"
+        />
+      </div>
     </div>
   </div>
   <div class="modal-footer">

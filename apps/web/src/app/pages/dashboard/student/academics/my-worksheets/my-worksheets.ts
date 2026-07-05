@@ -3,12 +3,13 @@ import {DatePipe} from '@angular/common';
 import {FormsModule} from '@angular/forms';
 import {ToastrService} from 'ngx-toastr';
 import {PageHeader} from '../../../../../common/layout/page-header/page-header';
+import {FileUpload, UploadedFile} from '../../../../../common/file-upload/file-upload';
 import {ApiService} from '../../../../../common/service/api.service';
 
 @Component({
   selector: 'app-my-worksheets',
   standalone: true,
-  imports: [PageHeader, FormsModule, DatePipe],
+  imports: [PageHeader, FormsModule, DatePipe, FileUpload],
   templateUrl: './my-worksheets.html',
   styleUrl: './my-worksheets.css',
 })
@@ -22,6 +23,7 @@ export class MyWorksheets {
   available = signal<any[]>([]);
   current = signal<any | null>(null);
   responseText = signal('');
+  attachmentUrl = signal('');
 
   constructor() {
     this.load();
@@ -38,15 +40,19 @@ export class MyWorksheets {
   openDo(w: any): void {
     this.current.set(w);
     this.responseText.set(w.submission?.response_text ?? '');
+    this.attachmentUrl.set(w.submission?.attachment_url ?? '');
     this.mode.set('do');
   }
+
+  onFileUploaded(file: UploadedFile): void { this.attachmentUrl.set(file.url); }
+  onFileCleared(): void { this.attachmentUrl.set(''); }
 
   submit(): void {
     const w = this.current();
     if (!w) return;
-    if (!this.responseText().trim()) { this.toast.error('Write your answers before submitting'); return; }
+    if (!this.responseText().trim() && !this.attachmentUrl()) { this.toast.error('Write your answers or attach a file before submitting'); return; }
     this.busy.set(true);
-    this.api.post<any>(`/backend/assessment/worksheets/${w.id}/submit`, {response_text: this.responseText()}).subscribe({
+    this.api.post<any>(`/backend/assessment/worksheets/${w.id}/submit`, {response_text: this.responseText(), attachment_url: this.attachmentUrl()}).subscribe({
       next: () => { this.toast.success('Worksheet submitted'); this.busy.set(false); this.backToList(); },
       error: (e) => { this.toast.error(e?.error?.error || 'Submit failed'); this.busy.set(false); },
     });

@@ -59,8 +59,15 @@
         <div class="border rounded-3 p-3 bg-light">{{ w.submission.response_text || '—' }}</div>
       } @else {
         <label class="form-label" for="ws_answer">Your answers</label>
-        <textarea id="ws_answer" class="form-control" rows="8" [ngModel]="responseText()" (ngModelChange)="responseText.set($event)"
+        <textarea id="ws_answer" class="form-control mb-3" rows="6" [ngModel]="responseText()" (ngModelChange)="responseText.set($event)"
                   placeholder="Type your worked answers here…"></textarea>
+        <label class="form-label">Or attach your work</label>
+        <app-file-upload
+          [value]="attachmentUrl() || null"
+          label="Upload a photo or document of your work"
+          (uploaded)="onFileUploaded($event)"
+          (cleared)="onFileCleared()"
+        />
         <div class="d-flex gap-2 mt-3">
           <button type="button" class="btn btn-primary" [disabled]="busy()" (click)="submit()">
             {{ w.submission ? 'Update submission' : 'Submit worksheet' }}
