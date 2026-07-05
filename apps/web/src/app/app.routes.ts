@@ -90,6 +90,7 @@ import {SuperAdminInstitutions} from './pages/dashboard/super-admin/institutions
 import {SuperAdminOnboard} from './pages/dashboard/super-admin/institutions/onboard/onboard';
 import {SuperAdminContentLibrary} from './pages/dashboard/super-admin/content-library/content-library';
 import {SuperAdminContentPackages} from './pages/dashboard/super-admin/content-packages/content-packages';
+import {SuperAdminPlans} from './pages/dashboard/super-admin/plans/plans';
 
 export const routes: Routes = [
   {
@@ -410,7 +411,8 @@ export const routes: Routes = [
               { path: "institutions", component: SuperAdminInstitutions },
               { path: "onboard", component: SuperAdminOnboard },
               { path: "content-library", component: SuperAdminContentLibrary },
-              { path: "content-packages", component: SuperAdminContentPackages }
+              { path: "content-packages", component: SuperAdminContentPackages },
+              { path: "plans", component: SuperAdminPlans }
             ]
           },
 

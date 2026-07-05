@@ -1,0 +1,90 @@
+<app-page-header icon="sell" action="Subscription Plans">
+  <app-learno-button text="New Plan" icon="add" (clicked)="openCreate()"/>
+</app-page-header>
+
+<app-learno-modal [modalId]="'plan_form'" [modalAction]="editing() ? 'Edit Plan' : 'New Plan'" [showBtn]="false">
+  <form modalForm [formGroup]="form" (ngSubmit)="save()">
+    <div class="modal-body">
+      <div class="row">
+        <div class="col-lg-4 mb-3">
+          <label class="form-label" for="pl_code">Code</label>
+          <input id="pl_code" type="text" class="form-control" formControlName="code" placeholder="e.g. premium"/>
+        </div>
+        <div class="col-lg-8 mb-3">
+          <label class="form-label" for="pl_name">Name</label>
+          <input id="pl_name" type="text" class="form-control" formControlName="name"/>
+        </div>
+        <div class="col-lg-4 mb-3">
+          <label class="form-label" for="pl_price">Price (₦)</label>
+          <input id="pl_price" type="number" class="form-control" formControlName="priceNaira"/>
+        </div>
+        <div class="col-lg-4 mb-3">
+          <label class="form-label" for="pl_interval">Interval</label>
+          <select id="pl_interval" class="form-select" formControlName="interval">
+            <option value="monthly">Monthly</option>
+            <option value="termly">Termly</option>
+            <option value="yearly">Yearly</option>
+          </select>
+        </div>
+        <div class="col-lg-4 mb-3 d-flex align-items-end">
+          <div class="form-check">
+            <input id="pl_active" type="checkbox" class="form-check-input" formControlName="isActive"/>
+            <label class="form-check-label" for="pl_active">Active (offered to institutions)</label>
+          </div>
+        </div>
+        <div class="col-lg-6 mb-3">
+          <label class="form-label" for="pl_maxs">Max students (blank = unlimited)</label>
+          <input id="pl_maxs" type="number" class="form-control" formControlName="maxStudents"/>
+        </div>
+        <div class="col-lg-6 mb-3">
+          <label class="form-label" for="pl_maxt">Max teachers (blank = unlimited)</label>
+          <input id="pl_maxt" type="number" class="form-control" formControlName="maxTeachers"/>
+        </div>
+        <div class="col-lg-12 mb-3">
+          <label class="form-label" for="pl_feat">Features (one per line)</label>
+          <textarea id="pl_feat" class="form-control" rows="4" formControlName="features"></textarea>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <a class="btn btn-light" data-bs-dismiss="modal">Cancel</a>
+      <app-learno-button [isLoading]="busy()" [text]="editing() ? 'Update Plan' : 'Create Plan'"/>
+    </div>
+  </form>
+</app-learno-modal>
+
+@if (loading()) {
+  <div class="text-body-secondary p-4">Loading…</div>
+} @else if (!plans().length) {
+  <div class="card border-0 shadow-sm p-5 text-center text-body-secondary">No plans yet. Click “New Plan”.</div>
+} @else {
+  <div class="row g-3">
+    @for (p of plans(); track p.id) {
+      <div class="col-md-4">
+        <div class="card border-0 shadow-sm h-100" [class.opacity-50]="!p.is_active">
+          <div class="card-body d-flex flex-column">
+            <div class="d-flex justify-content-between align-items-start">
+              <h5 class="fw-semibold mb-0">{{ p.name }}</h5>
+              <span class="badge" [class.bg-success-subtle]="p.is_active" [class.text-success]="p.is_active"
+                    [class.bg-secondary-subtle]="!p.is_active" [class.text-secondary]="!p.is_active">
+                {{ p.is_active ? 'Active' : 'Inactive' }}
+              </span>
+            </div>
+            <div class="small text-body-secondary">{{ p.code }}</div>
+            <div class="my-2"><span class="fs-4 fw-bold">₦{{ p.price_naira | number }}</span><span class="small text-body-secondary"> / {{ p.interval }}</span></div>
+            <div class="small text-body-secondary mb-3">
+              {{ p.max_students ? p.max_students + ' students' : 'Unlimited students' }} ·
+              {{ p.max_teachers ? p.max_teachers + ' teachers' : 'Unlimited teachers' }}
+            </div>
+            <div class="mt-auto d-flex gap-2">
+              <button type="button" class="btn btn-sm btn-outline-primary" (click)="openEdit(p)">Edit</button>
+              @if (p.is_active) {
+                <button type="button" class="btn btn-sm btn-outline-danger" (click)="deactivate(p)">Deactivate</button>
+              }
+            </div>
+          </div>
+        </div>
+      </div>
+    }
+  </div>
+}
