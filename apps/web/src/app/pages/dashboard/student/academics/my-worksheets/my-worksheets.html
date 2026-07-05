@@ -1,0 +1,77 @@
+<app-page-header icon="assignment_turned_in" action="My Worksheets"></app-page-header>
+
+<!-- LIST -->
+@if (mode() === 'list') {
+  @if (loading()) {
+    <div class="text-body-secondary p-4">Loading…</div>
+  } @else if (!available().length) {
+    <div class="card border-0 shadow-sm p-5 text-center text-body-secondary">No worksheets are assigned to you right now.</div>
+  } @else {
+    <div class="row g-3">
+      @for (w of available(); track w.id) {
+        <div class="col-md-6 col-xl-4">
+          <div class="card border-0 shadow-sm h-100">
+            <div class="card-body d-flex flex-column">
+              <div class="d-flex justify-content-between align-items-start gap-2">
+                <h6 class="fw-semibold mb-1">{{ w.title }}</h6>
+                @if (w.submission) {
+                  <span class="badge bg-{{ statusColor(w.submission.status) }}-subtle text-{{ statusColor(w.submission.status) }} text-capitalize">{{ w.submission.status }}</span>
+                }
+              </div>
+              <div class="text-body-secondary small mb-2">{{ w.topic }} · {{ w.total_marks }} mark(s)@if (w.due_date) { · due {{ w.due_date }} }</div>
+              @if (w.instructions) { <p class="small text-body-secondary mb-3">{{ w.instructions }}</p> }
+
+              @if (isGraded(w)) {
+                <div class="alert alert-success py-2 px-3 mb-3">
+                  Scored <b>{{ w.submission.score }}/{{ w.total_marks }}</b>
+                  @if (w.submission.feedback) { <div class="small mt-1">“{{ w.submission.feedback }}”</div> }
+                </div>
+              }
+
+              <div class="mt-auto">
+                <button type="button" class="btn btn-sm" [class.btn-primary]="!isGraded(w)" [class.btn-outline-secondary]="isGraded(w)" (click)="openDo(w)">
+                  {{ isGraded(w) ? 'View' : (w.submission ? 'Edit submission' : 'Start') }}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  }
+}
+
+<!-- DO -->
+@if (mode() === 'do' && current(); as w) {
+  <div class="card border-0 shadow-sm">
+    <div class="card-body">
+      <h5 class="fw-semibold mb-1">{{ w.title }}</h5>
+      <div class="text-body-secondary small mb-3">{{ w.topic }} · {{ w.total_marks }} mark(s)@if (w.due_date) { · due {{ w.due_date }} }</div>
+      @if (w.instructions) { <div class="alert alert-light border">{{ w.instructions }}</div> }
+
+      @if (isGraded(w)) {
+        <div class="alert alert-success">
+          You scored <b>{{ w.submission.score }}/{{ w.total_marks }}</b>
+          @if (w.submission.feedback) { <div class="small mt-1">Teacher feedback: “{{ w.submission.feedback }}”</div> }
+          @if (w.submission.graded_at) { <div class="small text-body-secondary mt-1">Graded {{ w.submission.graded_at | date:'medium' }}</div> }
+        </div>
+        <label class="form-label small text-body-secondary">Your submitted answers</label>
+        <div class="border rounded-3 p-3 bg-light">{{ w.submission.response_text || '—' }}</div>
+      } @else {
+        <label class="form-label" for="ws_answer">Your answers</label>
+        <textarea id="ws_answer" class="form-control" rows="8" [ngModel]="responseText()" (ngModelChange)="responseText.set($event)"
+                  placeholder="Type your worked answers here…"></textarea>
+        <div class="d-flex gap-2 mt-3">
+          <button type="button" class="btn btn-primary" [disabled]="busy()" (click)="submit()">
+            {{ w.submission ? 'Update submission' : 'Submit worksheet' }}
+          </button>
+          <button type="button" class="btn btn-light" [disabled]="busy()" (click)="backToList()">Back</button>
+        </div>
+      }
+
+      @if (isGraded(w)) {
+        <button type="button" class="btn btn-primary mt-4" (click)="backToList()">Back to my worksheets</button>
+      }
+    </div>
+  </div>
+}

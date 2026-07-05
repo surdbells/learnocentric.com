@@ -16,6 +16,7 @@ import {Topics} from "./pages/dashboard/admin/academics/topics/topics";
 import {QuestionBank} from "./pages/dashboard/admin/academics/question-bank/question-bank";
 import {Assessments} from "./pages/dashboard/admin/academics/assessments/assessments";
 import {Gradebook} from "./pages/dashboard/admin/academics/gradebook/gradebook";
+import {Worksheets} from "./pages/dashboard/admin/academics/worksheets/worksheets";
 import {Checkout} from "./pages/dashboard/admin/management/payment/checkout/checkout";
 import {Result} from "./pages/dashboard/admin/academics/result/result";
 import {Chat} from "./pages/apps/chat/chat";
@@ -49,6 +50,7 @@ import {StudentDashboard} from './pages/dashboard/student/student-main/student-d
 import {Classmate} from './pages/dashboard/student/student-main/classmate/classmate';
 import {StudentAssessment} from './pages/dashboard/student/academics/student-assessment/student-assessment';
 import {MyAssessments} from './pages/dashboard/student/academics/my-assessments/my-assessments';
+import {MyWorksheets} from './pages/dashboard/student/academics/my-worksheets/my-worksheets';
 import {StudentPerformance} from './pages/dashboard/student/academics/student-performance/student-performance';
 import {StudentManagement} from './pages/dashboard/student/management/management';
 import {StudentProfile} from './pages/dashboard/student/management/student-profile/student-profile';
@@ -132,6 +134,7 @@ export const routes: Routes = [
               { path: "topics", component: Topics, data: { user: "admin" }  },
               { path: "question-bank", component: QuestionBank, data: { user: "admin" }  },
               { path: "assessments", component: Assessments, data: { user: "admin" }  },
+              { path: "worksheets", component: Worksheets, data: { user: "admin" }  },
               { path: "gradebook", component: Gradebook, data: { user: "admin" }  },
               { path: "results", component: Result, data: { user: "admin" }  },
             ]
@@ -184,6 +187,7 @@ export const routes: Routes = [
             { path: "topics", component: Topics },
             { path: "question-bank", component: QuestionBank },
             { path: "assessments", component: Assessments },
+            { path: "worksheets", component: Worksheets },
             { path: "gradebook", component: Gradebook },
             { path: "results", component: Result },
           ]
@@ -254,6 +258,7 @@ export const routes: Routes = [
             { path: "topics", component: Topics },
             { path: "question-bank", component: QuestionBank },
             { path: "assessments", component: Assessments },
+            { path: "worksheets", component: Worksheets },
             { path: "gradebook", component: Gradebook },
             { path: "results", component: Result },
             { path: "pending-task", component: PendingTask },
@@ -314,6 +319,7 @@ export const routes: Routes = [
             { path: "grades", component: Grade },
             { path: "assignments", component: Assignment, data: { user: "student" } },
             { path: "assessments", component: MyAssessments },
+            { path: "worksheets", component: MyWorksheets },
             { path: "performance", component: StudentPerformance }
           ]
         },

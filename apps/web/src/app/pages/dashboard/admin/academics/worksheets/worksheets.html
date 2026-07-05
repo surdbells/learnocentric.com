@@ -1,0 +1,90 @@
+<app-page-header icon="assignment_turned_in" action="Worksheets">
+  <app-learno-button text="Add Worksheet" icon="add" data-bs-toggle="modal" data-bs-target="#add_worksheet" (clicked)="onAdd()"/>
+</app-page-header>
+
+<!-- Create / edit -->
+<app-learno-modal [modalId]="'add_worksheet'" [modalAction]="selectWorksheet() ? 'Edit Worksheet' : 'Add Worksheet'" [showBtn]="false">
+  <app-worksheet-form modalForm [select]="selectWorksheet()" [topics]="topics()" (submitted)="handleSuccessSubmit($event)"/>
+</app-learno-modal>
+
+<!-- Manage: lifecycle + submissions -->
+<app-learno-modal [modalId]="'worksheet_manage'" [modalAction]="'Manage worksheet'" [showBtn]="false">
+  <div modalForm>
+    @if (manage(); as w) {
+      <div class="d-flex align-items-start justify-content-between flex-wrap gap-2 mb-1">
+        <h5 class="fw-semibold mb-0">{{ w.title }}</h5>
+        <span class="badge bg-{{ statusColor(w.approval_status) }}-subtle text-{{ statusColor(w.approval_status) }} text-capitalize px-3 py-2">{{ w.approval_status }}</span>
+      </div>
+      <p class="text-body-secondary small mb-4">{{ w.topic }} · {{ w.total_marks }} mark(s){{ w.due_date ? ' · due ' + w.due_date : '' }}</p>
+
+      <!-- Lifecycle -->
+      <label class="form-label text-uppercase small fw-semibold text-body-secondary">Move to</label>
+      @if (availableActions().length) {
+        <div class="d-flex flex-wrap gap-2 mb-4">
+          @for (a of availableActions(); track a.to) {
+            <button type="button" class="btn btn-sm" [class.btn-primary]="a.to !== 'archived'" [class.btn-outline-danger]="a.to === 'archived'"
+                    [disabled]="!a.enabled || busy()" (click)="transition(a.to)">{{ a.label }}</button>
+          }
+        </div>
+      } @else {
+        <div class="text-body-secondary small mb-4">No further transitions from this state.</div>
+      }
+
+      <!-- Submissions -->
+      <div class="d-flex align-items-center justify-content-between mb-2">
+        <label class="form-label text-uppercase small fw-semibold text-body-secondary mb-0">Submissions</label>
+        @if (summary(); as s) {
+          <span class="small text-body-secondary">{{ s.submissions }} total · {{ s.graded }} graded · {{ s.ungraded }} pending</span>
+        }
+      </div>
+
+      @if (!submissions().length) {
+        <div class="text-body-secondary small">No submissions yet.</div>
+      } @else {
+        <div class="d-flex flex-column gap-3">
+          @for (sub of submissions(); track sub.id) {
+            <div class="border rounded-3 p-3">
+              <div class="d-flex align-items-center justify-content-between gap-2 mb-2">
+                <div class="fw-medium">{{ sub.student }}
+                  <span class="badge bg-{{ subColor(sub.status) }}-subtle text-{{ subColor(sub.status) }} ms-1 text-capitalize">{{ sub.status }}</span>
+                </div>
+                <span class="small text-body-secondary">{{ sub.submitted_at | date:'medium' }}</span>
+              </div>
+              @if (sub.response_text) { <p class="small mb-2">{{ sub.response_text }}</p> }
+              @if (sub.attachment_url) { <a class="small" [href]="sub.attachment_url" target="_blank" rel="noopener">View attachment</a> }
+
+              <div class="row g-2 align-items-end mt-1">
+                <div class="col-auto" style="width:7rem">
+                  <label class="form-label small mb-1">Score / {{ w.total_marks }}</label>
+                  <input type="number" class="form-control form-control-sm" [ngModel]="gradeDraft()[sub.id]?.score"
+                         (ngModelChange)="setScore(sub.id, $event)" [ngModelOptions]="{standalone: true}" min="0" [max]="w.total_marks"/>
+                </div>
+                <div class="col">
+                  <label class="form-label small mb-1">Feedback</label>
+                  <input type="text" class="form-control form-control-sm" [ngModel]="gradeDraft()[sub.id]?.feedback"
+                         (ngModelChange)="setFeedback(sub.id, $event)" [ngModelOptions]="{standalone: true}" placeholder="Optional feedback"/>
+                </div>
+                <div class="col-auto">
+                  <button type="button" class="btn btn-sm btn-primary" [disabled]="busy()" (click)="grade(sub)">
+                    {{ sub.status === 'graded' ? 'Update' : 'Grade' }}
+                  </button>
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+      }
+    }
+  </div>
+</app-learno-modal>
+
+<app-data-grid
+  endpoint="/backend/assessment/worksheets"
+  [columns]="columns"
+  [filters]="filterDefs()"
+  [actions]="['view', 'edit', 'delete']"
+  searchPlaceholder="Search worksheets…"
+  emptyMessage="No worksheets yet. Click “Add Worksheet” to create a draft."
+  (view)="onView($event)"
+  (edit)="onEdit($event)"
+/>
