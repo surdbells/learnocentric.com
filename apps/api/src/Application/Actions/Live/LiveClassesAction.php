@@ -240,11 +240,13 @@ final class LiveClassesAction
         if ($lc === null) {
             return Json::error($response, 'Live class not found.', 404);
         }
-        if (!$lc->isJoinable()) {
-            return Json::error($response, 'This class is not open to join.', 422);
-        }
-
         $isStaff = in_array($user->getRole()->getCode(), self::STAFF, true);
+
+        // A class is only joinable once it is live (a real Daily room + token
+        // exist). Before that a learner should wait for the host to go live.
+        if ($lc->getStatus() !== LiveClass::LIVE) {
+            return Json::error($response, 'This class hasn\'t started yet — please wait for the host to go live.', 422);
+        }
 
         // Learners get attendance recorded; staff (the host) do not.
         if (!$isStaff) {

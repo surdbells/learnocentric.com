@@ -32,8 +32,12 @@
                 <button type="button" class="btn btn-sm btn-success" [disabled]="busy() === lc.id" (click)="join(lc)">
                   <span class="material-symbols-outlined align-middle fs-6">videocam</span> Join now
                 </button>
+              } @else if (lc.status === 'scheduled') {
+                <button type="button" class="btn btn-sm btn-outline-secondary" disabled>
+                  <span class="material-symbols-outlined align-middle fs-6">schedule</span> Waiting for host to start
+                </button>
               } @else {
-                <button type="button" class="btn btn-sm btn-outline-primary" [disabled]="busy() === lc.id" (click)="join(lc)">Get link</button>
+                <span class="small text-body-secondary">This class has ended.</span>
               }
               @if (lc.joined) { <span class="small text-success"><span class="material-symbols-outlined align-middle fs-6">check</span> Joined</span> }
             </div>
