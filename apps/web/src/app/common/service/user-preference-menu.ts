@@ -191,21 +191,21 @@ export class UserPreferenceMenu {
   ]
 
   parent = [
-    { name: "Main", icon: "dashboard", link: "student/main",
+    { name: "Main", icon: "dashboard", link: "parent/main",
       children: [
-        { name: "Dashboard", link: "/student/main" },
+        { name: "Dashboard", link: "/parent/main" },
       ]
     },
 
-    { name: "Academics", icon: "school", link: "/student/academics",
+    { name: "Academics", icon: "school", link: "/parent/academics",
       children: [
-        { name: "Progress Report", link: "/student/academics/progress-report" },
+        { name: "Progress Report", link: "/parent/academics/progress-report" },
       ]
     },
 
-    { name: "Management", icon: "tenancy", link: "student/management",
+    { name: "Management", icon: "tenancy", link: "parent/management",
       children: [
-        { name: "Profile", link: "/student/management/profile" },
+        { name: "Profile", link: "/parent/management/profile" },
       ]
     },
   ]
