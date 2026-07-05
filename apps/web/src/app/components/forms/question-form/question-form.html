@@ -1,0 +1,99 @@
+<form (ngSubmit)="onSubmit()" [formGroup]="form">
+  <div class="modal-body">
+    <div class="row">
+      <div class="col-lg-6 mb-3">
+        <label class="form-label" for="q_topic">Topic</label>
+        <select id="q_topic" class="form-select" formControlName="topicId">
+          <option [ngValue]="null" disabled>Select a topic</option>
+          @for (t of topics(); track t.id) {
+            <option [ngValue]="t.id">{{ t.title }}{{ t.subject ? ' · ' + t.subject : '' }}</option>
+          }
+        </select>
+      </div>
+      <div class="col-lg-3 mb-3">
+        <label class="form-label" for="q_type">Type</label>
+        <select id="q_type" class="form-select" formControlName="type">
+          <option value="mcq">Multiple choice</option>
+          <option value="true_false">True / False</option>
+          <option value="short">Short answer</option>
+          <option value="numeric">Numeric</option>
+        </select>
+      </div>
+      <div class="col-lg-3 mb-3">
+        <label class="form-label" for="q_diff">Difficulty</label>
+        <select id="q_diff" class="form-select" formControlName="difficulty">
+          <option value="easy">Easy</option>
+          <option value="medium">Medium</option>
+          <option value="hard">Hard</option>
+        </select>
+      </div>
+
+      <div class="col-lg-12">
+        <div learnoInput class="mb-3" [label]="'Question'" [inputType]="'text'" [id]="'q_stem'" [formControlName]="'stem'"></div>
+      </div>
+
+      <!-- Type-specific answer editor -->
+      <div class="col-lg-12 mb-3">
+        <label class="form-label d-flex align-items-center gap-2">
+          <span class="material-symbols-outlined fs-6 text-success">verified</span> Correct answer
+        </label>
+
+        @if (type() === 'mcq') {
+          <div formArrayName="options" class="d-flex flex-column gap-2">
+            @for (opt of options.controls; track $index) {
+              <div class="d-flex align-items-center gap-2" [formGroupName]="$index">
+                <div class="form-check mb-0">
+                  <input class="form-check-input" type="radio" [value]="$index" [formControl]="correctIndexControl" [attr.aria-label]="'Mark option ' + letter($index) + ' correct'"/>
+                </div>
+                <span class="badge bg-light text-body-secondary">{{ letter($index) }}</span>
+                <input class="form-control" formControlName="text" [placeholder]="'Option ' + letter($index)"/>
+                <button type="button" class="btn btn-sm btn-icon text-danger" (click)="removeOption($index)" [disabled]="options.length <= 2" title="Remove">
+                  <span class="material-symbols-outlined">close</span>
+                </button>
+              </div>
+            }
+          </div>
+          <button type="button" class="btn btn-sm btn-link px-0 mt-1" (click)="addOption()">+ Add option</button>
+          <div class="form-text">Select the radio next to the correct option.</div>
+        } @else if (type() === 'true_false') {
+          <div class="d-flex gap-4">
+            <div class="form-check">
+              <input class="form-check-input" type="radio" id="tf_true" value="true" formControlName="tfAnswer"/>
+              <label class="form-check-label" for="tf_true">True</label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="radio" id="tf_false" value="false" formControlName="tfAnswer"/>
+              <label class="form-check-label" for="tf_false">False</label>
+            </div>
+          </div>
+        } @else if (type() === 'short') {
+          <textarea class="form-control" rows="3" formControlName="shortAnswers" placeholder="One accepted answer per line"></textarea>
+          <div class="form-text">Any of these (case-insensitive) will be accepted. One per line.</div>
+        } @else if (type() === 'numeric') {
+          <div class="row g-2">
+            <div class="col"><input type="number" class="form-control" formControlName="numValue" placeholder="Correct value"/></div>
+            <div class="col"><input type="number" class="form-control" formControlName="numTolerance" placeholder="± tolerance"/></div>
+          </div>
+        }
+      </div>
+
+      <div class="col-lg-4 mb-3">
+        <label class="form-label" for="q_track">Track</label>
+        <select id="q_track" class="form-select" formControlName="track">
+          <option value="academic">Academic performance</option>
+          <option value="competency">Competency transfer</option>
+        </select>
+      </div>
+      <div class="col-lg-2">
+        <div learnoInput class="mb-3" [label]="'Marks'" [inputType]="'number'" [id]="'q_marks'" [formControlName]="'marks'"></div>
+      </div>
+      <div class="col-lg-6">
+        <div learnoInput class="mb-3" [label]="'Explanation (optional)'" [inputType]="'text'" [id]="'q_expl'" [formControlName]="'explanation'"></div>
+      </div>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <a class="btn btn-light" data-bs-dismiss="modal">Cancel</a>
+    <app-learno-button [isLoading]="isLoading()" [text]="isEdit() ? 'Update Question' : 'Add Question'"/>
+  </div>
+</form>

@@ -1,0 +1,101 @@
+<app-page-header icon="quiz" action="Question Bank">
+  <app-learno-button text="Add Question" icon="add" data-bs-toggle="modal" data-bs-target="#add_question" (clicked)="onAdd()"/>
+</app-page-header>
+
+<!-- Create / edit -->
+<app-learno-modal [modalId]="'add_question'" [modalAction]="selectQuestion() ? 'Edit Question' : 'Add Question'" [showBtn]="false">
+  <app-question-form
+    modalForm
+    [select]="selectQuestion()"
+    [topics]="topics()"
+    (submitted)="handleSuccessSubmit($event)"
+  />
+</app-learno-modal>
+
+<!-- Lifecycle + answer-validation -->
+<app-learno-modal [modalId]="'question_lifecycle'" [modalAction]="'Question review'" [showBtn]="false">
+  <div modalForm>
+    @if (lifecycleQuestion(); as q) {
+      <div class="d-flex align-items-start justify-content-between flex-wrap gap-2 mb-1">
+        <h6 class="fw-semibold mb-0 pe-3">{{ q.stem }}</h6>
+        <span class="badge bg-{{ statusColor(q.approval_status) }}-subtle text-{{ statusColor(q.approval_status) }} text-capitalize px-3 py-2">
+          {{ q.approval_status }}
+        </span>
+      </div>
+      <p class="text-body-secondary small mb-4">{{ q.topic }} · {{ q.type }} · {{ q.marks }} mark(s) · v{{ q.version_count || 0 }}</p>
+
+      <!-- Answer gate -->
+      <div class="p-3 rounded-3 mb-4" [class.bg-success-subtle]="q.answer_validated" [class.bg-warning-subtle]="!q.answer_validated">
+        <div class="d-flex align-items-center justify-content-between gap-2 flex-wrap">
+          <div class="d-flex align-items-center gap-2">
+            <span class="material-symbols-outlined text-{{ q.answer_validated ? 'success' : 'warning' }}">
+              {{ q.answer_validated ? 'verified' : 'gpp_maybe' }}
+            </span>
+            <span class="fw-medium">{{ q.answer_validated ? 'Answer validated' : 'Answer not validated' }}</span>
+          </div>
+          @if (!q.answer_validated) {
+            <button type="button" class="btn btn-sm btn-warning" [disabled]="validating()" (click)="validate()">Run validation</button>
+          }
+        </div>
+        @if (q.answer_error) {
+          <div class="small text-danger mt-2">{{ q.answer_error }}</div>
+        }
+      </div>
+
+      <div class="mb-4">
+        <label class="form-label text-uppercase small fw-semibold text-body-secondary">Move to</label>
+        @if (availableActions().length) {
+          <div class="d-flex flex-wrap gap-2">
+            @for (a of availableActions(); track a.to) {
+              <button type="button" class="btn btn-sm"
+                      [class.btn-primary]="a.to !== 'archived'"
+                      [class.btn-outline-danger]="a.to === 'archived'"
+                      [disabled]="!a.enabled || transitioning()"
+                      (click)="transition(a.to)">
+                {{ a.label }}
+              </button>
+            }
+          </div>
+          @if (!q.answer_validated) {
+            <div class="form-text">Validate the answer before this question can be approved or published.</div>
+          }
+        } @else {
+          <div class="text-body-secondary small">No further transitions available from this state.</div>
+        }
+      </div>
+
+      <label class="form-label text-uppercase small fw-semibold text-body-secondary">History</label>
+      @if (historyLoading()) {
+        <div class="text-body-secondary small">Loading history…</div>
+      } @else if (history().length) {
+        <ul class="timeline list-unstyled mb-0">
+          @for (v of history(); track v.id) {
+            <li class="d-flex gap-3 pb-3">
+              <span class="dot bg-{{ statusColor(v.to_status) }} mt-1"></span>
+              <div>
+                <div class="fw-medium text-capitalize">
+                  {{ v.action }}
+                  <span class="text-body-secondary fw-normal">{{ v.from_status ? v.from_status + ' → ' + v.to_status : v.to_status }}</span>
+                </div>
+                <div class="small text-body-secondary">v{{ v.version }} · {{ v.actor_name || 'System' }} · {{ v.created_at | date:'medium' }}</div>
+              </div>
+            </li>
+          }
+        </ul>
+      } @else {
+        <div class="text-body-secondary small">No history yet.</div>
+      }
+    }
+  </div>
+</app-learno-modal>
+
+<app-data-grid
+  endpoint="/backend/assessment/questions"
+  [columns]="columns"
+  [filters]="filterDefs()"
+  [actions]="['view', 'edit', 'delete']"
+  searchPlaceholder="Search questions…"
+  emptyMessage="No questions yet. Click “Add Question” to create a draft."
+  (view)="onView($event)"
+  (edit)="onEdit($event)"
+/>
