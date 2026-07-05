@@ -46,6 +46,22 @@
               </div>
             </div>
           </div>
+          <div class="list-group-item border-0 bg-body">
+            <div class="row">
+              <div class="col-12 mb-2 fw-semibold">Content package</div>
+              <div class="col">
+                <select class="form-select form-select-sm" [ngModel]="assignPackageId()" (ngModelChange)="assignPackageId.set($event)">
+                  <option value="">— None —</option>
+                  @for (p of packages(); track p.id) {
+                    <option [value]="p.id">{{ p.name }}</option>
+                  }
+                </select>
+              </div>
+              <div class="col-auto">
+                <app-learno-button text="Assign" [isLoading]="assigning()" (clicked)="assignPackage()" />
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 

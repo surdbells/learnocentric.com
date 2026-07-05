@@ -55,6 +55,7 @@ import {SuperAdminContentLibrary} from './pages/dashboard/super-admin/content-li
 import {SuperAdminContentPackages} from './pages/dashboard/super-admin/content-packages/content-packages';
 import {SuperAdminPlans} from './pages/dashboard/super-admin/plans/plans';
 import {Support} from './pages/dashboard/support/support';
+import {Resources} from './pages/dashboard/resources/resources';
 
 export const routes: Routes = [
   {
@@ -108,6 +109,7 @@ export const routes: Routes = [
           { path: "insights", component: Insights, data: { user: "admin" } },
           { path: "analytics", component: Analytics, canActivate: [moduleGuard('analytics')], data: { user: "admin" } },
           { path: "interventions", component: Interventions, canActivate: [moduleGuard('interventions')], data: { user: "admin" } },
+          { path: "resources", component: Resources, data: { user: "admin" } },
         ]
       },
       {
@@ -160,6 +162,7 @@ export const routes: Routes = [
           { path: "insights", component: Insights },
           { path: "analytics", component: Analytics, canActivate: [moduleGuard('analytics')] },
           { path: "interventions", component: Interventions, canActivate: [moduleGuard('interventions')] },
+          { path: "resources", component: Resources },
         ]
       },
       {
@@ -205,6 +208,7 @@ export const routes: Routes = [
           { path: "analytics", component: Analytics, canActivate: [moduleGuard('analytics')] },
           { path: "interventions", component: Interventions, canActivate: [moduleGuard('interventions')] },
           { path: "safeguarding", component: Safeguarding, canActivate: [moduleGuard('safeguarding')] },
+          { path: "resources", component: Resources },
         ]
       },
       {
@@ -239,6 +243,7 @@ export const routes: Routes = [
           { path: "portfolio", component: MyPortfolio, canActivate: [moduleGuard('portfolio')] },
           { path: "feedback", component: MyFeedback },
           { path: "live-classes", component: MyLiveClasses, canActivate: [moduleGuard('live_classes')] },
+          { path: "resources", component: Resources },
           { path: "progress-report", component: ProgressReport, canActivate: [moduleGuard('analytics')] },
         ]
       },

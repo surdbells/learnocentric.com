@@ -681,7 +681,14 @@ class SeedCommand extends Command
         $this->em->persist($pack);
         $this->em->flush();
 
-        $output->writeln('  + 5 content resources, 1 content package');
+        // Assign the pack to the seeded school so its resources are visible there.
+        $gof = $this->em->getRepository(User::class)->findOneBy(['email' => 'school@gmail.com'])?->getInstitution();
+        if ($gof !== null) {
+            $gof->setAssignedPackageId($pack->getId());
+            $this->em->flush();
+        }
+
+        $output->writeln('  + 5 content resources, 1 content package (assigned to GOF College)');
     }
 
     /** Seed a couple of support tickets so the support centre isn't empty. */

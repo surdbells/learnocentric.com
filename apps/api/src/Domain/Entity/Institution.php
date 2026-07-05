@@ -79,6 +79,8 @@ class Institution
     public function setAdminContact(?array $adminContact): void { $this->adminContact = $adminContact; }
     public function getStatus(): string { return $this->status; }
     public function setStatus(string $status): void { $this->status = $status; }
+    public function getAssignedPackageId(): ?int { return $this->assignedPackageId; }
+    public function setAssignedPackageId(?int $id): void { $this->assignedPackageId = $id; }
 
     public function toArray(): array
     {

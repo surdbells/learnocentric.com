@@ -12,6 +12,7 @@ import { Router, RouterLink } from '@angular/router';
 import { DatePipe } from '@angular/common';
 import { LearnoModal } from "../../../../components/learno-modal/learno-modal";
 import { InstitutionForm } from "../../../../components/forms/institution-form/institution-form";
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-super-admin-institutions',
@@ -28,7 +29,8 @@ import { InstitutionForm } from "../../../../components/forms/institution-form/i
     DatePipe,
     RouterLink,
     LearnoModal,
-    InstitutionForm
+    InstitutionForm,
+    FormsModule
 ],
   templateUrl: './institutions.html',
   styleUrl: './institutions.css'
@@ -46,6 +48,9 @@ export class SuperAdminInstitutions implements OnInit {
   selectedInstitution = signal<any | null>(null);
   anchorSelector = signal<string>('');
   searchTerm = signal<string>('');
+  packages = signal<any[]>([]);
+  assignPackageId = signal<string>('');
+  assigning = signal<boolean>(false);
   @ViewChild(LearnoOffset) offsetCmp!: LearnoOffset;
   @ViewChild('closebtn', { static: false }) closebtn!: any;
   
@@ -77,6 +82,10 @@ export class SuperAdminInstitutions implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    this.apiSrv.get('/backend/content/packages').subscribe({
+      next: (data: any) => this.packages.set(Array.isArray(data) ? data : (data?.data ?? [])),
+      error: () => {},
+    });
     this.isLoading.set(true);
     this.apiSrv.get('/backend/admin/institutions')
       .subscribe({
@@ -112,6 +121,7 @@ export class SuperAdminInstitutions implements OnInit {
           evt.row = data;
 
           this.selectedInstitution.set(evt.row);
+          this.assignPackageId.set(evt.row?.assigned_package_id ? String(evt.row.assigned_package_id) : '');
           this.anchorSelector.set(evt.anchorSelector || '');
           this.selectedInstitutionId.set(evt.row.id);
           this.isEdit.set(true);
@@ -132,6 +142,21 @@ export class SuperAdminInstitutions implements OnInit {
   handleCloseOffset() {
     this.selectedInstitution.set(null);
     this.anchorSelector.set('');
+  }
+
+  assignPackage() {
+    const inst = this.selectedInstitution();
+    if (!inst) return;
+    this.assigning.set(true);
+    const packageId = this.assignPackageId() ? Number(this.assignPackageId()) : null;
+    this.apiSrv.post('/backend/content/assign', {institution_id: inst.id, package_id: packageId}).subscribe({
+      next: (res: any) => {
+        this.toastService.success(packageId ? 'Package assigned' : 'Package removed', 'Success');
+        this.selectedInstitution.set({...inst, assigned_package_id: res?.assigned_package_id ?? null});
+        this.assigning.set(false);
+      },
+      error: (e) => { this.toastService.error(e?.error?.error || 'Could not assign the package'); this.assigning.set(false); },
+    });
   }
 
   goToOnboard() {

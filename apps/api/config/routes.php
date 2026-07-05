@@ -173,6 +173,8 @@ return static function (App $app): void {
             $auth->map(['GET', 'POST', 'PUT', 'DELETE'], '/content/library', ContentLibraryAction::class);
             $auth->get('/content/packages/{id:[0-9]+}', ContentPackagesAction::class . ':show');
             $auth->map(['GET', 'POST', 'DELETE'], '/content/packages', ContentPackagesAction::class);
+            $auth->post('/content/assign', ContentPackagesAction::class . ':assign');
+            $auth->get('/content/my-resources', ContentPackagesAction::class . ':myResources');
 
             // Billing (Paystack) — plan catalogue, subscribe/verify, invoices
             $auth->map(['GET', 'POST', 'PUT', 'DELETE'], '/billing/plans', PlansAction::class);

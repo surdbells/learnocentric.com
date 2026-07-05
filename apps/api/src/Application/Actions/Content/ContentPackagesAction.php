@@ -7,6 +7,7 @@ namespace App\Application\Actions\Content;
 use App\Application\Support\Json;
 use App\Domain\Entity\ContentPackage;
 use App\Domain\Entity\ContentResource;
+use App\Domain\Entity\Institution;
 use App\Domain\Entity\User;
 use App\Service\AuditLogger;
 use Doctrine\ORM\EntityManagerInterface;
@@ -41,6 +42,67 @@ final class ContentPackagesAction
             return Json::error($response, 'Package not found.', 404);
         }
         return Json::write($response, $package->toArray(true));
+    }
+
+    /** POST /content/assign — assign a package to an institution (or unassign with package_id null). */
+    public function assign(Request $request, Response $response): Response
+    {
+        if (($g = $this->guard($request, $response)) !== null) {
+            return $g;
+        }
+        $body = (array) $request->getParsedBody();
+        $institution = $this->em->getRepository(Institution::class)->find((int) ($body['institution_id'] ?? 0));
+        if ($institution === null) {
+            return Json::error($response, 'Institution not found.', 404);
+        }
+
+        $packageId = $body['package_id'] ?? null;
+        if ($packageId === null || $packageId === '' || (int) $packageId === 0) {
+            $institution->setAssignedPackageId(null);
+            $this->em->flush();
+            $this->audit->log('content_package.unassign', $request->getAttribute('user'), 'Institution', (string) $institution->getId(), null, null);
+            return Json::write($response, ['institution_id' => $institution->getId(), 'assigned_package_id' => null]);
+        }
+
+        $package = $this->em->getRepository(ContentPackage::class)->find((int) $packageId);
+        if ($package === null) {
+            return Json::error($response, 'Package not found.', 404);
+        }
+        $institution->setAssignedPackageId($package->getId());
+        $this->em->flush();
+        $this->audit->log('content_package.assign', $request->getAttribute('user'), 'Institution', (string) $institution->getId(), null, ['package_id' => $package->getId()]);
+
+        return Json::write($response, [
+            'institution_id' => $institution->getId(),
+            'assigned_package_id' => $package->getId(),
+            'assigned_package' => $package->getName(),
+        ]);
+    }
+
+    /** GET /content/my-resources — the caller institution's assigned package + its resources. */
+    public function myResources(Request $request, Response $response): Response
+    {
+        /** @var User $user */
+        $user = $request->getAttribute('user');
+        $institution = $user->getInstitution();
+        $packageId = $institution?->getAssignedPackageId();
+        if ($packageId === null) {
+            return Json::write($response, ['package' => null, 'resources' => []]);
+        }
+        $package = $this->em->getRepository(ContentPackage::class)->find($packageId);
+        if ($package === null || !$package->toArray()['isActive']) {
+            return Json::write($response, ['package' => null, 'resources' => []]);
+        }
+        // Only serve resources that haven't been taken down.
+        $resources = array_values(array_filter(
+            array_map(static fn (ContentResource $r) => $r->toArray(), $package->getResources()->getValues()),
+            static fn (array $r) => $r['licence_status'] !== ContentResource::TAKEDOWN,
+        ));
+
+        return Json::write($response, [
+            'package' => ['id' => $package->getId(), 'name' => $package->getName(), 'description' => $package->toArray()['description']],
+            'resources' => $resources,
+        ]);
     }
 
     private function list(Response $response): Response
