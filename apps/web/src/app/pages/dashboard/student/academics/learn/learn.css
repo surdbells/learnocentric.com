@@ -1,0 +1,36 @@
+.stage-pip {
+  font-size: 18px;
+  color: var(--bs-secondary-color);
+  opacity: .35;
+}
+
+.stage-pip.done {
+  color: var(--bs-success);
+  opacity: 1;
+}
+
+.stage-pip.avail {
+  color: var(--bs-primary);
+  opacity: 1;
+}
+
+.stage-pip.na {
+  opacity: .25;
+}
+
+.lesson-text {
+  white-space: pre-line;
+  line-height: 1.6;
+}
+
+.stage-row.clickable {
+  cursor: pointer;
+}
+
+.stage-row.clickable:hover {
+  background: var(--bs-tertiary-bg);
+}
+
+.stage-row:last-child {
+  border-bottom: 0 !important;
+}

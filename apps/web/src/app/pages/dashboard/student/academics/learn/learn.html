@@ -1,0 +1,123 @@
+<app-page-header icon="school" action="Learn"></app-page-header>
+
+<!-- LIST: topic journey -->
+@if (mode() === 'list') {
+  @if (loading()) {
+    <div class="text-body-secondary p-4">Loading…</div>
+  } @else if (!topics().length) {
+    <div class="card border-0 shadow-sm p-5 text-center text-body-secondary">No lessons are published for you yet.</div>
+  } @else {
+    <div class="row g-3">
+      @for (t of topics(); track t.id) {
+        <div class="col-md-6 col-xl-4">
+          <div class="card border-0 shadow-sm h-100">
+            <div class="card-body d-flex flex-column">
+              <div class="small text-body-secondary">Week {{ t.week_number || '—' }} · {{ t.subject }}</div>
+              <h6 class="fw-semibold mb-2">{{ t.title }}</h6>
+
+              <div class="d-flex justify-content-between align-items-center small mb-1">
+                <span class="text-body-secondary">{{ t.completed_stages }}/{{ t.total_stages }} stages</span>
+                <span class="fw-semibold">{{ t.progress }}%</span>
+              </div>
+              <div class="progress mb-3" style="height:6px">
+                <div class="progress-bar bg-{{ barColor(t.progress) }}" [style.width.%]="t.progress"></div>
+              </div>
+
+              <div class="d-flex gap-1 mb-3">
+                @for (s of t.stages; track s.key) {
+                  <span class="stage-pip material-symbols-outlined"
+                        [class.done]="s.done" [class.avail]="s.available && !s.done" [class.na]="!s.available"
+                        [attr.title]="s.label + (s.available ? (s.done ? ' — done' : ' — to do') : ' — not available')">
+                    {{ stageIcon(s.key) }}
+                  </span>
+                }
+              </div>
+
+              <button type="button" class="btn btn-sm mt-auto" [class.btn-primary]="!t.complete" [class.btn-outline-success]="t.complete"
+                      [disabled]="busy()" (click)="openLesson(t)">
+                {{ ctaLabel(t) }}
+              </button>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  }
+}
+
+<!-- LESSON viewer -->
+@if (mode() === 'lesson' && lesson(); as l) {
+  <button type="button" class="btn btn-sm btn-light mb-3" (click)="backToList()">
+    <span class="material-symbols-outlined align-middle fs-6">arrow_back</span> All lessons
+  </button>
+
+  <div class="row g-4">
+    <div class="col-lg-8">
+      <div class="card border-0 shadow-sm">
+        <div class="card-body">
+          <div class="small text-body-secondary">Week {{ l.week_number || '—' }} · {{ l.subject }}</div>
+          <h4 class="fw-semibold mb-3">{{ l.title }}</h4>
+
+          @if (l.objective) {
+            <div class="mb-3"><div class="small text-uppercase fw-semibold text-body-secondary">Objective</div><p class="mb-0">{{ l.objective }}</p></div>
+          }
+
+          @if (l.lesson) {
+            @if (l.lesson.video_url) {
+              <a class="btn btn-sm btn-outline-primary mb-3" [href]="l.lesson.video_url" target="_blank" rel="noopener">
+                <span class="material-symbols-outlined align-middle fs-6">play_circle</span> Watch video
+              </a>
+            }
+            @if (l.lesson.learner_note) {
+              <div class="mb-3"><div class="small text-uppercase fw-semibold text-body-secondary">Lesson note</div><p class="lesson-text mb-0">{{ l.lesson.learner_note }}</p></div>
+            }
+            @if (l.lesson.worked_examples) {
+              <div class="mb-3"><div class="small text-uppercase fw-semibold text-body-secondary">Worked examples</div><p class="lesson-text mb-0">{{ l.lesson.worked_examples }}</p></div>
+            }
+          } @else {
+            <div class="alert alert-light border">The lesson pack for this topic isn't published yet — you can still work through the stages.</div>
+          }
+
+          @if (l.real_life_relevance) {
+            <div class="alert alert-success-subtle border-0 mb-0">
+              <b>Why it matters:</b> {{ l.real_life_relevance }}
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+
+    <!-- Journey checklist -->
+    <div class="col-lg-4">
+      <div class="card border-0 shadow-sm">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h6 class="fw-semibold mb-0">Your progress</h6>
+            <span class="badge bg-{{ barColor(l.progress) }}-subtle text-{{ barColor(l.progress) }}">{{ l.progress }}%</span>
+          </div>
+          <ul class="list-unstyled mb-3">
+            @for (s of l.stages; track s.key) {
+              <li class="d-flex align-items-center gap-2 py-2 border-bottom stage-row"
+                  [class.text-body-secondary]="!s.available" [class.clickable]="s.available && s.link" (click)="s.available && goToStage(s)">
+                <span class="material-symbols-outlined" [class.text-success]="s.done" [class.text-primary]="s.available && !s.done">
+                  {{ s.done ? 'check_circle' : (s.available ? 'radio_button_unchecked' : 'block') }}
+                </span>
+                <span class="flex-grow-1">{{ s.label }}</span>
+                @if (s.detail) { <span class="small badge bg-light text-body-secondary">{{ s.detail }}</span> }
+                @if (s.available && s.link) { <span class="material-symbols-outlined fs-6 text-body-secondary">chevron_right</span> }
+              </li>
+            }
+          </ul>
+
+          @if (!lessonStageDone()) {
+            <button type="button" class="btn btn-primary w-100" [disabled]="busy()" (click)="completeLesson()">Mark lesson complete</button>
+          } @else if (l.complete) {
+            <div class="text-center text-success"><span class="material-symbols-outlined align-middle">verified</span> Topic complete!</div>
+          } @else {
+            <div class="text-center small text-body-secondary">Lesson done — continue with the stages above.</div>
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+}

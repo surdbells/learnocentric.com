@@ -200,6 +200,7 @@ export class UserPreferenceMenu {
 
     { name: "Academics", icon: "school", link: "/student/academics",
       children: [
+        { name: "Learn", link: "/student/academics/learn" },
         // { name: "Assignments", link: "/student/academics/assignments" },
         { name: "Student Routine", link: "/student/academics/class-routine" },
         { name: "E-Library", link: "/student/academics/e-library" },
