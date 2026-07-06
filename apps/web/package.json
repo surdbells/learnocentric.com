@@ -6,6 +6,7 @@
     "start": "ng serve",
     "build": "ng build",
     "build:ci": "node --max_old_space_size=4096 ./scripts/ng.cjs build",
+    "build:pages": "node --max_old_space_size=4096 ./scripts/ng.cjs build && node scripts/pages-index.cjs",
     "prune:prod": "npm prune --omit=dev",
     "start:ssr": "node dist/learno-client/server/server.mjs",
     "watch": "ng build --watch --configuration development",
