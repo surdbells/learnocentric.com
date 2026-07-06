@@ -1,4 +1,10 @@
-:host { display: block; }
+:host { display: block; width: 100%; }
+
+/* quill-editor is a custom element (inline by default) — make it fill its container */
+.rich-editor {
+  display: block;
+  width: 100%;
+}
 
 /* Match the app's input styling around Quill's Snow theme */
 .rich-editor ::ng-deep .ql-toolbar {
