@@ -40,6 +40,6 @@ export const appConfig: ApplicationConfig = {
     // In dev the browser uses a relative base ('') so requests hit the Angular dev-server
     // proxy (see proxy.conf.json) and avoid CORS. In a production build it targets the API
     // directly. The SSR server overrides this with the absolute URL (app.config.server.ts).
-    { provide: API_BASE_URL, useValue: isDevMode() ? '' : 'https://learnocentric.com' },
+    { provide: API_BASE_URL, useValue: isDevMode() ? '' : 'https://api.learnocentric.com' },
   ]
 };

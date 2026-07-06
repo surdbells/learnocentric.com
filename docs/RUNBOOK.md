@@ -64,6 +64,8 @@ cd /www/wwwroot/learnocentric/apps/api
 composer install --no-dev --optimize-autoloader --classmap-authoritative
 ```
 
+> **`ext-redis` platform conflict?** If install fails with *"symfony/cache … conflicts with ext-redis <6.1"* (aaPanel/Ubuntu ships an older `php-redis`, e.g. 5.3.7), append `--ignore-platform-req=ext-redis`. The app doesn't use Redis — `symfony/cache` only pulls it in for an adapter we never instantiate — so skipping that one platform check is safe and installs straight from the lock file (no `composer update`). See **Troubleshooting → Composer ext-redis conflict**.
+
 ### A5. Configure `.env`
 
 ```bash
@@ -131,7 +133,10 @@ chmod -R 775 public/uploads
 1. aaPanel → **Website → Add site**
    - Domain: `api.learnocentric.com`
    - PHP version: 8.2+
-   - **Do not** let it create a fresh directory — after creating, set the site's **document root to `/www/wwwroot/learnocentric/apps/api/public`** (Site → Config → Site directory).
+   - After creating, point it at the checkout using aaPanel's **two** directory settings (Site → Config):
+     - **Website directory (site root)** → `/www/wwwroot/learnocentric/apps/api`
+     - **Running directory** → `/public`
+   - This matters: aaPanel scopes PHP's `open_basedir` to the **Website directory**, and `public/index.php` bootstraps files *outside* `public/` (`../config/bootstrap.php`, `vendor/`, `src/`, `.env`). Pointing the doc-root straight at `.../public` jails `open_basedir` to `public/` and the app dies with *"open_basedir restriction in effect … bootstrap.php is not within the allowed path(s)"*. Setting the site root to `apps/api` and the running directory to `/public` gives Nginx the right doc-root **and** an `open_basedir` that covers the whole app.
 2. Add the SPA-style front-controller rewrite (Slim routes everything through `public/index.php`). In the site's Nginx config (Site → Config → Configuration file), inside `server { ... }`:
 
 ```nginx
@@ -199,7 +204,7 @@ The browser API base is set in code. Edit **`apps/web/src/app/app.config.ts`**:
 { provide: API_BASE_URL, useValue: isDevMode() ? '' : 'https://api.learnocentric.com' },
 ```
 
-(Change `https://learnocentric.com` → your API host. Do the same in `app.config.server.ts` if you ever enable SSR.) Commit this change.
+The committed default is `https://learnocentric.com` — change it to your **API** host (`https://api.learnocentric.com`). Do the same in `app.config.server.ts` if you ever enable SSR. Commit this change.
 
 ### B2. Create the Cloudflare Pages project
 
@@ -297,6 +302,8 @@ Frontend: push to `main`. Cloudflare Pages builds and deploys automatically. (Or
 
 **CORS errors in the browser.** The frontend origin isn't in `CORS_ALLOWED_ORIGINS`. Add the exact origin (scheme + host, no trailing slash), including the `*.pages.dev` preview origin, and reload PHP. Preflight `OPTIONS` is handled by the API's CORS middleware.
 
+**Frontend route 404s on refresh (but works when navigating in-app).** The SPA fallback isn't taking effect. Confirm `apps/web/public/_redirects` (with `/* /index.html 200`) shipped in the build output, and that the Pages build command was `npm run build:pages` (not `npm run build`) so an `index.html` exists.
+
 **cURL error 60 / SSL certificate on outbound calls (Daily/Paystack/ZeptoMail).** PHP's cURL can't find the CA bundle. On Ubuntu, point it at the system bundle in the active `php.ini`:
 ```ini
 curl.cainfo = "/etc/ssl/certs/ca-certificates.crt"
@@ -305,6 +312,14 @@ openssl.cafile = "/etc/ssl/certs/ca-certificates.crt"
 Reload PHP-FPM. (This is the same class of issue documented for the dev environment.)
 
 **Uploads return 404 or "permission denied" on save.** Check `public/uploads` exists, is owned by `www:www`, is `775`, and that `STORAGE_PUBLIC_URL` matches the API host. The Nginx `try_files` rule serves them as static files.
+
+**`open_basedir restriction in effect … bootstrap.php is not within the allowed path(s)`.** aaPanel jailed PHP to the doc-root (`.../public/`), but the app bootstraps files above it (`config/`, `vendor/`, `src/`, `.env`). Fix: Site → Config → set **Website directory** to `/www/wwwroot/learnocentric/apps/api` and **Running directory** to `/public` (see A7), then reload PHP. CLI fallback: unlock the aaPanel `.user.ini` with `chattr -i .../apps/api/public/.user.ini`, change its line to `open_basedir=/www/wwwroot/learnocentric/apps/api/:/tmp/`, `chattr +i` it back, reload PHP-FPM.
+
+**Composer `ext-redis` conflict on install.** `composer install` reports *"Your lock file does not contain a compatible set of packages"* and *"symfony/cache … conflicts with ext-redis <6.1"*. The server's bundled `php-redis` is older than symfony/cache's Redis adapter wants. The app never uses Redis, so ignore that one platform requirement:
+```bash
+composer install --no-dev --optimize-autoloader --classmap-authoritative --ignore-platform-req=ext-redis
+```
+This installs from the lock file unchanged — do **not** run `composer update` (it would re-resolve untested versions). Permanent alternative: `pecl install redis` to get `ext-redis ≥ 6.1`, then the flag isn't needed.
 
 **500 on every request / blank page.** Check `APP_DEBUG` temporarily `true` and read the PHP-FPM error log (aaPanel → Site → Logs). Usual causes: missing `pdo_pgsql`, wrong DB credentials, or `.env` not readable by `www`.
 
@@ -341,6 +356,6 @@ php bin/console.php migrations:migrate --no-interaction
 php bin/console.php migrations:diff            # generate a migration from entity changes
 php bin/console.php app:seed                   # roles/permissions/super-admin/catalogue (+demo)
 
-# Frontend (local build check)
-cd apps/web && npm ci && npm run build         # output: dist/learno-client/browser
+# Frontend (production static build — emits index.html + browser/)
+cd apps/web && npm ci && npm run build:pages   # output: dist/learno-client/browser
 ```
