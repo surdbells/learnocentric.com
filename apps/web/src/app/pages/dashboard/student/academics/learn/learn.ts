@@ -35,6 +35,8 @@ export class Learn {
 
   // Lesson content tabs
   activeTab = signal<string>('lesson');
+  // Which media item is playing in the Media tab
+  activeMediaIndex = signal(0);
 
   constructor() {
     this.load();
@@ -46,6 +48,30 @@ export class Learn {
     if (!l) return [];
     if (Array.isArray(l.media) && l.media.length) return l.media;
     return l.video_url ? [{url: l.video_url, name: 'Lesson video'}] : [];
+  }
+
+  selectMedia(i: number): void { this.activeMediaIndex.set(i); }
+  activeMedia(): { url: string; name?: string } {
+    const m = this.lessonMedia();
+    return m[this.activeMediaIndex()] ?? m[0] ?? {url: '', name: ''};
+  }
+
+  /** Icon + label for a media item, from its URL. */
+  private mediaKind(url: string): 'video' | 'audio' | 'pdf' | 'image' | 'link' {
+    const u = (url || '').toLowerCase();
+    if (/youtube|youtu\.be|vimeo/.test(u)) return 'video';
+    const ext = u.split('?')[0].split('#')[0].split('.').pop() || '';
+    if (['mp4', 'webm', 'mov', 'm4v', 'ogv'].includes(ext)) return 'video';
+    if (['mp3', 'wav', 'm4a', 'aac', 'oga'].includes(ext)) return 'audio';
+    if (ext === 'pdf') return 'pdf';
+    if (['png', 'jpg', 'jpeg', 'gif', 'webp', 'svg', 'avif'].includes(ext)) return 'image';
+    return 'link';
+  }
+  mediaIcon(url: string): string {
+    return {video: 'play_circle', audio: 'audiotrack', pdf: 'description', image: 'image', link: 'folder'}[this.mediaKind(url)];
+  }
+  mediaTypeLabel(url: string): string {
+    return {video: 'Video', audio: 'Audio', pdf: 'PDF', image: 'Image', link: 'Resource'}[this.mediaKind(url)];
   }
 
   /** The tabs to show for the current lesson, based on what content exists. */
@@ -74,6 +100,7 @@ export class Learn {
     this.noteBody.set('');
     this.noteSavedAt.set(null);
     this.activeTab.set('lesson');
+    this.activeMediaIndex.set(0);
     this.api.get<any>(`/backend/learn/topics/${topic.id}`).subscribe({
       next: (res) => { this.lesson.set(res); this.mode.set('lesson'); this.busy.set(false); this.loadNote(topic.id); },
       error: () => { this.toast.error('Could not open the lesson'); this.busy.set(false); },

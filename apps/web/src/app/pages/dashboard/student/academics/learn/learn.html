@@ -90,11 +90,33 @@
 
             <!-- MEDIA -->
             @if (activeTab() === 'media') {
-              <div class="d-flex flex-column gap-4">
-                @for (m of lessonMedia(); track $index) {
-                  <div>
-                    @if (m.name) { <div class="fw-medium mb-2">{{ m.name }}</div> }
-                    <app-media-embed [url]="m.url" [title]="m.name || l.title" />
+              <div class="row g-3">
+                <!-- Main player -->
+                <div [class.col-lg-8]="lessonMedia().length > 1" [class.col-12]="lessonMedia().length <= 1">
+                  <app-media-embed [url]="activeMedia().url" [title]="activeMedia().name || l.title" />
+                  <div class="d-flex align-items-center gap-2 mt-2">
+                    <app-icon [name]="mediaIcon(activeMedia().url)" [size]="18" class="text-primary" />
+                    <span class="fw-semibold">{{ activeMedia().name || 'Lesson media' }}</span>
+                    <span class="badge bg-light text-body-secondary">{{ mediaTypeLabel(activeMedia().url) }}</span>
+                  </div>
+                </div>
+
+                <!-- Playlist (only when there's more than one) -->
+                @if (lessonMedia().length > 1) {
+                  <div class="col-lg-4">
+                    <div class="media-list-label">In this lesson · {{ lessonMedia().length }} items</div>
+                    <div class="media-list">
+                      @for (m of lessonMedia(); track $index) {
+                        <button type="button" class="media-item" [class.active]="activeMediaIndex() === $index" (click)="selectMedia($index)">
+                          <span class="media-item-ic"><app-icon [name]="mediaIcon(m.url)" [size]="18" /></span>
+                          <span class="media-item-body">
+                            <span class="media-item-name">{{ m.name || 'Media ' + ($index + 1) }}</span>
+                            <span class="media-item-type">{{ mediaTypeLabel(m.url) }}</span>
+                          </span>
+                          @if (activeMediaIndex() === $index) { <app-icon name="play_arrow" [size]="16" class="text-primary" /> }
+                        </button>
+                      }
+                    </div>
                   </div>
                 }
               </div>

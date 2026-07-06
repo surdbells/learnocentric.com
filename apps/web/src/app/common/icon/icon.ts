@@ -7,9 +7,9 @@ import {
   CloudUpload, CreditCard, DoorOpen, Eye, FilePen, FileText, FileUp, Folder, FolderOpen,
   AlarmClock, Download, GraduationCap, Headset, House, Inbox, Layers, LayoutDashboard, Library,
   LifeBuoy, ListFilter, ListChecks, LogOut, Megaphone, Menu, MessageSquare, MessagesSquare, Monitor,
-  Moon, Newspaper, PanelLeftClose, PartyPopper, Pencil, Play, Plus, Pointer, Receipt, Search,
-  Settings, Shield, ShieldCheck, Smile, SquarePen, Star, Sun, Tag, Trash2, TrendingUp, UserCog,
-  UserPlus, Users, Video, Wallet, X,
+  Image, Moon, Music, Newspaper, PanelLeftClose, PartyPopper, Pencil, Play, Plus, Pointer, Receipt,
+  Search, Settings, Shield, ShieldCheck, Smile, SquarePen, Star, Sun, Tag, Trash2, TrendingUp,
+  UserCog, UserPlus, Users, Video, Wallet, X,
 } from 'lucide-angular';
 
 /**
@@ -47,7 +47,7 @@ const MAP: Record<string, any> = {
   // misc
   shield: Shield, layers: Layers, monitor: Monitor, download: Download, groups: Users,
   alarm: AlarmClock, edit_square: SquarePen, verified_user: ShieldCheck,
-  circle_check: CircleCheck, group_add: UserPlus,
+  circle_check: CircleCheck, group_add: UserPlus, audiotrack: Music, image: Image,
 };
 
 @Component({
