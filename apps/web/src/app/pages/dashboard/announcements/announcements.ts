@@ -6,6 +6,8 @@ import {PageHeader} from '../../../common/layout/page-header/page-header';
 import {ApiService} from '../../../common/service/api.service';
 import {AuthService} from '../../../common/auth/auth.service';
 import {Icon} from '../../../common/icon/icon';
+import {RichEditor} from '../../../common/rich-editor/rich-editor';
+import {RichText} from '../../../common/rich-editor/rich-text';
 
 /**
  * School announcements feed. Staff (admins + teachers) can post to an audience;
@@ -14,7 +16,7 @@ import {Icon} from '../../../common/icon/icon';
 @Component({
   selector: 'app-announcements',
   standalone: true,
-  imports: [Icon, PageHeader, DatePipe, FormsModule],
+  imports: [RichText, RichEditor, Icon, PageHeader, DatePipe, FormsModule],
   templateUrl: './announcements.html',
   styleUrl: './announcements.css',
 })

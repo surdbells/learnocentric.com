@@ -9,6 +9,7 @@ import {DataGrid, GridColumn, GridFilter} from '../../../../../components/data-g
 import {WorksheetForm} from '../../../../../components/forms/worksheet-form/worksheet-form';
 import {ApiService} from '../../../../../common/service/api.service';
 import {AuthService} from '../../../../../common/auth/auth.service';
+import {RichText} from '../../../../../common/rich-editor/rich-text';
 
 declare const bootstrap: any;
 
@@ -19,7 +20,7 @@ const APPROVER_ROLES = ['academic_lead', 'school_admin', 'tutor_admin', 'super_a
 @Component({
   selector: 'app-worksheets',
   standalone: true,
-  imports: [PageHeader, LearnoModal, LearnoButton, DataGrid, WorksheetForm, FormsModule, DatePipe],
+  imports: [RichText, PageHeader, LearnoModal, LearnoButton, DataGrid, WorksheetForm, FormsModule, DatePipe],
   templateUrl: './worksheets.html',
   styleUrl: './worksheets.css',
 })

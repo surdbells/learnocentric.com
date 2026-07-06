@@ -10,6 +10,8 @@ import {DataGrid, GridColumn, GridFilter} from '../../../../../components/data-g
 import {ApiService} from '../../../../../common/service/api.service';
 import {AuthService} from '../../../../../common/auth/auth.service';
 import {Icon} from '../../../../../common/icon/icon';
+import {RichEditor} from '../../../../../common/rich-editor/rich-editor';
+import {RichText} from '../../../../../common/rich-editor/rich-text';
 
 declare const bootstrap: any;
 
@@ -21,7 +23,7 @@ const CATEGORIES = ['welfare', 'bullying', 'abuse', 'attendance', 'mental_health
 @Component({
   selector: 'app-safeguarding',
   standalone: true,
-  imports: [Icon, PageHeader, LearnoModal, LearnoButton, DataGrid, ReactiveFormsModule, FormsModule, DatePipe],
+  imports: [RichText, RichEditor, Icon, PageHeader, LearnoModal, LearnoButton, DataGrid, ReactiveFormsModule, FormsModule, DatePipe],
   templateUrl: './safeguarding.html',
   styleUrl: './safeguarding.css',
 })

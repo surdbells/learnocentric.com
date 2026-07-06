@@ -1,0 +1,23 @@
+:host { display: block; }
+
+/* Match the app's input styling around Quill's Snow theme */
+.rich-editor ::ng-deep .ql-toolbar {
+  border-color: var(--bs-border-color, #dee2e6);
+  border-top-left-radius: 0.5rem;
+  border-top-right-radius: 0.5rem;
+  background: var(--bs-tertiary-bg, #f8f9fa);
+}
+.rich-editor ::ng-deep .ql-container {
+  border-color: var(--bs-border-color, #dee2e6);
+  border-bottom-left-radius: 0.5rem;
+  border-bottom-right-radius: 0.5rem;
+  font-size: 0.95rem;
+  font-family: inherit;
+}
+.rich-editor ::ng-deep .ql-editor {
+  min-height: inherit;
+}
+.rich-editor ::ng-deep .ql-editor.ql-blank::before {
+  color: var(--bs-secondary-color, #9aa0a6);
+  font-style: normal;
+}

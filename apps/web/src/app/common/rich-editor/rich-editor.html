@@ -1,0 +1,15 @@
+@if (isBrowser) {
+  <quill-editor
+    class="rich-editor"
+    format="html"
+    [ngModel]="value()"
+    [ngModelOptions]="{standalone: true}"
+    (onContentChanged)="onContentChanged($event)"
+    (onBlur)="onTouched()"
+    [placeholder]="placeholder()"
+    [readOnly]="disabled()"
+    [styles]="{minHeight: minHeight()}"
+  ></quill-editor>
+} @else {
+  <textarea class="form-control" [placeholder]="placeholder()" rows="4" disabled></textarea>
+}

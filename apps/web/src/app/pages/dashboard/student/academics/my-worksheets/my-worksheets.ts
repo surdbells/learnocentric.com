@@ -5,11 +5,13 @@ import {ToastrService} from 'ngx-toastr';
 import {PageHeader} from '../../../../../common/layout/page-header/page-header';
 import {FileUpload, UploadedFile} from '../../../../../common/file-upload/file-upload';
 import {ApiService} from '../../../../../common/service/api.service';
+import {RichEditor} from '../../../../../common/rich-editor/rich-editor';
+import {RichText} from '../../../../../common/rich-editor/rich-text';
 
 @Component({
   selector: 'app-my-worksheets',
   standalone: true,
-  imports: [PageHeader, FormsModule, DatePipe, FileUpload],
+  imports: [RichText, RichEditor, PageHeader, FormsModule, DatePipe, FileUpload],
   templateUrl: './my-worksheets.html',
   styleUrl: './my-worksheets.css',
 })

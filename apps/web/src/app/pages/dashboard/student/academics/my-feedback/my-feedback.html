@@ -22,7 +22,7 @@
               </div>
               <span class="small text-body-secondary">{{ n.created_at | date:'medium' }}</span>
             </div>
-            <p class="mb-2">{{ n.message }}</p>
+            <app-rich-text class="d-block mb-2" [value]="n.message" />
             <div class="d-flex justify-content-between align-items-center">
               <span class="small text-body-secondary">{{ n.author ? 'From ' + n.author : '' }}</span>
               @if (!n.acknowledged) {

@@ -4,13 +4,15 @@ import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/
 import {ToastrService} from 'ngx-toastr';
 import {PageHeader} from '../../../../../common/layout/page-header/page-header';
 import {ApiService} from '../../../../../common/service/api.service';
+import {RichEditor} from '../../../../../common/rich-editor/rich-editor';
+import {RichText} from '../../../../../common/rich-editor/rich-text';
 
 const TYPE_COLOR: Record<string, string> = {praise: 'success', correction: 'warning', reteach: 'info', general: 'secondary'};
 
 @Component({
   selector: 'app-insights',
   standalone: true,
-  imports: [PageHeader, ReactiveFormsModule, DatePipe],
+  imports: [RichText, RichEditor, PageHeader, ReactiveFormsModule, DatePipe],
   templateUrl: './insights.html',
   styleUrl: './insights.css',
 })

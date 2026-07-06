@@ -6,13 +6,14 @@ import {ApiService} from '../../../../../common/service/api.service';
 import {AuthService} from '../../../../../common/auth/auth.service';
 import {PdfService} from '../../../../../common/service/pdf-service';
 import {Icon} from '../../../../../common/icon/icon';
+import {RichText} from '../../../../../common/rich-editor/rich-text';
 
 const RATING_COLOR: Record<string, string> = {emerging: 'secondary', developing: 'info', proficient: 'primary', mastery: 'success'};
 
 @Component({
   selector: 'app-progress-report',
   standalone: true,
-  imports: [Icon, PageHeader, DatePipe],
+  imports: [RichText, Icon, PageHeader, DatePipe],
   templateUrl: './progress-report.html',
   styleUrl: './progress-report.css',
 })

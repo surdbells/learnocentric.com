@@ -76,7 +76,7 @@
             </div>
             <div class="mb-3">
               <label class="form-label" for="f_msg">Message</label>
-              <textarea id="f_msg" class="form-control" rows="4" formControlName="message" placeholder="Specific, encouraging, and one next step…"></textarea>
+              <app-rich-editor formControlName="message" placeholder="Specific, encouraging, and one next step…" />
             </div>
             <button type="submit" class="btn btn-primary" [disabled]="busy()">Send feedback</button>
           </form>
@@ -102,7 +102,7 @@
                     {{ f.acknowledged ? 'Read' : 'Unread' }}
                   </span>
                 </div>
-                <p class="small mb-1">{{ f.message }}</p>
+                <app-rich-text class="small d-block mb-1" [value]="f.message" />
                 <div class="small text-body-secondary">{{ f.created_at | date:'medium' }}</div>
               </div>
             </div>

@@ -5,10 +5,11 @@ import { LearnoInput } from '../../../common/learno-input/learno-input';
 import { IInputOption, LearnoSelect } from '../../../common/learno-select/learno-select';
 import { ApiService } from '../../../common/service/api.service';
 import { ToastrService } from 'ngx-toastr';
+import {RichEditor} from '../../../common/rich-editor/rich-editor';
 
 @Component({
   selector: 'app-content-package-form',
-  imports: [LearnoButton, ReactiveFormsModule, LearnoInput, LearnoSelect],
+  imports: [RichEditor, LearnoButton, ReactiveFormsModule, LearnoInput, LearnoSelect],
   templateUrl: './content-package-form.html',
   styleUrl: './content-package-form.css'
 })

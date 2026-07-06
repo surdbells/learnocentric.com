@@ -4,6 +4,7 @@ import {ToastrService} from 'ngx-toastr';
 import {PageHeader} from '../../../../../common/layout/page-header/page-header';
 import {ApiService} from '../../../../../common/service/api.service';
 import {Icon} from '../../../../../common/icon/icon';
+import {RichEditor} from '../../../../../common/rich-editor/rich-editor';
 
 interface Band { grade: string; min: number; }
 
@@ -15,7 +16,7 @@ interface Band { grade: string; min: number; }
 @Component({
   selector: 'app-school-settings',
   standalone: true,
-  imports: [Icon, PageHeader, FormsModule],
+  imports: [RichEditor, Icon, PageHeader, FormsModule],
   templateUrl: './school-settings.html',
   styleUrl: './school-settings.css',
 })

@@ -29,7 +29,7 @@
                 </span>
               }
             </div>
-            @if (s.description) { <p class="small text-body-secondary mt-2 mb-3">{{ s.description }}</p> }
+            @if (s.description) { <app-rich-text class="small text-body-secondary d-block mt-2 mb-3" [value]="s.description" /> }
             <div class="mt-auto">
               <button type="button" class="btn btn-sm w-100"
                       [class.btn-outline-danger]="s.adopted" [class.btn-primary]="!s.adopted"

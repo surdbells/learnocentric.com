@@ -36,7 +36,7 @@
           <div class="list-group-item bg-body">
             <div class="row">
               <div class="col">Description</div>
-              <div class="col-auto">{{ selectedPackage()?.description }}</div>
+              <div class="col-auto"><app-rich-text [value]="selectedPackage()?.description" /></div>
             </div>
           </div>
         </div>

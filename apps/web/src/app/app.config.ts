@@ -9,10 +9,22 @@ import { provideHttpClient, withInterceptors, withFetch } from '@angular/common/
 import { authInterceptor } from './common/auth/auth.interceptor';
 import { AuthService } from './common/auth/auth.service';
 import { API_BASE_URL } from "./common/service/api.service";
+import { provideQuillConfig } from 'ngx-quill';
 
 export function initAuth(auth: AuthService) {
   return () => auth.initFromStorage();
 }
+
+// Toolbar shared by every rich-text editor. `formula` enables LaTeX maths.
+export const QUILL_TOOLBAR = [
+  ['bold', 'italic', 'underline'],
+  [{ script: 'sub' }, { script: 'super' }],
+  [{ list: 'ordered' }, { list: 'bullet' }],
+  ['blockquote', 'code-block'],
+  ['formula'],
+  ['link'],
+  ['clean'],
+];
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -23,6 +35,7 @@ export const appConfig: ApplicationConfig = {
     provideToastr(),
     provideAnimations(),
     provideHttpClient(withFetch(), withInterceptors([authInterceptor])),
+    provideQuillConfig({ modules: { toolbar: QUILL_TOOLBAR } }),
     { provide: APP_INITIALIZER, useFactory: initAuth, deps: [AuthService], multi: true },
     // In dev the browser uses a relative base ('') so requests hit the Angular dev-server
     // proxy (see proxy.conf.json) and avoid CORS. In a production build it targets the API

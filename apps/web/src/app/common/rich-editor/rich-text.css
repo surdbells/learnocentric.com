@@ -1,0 +1,23 @@
+:host { display: block; }
+
+.rich-text {
+  line-height: 1.6;
+  word-break: break-word;
+}
+/* Give Quill block formats sensible spacing when shown outside the editor */
+.rich-text :first-child { margin-top: 0; }
+.rich-text :last-child { margin-bottom: 0; }
+.rich-text blockquote {
+  border-left: 3px solid var(--bs-border-color, #dee2e6);
+  padding-left: 0.85rem;
+  color: var(--bs-secondary-color, #6c757d);
+  margin: 0.5rem 0;
+}
+.rich-text pre {
+  background: var(--bs-tertiary-bg, #f6f8fa);
+  padding: 0.75rem 0.9rem;
+  border-radius: 8px;
+  overflow-x: auto;
+}
+.rich-text ul, .rich-text ol { padding-left: 1.4rem; margin: 0.4rem 0; }
+.rich-text .ql-formula { font-size: 1.05em; }

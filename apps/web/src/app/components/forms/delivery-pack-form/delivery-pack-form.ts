@@ -4,6 +4,7 @@ import {ToastrService} from 'ngx-toastr';
 import {LearnoButton} from '../../../common/learno-button/learno-button';
 import {FileUpload, UploadedFile} from '../../../common/file-upload/file-upload';
 import {FormsModule} from '@angular/forms';
+import {RichEditor} from '../../../common/rich-editor/rich-editor';
 import {ApiService} from '../../../common/service/api.service';
 
 interface MediaItem { url: string; name: string; }
@@ -11,7 +12,7 @@ interface MediaItem { url: string; name: string; }
 @Component({
   selector: 'app-delivery-pack-form',
   standalone: true,
-  imports: [ReactiveFormsModule, LearnoButton, FileUpload, FormsModule],
+  imports: [ReactiveFormsModule, LearnoButton, FileUpload, FormsModule, RichEditor],
   templateUrl: './delivery-pack-form.html',
 })
 export class DeliveryPackForm {

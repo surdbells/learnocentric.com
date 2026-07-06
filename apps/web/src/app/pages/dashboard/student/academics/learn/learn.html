@@ -78,7 +78,7 @@
                 <div class="mb-3"><div class="tab-label">Objective</div><p class="mb-0">{{ l.objective }}</p></div>
               }
               @if (l.lesson.learner_note) {
-                <div class="mb-3"><div class="tab-label">Lesson note</div><p class="lesson-text mb-0">{{ l.lesson.learner_note }}</p></div>
+                <div class="mb-3"><div class="tab-label">Lesson note</div><app-rich-text [value]="l.lesson.learner_note" /></div>
               }
               @if (l.real_life_relevance) {
                 <div class="alert alert-success-subtle border-0 mb-0"><b>Why it matters:</b> {{ l.real_life_relevance }}</div>
@@ -124,7 +124,7 @@
 
             <!-- WORKED EXAMPLES -->
             @if (activeTab() === 'examples') {
-              <p class="lesson-text mb-0">{{ l.lesson.worked_examples }}</p>
+              <app-rich-text [value]="l.lesson.worked_examples" />
             }
 
             <!-- MY NOTES -->
@@ -133,8 +133,8 @@
                 <span class="text-body-secondary small">Only you can see these notes.</span>
                 @if (noteSavedAt()) { <span class="small text-body-secondary">Saved {{ noteSavedAt() | date:'MMM d, h:mm a' }}</span> }
               </div>
-              <textarea class="form-control note-area" rows="8" placeholder="Jot down key points, questions or reminders as you learn…"
-                        [ngModel]="noteBody()" (ngModelChange)="noteBody.set($event)"></textarea>
+              <app-rich-editor [ngModel]="noteBody()" (ngModelChange)="noteBody.set($event)"
+                               placeholder="Jot down key points, questions or reminders — you can add maths with the ƒx button…" minHeight="180px" />
               <div class="d-flex justify-content-end mt-2">
                 <button type="button" class="btn btn-sm btn-primary" [disabled]="noteSaving()" (click)="saveNote()">
                   {{ noteSaving() ? 'Saving…' : 'Save note' }}

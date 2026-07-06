@@ -31,6 +31,8 @@
               "src/assets/css/theme.bundle.css",
               "src/assets/css/remixicon.css",
               "src/assets/css/bootstrap-datetimepicker.min.css",
+              "node_modules/quill/dist/quill.snow.css",
+              "node_modules/katex/dist/katex.min.css",
               "src/styles.scss"
             ],
             "scripts": [

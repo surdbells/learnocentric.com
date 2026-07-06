@@ -6,13 +6,15 @@ import {PageHeader} from '../../../../../common/layout/page-header/page-header';
 import {FileUpload, UploadedFile} from '../../../../../common/file-upload/file-upload';
 import {ApiService} from '../../../../../common/service/api.service';
 import {Icon} from '../../../../../common/icon/icon';
+import {RichEditor} from '../../../../../common/rich-editor/rich-editor';
+import {RichText} from '../../../../../common/rich-editor/rich-text';
 
 const RATING_COLOR: Record<string, string> = {emerging: 'secondary', developing: 'info', proficient: 'primary', mastery: 'success'};
 
 @Component({
   selector: 'app-my-portfolio',
   standalone: true,
-  imports: [Icon, PageHeader, ReactiveFormsModule, DatePipe, FileUpload],
+  imports: [RichText, RichEditor, Icon, PageHeader, ReactiveFormsModule, DatePipe, FileUpload],
   templateUrl: './my-portfolio.html',
   styleUrl: './my-portfolio.css',
 })

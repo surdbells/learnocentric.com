@@ -27,7 +27,7 @@
                       [class.bg-info-subtle]="e.status === 'submitted'" [class.text-info]="e.status === 'submitted'">{{ e.status }}</span>
               </div>
               <div class="text-body-secondary small mb-2">{{ e.topic }} · {{ e.subject }}</div>
-              <p class="small mb-3">{{ e.description }}</p>
+              <app-rich-text class="small d-block mb-3" [value]="e.description" />
               @if (e.evidence_url) { <a class="small mb-2" [href]="e.evidence_url" target="_blank" rel="noopener">View evidence</a> }
 
               <div class="mt-auto">
@@ -36,7 +36,7 @@
                     <span class="text-body-secondary small">Competency:</span>
                     <span class="badge bg-{{ ratingColor(e.competency_rating) }} text-capitalize">{{ e.competency_rating }}</span>
                   </div>
-                  @if (e.reviewer_feedback) { <div class="small fst-italic text-body-secondary">“{{ e.reviewer_feedback }}” — {{ e.reviewed_by }}</div> }
+                  @if (e.reviewer_feedback) { <div class="small fst-italic text-body-secondary"><app-rich-text [value]="e.reviewer_feedback" /><span class="text-body-secondary"> — {{ e.reviewed_by }}</span></div> }
                 } @else {
                   <span class="small text-body-secondary">Awaiting teacher review</span>
                 }
@@ -72,7 +72,7 @@
         </div>
         <div class="mb-3">
           <label class="form-label" for="p_desc">What did you do?</label>
-          <textarea id="p_desc" class="form-control" rows="6" formControlName="description" placeholder="Describe how you applied the skill…"></textarea>
+          <app-rich-editor formControlName="description" placeholder="Describe how you applied the skill…" />
         </div>
         <div class="mb-3">
           <label class="form-label">Evidence (optional)</label>

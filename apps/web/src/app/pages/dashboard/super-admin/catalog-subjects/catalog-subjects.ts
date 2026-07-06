@@ -5,6 +5,8 @@ import {PageHeader} from '../../../../common/layout/page-header/page-header';
 import {LearnoModal} from '../../../../components/learno-modal/learno-modal';
 import {LearnoButton} from '../../../../common/learno-button/learno-button';
 import {ApiService} from '../../../../common/service/api.service';
+import {RichEditor} from '../../../../common/rich-editor/rich-editor';
+import {RichText} from '../../../../common/rich-editor/rich-text';
 
 declare const bootstrap: any;
 
@@ -12,7 +14,7 @@ declare const bootstrap: any;
 @Component({
   selector: 'app-catalog-subjects',
   standalone: true,
-  imports: [PageHeader, LearnoModal, LearnoButton, ReactiveFormsModule],
+  imports: [RichText, RichEditor, PageHeader, LearnoModal, LearnoButton, ReactiveFormsModule],
   templateUrl: './catalog-subjects.html',
   styleUrl: './catalog-subjects.css',
 })

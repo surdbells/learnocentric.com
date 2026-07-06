@@ -3,6 +3,7 @@ import {ToastrService} from 'ngx-toastr';
 import {PageHeader} from '../../../../../common/layout/page-header/page-header';
 import {Icon} from '../../../../../common/icon/icon';
 import {ApiService} from '../../../../../common/service/api.service';
+import {RichText} from '../../../../../common/rich-editor/rich-text';
 
 /**
  * Subjects are defined in the platform catalogue by the SaaS admin; a school
@@ -12,7 +13,7 @@ import {ApiService} from '../../../../../common/service/api.service';
 @Component({
   selector: 'app-subjects',
   standalone: true,
-  imports: [PageHeader, Icon],
+  imports: [RichText, PageHeader, Icon],
   templateUrl: './subjects.html',
   styleUrl: './subjects.css',
 })

@@ -15,11 +15,12 @@ import { DatePipe } from '@angular/common';
 import { UtilService } from '../../../../common/service/util.service';
 import { LearnoOffset } from "../../../../components/learno-offset/learno-offset";
 import {Icon} from '../../../../common/icon/icon';
+import {RichEditor} from '../../../../common/rich-editor/rich-editor';
 
 @Component({
   selector: 'app-super-admin-content-library',
   standalone: true,
-  imports: [Icon, 
+  imports: [RichEditor, Icon, 
     PageHeader,
     TableSearch,
     DataTable,

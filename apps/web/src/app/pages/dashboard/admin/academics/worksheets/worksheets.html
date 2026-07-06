@@ -50,7 +50,7 @@
                 </div>
                 <span class="small text-body-secondary">{{ sub.submitted_at | date:'medium' }}</span>
               </div>
-              @if (sub.response_text) { <p class="small mb-2">{{ sub.response_text }}</p> }
+              @if (sub.response_text) { <app-rich-text class="small d-block mb-2" [value]="sub.response_text" /> }
               @if (sub.attachment_url) { <a class="small" [href]="sub.attachment_url" target="_blank" rel="noopener">View attachment</a> }
 
               <div class="row g-2 align-items-end mt-1">

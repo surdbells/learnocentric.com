@@ -6,6 +6,8 @@ import {PageHeader} from '../../../../../common/layout/page-header/page-header';
 import {LearnoModal} from '../../../../../components/learno-modal/learno-modal';
 import {DataGrid, GridColumn, GridFilter} from '../../../../../components/data-grid/data-grid';
 import {ApiService} from '../../../../../common/service/api.service';
+import {RichEditor} from '../../../../../common/rich-editor/rich-editor';
+import {RichText} from '../../../../../common/rich-editor/rich-text';
 
 declare const bootstrap: any;
 
@@ -15,7 +17,7 @@ const RATINGS = ['emerging', 'developing', 'proficient', 'mastery'];
 @Component({
   selector: 'app-portfolio',
   standalone: true,
-  imports: [PageHeader, LearnoModal, DataGrid, FormsModule, DatePipe],
+  imports: [RichText, RichEditor, PageHeader, LearnoModal, DataGrid, FormsModule, DatePipe],
   templateUrl: './portfolio.html',
   styleUrl: './portfolio.css',
 })

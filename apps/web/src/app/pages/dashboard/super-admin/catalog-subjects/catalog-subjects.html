@@ -26,7 +26,7 @@
         </div>
         <div class="col-12 mb-3">
           <label class="form-label" for="cs_desc">Description</label>
-          <textarea id="cs_desc" class="form-control" rows="2" formControlName="description"></textarea>
+          <app-rich-editor formControlName="description" />
         </div>
       </div>
     </div>
@@ -53,7 +53,7 @@
             <tr [class.opacity-50]="!s.is_active">
               <td>
                 <div class="fw-medium">{{ s.name }}</div>
-                @if (s.description) { <div class="small text-body-secondary">{{ s.description }}</div> }
+                @if (s.description) { <div class="small text-body-secondary"><app-rich-text [value]="s.description" /></div> }
               </td>
               <td class="font-monospace">{{ s.code }}</td>
               <td class="small">{{ s.curriculum || '—' }}</td>

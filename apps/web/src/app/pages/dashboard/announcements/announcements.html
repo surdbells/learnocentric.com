@@ -23,7 +23,7 @@
         </div>
         <div class="col-12 mb-3">
           <label class="form-label" for="a_body">Message</label>
-          <textarea id="a_body" class="form-control" rows="4" [ngModel]="form().body" (ngModelChange)="updateForm({body: $event})"></textarea>
+          <app-rich-editor [ngModel]="form().body" (ngModelChange)="updateForm({body: $event})" />
         </div>
       </div>
       <div class="d-flex gap-2">
@@ -47,7 +47,7 @@
             <h6 class="fw-semibold mb-1">{{ a.title }}</h6>
             <span class="badge bg-light text-body-secondary text-capitalize">{{ a.audience }}</span>
           </div>
-          <p class="mb-2" style="white-space: pre-wrap;">{{ a.body }}</p>
+          <app-rich-text class="mb-2 d-block" [value]="a.body" />
           <div class="small text-body-secondary">{{ a.author }} · {{ a.created_at | date:'medium' }}</div>
         </div>
       </div>

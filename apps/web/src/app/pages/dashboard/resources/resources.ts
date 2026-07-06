@@ -3,6 +3,7 @@ import {ToastrService} from 'ngx-toastr';
 import {PageHeader} from '../../../common/layout/page-header/page-header';
 import {ApiService} from '../../../common/service/api.service';
 import {Icon} from '../../../common/icon/icon';
+import {RichText} from '../../../common/rich-editor/rich-text';
 
 /**
  * Learning resources available to the institution through its assigned content
@@ -11,7 +12,7 @@ import {Icon} from '../../../common/icon/icon';
 @Component({
   selector: 'app-resources',
   standalone: true,
-  imports: [Icon, PageHeader],
+  imports: [RichText, Icon, PageHeader],
   templateUrl: './resources.html',
   styleUrl: './resources.css',
 })

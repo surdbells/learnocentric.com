@@ -6,6 +6,8 @@ import {PageHeader} from '../../../../../common/layout/page-header/page-header';
 import {ApiService} from '../../../../../common/service/api.service';
 import {Icon} from '../../../../../common/icon/icon';
 import {MediaEmbed} from '../../../../../common/media-embed/media-embed';
+import {RichEditor} from '../../../../../common/rich-editor/rich-editor';
+import {RichText} from '../../../../../common/rich-editor/rich-text';
 import {FormsModule} from '@angular/forms';
 
 const STAGE_ICON: Record<string, string> = {lesson: 'menu_book', quiz: 'quiz', worksheet: 'assignment_turned_in', portfolio: 'folder_special'};
@@ -13,7 +15,7 @@ const STAGE_ICON: Record<string, string> = {lesson: 'menu_book', quiz: 'quiz', w
 @Component({
   selector: 'app-learn',
   standalone: true,
-  imports: [Icon, PageHeader, MediaEmbed, FormsModule, DatePipe],
+  imports: [Icon, PageHeader, MediaEmbed, RichEditor, RichText, FormsModule, DatePipe],
   templateUrl: './learn.html',
   styleUrl: './learn.css',
 })

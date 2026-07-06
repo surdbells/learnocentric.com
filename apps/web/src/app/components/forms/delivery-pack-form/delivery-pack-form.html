@@ -21,7 +21,7 @@
       <div class="col-lg-12 mb-2"><span class="badge bg-success-subtle text-success">Learner-facing</span></div>
       <div class="col-lg-12 mb-3">
         <label class="form-label" for="dp_note">Lesson note</label>
-        <textarea id="dp_note" class="form-control" rows="4" formControlName="learnerNote" placeholder="Explain the topic in clear, student-friendly language…"></textarea>
+        <app-rich-editor formControlName="learnerNote" placeholder="Explain the topic in clear, student-friendly language — add maths with the ƒx button…" />
       </div>
       <div class="col-12 mb-3">
         <label class="form-label d-block">Lesson media</label>
@@ -55,17 +55,17 @@
       </div>
       <div class="col-lg-6 mb-3">
         <label class="form-label" for="dp_worked">Worked examples</label>
-        <textarea id="dp_worked" class="form-control" rows="2" formControlName="workedExamples"></textarea>
+        <app-rich-editor formControlName="workedExamples" placeholder="Show worked examples, with maths as needed…" />
       </div>
 
       <div class="col-lg-12 mb-2"><span class="badge bg-secondary-subtle text-secondary">Staff / parent (not shown to students)</span></div>
       <div class="col-lg-6 mb-3">
         <label class="form-label" for="dp_guide">Teacher guide</label>
-        <textarea id="dp_guide" class="form-control" rows="3" formControlName="teacherGuide" placeholder="How to deliver this lesson…"></textarea>
+        <app-rich-editor formControlName="teacherGuide" placeholder="How to deliver this lesson…" />
       </div>
       <div class="col-lg-6 mb-3">
         <label class="form-label" for="dp_parent">Parent wording</label>
-        <textarea id="dp_parent" class="form-control" rows="3" formControlName="parentWording" placeholder="Plain-language note for parents…"></textarea>
+        <app-rich-editor formControlName="parentWording" placeholder="Plain-language note for parents…" />
       </div>
     </div>
   </div>

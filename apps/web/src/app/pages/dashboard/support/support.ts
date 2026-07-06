@@ -6,6 +6,8 @@ import {PageHeader} from '../../../common/layout/page-header/page-header';
 import {ApiService} from '../../../common/service/api.service';
 import {AuthService} from '../../../common/auth/auth.service';
 import {Icon} from '../../../common/icon/icon';
+import {RichEditor} from '../../../common/rich-editor/rich-editor';
+import {RichText} from '../../../common/rich-editor/rich-text';
 
 /**
  * Support centre — list tickets, open a new one, and work a thread. Requesters
@@ -15,7 +17,7 @@ import {Icon} from '../../../common/icon/icon';
 @Component({
   selector: 'app-support',
   standalone: true,
-  imports: [Icon, PageHeader, DatePipe, FormsModule],
+  imports: [RichText, RichEditor, Icon, PageHeader, DatePipe, FormsModule],
   templateUrl: './support.html',
   styleUrl: './support.css',
 })

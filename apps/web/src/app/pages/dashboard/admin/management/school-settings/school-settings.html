@@ -61,8 +61,7 @@
           </div>
           <div class="mb-0">
             <label class="form-label" for="dsl_note">Policy note</label>
-            <textarea id="dsl_note" rows="4" class="form-control" [ngModel]="safeguarding().policy_note" (ngModelChange)="setSafe({policy_note: $event})"
-                      placeholder="How concerns are handled at your school…"></textarea>
+            <app-rich-editor [ngModel]="safeguarding().policy_note" (ngModelChange)="setSafe({policy_note: $event})" placeholder="How concerns are handled at your school…" />
           </div>
         </div>
       </div>

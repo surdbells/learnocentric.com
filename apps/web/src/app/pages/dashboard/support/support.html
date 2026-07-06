@@ -83,7 +83,7 @@
         </div>
         <div class="col-12 mb-3">
           <label class="form-label" for="s_msg">Describe it</label>
-          <textarea id="s_msg" class="form-control" rows="6" [ngModel]="form().message" (ngModelChange)="updateForm({message: $event})" placeholder="What happened, and what did you expect?"></textarea>
+          <app-rich-editor [ngModel]="form().message" (ngModelChange)="updateForm({message: $event})" placeholder="What happened, and what did you expect?" />
         </div>
       </div>
       <div class="d-flex gap-2">
@@ -121,7 +121,7 @@
         <div class="d-flex" [class.justify-content-end]="m.is_staff">
           <div class="p-3 rounded-3 {{ m.is_staff ? 'bg-primary-subtle' : 'bg-light' }}" style="max-width: 80%;">
             <div class="small fw-semibold mb-1">{{ m.author }} @if (m.is_staff) { <span class="badge bg-primary ms-1">Support</span> }</div>
-            <div style="white-space: pre-wrap;">{{ m.body }}</div>
+            <div><app-rich-text [value]="m.body" /></div>
             <div class="small text-body-secondary mt-1">{{ m.created_at | date:'medium' }}</div>
           </div>
         </div>
@@ -133,7 +133,7 @@
   @if (t.status !== 'closed') {
     <div class="card border-0 shadow-sm">
       <div class="card-body">
-        <textarea class="form-control mb-3" rows="3" [ngModel]="replyText()" (ngModelChange)="replyText.set($event)" placeholder="Write a reply…"></textarea>
+        <app-rich-editor [ngModel]="replyText()" (ngModelChange)="replyText.set($event)" placeholder="Write a reply…" class="mb-3" />
         <div class="d-flex gap-2 flex-wrap">
           <button class="btn btn-primary" [disabled]="busy() || !replyText().trim()" (click)="sendReply()">Send reply</button>
           @if (isStaff()) {

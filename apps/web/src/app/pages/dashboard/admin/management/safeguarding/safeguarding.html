@@ -29,7 +29,7 @@
         </div>
         <div class="col-lg-12 mb-3">
           <label class="form-label" for="sg_details">Details</label>
-          <textarea id="sg_details" class="form-control" rows="4" formControlName="details" placeholder="What you observed, when, and any context. Stick to facts."></textarea>
+          <app-rich-editor formControlName="details" placeholder="What you observed, when, and any context. Stick to facts." />
         </div>
       </div>
     </div>
@@ -53,7 +53,7 @@
           Reported by {{ c.reported_by || 'unknown' }}{{ c.student ? ' · about ' + c.student : '' }} · {{ c.created_at | date:'medium' }}
         </p>
         <div class="mb-2"><div class="small text-uppercase fw-semibold text-body-secondary">Summary</div><p class="mb-0">{{ c.summary }}</p></div>
-        @if (c.details) { <div class="mb-3"><div class="small text-uppercase fw-semibold text-body-secondary">Details</div><p class="small mb-0">{{ c.details }}</p></div> }
+        @if (c.details) { <div class="mb-3"><div class="small text-uppercase fw-semibold text-body-secondary">Details</div><app-rich-text class="small d-block" [value]="c.details" /></div> }
 
         <hr/>
         <div class="row">

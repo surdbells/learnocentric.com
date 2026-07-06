@@ -56,11 +56,10 @@
           @if (w.submission.graded_at) { <div class="small text-body-secondary mt-1">Graded {{ w.submission.graded_at | date:'medium' }}</div> }
         </div>
         <label class="form-label small text-body-secondary">Your submitted answers</label>
-        <div class="border rounded-3 p-3 bg-light">{{ w.submission.response_text || '—' }}</div>
+        <div class="border rounded-3 p-3 bg-light">@if (w.submission.response_text) { <app-rich-text [value]="w.submission.response_text" /> } @else { — }</div>
       } @else {
         <label class="form-label" for="ws_answer">Your answers</label>
-        <textarea id="ws_answer" class="form-control mb-3" rows="6" [ngModel]="responseText()" (ngModelChange)="responseText.set($event)"
-                  placeholder="Type your worked answers here…"></textarea>
+        <app-rich-editor [ngModel]="responseText()" (ngModelChange)="responseText.set($event)" placeholder="Type your worked answers here…" class="mb-3" />
         <label class="form-label">Or attach your work</label>
         <app-file-upload
           [value]="attachmentUrl() || null"

@@ -129,7 +129,7 @@
             <div class="py-2 border-bottom">
               <span class="badge bg-light text-body-secondary text-capitalize me-1">{{ n.type }}</span>
               @if (n.topic) { <span class="small text-body-secondary">{{ n.topic }}</span> }
-              <div class="small mt-1">{{ n.message }}</div>
+              <div class="small mt-1"><app-rich-text [value]="n.message" /></div>
             </div>
           }
         }

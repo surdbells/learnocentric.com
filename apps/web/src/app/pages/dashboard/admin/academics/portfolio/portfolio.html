@@ -16,7 +16,7 @@
       }
 
       <label class="form-label small text-body-secondary">Student's evidence</label>
-      <div class="border rounded-3 p-3 mb-2">{{ e.description }}</div>
+      <div class="border rounded-3 p-3 mb-2"><app-rich-text [value]="e.description" /></div>
       @if (e.evidence_url) { <a class="small" [href]="e.evidence_url" target="_blank" rel="noopener">View attached evidence</a> }
 
       <hr class="my-4"/>
@@ -31,8 +31,7 @@
       </div>
 
       <label class="form-label small" for="p_fb">Feedback</label>
-      <textarea id="p_fb" class="form-control mb-3" rows="3" [ngModel]="feedback()" (ngModelChange)="feedback.set($event)"
-                [ngModelOptions]="{standalone: true}" placeholder="Encouragement and one thing to improve…"></textarea>
+      <app-rich-editor [ngModel]="feedback()" (ngModelChange)="feedback.set($event)" placeholder="Encouragement and one thing to improve…" class="mb-3" />
 
       <div class="d-flex gap-2">
         <button type="button" class="btn btn-primary" [disabled]="busy() || !rating()" (click)="submitReview()">
