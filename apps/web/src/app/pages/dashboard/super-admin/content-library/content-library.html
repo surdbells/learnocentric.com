@@ -92,9 +92,30 @@
           </div>
 
           <div class="col-lg-6">
+            <div class="mb-3" learnoInput [label]="'Source'" [inputType]="'text'" [id]="'source'" [formControlName]="'source'"></div>
+          </div>
+          <div class="col-lg-6">
+            <div class="mb-3" learnoSelect [placeHolder]="'Licence'" [searchable]="true" [label]="'Licence'" [id]="'licence'" [formControlName]="'licence'" [options]="licenceOptions"></div>
+          </div>
+
+          <div class="col-lg-6">
+            <div class="mb-3" learnoSelect [placeHolder]="'Audience'" [searchable]="true" [label]="'Audience'" [id]="'audience'" [formControlName]="'audience'" [options]="audienceOptions"></div>
+          </div>
+          <div class="col-lg-6">
+            <div class="mb-3" learnoSelect [placeHolder]="'Visibility'" [searchable]="true" [label]="'Visibility'" [id]="'visibility'" [formControlName]="'visibility'" [options]="visibilityOptions"></div>
+          </div>
+
+          <div class="col-lg-6">
             <div class="form-check mt-4">
               <input class="form-check-input" type="checkbox" id="isPremium" [formControlName]="'isPremium'">
               <label class="form-check-label" for="premium">Premium (requires subscription)</label>
+            </div>
+          </div>
+
+          <div class="col-lg-6">
+            <div class="form-check mt-4">
+              <input class="form-check-input" type="checkbox" id="downloadable" [formControlName]="'downloadable'">
+              <label class="form-check-label" for="downloadable">Allow download</label>
             </div>
           </div>
 

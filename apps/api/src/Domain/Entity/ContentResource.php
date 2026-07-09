@@ -23,6 +23,12 @@ class ContentResource
     public const TYPES = ['document', 'video', 'assignment', 'quiz', 'interactive'];
     public const LICENCES = ['owned', 'cc-by', 'cc-by-sa', 'public-domain', 'licensed'];
 
+    // Who the resource is intended for (spec §17 governance).
+    public const AUDIENCES = ['learner', 'teacher', 'school_admin', 'platform'];
+
+    // Publication state — only "published" resources are delivered to learners.
+    public const VISIBILITIES = ['draft', 'internal', 'published'];
+
     // Licence review / takedown lifecycle.
     public const APPROVED = 'approved';
     public const PENDING = 'pending';
@@ -80,6 +86,16 @@ class ContentResource
     #[ORM\Column(name: 'takedown_reason', type: Types::TEXT, nullable: true)]
     private ?string $takedownReason = null;
 
+    // --- Resource governance (spec §17) ---
+    #[ORM\Column(length: 20, options: ['default' => 'learner'])]
+    private string $audience = 'learner';
+
+    #[ORM\Column(length: 20, options: ['default' => 'published'])]
+    private string $visibility = 'published';
+
+    #[ORM\Column(type: Types::BOOLEAN, options: ['default' => true])]
+    private bool $downloadable = true;
+
     #[ORM\ManyToOne(targetEntity: User::class)]
     #[ORM\JoinColumn(name: 'created_by', referencedColumnName: 'id', nullable: true, onDelete: 'SET NULL')]
     private ?User $createdBy = null;
@@ -108,10 +124,18 @@ class ContentResource
         $this->fileName = $name;
         $this->fileSize = $size;
     }
+    public function getSource(): ?string { return $this->source; }
     public function setSource(?string $v): void { $this->source = $v; }
+    public function getLicence(): string { return $this->licence; }
     public function setLicence(string $v): void { $this->licence = in_array($v, self::LICENCES, true) ? $v : 'owned'; }
     public function getLicenceStatus(): string { return $this->licenceStatus; }
     public function setCreatedBy(?User $v): void { $this->createdBy = $v; }
+    public function getAudience(): string { return $this->audience; }
+    public function setAudience(string $v): void { $this->audience = in_array($v, self::AUDIENCES, true) ? $v : 'learner'; }
+    public function getVisibility(): string { return $this->visibility; }
+    public function setVisibility(string $v): void { $this->visibility = in_array($v, self::VISIBILITIES, true) ? $v : 'published'; }
+    public function isDownloadable(): bool { return $this->downloadable; }
+    public function setDownloadable(bool $v): void { $this->downloadable = $v; }
 
     /** Take the resource down (licence dispute) or restore it. */
     public function takedown(?string $reason): void
@@ -144,6 +168,9 @@ class ContentResource
             'licence' => $this->licence,
             'licence_status' => $this->licenceStatus,
             'takedown_reason' => $this->takedownReason,
+            'audience' => $this->audience,
+            'visibility' => $this->visibility,
+            'downloadable' => $this->downloadable,
             'created_at' => $this->createdAt->format(DATE_ATOM),
         ];
     }

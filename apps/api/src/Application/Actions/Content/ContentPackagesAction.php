@@ -11,19 +11,22 @@ use App\Domain\Entity\ContentResource;
 use App\Domain\Entity\Institution;
 use App\Domain\Entity\User;
 use App\Service\AuditLogger;
+use App\Service\LifecycleService;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
+use Throwable;
 
 /**
  * /backend/content/packages — curated content bundles (super admin only).
- * List / show (with resources) / create / delete.
+ * List / show (with resources) / create / delete; plus lifecycle transition/history.
  */
 final class ContentPackagesAction
 {
     public function __construct(
         private readonly EntityManagerInterface $em,
         private readonly AuditLogger $audit,
+        private readonly LifecycleService $lifecycle,
     ) {
     }
 
@@ -94,10 +97,10 @@ final class ContentPackagesAction
         if ($package === null || !$package->toArray()['isActive']) {
             return Json::write($response, ['package' => null, 'resources' => []]);
         }
-        // Only serve resources that haven't been taken down.
+        // Only serve resources cleared for learners: licence-approved and published (spec §17).
         $resources = array_values(array_filter(
             array_map(static fn (ContentResource $r) => $r->toArray(), $package->getResources()->getValues()),
-            static fn (array $r) => $r['licence_status'] !== ContentResource::TAKEDOWN,
+            static fn (array $r) => $r['licence_status'] === ContentResource::APPROVED && ($r['visibility'] ?? 'published') === 'published',
         ));
 
         return Json::write($response, [
@@ -165,6 +168,40 @@ final class ContentPackagesAction
         $this->audit->log('content_package.delete', $request->getAttribute('user'), 'ContentPackage', (string) ($request->getQueryParams()['id'] ?? ''), null, null);
 
         return Json::write($response, ['deleted' => true]);
+    }
+
+    /** POST /content/packages/{id}/transition — body { to, note } */
+    public function transition(Request $request, Response $response, array $args): Response
+    {
+        if (($g = $this->guard($request, $response)) !== null) {
+            return $g;
+        }
+        $package = $this->em->getRepository(ContentPackage::class)->find((int) $args['id']);
+        if ($package === null) {
+            return Json::error($response, 'Package not found.', 404);
+        }
+        $body = (array) $request->getParsedBody();
+        try {
+            $result = $this->lifecycle->transition($package, (string) ($body['to'] ?? ''), $request->getAttribute('user'), $body['note'] ?? null);
+        } catch (Throwable $e) {
+            return Json::error($response, $e->getMessage(), 422);
+        }
+
+        return Json::write($response, ['package' => $package->toArray()] + $result);
+    }
+
+    /** GET /content/packages/{id}/history */
+    public function history(Request $request, Response $response, array $args): Response
+    {
+        if (($g = $this->guard($request, $response)) !== null) {
+            return $g;
+        }
+        $package = $this->em->getRepository(ContentPackage::class)->find((int) $args['id']);
+        if ($package === null) {
+            return Json::error($response, 'Package not found.', 404);
+        }
+
+        return Json::write($response, array_map(static fn ($v) => $v->toArray(), $this->lifecycle->history($package)));
     }
 
     /** @param mixed $ids @return ContentResource[] */
