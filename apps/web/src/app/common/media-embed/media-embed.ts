@@ -1,5 +1,6 @@
 import {Component, computed, inject, input} from '@angular/core';
 import {DomSanitizer, SafeResourceUrl} from '@angular/platform-browser';
+import {Icon} from '../icon/icon';
 
 type Kind = 'youtube' | 'vimeo' | 'video' | 'audio' | 'pdf' | 'image' | 'link';
 
@@ -11,7 +12,7 @@ type Kind = 'youtube' | 'vimeo' | 'video' | 'audio' | 'pdf' | 'image' | 'link';
 @Component({
   selector: 'app-media-embed',
   standalone: true,
-  imports: [],
+  imports: [Icon],
   templateUrl: './media-embed.html',
   styleUrl: './media-embed.css',
 })
@@ -20,6 +21,18 @@ export class MediaEmbed {
   title = input<string>('Lesson media');
 
   private readonly sanitizer = inject(DomSanitizer);
+
+  /** File-type media (not a streaming embed) can be saved for offline use. */
+  readonly downloadable = computed<boolean>(() => {
+    const k = this.kind();
+    return k === 'video' || k === 'audio' || k === 'pdf' || k === 'image' || k === 'link';
+  });
+
+  /** A sensible filename for the download attribute, taken from the URL. */
+  readonly downloadName = computed<string>(() => {
+    const u = (this.url() || '').split('?')[0].split('#')[0];
+    return u.split('/').pop() || 'download';
+  });
 
   readonly kind = computed<Kind>(() => {
     const u = (this.url() || '').trim();

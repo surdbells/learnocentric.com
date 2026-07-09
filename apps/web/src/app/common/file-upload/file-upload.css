@@ -22,10 +22,21 @@
 }
 
 .fu-progress,
-.fu-file {
+.fu-file,
+.fu-error {
   border: 1px solid var(--bs-border-color);
   border-radius: 12px;
   padding: 12px 14px;
+}
+
+.fu-error {
+  border-color: var(--bs-danger-border-subtle, #f1aeb5);
+  background: var(--bs-danger-bg-subtle, #fff5f5);
+}
+
+.fu-doc-error {
+  background: var(--bs-danger-bg-subtle, #fdecee);
+  color: var(--bs-danger, #dc3545);
 }
 
 .fu-file {

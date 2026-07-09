@@ -4,6 +4,13 @@
 @if (mode() === 'list') {
   @if (loading()) {
     <div class="text-body-secondary p-4">Loading…</div>
+  } @else if (loadError(); as err) {
+    <div class="card border-0 shadow-sm p-5 text-center">
+      <app-icon name="cancel" [size]="32" class="text-danger mb-2" />
+      <div class="fw-semibold mb-1">Couldn't load your lessons</div>
+      <div class="text-body-secondary mb-3">{{ err }}</div>
+      <div><button type="button" class="btn btn-primary" (click)="load()">Try again</button></div>
+    </div>
   } @else if (!topics().length) {
     <div class="card border-0 shadow-sm p-5 text-center text-body-secondary">No lessons are published for you yet.</div>
   } @else {

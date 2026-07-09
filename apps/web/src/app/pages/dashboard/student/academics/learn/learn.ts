@@ -26,6 +26,7 @@ export class Learn {
 
   mode = signal<'list' | 'lesson'>('list');
   loading = signal(true);
+  loadError = signal<string | null>(null);
   busy = signal(false);
   topics = signal<any[]>([]);
   lesson = signal<any | null>(null);
@@ -91,9 +92,10 @@ export class Learn {
 
   load(): void {
     this.loading.set(true);
+    this.loadError.set(null);
     this.api.get<any>('/backend/learn/topics').subscribe({
       next: (res) => { this.topics.set(res?.data ?? []); this.loading.set(false); },
-      error: () => { this.loading.set(false); this.toast.error('Could not load your lessons'); },
+      error: () => { this.loading.set(false); this.loadError.set('We couldn\'t load your lessons. Please check your connection and try again.'); },
     });
   }
 
