@@ -92,7 +92,7 @@ final class LiveClassesAction
         $subject = $this->em->getRepository(Subject::class)->find((int) ($body['subject_id'] ?? 0));
         $title = trim((string) ($body['title'] ?? ''));
         $when = $this->parseDate($body['scheduled_at'] ?? null);
-        if ($subject === null || $title === '' || $when === null) {
+        if ($subject === null || !$this->canActWithin($request, $subject->getInstitution()) || $title === '' || $when === null) {
             return Json::error($response, 'A subject, title and scheduled_at are required.', 422);
         }
 
@@ -115,7 +115,7 @@ final class LiveClassesAction
         }
         $body = (array) $request->getParsedBody();
         $lc = $this->em->getRepository(LiveClass::class)->find((int) ($body['id'] ?? 0));
-        if ($lc === null) {
+        if ($lc === null || !$this->canActWithin($request, $lc->getSubject()->getInstitution())) {
             return Json::error($response, 'Live class not found.', 404);
         }
         if ($lc->getStatus() === LiveClass::ENDED) {
@@ -143,7 +143,7 @@ final class LiveClassesAction
         }
         $id = (int) ($request->getQueryParams()['id'] ?? 0);
         $lc = $this->em->getRepository(LiveClass::class)->find($id);
-        if ($lc === null) {
+        if ($lc === null || !$this->canActWithin($request, $lc->getSubject()->getInstitution())) {
             return Json::error($response, 'Live class not found.', 404);
         }
         $this->em->remove($lc);
@@ -170,7 +170,7 @@ final class LiveClassesAction
             return $guard;
         }
         $lc = $this->em->getRepository(LiveClass::class)->find($id);
-        if ($lc === null) {
+        if ($lc === null || !$this->canActWithin($request, $lc->getSubject()->getInstitution())) {
             return Json::error($response, 'Live class not found.', 404);
         }
         // Provision a fresh Daily room as the class goes live so the embedded

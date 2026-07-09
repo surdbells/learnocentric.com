@@ -32,6 +32,36 @@ trait ResolvesInstitution
         return $institution;
     }
 
+    /**
+     * Tenant-ownership guard for mutation handlers.
+     *
+     * List queries are institution-scoped, but update/delete handlers that load a
+     * record by primary key must also verify the record belongs to the caller's
+     * institution — otherwise a scoped user (school_admin/teacher) can act on another
+     * school's record by supplying its id (cross-tenant IDOR).
+     *
+     * Rules:
+     *  - A platform actor (no institution, e.g. super admin) may act across tenants.
+     *  - An institution-scoped caller may act only on records owned by that same
+     *    institution. A record with no owner ($owner === null) is not actionable by a
+     *    scoped caller.
+     *
+     * Callers should treat a false result as "not found" (404) rather than "forbidden"
+     * so record existence is not leaked across tenants.
+     */
+    protected function canActWithin(Request $request, ?Institution $owner): bool
+    {
+        /** @var User|null $user */
+        $user = $request->getAttribute('user');
+        $caller = $user?->getInstitution();
+
+        if ($caller === null) {
+            return true; // platform-level actor (super admin) — governs across tenants
+        }
+
+        return $owner !== null && $owner->getId() === $caller->getId();
+    }
+
     /** @return User[] users of a role code, scoped to institution when set */
     protected function usersByRole(EntityManagerInterface $em, string $roleCode, ?Institution $institution): array
     {
@@ -50,17 +80,36 @@ trait ResolvesInstitution
         return $qb->getQuery()->getResult();
     }
 
-    protected function userRow(User $u): array
+    /**
+     * @param bool $includeSensitive Whether to expose sensitive contact fields
+     *   (phone, date of birth). These are restricted to admin-level roles; plain
+     *   teachers listing learners should not see them (spec §15 sensitive-data control).
+     */
+    protected function userRow(User $u, bool $includeSensitive = true): array
     {
-        return [
+        $row = [
             'id' => $u->getId(),
             'email' => $u->getEmail(),
             'first_name' => $u->getFirstName(),
             'last_name' => $u->getLastName(),
-            'phone' => $u->getPhone(),
-            'date_of_birth' => $u->getDateOfBirth()?->format('Y-m-d'),
             'is_active' => $u->getStatus() === 'active',
             'profile_image_url' => $u->getProfileImageUrl(),
         ];
+        if ($includeSensitive) {
+            $row['phone'] = $u->getPhone();
+            $row['date_of_birth'] = $u->getDateOfBirth()?->format('Y-m-d');
+        }
+
+        return $row;
+    }
+
+    /** Roles allowed to see sensitive learner contact fields in listings. */
+    protected function callerSeesSensitive(Request $request): bool
+    {
+        /** @var User|null $user */
+        $user = $request->getAttribute('user');
+        $role = $user?->getRole()?->getCode();
+
+        return in_array($role, ['school_admin', 'tutor_admin', 'academic_lead', 'super_admin'], true);
     }
 }

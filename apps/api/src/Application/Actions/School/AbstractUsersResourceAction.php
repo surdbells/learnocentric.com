@@ -54,7 +54,8 @@ abstract class AbstractUsersResourceAction
             $qb->andWhere('u.status = :st')->setParameter('st', $active ? 'active' : 'suspended');
         }
 
-        $mapper = fn (User $u) => $this->userRow($u);
+        $includeSensitive = $this->callerSeesSensitive($request);
+        $mapper = fn (User $u) => $this->userRow($u, $includeSensitive);
 
         if (!$query->paginated) {
             $qb->orderBy('u.firstName', 'ASC');

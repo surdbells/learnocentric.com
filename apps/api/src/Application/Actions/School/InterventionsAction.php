@@ -87,7 +87,8 @@ final class InterventionsAction
         $body = (array) $request->getParsedBody();
         $student = $this->em->getRepository(User::class)->find((int) ($body['student_id'] ?? 0));
         $reason = trim((string) ($body['reason'] ?? ''));
-        if ($student === null || $student->getRole()->getCode() !== 'student') {
+        if ($student === null || $student->getRole()->getCode() !== 'student'
+            || !$this->canActWithin($request, $student->getInstitution())) {
             return Json::error($response, 'A valid student is required.', 422);
         }
         if ($reason === '') {
@@ -114,7 +115,7 @@ final class InterventionsAction
         }
         $body = (array) $request->getParsedBody();
         $intervention = $this->em->getRepository(Intervention::class)->find((int) ($body['id'] ?? 0));
-        if ($intervention === null) {
+        if ($intervention === null || !$this->canActWithin($request, $intervention->getStudent()->getInstitution())) {
             return Json::error($response, 'Intervention not found.', 404);
         }
         $before = $intervention->toArray();
@@ -154,7 +155,7 @@ final class InterventionsAction
         }
         $id = (int) ($request->getQueryParams()['id'] ?? 0);
         $intervention = $this->em->getRepository(Intervention::class)->find($id);
-        if ($intervention === null) {
+        if ($intervention === null || !$this->canActWithin($request, $intervention->getStudent()->getInstitution())) {
             return Json::error($response, 'Intervention not found.', 404);
         }
         $this->em->remove($intervention);
@@ -175,6 +176,9 @@ final class InterventionsAction
         }
         $count = 0;
         foreach ($this->em->getRepository(Intervention::class)->findBy(['id' => $ids]) as $intervention) {
+            if (!$this->canActWithin($request, $intervention->getStudent()->getInstitution())) {
+                continue; // skip records outside the caller's institution
+            }
             $this->em->remove($intervention);
             $count++;
         }

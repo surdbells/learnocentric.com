@@ -19,6 +19,8 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 /** Student worksheet submissions and staff grading. */
 final class WorksheetSubmissionsAction
 {
+    use \App\Application\Actions\School\ResolvesInstitution;
+
     private const STAFF = ['teacher', 'academic_lead', 'school_admin', 'tutor_admin', 'super_admin'];
 
     public function __construct(
@@ -131,7 +133,7 @@ final class WorksheetSubmissionsAction
             return $guard;
         }
         $submission = $this->em->getRepository(WorksheetSubmission::class)->find((int) $args['id']);
-        if ($submission === null) {
+        if ($submission === null || !$this->canActWithin($request, $submission->getStudent()->getInstitution())) {
             return Json::error($response, 'Submission not found.', 404);
         }
         $body = (array) $request->getParsedBody();
