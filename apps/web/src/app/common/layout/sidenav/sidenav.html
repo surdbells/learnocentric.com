@@ -19,13 +19,16 @@
           <button
             type="button"
             class="sb-link"
+            [class.is-static]="alwaysOpen()"
             (click)="toggleGroup(group, $event)"
             [attr.aria-expanded]="isOpen(group)"
             [attr.data-title]="group.name"
           >
             <app-icon [name]="group.icon" class="sb-icon" />
             <span class="sb-text">{{ group.name }}</span>
-            <app-icon name="expand_more" class="sb-caret" />
+            @if (!alwaysOpen()) {
+              <app-icon name="expand_more" class="sb-caret" />
+            }
           </button>
 
           <!-- Submenu (accordion when expanded, flyout when rail) -->
