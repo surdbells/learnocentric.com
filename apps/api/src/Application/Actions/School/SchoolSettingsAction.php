@@ -29,6 +29,12 @@ final class SchoolSettingsAction
                 ['grade' => 'D', 'min' => 40],
                 ['grade' => 'F', 'min' => 0],
             ],
+            // Score separation is the default: portfolio/competency never inflates the
+            // academic grade unless a school deliberately opts in here (spec §14, §18).
+            'weighting' => [
+                'portfolio_into_academic' => false,
+                'portfolio_percent' => 0, // 0–100 share of a blended grade when enabled
+            ],
         ],
         'safeguarding' => [
             'lead_name' => '',
