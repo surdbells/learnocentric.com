@@ -7,6 +7,7 @@ namespace App\Application\Actions\School;
 use App\Application\Support\Json;
 use App\Application\Support\ListQuery;
 use App\Application\Support\Paginator;
+use App\Domain\Entity\GuardianLink;
 use App\Domain\Entity\SafeguardingCase;
 use App\Domain\Entity\User;
 use App\Service\AuditLogger;
@@ -24,8 +25,8 @@ final class SafeguardingAction
 {
     use ResolvesInstitution;
 
-    /** Who may raise a concern. */
-    private const REPORTERS = ['teacher', 'academic_lead', 'school_admin', 'tutor_admin', 'super_admin'];
+    /** Who may raise a concern (staff plus learners — students and parents). */
+    private const REPORTERS = ['teacher', 'academic_lead', 'school_admin', 'tutor_admin', 'super_admin', 'student', 'parent'];
     /** Who may see and manage the register. */
     private const LEADS = ['school_admin', 'tutor_admin', 'super_admin'];
 
@@ -96,7 +97,21 @@ final class SafeguardingAction
         $case->setInstitution($user->getInstitution());
         $case->setCategory((string) ($body['category'] ?? 'welfare'));
         $case->setDetails(!empty($body['details']) ? (string) $body['details'] : null);
-        if (!empty($body['student_id'])) {
+        // A learner-reported case defaults to medium severity; leads/staff may set it explicitly.
+        $case->setSeverity((string) ($body['severity'] ?? SafeguardingCase::SEVERITY_MEDIUM));
+        $case->setAccessLevel((string) ($body['access_level'] ?? SafeguardingCase::ACCESS_STANDARD));
+        if (!empty($body['evidence']) && is_array($body['evidence'])) {
+            $case->setEvidence($this->normaliseEvidence($body['evidence']));
+        }
+
+        $reporterRole = $user->getRole()->getCode();
+        if ($reporterRole === 'student') {
+            // A student raising a concern — the case is about themselves.
+            $case->setStudent($user);
+        } elseif ($reporterRole === 'parent') {
+            // A parent may only raise a concern about a student they guard.
+            $case->setStudent($this->resolveGuardedStudent($user, $body['student_id'] ?? null));
+        } elseif (!empty($body['student_id'])) {
             $student = $this->em->getRepository(User::class)->find((int) $body['student_id']);
             if ($student !== null && $student->getRole()->getCode() === 'student') {
                 $case->setStudent($student);
@@ -123,7 +138,7 @@ final class SafeguardingAction
         $user = $request->getAttribute('user');
         $body = (array) $request->getParsedBody();
         $case = $this->em->getRepository(SafeguardingCase::class)->find((int) ($body['id'] ?? 0));
-        if ($case === null) {
+        if ($case === null || !$this->canActWithin($request, $case->getInstitution())) {
             return Json::error($response, 'Case not found.', 404);
         }
         $before = $case->toArray();
@@ -137,6 +152,15 @@ final class SafeguardingAction
         }
         if (array_key_exists('outcome', $body)) {
             $case->setOutcome($body['outcome'] !== '' ? (string) $body['outcome'] : null);
+        }
+        if (isset($body['severity'])) {
+            $case->setSeverity((string) $body['severity']);
+        }
+        if (isset($body['access_level'])) {
+            $case->setAccessLevel((string) $body['access_level']);
+        }
+        if (array_key_exists('evidence', $body)) {
+            $case->setEvidence(is_array($body['evidence']) ? $this->normaliseEvidence($body['evidence']) : null);
         }
         $this->em->flush();
         $this->audit->log('safeguarding.update', $user, 'SafeguardingCase', (string) $case->getId(), $before, $case->toArray());
@@ -163,6 +187,51 @@ final class SafeguardingAction
                 '/admin/management/safeguarding',
             );
         }
+    }
+
+    /**
+     * The student a parent/guardian may raise a concern about. When a specific
+     * student is named it must be one they guard; otherwise fall back to the sole
+     * guarded student where there is exactly one.
+     */
+    private function resolveGuardedStudent(User $guardian, mixed $studentId): ?User
+    {
+        $links = $this->em->getRepository(GuardianLink::class)->findBy(['guardian' => $guardian]);
+        if ($links === []) {
+            return null;
+        }
+        if (!empty($studentId)) {
+            foreach ($links as $link) {
+                if ($link->getStudent()->getId() === (int) $studentId) {
+                    return $link->getStudent();
+                }
+            }
+            return null;
+        }
+        return count($links) === 1 ? $links[0]->getStudent() : null;
+    }
+
+    /**
+     * Keep only well-formed {label, url} attachment references.
+     *
+     * @param array<mixed> $items
+     * @return array<int, array{label: string, url: string}>|null
+     */
+    private function normaliseEvidence(array $items): ?array
+    {
+        $clean = [];
+        foreach ($items as $item) {
+            if (!is_array($item)) {
+                continue;
+            }
+            $url = trim((string) ($item['url'] ?? ''));
+            if ($url === '') {
+                continue;
+            }
+            $label = trim((string) ($item['label'] ?? ''));
+            $clean[] = ['label' => $label !== '' ? $label : $url, 'url' => $url];
+        }
+        return $clean === [] ? null : $clean;
     }
 
     private function leadGuard(Request $request, Response $response): ?Response

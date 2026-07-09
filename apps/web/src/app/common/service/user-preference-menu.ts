@@ -220,6 +220,7 @@ export class UserPreferenceMenu {
       children: [
         { name: "Messages", link: "/student/communication/messages" },
         { name: "Announcements", link: "/student/communication/announcements" },
+        { name: "Report a Concern", link: "/student/report-concern" },
       ]
     },
 

@@ -1,9 +1,11 @@
 import {Component, inject, signal} from '@angular/core';
 import {DatePipe} from '@angular/common';
 import {FormsModule} from '@angular/forms';
+import {RouterLink} from '@angular/router';
 import {ToastrService} from 'ngx-toastr';
 import {PageHeader} from '../../../common/layout/page-header/page-header';
 import {ApiService} from '../../../common/service/api.service';
+import {AuthService} from '../../../common/auth/auth.service';
 import {Icon} from '../../../common/icon/icon';
 
 /**
@@ -14,13 +16,17 @@ import {Icon} from '../../../common/icon/icon';
 @Component({
   selector: 'app-messages',
   standalone: true,
-  imports: [Icon, PageHeader, DatePipe, FormsModule],
+  imports: [Icon, PageHeader, DatePipe, FormsModule, RouterLink],
   templateUrl: './messages.html',
   styleUrl: './messages.css',
 })
 export class Messages {
   private readonly api = inject(ApiService);
   private readonly toast = inject(ToastrService);
+  private readonly auth = inject(AuthService);
+
+  /** The learner "report a concern" affordance is student-only (the target route is under /student). */
+  protected readonly isStudent = this.auth.getAuthSession()?.user?.role === 'student';
 
   loading = signal(true);
   conversations = signal<any[]>([]);
