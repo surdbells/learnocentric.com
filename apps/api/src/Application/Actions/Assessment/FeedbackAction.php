@@ -101,6 +101,16 @@ final class FeedbackAction
         if (!empty($body['topic_id'])) {
             $note->setTopic($this->em->getRepository(Topic::class)->find((int) $body['topic_id']));
         }
+        // Structured fields for parent reports (spec §7.5, §18) — all optional.
+        if (array_key_exists('strengths', $body)) {
+            $note->setStrengths(trim((string) $body['strengths']));
+        }
+        if (array_key_exists('practice_needed', $body)) {
+            $note->setPracticeNeeded(trim((string) $body['practice_needed']));
+        }
+        if (array_key_exists('parent_support_suggestion', $body)) {
+            $note->setParentSupportSuggestion(trim((string) $body['parent_support_suggestion']));
+        }
         $this->em->persist($note);
         $this->notify->notify(
             $student,
