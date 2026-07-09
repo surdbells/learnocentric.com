@@ -128,6 +128,17 @@ chmod -R 775 public/uploads
 
 `STORAGE_PUBLIC_URL` must resolve to this folder over HTTP (files live under `public/uploads`, so the API host serves them as static files).
 
+**Runtime writable dirs.** The app writes to `var/log`, `var/doctrine/proxies` and `var/cache` (Doctrine proxies, app log, cache). It tries to create them on boot, but that fails silently if `var/` isn't owned by the PHP-FPM user — so create them and hand `var/` to `www`:
+
+```bash
+cd /www/wwwroot/learnocentric/apps/api
+mkdir -p var/log var/doctrine/proxies var/cache
+chown -R www:www var
+chmod -R 775 var
+```
+
+> If you run `migrations:migrate` / `app:seed` / `composer` as **root**, `var/` files get created as `root:root` and PHP-FPM (running as `www`) then fails with *"proxy directory … must be writable"*. Run console commands as the web user — `sudo -u www php bin/console.php …` — or re-`chown -R www:www var` afterwards.
+
 ### A7. Create the aaPanel site (Nginx + PHP-FPM)
 
 1. aaPanel → **Website → Add site**
@@ -314,6 +325,8 @@ Reload PHP-FPM. (This is the same class of issue documented for the dev environm
 **Uploads return 404 or "permission denied" on save.** Check `public/uploads` exists, is owned by `www:www`, is `775`, and that `STORAGE_PUBLIC_URL` matches the API host. The Nginx `try_files` rule serves them as static files.
 
 **`open_basedir restriction in effect … bootstrap.php is not within the allowed path(s)`.** aaPanel jailed PHP to the doc-root (`.../public/`), but the app bootstraps files above it (`config/`, `vendor/`, `src/`, `.env`). Fix: Site → Config → set **Website directory** to `/www/wwwroot/learnocentric/apps/api` and **Running directory** to `/public` (see A7), then reload PHP. CLI fallback: unlock the aaPanel `.user.ini` with `chattr -i .../apps/api/public/.user.ini`, change its line to `open_basedir=/www/wwwroot/learnocentric/apps/api/:/tmp/`, `chattr +i` it back, reload PHP-FPM.
+
+**`Your proxy directory … var/doctrine/proxies must be writable`.** PHP-FPM (user `www`) can't write the runtime dirs — usually because they were created as `root` by a CLI command. Fix: `chown -R www:www var && chmod -R 775 var` under `apps/api` (see A6), and run future console commands as `sudo -u www …`.
 
 **Composer `ext-redis` conflict on install.** `composer install` reports *"Your lock file does not contain a compatible set of packages"* and *"symfony/cache … conflicts with ext-redis <6.1"*. The server's bundled `php-redis` is older than symfony/cache's Redis adapter wants. The app never uses Redis, so ignore that one platform requirement:
 ```bash
