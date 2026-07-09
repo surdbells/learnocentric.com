@@ -46,6 +46,9 @@ class RolePermission
     #[ORM\Column(name: 'can_delete', type: Types::BOOLEAN, options: ['default' => false])]
     private bool $canDelete = false;
 
+    #[ORM\Column(name: 'can_archive', type: Types::BOOLEAN, options: ['default' => false])]
+    private bool $canArchive = false;
+
     /** platform | school | own */
     #[ORM\Column(length: 20, options: ['default' => 'school'])]
     private string $scope = 'school';
@@ -60,6 +63,7 @@ class RolePermission
         $this->canApprove = (bool) ($actions['approve'] ?? false);
         $this->canExport = (bool) ($actions['export'] ?? false);
         $this->canDelete = (bool) ($actions['delete'] ?? false);
+        $this->canArchive = (bool) ($actions['archive'] ?? false);
         $this->scope = $scope;
     }
 
@@ -76,6 +80,7 @@ class RolePermission
             'approve' => $this->canApprove,
             'export' => $this->canExport,
             'delete' => $this->canDelete,
+            'archive' => $this->canArchive,
             default => false,
         };
     }
@@ -90,6 +95,7 @@ class RolePermission
             'can_approve' => $this->canApprove,
             'can_export' => $this->canExport,
             'can_delete' => $this->canDelete,
+            'can_archive' => $this->canArchive,
             'scope' => $this->scope,
         ];
     }
