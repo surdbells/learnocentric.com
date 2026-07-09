@@ -22,9 +22,9 @@ class Question implements LifecycleAware
 {
     use TimestampsTrait;
 
-    public const TYPES = ['mcq', 'true_false', 'short', 'numeric'];
+    public const TYPES = ['mcq', 'multi', 'true_false', 'short', 'numeric'];
     public const TRACKS = ['academic', 'competency'];
-    public const DIFFICULTIES = ['easy', 'medium', 'hard'];
+    public const DIFFICULTIES = ['foundational', 'moderate', 'challenging', 'extension'];
 
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -41,8 +41,12 @@ class Question implements LifecycleAware
     #[ORM\Column(length: 20)]
     private string $track = 'academic';
 
-    #[ORM\Column(length: 10)]
-    private string $difficulty = 'medium';
+    #[ORM\Column(length: 20)]
+    private string $difficulty = 'moderate';
+
+    /** Optional tag naming the common misconception this question probes (spec §14). */
+    #[ORM\Column(name: 'misconception_tag', length: 120, nullable: true)]
+    private ?string $misconceptionTag = null;
 
     #[ORM\Column(type: Types::TEXT)]
     private string $stem;
@@ -81,13 +85,16 @@ class Question implements LifecycleAware
     public function getTrack(): string { return $this->track; }
     public function setTrack(string $v): void { $this->track = in_array($v, self::TRACKS, true) ? $v : 'academic'; }
     public function getDifficulty(): string { return $this->difficulty; }
-    public function setDifficulty(string $v): void { $this->difficulty = in_array($v, self::DIFFICULTIES, true) ? $v : 'medium'; }
+    public function setDifficulty(string $v): void { $this->difficulty = in_array($v, self::DIFFICULTIES, true) ? $v : 'moderate'; }
+    public function getMisconceptionTag(): ?string { return $this->misconceptionTag; }
+    public function setMisconceptionTag(?string $v): void { $this->misconceptionTag = $v !== null && trim($v) !== '' ? trim($v) : null; }
     public function getStem(): string { return $this->stem; }
     public function setStem(string $v): void { $this->stem = $v; }
     public function getOptions(): ?array { return $this->options; }
     public function setOptions(?array $v): void { $this->options = $v; }
     public function getCorrectAnswer(): mixed { return $this->correctAnswer; }
     public function setCorrectAnswer(mixed $v): void { $this->correctAnswer = $v; }
+    public function getExplanation(): ?string { return $this->explanation; }
     public function setExplanation(?string $v): void { $this->explanation = $v; }
     public function getMarks(): int { return $this->marks; }
     public function setMarks(int $v): void { $this->marks = max(1, $v); }
@@ -114,6 +121,26 @@ class Question implements LifecycleAware
                 }
                 if (!is_string($ans) || !in_array($ans, $keys, true)) {
                     return 'The correct answer must match one of the option keys.';
+                }
+                return null;
+            case 'multi':
+                $keys = array_column($this->options ?? [], 'key');
+                if (count($keys) < 2) {
+                    return 'A multi-select question needs at least two options.';
+                }
+                if (count($keys) !== count(array_unique($keys))) {
+                    return 'Option keys must be unique.';
+                }
+                if (!is_array($ans) || $ans === []) {
+                    return 'Mark at least one option as correct.';
+                }
+                foreach ($ans as $key) {
+                    if (!is_string($key) || !in_array($key, $keys, true)) {
+                        return 'Every correct answer must match one of the option keys.';
+                    }
+                }
+                if (count($ans) !== count(array_unique($ans))) {
+                    return 'The correct answers must not repeat an option key.';
                 }
                 return null;
             case 'true_false':
@@ -156,6 +183,7 @@ class Question implements LifecycleAware
             'type' => $this->type,
             'track' => $this->track,
             'difficulty' => $this->difficulty,
+            'misconception_tag' => $this->misconceptionTag,
             'stem' => $this->stem,
             'options' => $this->options,
             'correct_answer' => $this->correctAnswer,

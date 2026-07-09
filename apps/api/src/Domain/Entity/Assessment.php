@@ -25,6 +25,8 @@ class Assessment implements LifecycleAware
 
     public const TYPES = ['quiz', 'test', 'exam', 'worksheet'];
     public const TRACKS = ['academic', 'competency'];
+    /** Editorial moderation states, tracked separately from the publish lifecycle. */
+    public const MODERATION_STATUSES = ['pending', 'reviewed', 'approved', 'flagged', 'returned'];
 
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -68,6 +70,9 @@ class Assessment implements LifecycleAware
     #[ORM\Column(name: 'approval_status', length: 20, options: ['default' => Lifecycle::DRAFT])]
     private string $approvalStatus = Lifecycle::DRAFT;
 
+    #[ORM\Column(name: 'moderation_status', length: 20, options: ['default' => 'pending'])]
+    private string $moderationStatus = 'pending';
+
     /** @var Collection<int, AssessmentQuestion> */
     #[ORM\OneToMany(mappedBy: 'assessment', targetEntity: AssessmentQuestion::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
     #[ORM\OrderBy(['position' => 'ASC'])]
@@ -99,6 +104,8 @@ class Assessment implements LifecycleAware
     public function setInstructions(?string $v): void { $this->instructions = $v; }
     public function getApprovalStatus(): string { return $this->approvalStatus; }
     public function setApprovalStatus(string $v): void { $this->approvalStatus = $v; }
+    public function getModerationStatus(): string { return $this->moderationStatus; }
+    public function setModerationStatus(string $v): void { $this->moderationStatus = in_array($v, self::MODERATION_STATUSES, true) ? $v : 'pending'; }
 
     /** @return Collection<int, AssessmentQuestion> */
     public function getItems(): Collection { return $this->items; }
@@ -150,6 +157,7 @@ class Assessment implements LifecycleAware
             'question_count' => $this->items->count(),
             'total_marks' => $this->totalMarks(),
             'approval_status' => $this->approvalStatus,
+            'moderation_status' => $this->moderationStatus,
         ];
         if ($withItems) {
             $data['questions'] = array_map(static fn (AssessmentQuestion $i) => $i->toArray(), $this->items->toArray());

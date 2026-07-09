@@ -191,7 +191,7 @@ final class AttemptsAction
             /** @var AssessmentQuestion $item */
             $q = $item->getQuestion();
             $options = null;
-            if ($q->getType() === 'mcq' && is_array($q->getOptions())) {
+            if (in_array($q->getType(), ['mcq', 'multi'], true) && is_array($q->getOptions())) {
                 $options = array_map(static fn ($o) => ['key' => $o['key'] ?? '', 'text' => $o['text'] ?? ''], $q->getOptions());
             }
             $questions[] = [

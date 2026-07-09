@@ -13,7 +13,7 @@ import {Icon} from '../../../../../common/icon/icon';
 declare const bootstrap: any;
 
 const STATUS_COLOR: Record<string, string> = {draft: 'secondary', review: 'warning', approved: 'info', published: 'success', archived: 'dark'};
-const DIFF_COLOR: Record<string, string> = {easy: 'success', medium: 'warning', hard: 'danger'};
+const DIFF_COLOR: Record<string, string> = {foundational: 'success', moderate: 'info', challenging: 'warning', extension: 'danger'};
 const TYPE_LABEL: Record<string, string> = {mcq: 'Multiple choice', true_false: 'True / False', short: 'Short answer', numeric: 'Numeric'};
 const ACTION_LABEL: Record<string, string> = {review: 'Submit for review', approved: 'Approve', published: 'Publish', archived: 'Archive', draft: 'Return to draft'};
 const APPROVER_ROLES = ['academic_lead', 'school_admin', 'tutor_admin', 'super_admin'];
@@ -60,7 +60,9 @@ export class QuestionBank {
       {label: 'Multiple choice', value: 'mcq'}, {label: 'True / False', value: 'true_false'},
       {label: 'Short answer', value: 'short'}, {label: 'Numeric', value: 'numeric'}]},
     {key: 'answer_validated', label: 'Answer', options: [{label: 'Validated', value: '1'}, {label: 'Unvalidated', value: '0'}]},
-    {key: 'difficulty', label: 'Level', options: [{label: 'Easy', value: 'easy'}, {label: 'Medium', value: 'medium'}, {label: 'Hard', value: 'hard'}]},
+    {key: 'difficulty', label: 'Level', options: [
+      {label: 'Foundational', value: 'foundational'}, {label: 'Moderate', value: 'moderate'},
+      {label: 'Challenging', value: 'challenging'}, {label: 'Extension', value: 'extension'}]},
   ]);
 
   readonly availableActions = computed(() => {

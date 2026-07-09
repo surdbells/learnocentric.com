@@ -178,11 +178,25 @@ final class QuestionsAction
         $body = (array) $request->getParsedBody();
         $to = (string) ($body['to'] ?? '');
 
-        // The gate: a question cannot be approved or published without a validated answer.
+        // The gate: a question cannot be approved or published without a validated
+        // answer, an explanation (every type is auto-marked) and a difficulty set.
         if (in_array($to, [Lifecycle::APPROVED, Lifecycle::PUBLISHED], true)) {
             $error = $q->answerError();
-            if ($error !== null || !$q->isAnswerValidated()) {
-                return Json::error($response, $error ?? 'Validate the answer before approving or publishing this question.', 422);
+            if ($error !== null) {
+                return Json::error($response, $error, 422);
+            }
+            $missing = [];
+            if (!$q->isAnswerValidated()) {
+                $missing[] = 'a validated answer';
+            }
+            if (trim((string) $q->getExplanation()) === '') {
+                $missing[] = 'an explanation';
+            }
+            if (!in_array($q->getDifficulty(), Question::DIFFICULTIES, true)) {
+                $missing[] = 'a difficulty level';
+            }
+            if (!empty($missing)) {
+                return Json::error($response, 'This question needs ' . implode(', ', $missing) . ' before it can be approved or published.', 422);
             }
         }
 
@@ -230,8 +244,16 @@ final class QuestionsAction
         if (isset($body['track'])) { $q->setTrack((string) $body['track']); }
         if (isset($body['difficulty'])) { $q->setDifficulty((string) $body['difficulty']); }
         if (array_key_exists('options', $body)) { $q->setOptions(is_array($body['options']) ? $body['options'] : null); }
-        if (array_key_exists('correct_answer', $body)) { $q->setCorrectAnswer($body['correct_answer']); }
+        if (array_key_exists('correct_answer', $body)) {
+            $answer = $body['correct_answer'];
+            // multi-select stores a de-duplicated, re-indexed list of option keys.
+            if ($q->getType() === 'multi') {
+                $answer = is_array($answer) ? array_values(array_unique(array_map('strval', $answer))) : [];
+            }
+            $q->setCorrectAnswer($answer);
+        }
         if (array_key_exists('explanation', $body)) { $q->setExplanation($body['explanation'] !== '' ? (string) $body['explanation'] : null); }
+        if (array_key_exists('misconception_tag', $body)) { $q->setMisconceptionTag($body['misconception_tag'] !== '' && $body['misconception_tag'] !== null ? (string) $body['misconception_tag'] : null); }
         if (isset($body['marks'])) { $q->setMarks((int) $body['marks']); }
     }
 

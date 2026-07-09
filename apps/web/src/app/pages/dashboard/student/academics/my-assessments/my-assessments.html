@@ -75,6 +75,16 @@
                 </div>
               }
             }
+            @case ('multi') {
+              @for (opt of q.options; track opt.key) {
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" [id]="'q' + q.question_id + opt.key"
+                         [checked]="isChecked(q.question_id, opt.key)"
+                         (change)="toggleMulti(q.question_id, opt.key, $any($event.target).checked)"/>
+                  <label class="form-check-label" [for]="'q' + q.question_id + opt.key">{{ opt.key.toUpperCase() }}. {{ opt.text }}</label>
+                </div>
+              }
+            }
             @case ('true_false') {
               @for (tf of ['true', 'false']; track tf) {
                 <div class="form-check">
@@ -130,7 +140,7 @@
             <div class="flex-grow-1">
               <div class="fw-medium">{{ a.stem }}</div>
               <div class="small">
-                Your answer: <b>{{ a.response ?? '—' }}</b>
+                Your answer: <b>{{ responseText(a.response) }}</b>
                 @if (!a.is_correct) {
                   <span class="text-success ms-2">Correct: {{ answerText(a) }}</span>
                 }

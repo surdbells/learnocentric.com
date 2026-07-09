@@ -62,8 +62,24 @@ export class MyAssessments {
     this.responses.set({...this.responses(), [questionId]: value});
   }
 
+  isChecked(questionId: number, key: string): boolean {
+    const v = this.responses()[questionId];
+    return Array.isArray(v) && v.includes(key);
+  }
+
+  toggleMulti(questionId: number, key: string, checked: boolean): void {
+    const current = this.responses()[questionId];
+    const selected: string[] = Array.isArray(current) ? [...current] : [];
+    const idx = selected.indexOf(key);
+    if (checked && idx < 0) selected.push(key);
+    if (!checked && idx >= 0) selected.splice(idx, 1);
+    this.setResponse(questionId, selected);
+  }
+
   answered(): number {
-    return Object.values(this.responses()).filter((v) => v !== null && v !== undefined && v !== '').length;
+    return Object.values(this.responses()).filter(
+      (v) => v !== null && v !== undefined && v !== '' && !(Array.isArray(v) && v.length === 0),
+    ).length;
   }
 
   submit(): void {
@@ -82,6 +98,12 @@ export class MyAssessments {
     this.result.set(null);
     this.mode.set('list');
     this.loadAvailable();
+  }
+
+  responseText(r: any): string {
+    if (r === null || r === undefined || r === '') return '—';
+    if (Array.isArray(r)) return r.length ? r.join(' / ') : '—';
+    return String(r);
   }
 
   answerText(a: any): string {
