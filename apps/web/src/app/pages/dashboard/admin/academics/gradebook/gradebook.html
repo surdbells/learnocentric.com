@@ -1,8 +1,13 @@
 <app-page-header icon="grading" action="Gradebook"></app-page-header>
 
-<div class="btn-group mb-4" role="group">
-  <button type="button" class="btn btn-sm" [class.btn-primary]="mode() === 'assessments'" [class.btn-outline-primary]="mode() !== 'assessments'" (click)="setMode('assessments')">By assessment</button>
-  <button type="button" class="btn btn-sm" [class.btn-primary]="mode() === 'students'" [class.btn-outline-primary]="mode() !== 'students'" (click)="setMode('students')">By student</button>
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
+  <div class="btn-group" role="group">
+    <button type="button" class="btn btn-sm" [class.btn-primary]="mode() === 'assessments'" [class.btn-outline-primary]="mode() !== 'assessments'" (click)="setMode('assessments')">By assessment</button>
+    <button type="button" class="btn btn-sm" [class.btn-primary]="mode() === 'students'" [class.btn-outline-primary]="mode() !== 'students'" (click)="setMode('students')">By student</button>
+  </div>
+  <button type="button" class="btn btn-sm btn-outline-secondary" [disabled]="exporting()" (click)="exportCsv()">
+    <app-icon name="download" [size]="16" /> Export CSV
+  </button>
 </div>
 
 @if (loading()) {

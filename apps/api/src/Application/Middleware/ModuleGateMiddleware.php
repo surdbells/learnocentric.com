@@ -41,6 +41,8 @@ class ModuleGateMiddleware implements MiddlewareInterface
         '/assessment/gradebook' => 'assessments',
         '/live-classes' => 'live_classes',
         '/analytics' => 'analytics',
+        '/export/gradebook' => 'assessments',
+        '/export/summary' => 'analytics',
         '/school/interventions' => 'interventions',
         '/safeguarding' => 'safeguarding',
     ];

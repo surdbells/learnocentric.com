@@ -1,4 +1,9 @@
-<app-page-header icon="monitoring" action="Analytics"></app-page-header>
+<div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+  <app-page-header icon="monitoring" action="Analytics"></app-page-header>
+  <button type="button" class="btn btn-sm btn-outline-secondary" [disabled]="exporting()" (click)="exportCsv()">
+    <app-icon name="download" [size]="16" /> Export CSV
+  </button>
+</div>
 
 @if (loading()) {
   <div class="text-body-secondary p-4">Loading…</div>
