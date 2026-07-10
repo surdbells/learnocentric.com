@@ -1,0 +1,58 @@
+<app-page-header icon="health_and_safety" action="Report a concern" />
+
+<div class="row justify-content-center">
+  <div class="col-lg-8">
+    <div class="card border-0 shadow-sm">
+      <div class="card-body p-4">
+        @if (reference()) {
+          <div class="text-center py-4">
+            <app-icon name="verified" [size]="40" class="text-success mb-3" />
+            <h5 class="fw-semibold">Your concern has been shared</h5>
+            <p class="text-body-secondary">
+              A member of the safeguarding team will look into it. Keep this reference in case you need to follow up.
+            </p>
+            <div class="badge bg-light text-body fs-6 my-2">{{ reference() }}</div>
+            <div class="d-flex justify-content-center gap-2 mt-3">
+              <button type="button" class="btn btn-outline-secondary" (click)="reset()">Report another</button>
+              <button type="button" class="btn btn-primary" (click)="done()">Done</button>
+            </div>
+          </div>
+        } @else {
+          <p class="text-body-secondary">
+            If something is worrying you — about yourself or someone else — you can tell us here.
+            Only the safeguarding team will see this.
+          </p>
+
+          <form (ngSubmit)="submit()">
+            <div class="mb-3">
+              <label class="form-label fw-medium">What is your concern about?</label>
+              <select class="form-select" [ngModel]="category()" (ngModelChange)="category.set($event)" name="category">
+                @for (c of categories; track c.value) {
+                  <option [value]="c.value">{{ c.label }}</option>
+                }
+              </select>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label fw-medium">Summary</label>
+              <input class="form-control" placeholder="In a few words, what is the concern?"
+                     [ngModel]="summary()" (ngModelChange)="summary.set($event)" name="summary" maxlength="200" required/>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label fw-medium">Tell us more <span class="text-body-secondary fw-normal">(optional)</span></label>
+              <textarea class="form-control" rows="5" placeholder="Add anything that would help us understand what is happening."
+                        [ngModel]="details()" (ngModelChange)="details.set($event)" name="details"></textarea>
+            </div>
+
+            <div class="d-flex justify-content-end">
+              <button type="submit" class="btn btn-primary" [disabled]="busy() || !summary().trim()">
+                <app-icon name="send" [size]="18" class="me-1" /> Send report
+              </button>
+            </div>
+          </form>
+        }
+      </div>
+    </div>
+  </div>
+</div>

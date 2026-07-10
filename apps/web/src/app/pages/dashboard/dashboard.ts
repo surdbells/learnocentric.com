@@ -24,6 +24,9 @@ export class Dashboard implements OnInit {
   /** Menu with items the current plan doesn't grant filtered out. */
   readonly menu = computed<IMenu[]>(() => this.filterByModules(this.fullMenu()));
 
+  /** Students get a fully-expanded, non-collapsible menu (all items always visible). */
+  readonly alwaysOpenMenu = signal<boolean>(false);
+
   /** Desktop rail collapse state (persisted). */
   collapsed = signal<boolean>(false);
   /** Mobile off-canvas drawer state. */
@@ -36,6 +39,7 @@ export class Dashboard implements OnInit {
     if (isPlatformBrowser(platformId)) {
       const user: AuthUser = JSON.parse(localStorage.getItem('auth_user') || '{}');
       this.fullMenu.set(this.userPreferenceMenu[user.role] ?? []);
+      this.alwaysOpenMenu.set(user.role === 'student');
       // Refresh granted modules so the menu reflects the school's current plan.
       this.moduleAccess.refresh();
     }
@@ -43,7 +47,8 @@ export class Dashboard implements OnInit {
 
   ngOnInit(): void {
     if (isPlatformBrowser(this.platformId)) {
-      this.collapsed.set(localStorage.getItem(COLLAPSE_KEY) === '1');
+      // Students always get the full, expanded sidebar — never the icon rail.
+      this.collapsed.set(!this.alwaysOpenMenu() && localStorage.getItem(COLLAPSE_KEY) === '1');
     }
   }
 
@@ -61,6 +66,7 @@ export class Dashboard implements OnInit {
   }
 
   toggleCollapse(): void {
+    if (this.alwaysOpenMenu()) return; // students stay on the full expanded sidebar
     const next = !this.collapsed();
     this.collapsed.set(next);
     if (isPlatformBrowser(this.platformId)) {

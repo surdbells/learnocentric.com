@@ -91,6 +91,25 @@
       } @else {
         <div class="text-body-secondary small">No further transitions available from this state.</div>
       }
+
+      <!-- Moderation -->
+      <div class="mt-4">
+        <label class="form-label text-uppercase small fw-semibold text-body-secondary">Moderation</label>
+        <div class="mb-2">
+          <span class="badge bg-{{ moderationColor(a.moderation_status) }}-subtle text-{{ moderationColor(a.moderation_status) }} text-capitalize px-3 py-2">
+            {{ titleCase(a.moderation_status) }}
+          </span>
+        </div>
+        @if (isApprover()) {
+          <div class="d-flex flex-wrap gap-2">
+            @for (s of moderationStatuses; track s) {
+              <button type="button" class="btn btn-sm btn-outline-secondary text-capitalize"
+                      [disabled]="busy() || a.moderation_status === s"
+                      (click)="moderate(s)">{{ titleCase(s) }}</button>
+            }
+          </div>
+        }
+      </div>
     } @else {
       <div class="text-body-secondary small">Loading…</div>
     }

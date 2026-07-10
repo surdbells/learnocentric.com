@@ -48,8 +48,10 @@ use App\Application\Actions\School\TeachersAction;
 use App\Application\Actions\School\TeacherStudentsAction;
 use App\Application\Actions\Storage\UploadAction;
 use App\Application\Actions\Support\SupportAction;
+use App\Application\Actions\Export\ExportAction;
 use App\Application\Middleware\JwtAuthMiddleware;
 use App\Application\Middleware\ModuleGateMiddleware;
+use App\Application\Middleware\RequirePermissionMiddleware;
 use Slim\App;
 use Slim\Routing\RouteCollectorProxy;
 
@@ -89,6 +91,8 @@ return static function (App $app): void {
             $auth->map(['GET', 'POST', 'PUT', 'DELETE'], '/school/enrollments', EnrollmentsAction::class);
             $auth->map(['GET', 'POST', 'PUT', 'DELETE'], '/school/scheme-of-work', SchemeOfWorkAction::class);
             $auth->post('/school/scheme-of-work/bulk-delete', SchemeOfWorkAction::class . ':bulkDelete');
+            $auth->post('/school/scheme-of-work/{id:[0-9]+}/transition', SchemeOfWorkAction::class . ':transition');
+            $auth->get('/school/scheme-of-work/{id:[0-9]+}/history', SchemeOfWorkAction::class . ':history');
             $auth->get('/school/terms', TermsAction::class);
             $auth->map(['GET', 'PUT'], '/school/profile', SchoolProfileAction::class);
             $auth->map(['GET', 'PUT'], '/school/settings', SchoolSettingsAction::class);
@@ -124,6 +128,8 @@ return static function (App $app): void {
             $auth->delete('/assessment/assessments/{id:[0-9]+}/questions/{qid:[0-9]+}', AssessmentsAction::class . ':detach');
             $auth->post('/assessment/assessments/{id:[0-9]+}/transition', AssessmentsAction::class . ':transition');
             $auth->get('/assessment/assessments/{id:[0-9]+}/history', AssessmentsAction::class . ':history');
+            $auth->post('/assessment/assessments/{id:[0-9]+}/moderate', AssessmentsAction::class . ':moderate')
+                ->setArgument('perm', 'assessment:approve');
 
             // Assessment — learner attempts (take + auto-grade)
             $auth->get('/assessment/attempts/available', AttemptsAction::class . ':available');
@@ -180,10 +186,16 @@ return static function (App $app): void {
             $auth->get('/analytics/children', AnalyticsAction::class . ':children');
             $auth->get('/analytics/student/{id:[0-9]+}', AnalyticsAction::class . ':student');
 
+            // Server-side CSV exports (staff) — audited via AuditLogger (report.export)
+            $auth->get('/export/gradebook', ExportAction::class . ':gradebook')->setArgument('perm', 'report:export');
+            $auth->get('/export/summary', ExportAction::class . ':summary')->setArgument('perm', 'report:export');
+
             // Content library + packages (super-admin supply chain, licensing/takedown)
             $auth->map(['GET', 'POST', 'PUT', 'DELETE'], '/content/library', ContentLibraryAction::class);
             $auth->get('/content/packages/{id:[0-9]+}', ContentPackagesAction::class . ':show');
             $auth->map(['GET', 'POST', 'DELETE'], '/content/packages', ContentPackagesAction::class);
+            $auth->post('/content/packages/{id:[0-9]+}/transition', ContentPackagesAction::class . ':transition');
+            $auth->get('/content/packages/{id:[0-9]+}/history', ContentPackagesAction::class . ':history');
             $auth->post('/content/assign', ContentPackagesAction::class . ':assign');
             $auth->get('/content/my-resources', ContentPackagesAction::class . ':myResources');
 
@@ -221,6 +233,6 @@ return static function (App $app): void {
             $auth->post('/support/tickets/{id:[0-9]+}/transition', SupportAction::class . ':transition');
 
             $auth->post('/upload', UploadAction::class);
-        })->add(ModuleGateMiddleware::class)->add(JwtAuthMiddleware::class);
+        })->add(RequirePermissionMiddleware::class)->add(ModuleGateMiddleware::class)->add(JwtAuthMiddleware::class);
     });
 };

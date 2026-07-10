@@ -37,6 +37,11 @@ export class FileUpload {
   progress = signal<number | null>(null);
   current = signal<UploadedFile | null>(null);
   fileName = signal('');
+  /** Inline error message shown when an upload fails; null when there's no error. */
+  error = signal<string | null>(null);
+
+  /** The last file the user chose, kept so a failed upload can be retried as-is. */
+  private pendingFile: File | null = null;
 
   onSelect(event: Event): void {
     const input = event.target as HTMLInputElement;
@@ -47,7 +52,9 @@ export class FileUpload {
       input.value = '';
       return;
     }
+    this.error.set(null);
     this.fileName.set(file.name);
+    this.pendingFile = file;
     this.upload(file);
     input.value = '';
   }
@@ -55,6 +62,7 @@ export class FileUpload {
   private upload(file: File): void {
     const form = new FormData();
     form.append('file', file, file.name);
+    this.error.set(null);
     this.progress.set(0);
 
     this.http.post<UploadedFile>('/backend/upload', form, {reportProgress: true, observe: 'events'}).subscribe({
@@ -64,21 +72,36 @@ export class FileUpload {
         } else if (event.type === HttpEventType.Response && event.body) {
           this.current.set(event.body);
           this.progress.set(null);
+          this.pendingFile = null;
           this.uploaded.emit(event.body);
           this.toast.success('File uploaded');
         }
       },
       error: (e) => {
         this.progress.set(null);
-        this.toast.error(e?.error?.error || 'Upload failed');
+        this.error.set(e?.error?.error || 'Upload failed — check your connection and try again.');
       },
     });
+  }
+
+  /** Re-attempt the exact same file that just failed. */
+  retry(): void {
+    if (this.pendingFile) this.upload(this.pendingFile);
+  }
+
+  /** Discard the failed file and return to the empty picker. */
+  chooseAnother(): void {
+    this.error.set(null);
+    this.pendingFile = null;
+    this.fileName.set('');
   }
 
   remove(): void {
     this.current.set(null);
     this.fileName.set('');
     this.progress.set(null);
+    this.error.set(null);
+    this.pendingFile = null;
     this.cleared.emit();
   }
 

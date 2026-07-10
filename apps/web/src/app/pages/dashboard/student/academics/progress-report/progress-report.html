@@ -16,7 +16,15 @@
 } @else if (isParent() && !children().length) {
   <div class="card border-0 shadow-sm p-5 text-center text-body-secondary">No student is linked to your account yet. Ask the school to link your child.</div>
 } @else if (report(); as r) {
-  <div class="d-flex justify-content-end mb-3">
+  <div class="d-flex justify-content-end gap-2 mb-3">
+    <button type="button" class="btn btn-outline-success btn-sm" (click)="shareWhatsApp()">
+      <app-icon name="chat" [size]="18" class="me-1" />
+      Share (WhatsApp)
+    </button>
+    <button type="button" class="btn btn-outline-secondary btn-sm" (click)="copySummary()">
+      <app-icon name="assignment" [size]="18" class="me-1" />
+      Copy summary
+    </button>
     <button type="button" class="btn btn-outline-primary btn-sm" [disabled]="downloading()" (click)="downloadPdf()">
       <app-icon name="download" [size]="18" class="me-1" />
       {{ downloading() ? 'Preparing…' : 'Download PDF' }}
@@ -46,6 +54,47 @@
       </div>
     </div>
   </div>
+
+  <!-- Structured teacher summary for parents (spec §7.5, §18) -->
+  @if (r.feedback.strengths || r.feedback.misconceptions?.length || r.feedback.practice_needed || r.feedback.teacher_comment || r.feedback.parent_support_suggestion) {
+    <div class="card border-0 shadow-sm mb-4"><div class="card-body">
+      <h6 class="fw-semibold mb-3">Teacher summary</h6>
+      <div class="row g-3">
+        @if (r.feedback.strengths) {
+          <div class="col-md-6">
+            <div class="small text-success fw-semibold mb-1">Strengths</div>
+            <div class="small"><app-rich-text [value]="r.feedback.strengths" /></div>
+          </div>
+        }
+        @if (r.feedback.misconceptions?.length) {
+          <div class="col-md-6">
+            <div class="small text-warning fw-semibold mb-1">Misconceptions to work on</div>
+            <ul class="small mb-0 ps-3">
+              @for (m of r.feedback.misconceptions; track $index) { <li>{{ m }}</li> }
+            </ul>
+          </div>
+        }
+        @if (r.feedback.practice_needed) {
+          <div class="col-md-6">
+            <div class="small text-primary fw-semibold mb-1">Practice needed</div>
+            <div class="small"><app-rich-text [value]="r.feedback.practice_needed" /></div>
+          </div>
+        }
+        @if (r.feedback.teacher_comment) {
+          <div class="col-md-6">
+            <div class="small text-body-secondary fw-semibold mb-1">Teacher comment</div>
+            <div class="small"><app-rich-text [value]="r.feedback.teacher_comment" /></div>
+          </div>
+        }
+        @if (r.feedback.parent_support_suggestion) {
+          <div class="col-12">
+            <div class="small text-info fw-semibold mb-1">Parent support suggestion</div>
+            <div class="small"><app-rich-text [value]="r.feedback.parent_support_suggestion" /></div>
+          </div>
+        }
+      </div>
+    </div></div>
+  }
 
   <div class="row g-4">
     <!-- Academic: quizzes -->

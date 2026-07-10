@@ -4,13 +4,14 @@ import {ToastrService} from 'ngx-toastr';
 import {PageHeader} from '../../../../../common/layout/page-header/page-header';
 import {LearnoModal} from '../../../../../components/learno-modal/learno-modal';
 import {ApiService} from '../../../../../common/service/api.service';
+import {Icon} from '../../../../../common/icon/icon';
 
 declare const bootstrap: any;
 
 @Component({
   selector: 'app-gradebook',
   standalone: true,
-  imports: [PageHeader, LearnoModal, DatePipe],
+  imports: [PageHeader, LearnoModal, DatePipe, Icon],
   templateUrl: './gradebook.html',
   styleUrl: './gradebook.css',
 })
@@ -67,5 +68,25 @@ export class Gradebook {
     if (pct >= 70) return 'success';
     if (pct >= 50) return 'warning';
     return 'danger';
+  }
+
+  exporting = signal(false);
+
+  exportCsv(): void {
+    this.exporting.set(true);
+    this.api.get('/backend/export/gradebook', {responseType: 'blob', observe: 'body'}).subscribe({
+      next: (blob: any) => { this.downloadBlob(blob, 'gradebook.csv'); this.exporting.set(false); },
+      error: () => { this.exporting.set(false); this.toast.error('Could not export the gradebook'); },
+    });
+  }
+
+  private downloadBlob(blob: Blob, filename: string): void {
+    if (typeof window === 'undefined') return;
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    a.click();
+    window.URL.revokeObjectURL(url);
   }
 }

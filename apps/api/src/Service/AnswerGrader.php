@@ -26,6 +26,17 @@ final class AnswerGrader
         switch ($question->getType()) {
             case 'mcq':
                 return is_string($response) && $response !== '' && $response === $answer;
+            case 'multi':
+                $expected = is_array($answer) ? array_values(array_unique(array_map('strval', $answer))) : [];
+                $given = is_array($response)
+                    ? array_values(array_unique(array_map('strval', $response)))
+                    : ($response === null || $response === '' ? [] : [(string) $response]);
+                if ($expected === [] || count($expected) !== count($given)) {
+                    return false;
+                }
+                sort($expected);
+                sort($given);
+                return $expected === $given;
             case 'true_false':
                 return $this->boolStr($response) === $this->boolStr($answer);
             case 'short':

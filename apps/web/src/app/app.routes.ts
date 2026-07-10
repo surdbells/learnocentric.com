@@ -43,6 +43,7 @@ import {Learn} from './pages/dashboard/student/academics/learn/learn';
 import {ProgressReport} from './pages/dashboard/student/academics/progress-report/progress-report';
 import {StudentManagement} from './pages/dashboard/student/management/management';
 import {StudentProfile} from './pages/dashboard/student/management/student-profile/student-profile';
+import {ReportConcern} from './pages/dashboard/student/report-concern/report-concern';
 import {authGuard} from './common/auth/auth-guard';
 import {moduleGuard} from './common/auth/module-guard';
 import {ParentMain} from './pages/dashboard/parent/parent-main/parent-main';
@@ -282,6 +283,7 @@ export const routes: Routes = [
           { path: "profile", component: StudentProfile },
         ]
       },
+      { path: "report-concern", component: ReportConcern },
       {
         path: "communication",
         children: [

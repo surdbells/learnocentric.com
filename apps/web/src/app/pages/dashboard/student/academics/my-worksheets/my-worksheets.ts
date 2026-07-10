@@ -7,11 +7,12 @@ import {FileUpload, UploadedFile} from '../../../../../common/file-upload/file-u
 import {ApiService} from '../../../../../common/service/api.service';
 import {RichEditor} from '../../../../../common/rich-editor/rich-editor';
 import {RichText} from '../../../../../common/rich-editor/rich-text';
+import {Icon} from '../../../../../common/icon/icon';
 
 @Component({
   selector: 'app-my-worksheets',
   standalone: true,
-  imports: [RichText, RichEditor, PageHeader, FormsModule, DatePipe, FileUpload],
+  imports: [RichText, RichEditor, PageHeader, FormsModule, DatePipe, FileUpload, Icon],
   templateUrl: './my-worksheets.html',
   styleUrl: './my-worksheets.css',
 })
@@ -21,6 +22,7 @@ export class MyWorksheets {
 
   mode = signal<'list' | 'do'>('list');
   loading = signal(false);
+  loadError = signal<string | null>(null);
   busy = signal(false);
   available = signal<any[]>([]);
   current = signal<any | null>(null);
@@ -33,10 +35,17 @@ export class MyWorksheets {
 
   load(): void {
     this.loading.set(true);
+    this.loadError.set(null);
     this.api.get<any>('/backend/assessment/worksheets/available').subscribe({
       next: (res) => { this.available.set(res?.data ?? []); this.loading.set(false); },
-      error: () => { this.loading.set(false); this.toast.error('Could not load worksheets'); },
+      error: () => { this.loading.set(false); this.loadError.set('We couldn\'t load your worksheets. Please check your connection and try again.'); },
     });
+  }
+
+  /** Filename for a download link, derived from the file URL. */
+  downloadName(url: string | undefined | null): string {
+    const u = (url || '').split('?')[0].split('#')[0];
+    return u.split('/').pop() || 'download';
   }
 
   openDo(w: any): void {

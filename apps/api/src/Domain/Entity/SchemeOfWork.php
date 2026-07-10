@@ -6,6 +6,7 @@ namespace App\Domain\Entity;
 
 use App\Domain\Entity\Concern\TimestampsTrait;
 use App\Domain\Lifecycle;
+use App\Domain\LifecycleAware;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -13,7 +14,7 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\Entity]
 #[ORM\Table(name: 'scheme_of_work')]
 #[ORM\HasLifecycleCallbacks]
-class SchemeOfWork
+class SchemeOfWork implements LifecycleAware
 {
     use TimestampsTrait;
 
@@ -66,7 +67,14 @@ class SchemeOfWork
     public function setTopic(?Topic $v): void { $this->topic = $v; }
     public function setObjective(?string $v): void { $this->objective = $v; }
     public function setAssignedTeacher(?User $v): void { $this->assignedTeacher = $v; }
+    public function getStatus(): string { return $this->status; }
     public function setStatus(string $v): void { $this->status = $v; }
+
+    // --- LifecycleAware ---
+    public function getLifecycleStatus(): string { return $this->status; }
+    public function setLifecycleStatus(string $status): void { $this->status = $status; }
+    public function lifecycleType(): string { return 'SchemeOfWork'; }
+    public function lifecycleSnapshot(): array { return $this->toArray(); }
 
     public function toArray(): array
     {

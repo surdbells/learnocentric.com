@@ -11,6 +11,26 @@
         <div class="progress-bar bg-success" [style.width.%]="progress()"></div>
       </div>
     </div>
+  } @else if (error(); as err) {
+    <!-- Upload failed — keep the file and offer a retry -->
+    <div class="fu-error">
+      <div class="d-flex align-items-center gap-2 mb-2">
+        <span class="fu-doc fu-doc-error"><app-icon name="cancel" /></span>
+        <div class="flex-grow-1 min-w-0">
+          <span class="fu-name text-truncate d-block">{{ fileName() }}</span>
+          <span class="small text-danger">{{ err }}</span>
+        </div>
+      </div>
+      <div class="d-flex gap-2">
+        <button type="button" class="btn btn-sm btn-primary" (click)="retry()">
+          <app-icon name="upload_file" [size]="16" /> Retry
+        </button>
+        <label class="btn btn-sm btn-light mb-0">
+          Choose another
+          <input type="file" class="d-none" [accept]="accept()" (change)="onSelect($event)"/>
+        </label>
+      </div>
+    </div>
   } @else if (displayUrl(); as url) {
     <!-- Uploaded -->
     <div class="fu-file">

@@ -13,6 +13,8 @@ import {Icon} from '../../../../../common/icon/icon';
 declare const bootstrap: any;
 
 const STATUS_COLOR: Record<string, string> = {draft: 'secondary', review: 'warning', approved: 'info', published: 'success', archived: 'dark'};
+const MODERATION_COLOR: Record<string, string> = {pending: 'secondary', reviewed: 'info', approved: 'success', flagged: 'danger', returned: 'warning'};
+const MODERATION_STATUSES = ['pending', 'reviewed', 'approved', 'flagged', 'returned'];
 const ACTION_LABEL: Record<string, string> = {review: 'Submit for review', approved: 'Approve', published: 'Publish', archived: 'Archive', draft: 'Return to draft'};
 const APPROVER_ROLES = ['academic_lead', 'school_admin', 'tutor_admin', 'super_admin'];
 
@@ -48,7 +50,10 @@ export class Assessments {
     {key: 'question_count', label: 'Questions'},
     {key: 'total_marks', label: 'Marks'},
     {key: 'approval_status', label: 'Status', type: 'badge', badge: (v) => ({text: this.titleCase(v), color: STATUS_COLOR[v] ?? 'secondary'})},
+    {key: 'moderation_status', label: 'Moderation', type: 'badge', badge: (v) => ({text: this.titleCase(v), color: MODERATION_COLOR[v] ?? 'secondary'})},
   ];
+
+  readonly moderationStatuses = MODERATION_STATUSES;
 
   readonly filterDefs = computed<GridFilter[]>(() => [
     {key: 'approval_status', label: 'Status', options: [
@@ -153,6 +158,24 @@ export class Assessments {
       error: (e) => { this.toast.error(e?.error?.error || 'Transition failed'); this.busy.set(false); },
     });
   }
+
+  moderate(status: string): void {
+    const a = this.builder();
+    if (!a) return;
+    this.busy.set(true);
+    this.api.post<any>(`/backend/assessment/assessments/${a.id}/moderate`, {moderation_status: status}).subscribe({
+      next: (detail) => {
+        this.toast.success(`Moderation set to ${this.titleCase(status)}`);
+        this.builder.set(detail);
+        this.loadAvailable(detail);
+        this.grid?.refresh();
+        this.busy.set(false);
+      },
+      error: (e) => { this.toast.error(e?.error?.error || 'Could not update moderation'); this.busy.set(false); },
+    });
+  }
+
+  moderationColor(s: string): string { return MODERATION_COLOR[s] ?? 'secondary'; }
 
   canDo(a: any, to: string): boolean {
     if (a.approval_status === 'draft' && to === 'review') return true;

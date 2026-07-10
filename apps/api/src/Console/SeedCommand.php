@@ -278,15 +278,16 @@ class SeedCommand extends Command
     /** @param array<string,Role> $roles */
     private function seedGrants(array $roles): void
     {
-        $all = ['view' => true, 'create' => true, 'edit' => true, 'approve' => true, 'export' => true, 'delete' => true];
+        $all = ['view' => true, 'create' => true, 'edit' => true, 'approve' => true, 'export' => true, 'delete' => true, 'archive' => true];
         $rw = ['view' => true, 'create' => true, 'edit' => true];
         $ro = ['view' => true];
+        $appr = ['view' => true, 'approve' => true, 'archive' => true]; // approver of governed content may also archive/take down
 
         $matrix = [
             Role::SCHOOL_ADMIN => [
-                'academic_setup' => $all, 'user' => $rw, 'curriculum_pack' => $ro, 'delivery_pack' => ['view' => true, 'approve' => true],
-                'assessment' => ['view' => true, 'approve' => true], 'gradebook' => ['view' => true, 'approve' => true, 'export' => true],
-                'report' => ['view' => true, 'export' => true], 'intervention' => $rw, 'resource' => ['view' => true, 'approve' => true],
+                'academic_setup' => $all, 'user' => $rw, 'curriculum_pack' => $ro, 'delivery_pack' => $appr,
+                'assessment' => $appr, 'gradebook' => ['view' => true, 'approve' => true, 'export' => true],
+                'report' => ['view' => true, 'export' => true], 'intervention' => $rw, 'resource' => $appr,
                 'live_class' => $ro, 'safeguarding_case' => $rw, 'subscription' => $ro,
             ],
             Role::TEACHER => [

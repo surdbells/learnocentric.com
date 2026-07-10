@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Domain\Entity;
 
 use App\Domain\Entity\Concern\TimestampsTrait;
+use App\Domain\Lifecycle;
+use App\Domain\LifecycleAware;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
@@ -18,7 +20,7 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\Entity]
 #[ORM\Table(name: 'content_packages')]
 #[ORM\HasLifecycleCallbacks]
-class ContentPackage
+class ContentPackage implements LifecycleAware
 {
     use TimestampsTrait;
 
@@ -59,6 +61,9 @@ class ContentPackage
     #[ORM\Column(name: 'is_active', type: Types::BOOLEAN, options: ['default' => true])]
     private bool $isActive = true;
 
+    #[ORM\Column(length: 20, options: ['default' => Lifecycle::DRAFT])]
+    private string $status = Lifecycle::DRAFT;
+
     /** @var Collection<int, ContentResource> */
     #[ORM\ManyToMany(targetEntity: ContentResource::class)]
     #[ORM\JoinTable(name: 'content_package_resources')]
@@ -85,6 +90,14 @@ class ContentPackage
     public function setPriceKobo(int $v): void { $this->priceKobo = max(0, $v); }
     public function setDurationMonths(?int $v): void { $this->durationMonths = $v; }
     public function setIsActive(bool $v): void { $this->isActive = $v; }
+    public function getStatus(): string { return $this->status; }
+    public function setStatus(string $v): void { $this->status = $v; }
+
+    // --- LifecycleAware ---
+    public function getLifecycleStatus(): string { return $this->status; }
+    public function setLifecycleStatus(string $status): void { $this->status = $status; }
+    public function lifecycleType(): string { return 'ContentPackage'; }
+    public function lifecycleSnapshot(): array { return $this->toArray(); }
 
     /** @return Collection<int, ContentResource> */
     public function getResources(): Collection { return $this->resources; }
@@ -107,6 +120,7 @@ class ContentPackage
             'price' => $this->priceKobo / 100,
             'durationMonths' => $this->durationMonths,
             'isActive' => $this->isActive,
+            'status' => $this->status,
             'content_count' => $this->resources->count(),
             'contentIds' => $this->resources->map(fn (ContentResource $r) => $r->getId())->getValues(),
             'created_at' => $this->createdAt->format(DATE_ATOM),

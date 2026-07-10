@@ -32,6 +32,8 @@ final class LoginAction
 
         $user = $this->auth->attempt($email, $password);
         if ($user === null) {
+            // Log failed attempts (spec §15 audit trail) — no actor, capture the email tried + IP/device.
+            $this->audit->log('auth.login_failed', null, 'User', null, null, ['email' => $email], $this->ip($request));
             return Json::error($response, 'Incorrect email or password.', 401);
         }
 

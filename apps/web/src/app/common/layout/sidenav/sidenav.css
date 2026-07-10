@@ -82,6 +82,10 @@
 }
 .sb-group.is-open > .sb-link .sb-caret { transform: rotate(180deg); }
 
+/* Pinned-open groups (alwaysOpen): the header is a section label, not a toggle */
+.sb-link.is-static { cursor: default; }
+.sb-link.is-static:hover { background: transparent; color: var(--_sb-muted); }
+
 /* A group whose section is active: subtle emphasis only (no heavy pill) */
 .sb-group.is-active > .sb-link { color: var(--_sb-active-color); font-weight: 600; }
 .sb-group.is-active > .sb-link .sb-icon { color: var(--_sb-active-color); }

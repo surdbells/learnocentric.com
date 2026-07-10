@@ -166,6 +166,37 @@ final class AnalyticsAction
         // Feedback
         $notes = $this->em->getRepository(FeedbackNote::class)->findBy(['student' => $student], ['createdAt' => 'DESC']);
 
+        // Structured summary for the parent report (spec §7.5, §18): pull the most
+        // recent non-empty value for each field and collect topic misconceptions.
+        $mostRecent = static function (callable $get) use ($notes): ?string {
+            foreach ($notes as $n) {
+                $v = $get($n);
+                if ($v !== null && trim($v) !== '') {
+                    return $v;
+                }
+            }
+            return null;
+        };
+        $teacherComment = $mostRecent(static fn (FeedbackNote $n) => $n->getMessage());
+        $strengths = $mostRecent(static fn (FeedbackNote $n) => $n->getStrengths());
+        $practiceNeeded = $mostRecent(static fn (FeedbackNote $n) => $n->getPracticeNeeded());
+        $parentSupport = $mostRecent(static fn (FeedbackNote $n) => $n->getParentSupportSuggestion());
+        // Misconceptions to work on — from the known misconceptions of topics the
+        // student has received feedback on (topic data already available here).
+        $misconceptions = [];
+        foreach ($notes as $n) {
+            $topic = $n->getTopic();
+            if ($topic === null) {
+                continue;
+            }
+            foreach ((array) ($topic->toArray()['misconceptions'] ?? []) as $m) {
+                $m = trim((string) $m);
+                if ($m !== '' && !in_array($m, $misconceptions, true)) {
+                    $misconceptions[] = $m;
+                }
+            }
+        }
+
         // Live class attendance: joined vs classes offered to their group
         $joined = $this->em->getRepository(LiveClassAttendance::class)->count(['student' => $student]);
         $classIds = [];
@@ -216,6 +247,12 @@ final class AnalyticsAction
             'feedback' => [
                 'total' => count($notes),
                 'unread' => count(array_filter($notes, static fn (FeedbackNote $n) => !$n->isAcknowledged())),
+                // Named, structured fields the parent report renders in separate sections.
+                'strengths' => $strengths,
+                'misconceptions' => $misconceptions,
+                'practice_needed' => $practiceNeeded,
+                'parent_support_suggestion' => $parentSupport,
+                'teacher_comment' => $teacherComment,
                 'recent' => array_map(static fn (FeedbackNote $n) => [
                     'type' => $n->getType(),
                     'message' => $n->getMessage(),

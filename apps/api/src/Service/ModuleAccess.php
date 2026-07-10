@@ -42,7 +42,20 @@ final class ModuleAccess
         return $this->forInstitution($institution);
     }
 
-    /** @return string[] module keys granted to an institution right now. */
+    /**
+     * @return string[] module keys granted to an institution right now.
+     *
+     * DATA-RETENTION GUARANTEE (spec §19): expiry, lapse or suspension of a
+     * subscription only withdraws access to gated feature MODULES — it NEVER
+     * deletes or hides learner records, academic results or reports. An expired
+     * institution simply returns an empty module set here; its underlying data
+     * (users, attempts, worksheet/portfolio submissions, feedback, analytics)
+     * stays intact and is restored the moment a plan is reactivated.
+     *
+     * There is deliberately no deletion path triggered by a lapse anywhere in
+     * this service. If a scheduled data-purge is ever introduced, it MUST
+     * exclude learner academic/report records so this guarantee still holds.
+     */
     public function forInstitution(Institution $institution): array
     {
         $sub = $this->currentSubscription($institution);

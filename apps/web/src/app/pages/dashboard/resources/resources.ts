@@ -21,18 +21,38 @@ export class Resources {
   private readonly toast = inject(ToastrService);
 
   loading = signal(true);
+  loadError = signal<string | null>(null);
   package = signal<any | null>(null);
   resources = signal<any[]>([]);
 
   constructor() {
+    this.load();
+  }
+
+  load(): void {
+    this.loading.set(true);
+    this.loadError.set(null);
     this.api.get<any>('/backend/content/my-resources').subscribe({
       next: (res) => {
         this.package.set(res?.package ?? null);
         this.resources.set(res?.resources ?? []);
         this.loading.set(false);
       },
-      error: () => { this.loading.set(false); this.toast.error('Could not load resources'); },
+      error: () => { this.loading.set(false); this.loadError.set('We couldn\'t load your resources. Please check your connection and try again.'); },
     });
+  }
+
+  /** A downloadable resource has a real file, isn't a stream, and isn't licence-locked. */
+  isDownloadable(r: any): boolean {
+    const u = (r?.file_url || '').toLowerCase();
+    if (!u || r?.downloadable === false) return false;
+    if (/youtube|youtu\.be|vimeo/.test(u)) return false;
+    return /\.(pdf|docx?|pptx?|xlsx?|csv|txt|rtf|odt|mp4|webm|mov|m4v|ogv|mp3|wav|m4a|aac|oga|png|jpe?g|gif|webp|svg|avif|zip)$/i.test(u.split('?')[0].split('#')[0]);
+  }
+
+  downloadName(r: any): string {
+    const u = (r?.file_url || '').split('?')[0].split('#')[0];
+    return u.split('/').pop() || 'download';
   }
 
   typeIcon(type: string): string {

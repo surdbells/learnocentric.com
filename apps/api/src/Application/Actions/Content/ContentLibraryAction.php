@@ -64,6 +64,11 @@ final class ContentLibraryAction
         $this->applyFields($resource, $body);
         $resource->setCreatedBy($request->getAttribute('user'));
 
+        // A resource cannot enter the library without a documented licence + source (spec §17).
+        if (($err = $this->assertLicensed($resource, $response)) !== null) {
+            return $err;
+        }
+
         // Optional file (multipart field "file").
         $file = $this->pickFile($request);
         if ($file !== null) {
@@ -96,16 +101,20 @@ final class ContentLibraryAction
             $resource->setTitle((string) $body['title']);
         }
 
-        // Licence takedown / restore.
+        $this->applyFields($resource, $body);
+
+        // Licence takedown / restore. Approving requires a documented licence + source (spec §17).
         if (isset($body['licence_status'])) {
             if ($body['licence_status'] === ContentResource::TAKEDOWN) {
                 $resource->takedown(isset($body['takedown_reason']) ? (string) $body['takedown_reason'] : null);
             } elseif ($body['licence_status'] === ContentResource::APPROVED) {
+                if (($err = $this->assertLicensed($resource, $response)) !== null) {
+                    return $err;
+                }
                 $resource->restore();
             }
         }
 
-        $this->applyFields($resource, $body);
         $this->em->flush();
         $this->audit->log('content.update', $request->getAttribute('user'), 'ContentResource', (string) $resource->getId(), $before, $resource->toArray());
 
@@ -139,6 +148,21 @@ final class ContentLibraryAction
         if (array_key_exists('isPremium', $body)) { $r->setIsPremium(filter_var($body['isPremium'], FILTER_VALIDATE_BOOL)); }
         if (array_key_exists('source', $body)) { $r->setSource($this->str($body['source'])); }
         if (array_key_exists('licence', $body)) { $r->setLicence((string) $body['licence']); }
+        if (array_key_exists('audience', $body)) { $r->setAudience((string) $body['audience']); }
+        if (array_key_exists('visibility', $body)) { $r->setVisibility((string) $body['visibility']); }
+        if (array_key_exists('downloadable', $body)) { $r->setDownloadable(filter_var($body['downloadable'], FILTER_VALIDATE_BOOL)); }
+    }
+
+    /**
+     * A resource may only be served/approved once its provenance is documented:
+     * a non-empty source and a recorded licence (spec §17).
+     */
+    private function assertLicensed(ContentResource $r, Response $response): ?Response
+    {
+        if ($this->str($r->getSource()) === null || trim($r->getLicence()) === '') {
+            return Json::error($response, 'A source and licence are required before a resource can be served.', 422);
+        }
+        return null;
     }
 
     private function pickFile(Request $request): ?UploadedFileInterface

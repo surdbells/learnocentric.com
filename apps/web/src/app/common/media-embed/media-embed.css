@@ -29,3 +29,8 @@
   object-fit: contain;
   border-radius: 12px;
 }
+.media-download {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}

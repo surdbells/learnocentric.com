@@ -33,6 +33,8 @@ final class AssessmentsAction
     use ResolvesInstitution;
 
     private const EDITABLE = [Lifecycle::DRAFT, Lifecycle::REVIEW];
+    /** Roles allowed to set an assessment's moderation status. */
+    private const MODERATORS = ['academic_lead', 'school_admin', 'tutor_admin', 'super_admin'];
 
     public function __construct(
         private readonly EntityManagerInterface $em,
@@ -247,6 +249,30 @@ final class AssessmentsAction
         }
 
         return Json::write($response, ['assessment' => $this->row($a, true)] + $result);
+    }
+
+    /** POST /assessment/assessments/{id}/moderate — set the moderation status (staff/approver only). */
+    public function moderate(Request $request, Response $response, array $args): Response
+    {
+        $a = $this->em->getRepository(Assessment::class)->find((int) $args['id']);
+        if ($a === null) {
+            return Json::error($response, 'Assessment not found.', 404);
+        }
+        $user = $request->getAttribute('user');
+        if ($user === null || !in_array($user->getRole()->getCode(), self::MODERATORS, true)) {
+            return Json::error($response, 'You are not allowed to moderate assessments.', 403);
+        }
+        $body = (array) $request->getParsedBody();
+        $status = (string) ($body['moderation_status'] ?? '');
+        if (!in_array($status, Assessment::MODERATION_STATUSES, true)) {
+            return Json::error($response, 'Invalid moderation status. Use one of: ' . implode(', ', Assessment::MODERATION_STATUSES) . '.', 422);
+        }
+        $before = $a->toArray();
+        $a->setModerationStatus($status);
+        $this->em->flush();
+        $this->audit->log('assessment.moderate', $user, 'Assessment', (string) $a->getId(), $before, $a->toArray());
+
+        return Json::write($response, $this->row($a, true));
     }
 
     /** GET /assessment/assessments/{id}/history */

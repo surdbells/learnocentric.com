@@ -30,10 +30,11 @@ export class QuestionForm {
     topicId: new FormControl<number | null>(null, {validators: [Validators.required]}),
     type: new FormControl('mcq', {nonNullable: true}),
     track: new FormControl('academic', {nonNullable: true}),
-    difficulty: new FormControl('medium', {nonNullable: true}),
+    difficulty: new FormControl('moderate', {nonNullable: true}),
     marks: new FormControl(1, {nonNullable: true}),
     stem: new FormControl('', {nonNullable: true, validators: [Validators.required]}),
     explanation: new FormControl(''),
+    misconceptionTag: new FormControl(''),
     options: new FormArray<FormGroup>([]),
     correctIndex: new FormControl<number | null>(null),
     tfAnswer: new FormControl('true', {nonNullable: true}),
@@ -53,7 +54,7 @@ export class QuestionForm {
   constructor() {
     this.form.get('type')!.valueChanges.subscribe((t) => {
       this.type.set(t ?? 'mcq');
-      if (t === 'mcq' && this.options.length === 0) this.seedOptions();
+      if ((t === 'mcq' || t === 'multi') && this.options.length === 0) this.seedOptions();
     });
 
     effect(() => {
@@ -64,16 +65,23 @@ export class QuestionForm {
   }
 
   private reset(): void {
-    this.form.reset({type: 'mcq', track: 'academic', difficulty: 'medium', marks: 1, tfAnswer: 'true', numTolerance: 0});
+    this.form.reset({type: 'mcq', track: 'academic', difficulty: 'moderate', marks: 1, tfAnswer: 'true', numTolerance: 0});
     this.options.clear();
     this.seedOptions();
     this.type.set('mcq');
     this.isEdit.set(false);
   }
 
+  private newOption(text = '', correct = false): FormGroup {
+    return new FormGroup({
+      text: new FormControl(text, {nonNullable: true}),
+      correct: new FormControl(correct, {nonNullable: true}),
+    });
+  }
+
   private seedOptions(): void {
     this.options.clear();
-    for (let i = 0; i < 4; i++) this.options.push(new FormGroup({text: new FormControl('', {nonNullable: true})}));
+    for (let i = 0; i < 4; i++) this.options.push(this.newOption());
   }
 
   private patchFrom(s: any): void {
@@ -82,20 +90,26 @@ export class QuestionForm {
       topicId: s['topic_id'] ?? null,
       type: s['type'] ?? 'mcq',
       track: s['track'] ?? 'academic',
-      difficulty: s['difficulty'] ?? 'medium',
+      difficulty: s['difficulty'] ?? 'moderate',
       marks: s['marks'] ?? 1,
       stem: s['stem'] ?? '',
       explanation: s['explanation'] ?? '',
+      misconceptionTag: s['misconception_tag'] ?? '',
     }, {emitEvent: false});
     this.type.set(s['type'] ?? 'mcq');
 
     const ans = s['correct_answer'];
     if (s['type'] === 'mcq') {
       const opts: any[] = Array.isArray(s['options']) ? s['options'] : [];
-      opts.forEach((o) => this.options.push(new FormGroup({text: new FormControl(o?.text ?? '', {nonNullable: true})})));
-      while (this.options.length < 2) this.options.push(new FormGroup({text: new FormControl('', {nonNullable: true})}));
+      opts.forEach((o) => this.options.push(this.newOption(o?.text ?? '')));
+      while (this.options.length < 2) this.options.push(this.newOption());
       const idx = opts.findIndex((o) => o?.key === ans);
       this.form.get('correctIndex')!.setValue(idx >= 0 ? idx : null, {emitEvent: false});
+    } else if (s['type'] === 'multi') {
+      const opts: any[] = Array.isArray(s['options']) ? s['options'] : [];
+      const correctKeys: string[] = Array.isArray(ans) ? ans.map((k: any) => String(k)) : [];
+      opts.forEach((o) => this.options.push(this.newOption(o?.text ?? '', correctKeys.includes(String(o?.key)))));
+      while (this.options.length < 2) this.options.push(this.newOption());
     } else if (s['type'] === 'true_false') {
       this.form.get('tfAnswer')!.setValue(ans === false || ans === 'false' ? 'false' : 'true', {emitEvent: false});
     } else if (s['type'] === 'short') {
@@ -112,7 +126,7 @@ export class QuestionForm {
 
   addOption(): void {
     if (this.options.length >= LETTERS.length) return;
-    this.options.push(new FormGroup({text: new FormControl('', {nonNullable: true})}));
+    this.options.push(this.newOption());
   }
 
   removeOption(i: number): void {
@@ -133,6 +147,14 @@ export class QuestionForm {
         const idx = v.correctIndex;
         const correct = idx !== null && idx >= 0 && idx < opts.length ? LETTERS[idx] : null;
         return {options: opts, correct};
+      }
+      case 'multi': {
+        const rows = this.options.controls
+          .map((c, i) => ({key: LETTERS[i], text: (c.get('text')!.value ?? '').trim(), correct: !!c.get('correct')!.value}))
+          .filter((o) => o.text !== '');
+        const options = rows.map(({key, text}) => ({key, text}));
+        const correct = rows.filter((o) => o.correct).map((o) => o.key);
+        return {options, correct};
       }
       case 'true_false':
         return {options: null, correct: v.tfAnswer};
@@ -160,6 +182,7 @@ export class QuestionForm {
       marks: v.marks,
       stem: v.stem,
       explanation: v.explanation,
+      misconception_tag: v.misconceptionTag,
       options,
       correct_answer: correct,
     };

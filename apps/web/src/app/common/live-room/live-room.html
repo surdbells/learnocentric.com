@@ -5,7 +5,14 @@
       <span class="fw-semibold">{{ title }}</span>
       @if (connecting()) { <span class="small opacity-75">connecting…</span> }
     </div>
-    <button type="button" class="btn btn-sm btn-danger" (click)="leave()">Leave class</button>
+    <div class="d-flex align-items-center gap-2">
+      @if (isStudent) {
+        <a routerLink="/student/report-concern" class="btn btn-sm btn-outline-light" title="Report a safeguarding concern">
+          <app-icon name="health_and_safety" [size]="18" class="me-1" /> Report a concern
+        </a>
+      }
+      <button type="button" class="btn btn-sm btn-danger" (click)="leave()">Leave class</button>
+    </div>
   </div>
 
   <div class="live-room-stage">

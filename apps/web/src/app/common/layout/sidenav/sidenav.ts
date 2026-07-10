@@ -25,6 +25,8 @@ import {Icon} from '../../icon/icon';
 export class Sidenav implements OnInit {
   menu = input.required<IMenu[]>();
   collapsed = input<boolean>(false);
+  /** When true, every group is expanded and cannot be collapsed (all items always visible). */
+  alwaysOpen = input<boolean>(false);
   itemClick = output<void>();
 
   protected router = inject(Router);
@@ -60,11 +62,12 @@ export class Sidenav implements OnInit {
   }
 
   isOpen(group: IMenu): boolean {
-    return this.openGroups.has(group.name);
+    return this.alwaysOpen() || this.openGroups.has(group.name);
   }
 
   toggleGroup(group: IMenu, event?: Event): void {
     event?.preventDefault();
+    if (this.alwaysOpen()) return; // groups are pinned open; nothing to toggle
     if (this.openGroups.has(group.name)) this.openGroups.delete(group.name);
     else this.openGroups.add(group.name);
   }

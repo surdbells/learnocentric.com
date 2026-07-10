@@ -66,22 +66,26 @@ export class PdfService {
         const pdf = new jsPDF('p', 'mm', 'a4');
         const imgWidth = 210; // A4 width in mm
         const pageHeight = 297; // A4 height in mm
-        const imgHeight = 0.8 * 297; //(canvas.height * imgWidth) / canvas.width;
+        // Scale the captured canvas to the page width and derive the true height so
+        // long reports keep their full aspect ratio instead of being clipped.
+        const imgHeight = (canvas.height * imgWidth) / canvas.width;
 
         let heightLeft = imgHeight;
         let position = 0;
 
+        // First page.
         pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
         heightLeft -= pageHeight;
 
-        // Handle multipage
-        
-        // while (heightLeft > 0) {
-        //     position = - (imgHeight - heightLeft); // ✅ correct positioning
-        //     // pdf.addPage();
-        //     pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-        //     heightLeft -= pageHeight;
-        // }s
+        // Additional pages: shift the same tall image up by one page each time until
+        // the remaining content fits within a single page.
+        while (heightLeft > 0) {
+            position -= pageHeight; // move the image up by one page
+            pdf.addPage();
+            pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+            heightLeft -= pageHeight;
+        }
+
         pdf.save(fileName);
     }
 }

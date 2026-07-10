@@ -80,7 +80,34 @@ export class SuperAdminContentLibrary implements OnInit {
     description: new FormControl<string>(''),
     difficultyLevel: new FormControl(''),
     tags: new FormControl<string[]>([]),
+    // Governance (spec §17): provenance + delivery controls.
+    source: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
+    licence: new FormControl('owned', { nonNullable: true, validators: [Validators.required] }),
+    audience: new FormControl('learner'),
+    visibility: new FormControl('published'),
+    downloadable: new FormControl(true),
   });
+
+  licenceOptions: IInputOption[] = [
+    { value: 'owned', label: 'Owned' },
+    { value: 'cc-by', label: 'CC BY' },
+    { value: 'cc-by-sa', label: 'CC BY-SA' },
+    { value: 'public-domain', label: 'Public Domain' },
+    { value: 'licensed', label: 'Licensed' },
+  ];
+
+  audienceOptions: IInputOption[] = [
+    { value: 'learner', label: 'Learner' },
+    { value: 'teacher', label: 'Teacher' },
+    { value: 'school_admin', label: 'School Admin' },
+    { value: 'platform', label: 'Platform' },
+  ];
+
+  visibilityOptions: IInputOption[] = [
+    { value: 'draft', label: 'Draft' },
+    { value: 'internal', label: 'Internal' },
+    { value: 'published', label: 'Published' },
+  ];
 
     levelOptions: IInputOption[] = [
     { value: 'beginner', label: 'Begginner' },
@@ -215,6 +242,14 @@ export class SuperAdminContentLibrary implements OnInit {
               gradeId,
               gradeLevel: i.grade_level ?? gradeLevelName,
               isPremium: String(i.is_premium ?? i.isPremium ?? false),
+              description: i.description ?? '',
+              difficultyLevel: i.difficultyLevel ?? i.difficulty_level ?? '',
+              tags: i.tags ?? [],
+              source: i.source ?? '',
+              licence: i.licence ?? 'owned',
+              audience: i.audience ?? 'learner',
+              visibility: i.visibility ?? 'published',
+              downloadable: i.downloadable ?? true,
               createdAt: i.createdAt ?? i.created_date ?? i.created_on ?? null,
             };
           });
@@ -305,6 +340,11 @@ export class SuperAdminContentLibrary implements OnInit {
     formData.append('description', f.description || '');
     formData.append('difficultyLevel', f.difficultyLevel || '');
     formData.append('tags', f.tags || '');
+    formData.append('source', f.source || '');
+    formData.append('licence', f.licence || 'owned');
+    formData.append('audience', f.audience || 'learner');
+    formData.append('visibility', f.visibility || 'published');
+    formData.append('downloadable', f.downloadable ? 'true' : 'false');
     if (f.file) formData.append('file', f.file);
 
     if(f.isPremium) formData.append('isPremium', 'true');
@@ -316,7 +356,7 @@ export class SuperAdminContentLibrary implements OnInit {
       .subscribe({
         next: (resp: any) => {
           this.toastSrv.success('Content uploaded');
-          this.form.reset({ title: '', subjectArea: '', gradeLevel: '', contentType: '', isPremium: false, file: null, description: '' });
+          this.form.reset({ title: '', subjectArea: '', gradeLevel: '', contentType: '', isPremium: false, file: null, description: '', source: '', licence: 'owned', audience: 'learner', visibility: 'published', downloadable: true });
           this.closebtn?.nativeElement?.click();
           this.loadContents();
 
@@ -350,6 +390,11 @@ export class SuperAdminContentLibrary implements OnInit {
       description: evt.row.description,
       difficultyLevel: evt.row.difficultyLevel,
       tags: evt.row.tags,
+      source: evt.row.source,
+      licence: evt.row.licence,
+      audience: evt.row.audience,
+      visibility: evt.row.visibility,
+      downloadable: evt.row.downloadable,
     });
     this.isEdit.set(true);
     this.anchorSelector.set(evt.anchorSelector || '');

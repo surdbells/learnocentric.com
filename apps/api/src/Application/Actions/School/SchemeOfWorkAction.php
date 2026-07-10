@@ -13,19 +13,25 @@ use App\Domain\Entity\Subject;
 use App\Domain\Entity\Term;
 use App\Domain\Entity\Topic;
 use App\Domain\Entity\User;
+use App\Domain\Lifecycle;
 use App\Service\AuditLogger;
+use App\Service\LifecycleService;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
+use Throwable;
 
 /** /backend/school/scheme-of-work — term/week curriculum plan per class + subject. */
 final class SchemeOfWorkAction
 {
     use ResolvesInstitution;
 
+    private const EDITABLE = [Lifecycle::DRAFT, Lifecycle::REVIEW];
+
     public function __construct(
         private readonly EntityManagerInterface $em,
         private readonly AuditLogger $audit,
+        private readonly LifecycleService $lifecycle,
     ) {
     }
 
@@ -108,6 +114,9 @@ final class SchemeOfWorkAction
         if ($scheme === null) {
             return Json::error($response, 'Scheme entry not found.', 404);
         }
+        if (!in_array($scheme->getStatus(), self::EDITABLE, true)) {
+            return Json::error($response, "This scheme entry is {$scheme->getStatus()}; return it to draft before editing.", 409);
+        }
         $before = $scheme->toArray();
         if (isset($body['week_number'])) {
             $scheme->setWeekNumber(max(1, (int) $body['week_number']));
@@ -152,6 +161,34 @@ final class SchemeOfWorkAction
         return Json::write($response, ['deleted' => $count]);
     }
 
+    /** POST /backend/school/scheme-of-work/{id}/transition — body { to, note } */
+    public function transition(Request $request, Response $response, array $args): Response
+    {
+        $scheme = $this->em->getRepository(SchemeOfWork::class)->find((int) $args['id']);
+        if ($scheme === null) {
+            return Json::error($response, 'Scheme entry not found.', 404);
+        }
+        $body = (array) $request->getParsedBody();
+        try {
+            $result = $this->lifecycle->transition($scheme, (string) ($body['to'] ?? ''), $request->getAttribute('user'), $body['note'] ?? null);
+        } catch (Throwable $e) {
+            return Json::error($response, $e->getMessage(), 422);
+        }
+
+        return Json::write($response, ['scheme' => $scheme->toArray()] + $result);
+    }
+
+    /** GET /backend/school/scheme-of-work/{id}/history */
+    public function history(Request $request, Response $response, array $args): Response
+    {
+        $scheme = $this->em->getRepository(SchemeOfWork::class)->find((int) $args['id']);
+        if ($scheme === null) {
+            return Json::error($response, 'Scheme entry not found.', 404);
+        }
+
+        return Json::write($response, array_map(static fn ($v) => $v->toArray(), $this->lifecycle->history($scheme)));
+    }
+
     private function applyFields(SchemeOfWork $scheme, array $body): void
     {
         if (array_key_exists('topic_id', $body)) {
@@ -162,9 +199,6 @@ final class SchemeOfWorkAction
         }
         if (array_key_exists('assigned_teacher_id', $body)) {
             $scheme->setAssignedTeacher(!empty($body['assigned_teacher_id']) ? $this->em->getRepository(User::class)->find((int) $body['assigned_teacher_id']) : null);
-        }
-        if (isset($body['status']) && in_array($body['status'], ['draft', 'published'], true)) {
-            $scheme->setStatus((string) $body['status']);
         }
     }
 

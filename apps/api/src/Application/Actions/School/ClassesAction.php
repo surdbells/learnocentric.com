@@ -122,7 +122,7 @@ final class ClassesAction
     {
         $body = (array) $request->getParsedBody();
         $class = $this->em->getRepository(SchoolClass::class)->find((int) ($body['id'] ?? 0));
-        if ($class === null) {
+        if ($class === null || !$this->canActWithin($request, $class->getInstitution())) {
             return Json::error($response, 'Class not found.', 404);
         }
         $before = $class->toArray();
@@ -140,7 +140,7 @@ final class ClassesAction
     {
         $id = (int) ($request->getQueryParams()['id'] ?? 0);
         $class = $this->em->getRepository(SchoolClass::class)->find($id);
-        if ($class === null) {
+        if ($class === null || !$this->canActWithin($request, $class->getInstitution())) {
             return Json::error($response, 'Class not found.', 404);
         }
         $before = $class->toArray();

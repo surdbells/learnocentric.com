@@ -8,6 +8,7 @@ use App\Application\Actions\School\ResolvesInstitution;
 use App\Application\Support\Json;
 use App\Domain\Entity\Assessment;
 use App\Domain\Entity\AssessmentAttempt;
+use App\Domain\Entity\Institution;
 use App\Domain\Entity\User;
 use App\Domain\Lifecycle;
 use Doctrine\ORM\EntityManagerInterface;
@@ -98,6 +99,7 @@ final class GradebookAction
             return $guard;
         }
         $institution = $this->resolveInstitution($request, $this->em);
+        $weighting = $this->weighting($institution);
 
         $qb = $this->em->createQueryBuilder()->select('at')->from(AssessmentAttempt::class, 'at')
             ->join('at.assessment', 'a')->join('a.subject', 's')->join('at.student', 'st')
@@ -118,13 +120,50 @@ final class GradebookAction
             $byStudent[$sid]['passed'] += $attempt->isPassed() ? 1 : 0;
         }
 
-        $rows = array_map(static function (array $r): array {
+        // Spec §14 keeps the academic and competency tracks separate by default. A school
+        // can opt in (grading.weighting.portfolio_into_academic) to ALSO surface a blended
+        // figure; the two separate averages are never overwritten.
+        $blend = $weighting['portfolio_into_academic'];
+        $p = $weighting['portfolio_percent'] / 100;
+
+        $rows = array_map(static function (array $r) use ($blend, $p): array {
             $avg = static fn (array $v) => empty($v) ? null : round(array_sum($v) / count($v), 1);
-            return ['student_id' => $r['student_id'], 'student' => $r['student'], 'attempts' => $r['attempts'], 'passed' => $r['passed'],
-                'academic_avg' => $avg($r['academic']), 'competency_avg' => $avg($r['competency'])];
+            $academic = $avg($r['academic']);
+            $competency = $avg($r['competency']);
+            $row = ['student_id' => $r['student_id'], 'student' => $r['student'], 'attempts' => $r['attempts'], 'passed' => $r['passed'],
+                'academic_avg' => $academic, 'competency_avg' => $competency];
+            if ($blend) {
+                // Only compute when at least one track has data; a missing track contributes 0.
+                $row['blended_avg'] = ($academic === null && $competency === null)
+                    ? null
+                    : round(($academic ?? 0.0) * (1 - $p) + ($competency ?? 0.0) * $p, 1);
+            }
+            return $row;
         }, array_values($byStudent));
 
-        return Json::write($response, ['data' => $rows, 'meta' => ['total' => count($rows)]]);
+        return Json::write($response, [
+            'data' => $rows,
+            'meta' => ['total' => count($rows)],
+            'weighting' => ['active' => $weighting['portfolio_into_academic'], 'portfolio_percent' => $weighting['portfolio_percent']],
+        ]);
+    }
+
+    /**
+     * The institution's portfolio-into-academic weighting policy, defaulting to full
+     * track separation (spec §14) when unset or when there is no institution scope.
+     *
+     * @return array{portfolio_into_academic: bool, portfolio_percent: int}
+     */
+    private function weighting(?Institution $institution): array
+    {
+        $settings = $institution?->getSettings() ?? [];
+        $grading = is_array($settings['grading'] ?? null) ? $settings['grading'] : [];
+        $w = is_array($grading['weighting'] ?? null) ? $grading['weighting'] : [];
+
+        return [
+            'portfolio_into_academic' => ($w['portfolio_into_academic'] ?? false) === true,
+            'portfolio_percent' => max(0, min(100, (int) ($w['portfolio_percent'] ?? 0))),
+        ];
     }
 
     /** @return AssessmentAttempt[] */

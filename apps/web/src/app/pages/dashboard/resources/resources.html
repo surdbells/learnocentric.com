@@ -2,6 +2,13 @@
 
 @if (loading()) {
   <div class="text-body-secondary p-4">Loading…</div>
+} @else if (loadError(); as err) {
+  <div class="card border-0 shadow-sm p-5 text-center">
+    <app-icon name="cancel" [size]="32" class="text-danger mb-2" />
+    <div class="fw-semibold mb-1">Couldn't load your resources</div>
+    <div class="text-body-secondary mb-3">{{ err }}</div>
+    <div><button type="button" class="btn btn-primary" (click)="load()">Try again</button></div>
+  </div>
 } @else if (!package()) {
   <div class="card border-0 shadow-sm p-5 text-center text-body-secondary">
     No content package is assigned to your school yet. Your administrator can request one from the platform team.
@@ -31,12 +38,21 @@
                 @if (r.is_premium) { <span class="badge bg-warning-subtle text-warning">Premium</span> }
               </div>
               @if (r.description) { <app-rich-text class="small text-body-secondary d-block mb-3" [value]="r.description" /> }
-              <div class="mt-auto d-flex justify-content-between align-items-center">
-                @if (r.file_url) {
-                  <a class="btn btn-sm btn-outline-primary" [href]="r.file_url" target="_blank" rel="noopener">Open</a>
-                } @else {
-                  <span class="small text-body-secondary fst-italic">No file attached</span>
-                }
+              <div class="mt-auto d-flex justify-content-between align-items-center gap-2">
+                <div class="d-flex gap-2">
+                  @if (r.file_url && r.downloadable !== false) {
+                    <a class="btn btn-sm btn-outline-primary" [href]="r.file_url" target="_blank" rel="noopener">Open</a>
+                  } @else if (r.file_url) {
+                    <span class="small text-body-secondary fst-italic">View only</span>
+                  } @else {
+                    <span class="small text-body-secondary fst-italic">No file attached</span>
+                  }
+                  @if (isDownloadable(r)) {
+                    <a class="btn btn-sm btn-outline-secondary d-inline-flex align-items-center gap-1" [href]="r.file_url" [attr.download]="downloadName(r)" title="Save for offline use">
+                      <app-icon name="download" [size]="16" /> Download
+                    </a>
+                  }
+                </div>
                 <span class="small text-body-secondary text-uppercase">{{ r.licence }}</span>
               </div>
             </div>

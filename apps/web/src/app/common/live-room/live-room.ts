@@ -1,5 +1,7 @@
 import {afterNextRender, Component, ElementRef, EventEmitter, inject, Input, OnDestroy, Output, signal, ViewChild} from '@angular/core';
+import {RouterLink} from '@angular/router';
 import {ToastrService} from 'ngx-toastr';
+import {AuthService} from '../auth/auth.service';
 import {Icon} from '../icon/icon';
 
 /**
@@ -13,7 +15,7 @@ import {Icon} from '../icon/icon';
 @Component({
   selector: 'app-live-room',
   standalone: true,
-  imports: [Icon, ],
+  imports: [Icon, RouterLink],
   templateUrl: './live-room.html',
   styleUrl: './live-room.css',
 })
@@ -26,7 +28,11 @@ export class LiveRoom implements OnDestroy {
   @ViewChild('callContainer', {static: true}) container!: ElementRef<HTMLDivElement>;
 
   private readonly toast = inject(ToastrService);
+  private readonly auth = inject(AuthService);
   private frame: any = null;
+
+  /** The learner "report a concern" affordance is student-only (its route is under /student). */
+  protected readonly isStudent = this.auth.getAuthSession()?.user?.role === 'student';
 
   connecting = signal(true);
   error = signal<string | null>(null);

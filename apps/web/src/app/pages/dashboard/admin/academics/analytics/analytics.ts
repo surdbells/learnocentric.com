@@ -2,11 +2,12 @@ import {afterNextRender, Component, ElementRef, inject, signal, ViewChild} from 
 import {ToastrService} from 'ngx-toastr';
 import {PageHeader} from '../../../../../common/layout/page-header/page-header';
 import {ApiService} from '../../../../../common/service/api.service';
+import {Icon} from '../../../../../common/icon/icon';
 
 @Component({
   selector: 'app-analytics',
   standalone: true,
-  imports: [PageHeader],
+  imports: [PageHeader, Icon],
   templateUrl: './analytics.html',
   styleUrl: './analytics.css',
 })
@@ -83,4 +84,24 @@ export class Analytics {
   }
 
   pct(v: number | null): string { return v === null || v === undefined ? '—' : v + '%'; }
+
+  exporting = signal(false);
+
+  exportCsv(): void {
+    this.exporting.set(true);
+    this.api.get('/backend/export/summary', {responseType: 'blob', observe: 'body'}).subscribe({
+      next: (blob: any) => { this.downloadBlob(blob, 'school-summary.csv'); this.exporting.set(false); },
+      error: () => { this.exporting.set(false); this.toast.error('Could not export the report'); },
+    });
+  }
+
+  private downloadBlob(blob: Blob, filename: string): void {
+    if (typeof window === 'undefined') return;
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    a.click();
+    window.URL.revokeObjectURL(url);
+  }
 }

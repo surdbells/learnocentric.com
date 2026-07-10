@@ -14,6 +14,7 @@
         <label class="form-label" for="q_type">Type</label>
         <select id="q_type" class="form-select" formControlName="type">
           <option value="mcq">Multiple choice</option>
+          <option value="multi">Multi-select</option>
           <option value="true_false">True / False</option>
           <option value="short">Short answer</option>
           <option value="numeric">Numeric</option>
@@ -22,9 +23,10 @@
       <div class="col-lg-3 mb-3">
         <label class="form-label" for="q_diff">Difficulty</label>
         <select id="q_diff" class="form-select" formControlName="difficulty">
-          <option value="easy">Easy</option>
-          <option value="medium">Medium</option>
-          <option value="hard">Hard</option>
+          <option value="foundational">Foundational</option>
+          <option value="moderate">Moderate</option>
+          <option value="challenging">Challenging</option>
+          <option value="extension">Extension</option>
         </select>
       </div>
 
@@ -55,6 +57,23 @@
           </div>
           <button type="button" class="btn btn-sm btn-link px-0 mt-1" (click)="addOption()">+ Add option</button>
           <div class="form-text">Select the radio next to the correct option.</div>
+        } @else if (type() === 'multi') {
+          <div formArrayName="options" class="d-flex flex-column gap-2">
+            @for (opt of options.controls; track $index) {
+              <div class="d-flex align-items-center gap-2" [formGroupName]="$index">
+                <div class="form-check mb-0">
+                  <input class="form-check-input" type="checkbox" formControlName="correct" [attr.aria-label]="'Mark option ' + letter($index) + ' correct'"/>
+                </div>
+                <span class="badge bg-light text-body-secondary">{{ letter($index) }}</span>
+                <input class="form-control" formControlName="text" [placeholder]="'Option ' + letter($index)"/>
+                <button type="button" class="btn btn-sm btn-icon text-danger" (click)="removeOption($index)" [disabled]="options.length <= 2" title="Remove">
+                  <app-icon name="close" />
+                </button>
+              </div>
+            }
+          </div>
+          <button type="button" class="btn btn-sm btn-link px-0 mt-1" (click)="addOption()">+ Add option</button>
+          <div class="form-text">Tick every option that is correct (two or more).</div>
         } @else if (type() === 'true_false') {
           <div class="d-flex gap-4">
             <div class="form-check">
@@ -89,6 +108,9 @@
       </div>
       <div class="col-lg-6">
         <div learnoInput class="mb-3" [label]="'Explanation (optional)'" [inputType]="'text'" [id]="'q_expl'" [formControlName]="'explanation'"></div>
+      </div>
+      <div class="col-lg-6">
+        <div learnoInput class="mb-3" [label]="'Misconception tag (optional)'" [inputType]="'text'" [id]="'q_miscon'" [formControlName]="'misconceptionTag'"></div>
       </div>
     </div>
   </div>

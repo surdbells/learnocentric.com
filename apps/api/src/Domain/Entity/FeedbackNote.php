@@ -45,6 +45,16 @@ class FeedbackNote
     #[ORM\Column(type: Types::TEXT)]
     private string $message;
 
+    /** Structured feedback for parent reports (spec §7.5, §18) — all optional. */
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    private ?string $strengths = null;
+
+    #[ORM\Column(name: 'practice_needed', type: Types::TEXT, nullable: true)]
+    private ?string $practiceNeeded = null;
+
+    #[ORM\Column(name: 'parent_support_suggestion', type: Types::TEXT, nullable: true)]
+    private ?string $parentSupportSuggestion = null;
+
     #[ORM\Column(type: Types::BOOLEAN, options: ['default' => false])]
     private bool $acknowledged = false;
 
@@ -68,6 +78,12 @@ class FeedbackNote
     public function setType(string $v): void { $this->type = in_array($v, self::TYPES, true) ? $v : 'general'; }
     public function getMessage(): string { return $this->message; }
     public function setMessage(string $v): void { $this->message = $v; }
+    public function getStrengths(): ?string { return $this->strengths; }
+    public function setStrengths(?string $v): void { $this->strengths = ($v === null || trim($v) === '') ? null : $v; }
+    public function getPracticeNeeded(): ?string { return $this->practiceNeeded; }
+    public function setPracticeNeeded(?string $v): void { $this->practiceNeeded = ($v === null || trim($v) === '') ? null : $v; }
+    public function getParentSupportSuggestion(): ?string { return $this->parentSupportSuggestion; }
+    public function setParentSupportSuggestion(?string $v): void { $this->parentSupportSuggestion = ($v === null || trim($v) === '') ? null : $v; }
     public function isAcknowledged(): bool { return $this->acknowledged; }
     public function setAcknowledged(bool $v): void { $this->acknowledged = $v; }
     public function setAcknowledgedAt(?\DateTimeImmutable $v): void { $this->acknowledgedAt = $v; }
@@ -83,6 +99,9 @@ class FeedbackNote
             'topic' => $this->topic?->getTitle(),
             'type' => $this->type,
             'message' => $this->message,
+            'strengths' => $this->strengths,
+            'practice_needed' => $this->practiceNeeded,
+            'parent_support_suggestion' => $this->parentSupportSuggestion,
             'acknowledged' => $this->acknowledged,
             'acknowledged_at' => $this->acknowledgedAt?->format(DATE_ATOM),
             'created_at' => $this->getCreatedAt()?->format(DATE_ATOM),

@@ -28,6 +28,16 @@ class SafeguardingCase
     public const CLOSED = 'closed';
     public const STATUSES = [self::REPORTED, self::UNDER_REVIEW, self::ESCALATED, self::CLOSED];
 
+    public const SEVERITY_LOW = 'low';
+    public const SEVERITY_MEDIUM = 'medium';
+    public const SEVERITY_HIGH = 'high';
+    public const SEVERITY_CRITICAL = 'critical';
+    public const SEVERITIES = [self::SEVERITY_LOW, self::SEVERITY_MEDIUM, self::SEVERITY_HIGH, self::SEVERITY_CRITICAL];
+
+    public const ACCESS_STANDARD = 'standard';
+    public const ACCESS_RESTRICTED = 'restricted';
+    public const ACCESS_LEVELS = [self::ACCESS_STANDARD, self::ACCESS_RESTRICTED];
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: Types::INTEGER)]
@@ -57,6 +67,22 @@ class SafeguardingCase
 
     #[ORM\Column(length: 20)]
     private string $status = self::REPORTED;
+
+    /** How urgent the concern is (spec §15). */
+    #[ORM\Column(length: 12, options: ['default' => self::SEVERITY_MEDIUM])]
+    private string $severity = self::SEVERITY_MEDIUM;
+
+    /** Whether the case needs tighter, lead-only handling. */
+    #[ORM\Column(name: 'access_level', length: 12, options: ['default' => self::ACCESS_STANDARD])]
+    private string $accessLevel = self::ACCESS_STANDARD;
+
+    /**
+     * Optional attachment references, each shaped {label, url}.
+     *
+     * @var array<int, array{label: string, url: string}>|null
+     */
+    #[ORM\Column(type: Types::JSON, nullable: true)]
+    private ?array $evidence = null;
 
     #[ORM\ManyToOne(targetEntity: User::class)]
     #[ORM\JoinColumn(name: 'handled_by', referencedColumnName: 'id', nullable: true, onDelete: 'SET NULL')]
@@ -88,6 +114,14 @@ class SafeguardingCase
     public function setDetails(?string $v): void { $this->details = $v; }
     public function getStatus(): string { return $this->status; }
     public function setStatus(string $v): void { $this->status = in_array($v, self::STATUSES, true) ? $v : self::REPORTED; }
+    public function getSeverity(): string { return $this->severity; }
+    public function setSeverity(string $v): void { $this->severity = in_array($v, self::SEVERITIES, true) ? $v : self::SEVERITY_MEDIUM; }
+    public function getAccessLevel(): string { return $this->accessLevel; }
+    public function setAccessLevel(string $v): void { $this->accessLevel = in_array($v, self::ACCESS_LEVELS, true) ? $v : self::ACCESS_STANDARD; }
+    /** @return array<int, array{label: string, url: string}>|null */
+    public function getEvidence(): ?array { return $this->evidence; }
+    /** @param array<int, array{label: string, url: string}>|null $v */
+    public function setEvidence(?array $v): void { $this->evidence = $v === [] ? null : $v; }
     public function setHandledBy(?User $v): void { $this->handledBy = $v; }
     public function setOutcome(?string $v): void { $this->outcome = $v; }
     public function getClosedAt(): ?\DateTimeImmutable { return $this->closedAt; }
@@ -104,6 +138,9 @@ class SafeguardingCase
             'summary' => $this->summary,
             'details' => $this->details,
             'status' => $this->status,
+            'severity' => $this->severity,
+            'access_level' => $this->accessLevel,
+            'evidence' => $this->evidence,
             'handled_by' => $this->handledBy ? $this->handledBy->getFirstName() . ' ' . $this->handledBy->getLastName() : null,
             'outcome' => $this->outcome,
             'closed_at' => $this->closedAt?->format(DATE_ATOM),

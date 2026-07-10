@@ -28,3 +28,10 @@
     <a class="btn btn-outline-primary" [href]="url()" target="_blank" rel="noopener">Open resource</a>
   }
 }
+
+<!-- Offline: let learners save downloadable media for low-data use -->
+@if (downloadable()) {
+  <a class="btn btn-sm btn-outline-secondary media-download mt-2" [href]="url()" [attr.download]="downloadName()">
+    <app-icon name="download" [size]="16" /> Download for offline
+  </a>
+}
