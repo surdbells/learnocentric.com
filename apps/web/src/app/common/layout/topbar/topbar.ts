@@ -8,11 +8,12 @@ import {PreferenceSetting} from '../preference-setting/preference-setting';
 import {NotificationBell} from '../notification-bell/notification-bell';
 import {Preferences} from '../../service/preferences';
 import {Icon} from '../../icon/icon';
+import {TermSwitcher} from '../../ui/term-switcher';
 
 @Component({
   selector: 'app-topbar',
   standalone: true,
-  imports: [Icon, PreferenceSetting, NotificationBell],
+  imports: [Icon, PreferenceSetting, NotificationBell, TermSwitcher],
   templateUrl: './topbar.html',
   styleUrl: './topbar.css',
   host: { 'class': 'app-topbar' },

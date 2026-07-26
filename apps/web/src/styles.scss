@@ -33,6 +33,8 @@
   --shadow-lg: 0 8px 24px rgba(16, 24, 40, 0.10), 0 2px 6px rgba(16, 24, 40, 0.06);
 
   /* App shell layout tokens */
+  --ui-tone: var(--brand-600);
+  --ui-tone-rgb: var(--brand-rgb);
   --sidebar-w: 264px;
   --sidebar-w-collapsed: 76px;
   --topbar-h: 64px;

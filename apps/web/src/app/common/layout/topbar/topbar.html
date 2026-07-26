@@ -20,6 +20,8 @@
 
   <!-- Right: preferences + user -->
   <div class="tb-right">
+    <app-term-switcher class="d-none d-md-inline-flex me-1" />
+
     <button type="button" class="tb-icon-btn" (click)="toggleTheme()"
             [attr.aria-label]="isDark() ? 'Switch to light theme' : 'Switch to dark theme'"
             [attr.title]="isDark() ? 'Light mode' : 'Dark mode'">
