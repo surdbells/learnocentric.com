@@ -1,6 +1,7 @@
 import {Injectable, Inject, PLATFORM_ID, computed, inject, signal} from '@angular/core';
 import {isPlatformBrowser} from '@angular/common';
 import {ApiService} from './api.service';
+import {AuthService} from '../auth/auth.service';
 
 export interface TermOption {
   id: number;
@@ -21,6 +22,7 @@ const ACTIVE_TERM_KEY = 'activeTermId';
 @Injectable({providedIn: 'root'})
 export class TermContext {
   private readonly api = inject(ApiService);
+  private readonly auth = inject(AuthService);
 
   readonly terms = signal<TermOption[]>([]);
   readonly activeId = signal<number | null>(null);
@@ -35,6 +37,9 @@ export class TermContext {
   /** Fetch terms once; safe to call from every switcher instance. */
   load(): void {
     if (this.loaded || !isPlatformBrowser(this.platformId)) return;
+    // Terms are institution-scoped; platform users (e.g. super admin, no institution)
+    // have none — skip the fetch so the switcher stays hidden for them.
+    if (!this.auth.getAuthSession()?.user?.institutionId) return;
     this.loaded = true;
     this.api.get<TermOption[]>('/backend/school/terms').subscribe({
       next: (rows) => {
