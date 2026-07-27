@@ -1,14 +1,17 @@
 import {Component, computed, inject, PLATFORM_ID, signal} from '@angular/core';
-import {DatePipe, isPlatformBrowser} from '@angular/common';
+import {isPlatformBrowser} from '@angular/common';
 import {RouterLink} from '@angular/router';
 import {AuthService} from '../../../../../common/auth/auth.service';
 import {ApiService} from '../../../../../common/service/api.service';
 import {Icon} from '../../../../../common/icon/icon';
+import {
+  AttentionItem, AttentionList, KpiItem, KpiStrip, QuickAction, QuickActions, RailCard, StatRing,
+} from '../../../../../common/ui';
 
 @Component({
   selector: 'app-student-dashboard',
   standalone: true,
-  imports: [Icon, RouterLink, DatePipe],
+  imports: [Icon, RouterLink, KpiStrip, RailCard, AttentionList, QuickActions, StatRing],
   templateUrl: './student-dashboard.html',
   styleUrl: './student-dashboard.css',
 })
@@ -20,6 +23,44 @@ export class StudentDashboard {
   loading = signal(true);
   data = signal<any | null>(null);
   firstName = signal('');
+
+  readonly lessonPct = computed<number>(() => {
+    const s = this.data()?.stats;
+    if (!s || !s.topics) return 0;
+    return Math.round((s.lessons_viewed / s.topics) * 100);
+  });
+
+  readonly quizAvg = computed<number>(() => Number(this.data()?.stats?.quiz_average ?? 0));
+
+  readonly kpis = computed<KpiItem[]>(() => {
+    const d = this.data();
+    if (!d) return [];
+    const s = d.stats;
+    return [
+      {label: 'Lessons viewed', value: `${s.lessons_viewed}/${s.topics}`, icon: 'menu_book', tone: 'primary', link: '/student/academics/learn'},
+      {label: 'Quizzes taken', value: s.quizzes_taken, icon: 'quiz', tone: 'info', link: '/student/academics/assessments'},
+      {label: 'Quiz average', value: this.pct(s.quiz_average), icon: 'workspace_premium', tone: 'success'},
+      {label: 'Upcoming live', value: d.action_items.upcoming_live, icon: 'video_camera_front', tone: 'danger', link: '/student/academics/live-classes'},
+    ];
+  });
+
+  readonly dueTasks = computed<AttentionItem[]>(() => {
+    const d = this.data();
+    if (!d) return [];
+    const a = d.action_items;
+    return [
+      {label: 'Pending worksheets', count: a.pending_worksheets, tone: a.pending_worksheets ? 'warning' : 'secondary', icon: 'assignment', link: '/student/academics/worksheets'},
+      {label: 'Unread feedback', count: a.unread_feedback, tone: a.unread_feedback ? 'primary' : 'secondary', icon: 'chat', link: '/student/academics/feedback'},
+      {label: 'New notifications', count: a.unread_notifications, tone: a.unread_notifications ? 'info' : 'secondary', icon: 'notifications', link: '/student/communication/announcements'},
+    ];
+  });
+
+  readonly quickActions: QuickAction[] = [
+    {label: 'Continue Learning', sublabel: 'Resume your lessons', icon: 'play_circle', link: '/student/academics/learn'},
+    {label: 'Take a Quiz', sublabel: 'Practise & assess', icon: 'quiz', link: '/student/academics/assessments'},
+    {label: 'My Worksheets', sublabel: 'Complete & submit', icon: 'assignment', link: '/student/academics/worksheets'},
+    {label: 'Live Classes', sublabel: 'Join a session', icon: 'video_camera_front', link: '/student/academics/live-classes'},
+  ];
 
   constructor() {
     this.firstName.set(this.auth.getAuthSession()?.user?.firstName ?? 'there');
@@ -38,37 +79,4 @@ export class StudentDashboard {
     return 'danger';
   }
   pct(v: number | null): string { return v === null || v === undefined ? '—' : v + '%'; }
-
-  // --- SVG gauges ---
-  readonly gaugeCirc = 2 * Math.PI * 52; // r = 52
-
-  gaugeOffset(pctVal: number | null): number {
-    const p = Math.max(0, Math.min(100, Number(pctVal ?? 0)));
-    return this.gaugeCirc * (1 - p / 100);
-  }
-  gaugeStroke(color: string): string {
-    return ({success: '#22c55e', warning: '#f59e0b', danger: '#ef4444', info: '#0ea5e9'} as Record<string, string>)[color] ?? '#39c645';
-  }
-
-  readonly lessonPct = computed<number>(() => {
-    const s = this.data()?.stats;
-    if (!s || !s.topics) return 0;
-    return Math.round((s.lessons_viewed / s.topics) * 100);
-  });
-
-  /** Recent quiz percentages, oldest→newest, as an SVG area + line path. */
-  readonly trend = computed(() => {
-    const qs = (this.data()?.recent_quizzes ?? []).slice().reverse();
-    if (qs.length < 2) return null;
-    const w = 320, h = 96, pad = 8;
-    const vals = qs.map((q: any) => Math.max(0, Math.min(100, Number(q.percentage) || 0)));
-    const stepX = (w - pad * 2) / (vals.length - 1);
-    const pts = vals.map((v: number, i: number) => ({
-      x: pad + i * stepX,
-      y: pad + (h - pad * 2) * (1 - v / 100),
-    }));
-    const line = pts.map((p: any) => `${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' ');
-    const area = `M${pad},${h - pad} L` + line.split(' ').join(' L') + ` L${(w - pad).toFixed(1)},${h - pad} Z`;
-    return {w, h, line, area, pts, last: pts[pts.length - 1]};
-  });
 }
