@@ -1,8 +1,11 @@
-<div class="dash-hero mb-4">
+<div class="dash-hero mb-4 d-flex justify-content-between align-items-start gap-3">
   <div>
     <h4 class="fw-bold mb-1">Welcome back, {{ firstName() }} 👋</h4>
     <p class="text-body-secondary mb-0">Here's what's happening across your school today.</p>
   </div>
+  <button type="button" class="btn btn-sm btn-outline-secondary d-inline-flex align-items-center gap-1" (click)="refresh()">
+    <app-icon name="activity" [size]="15" /> Refresh
+  </button>
 </div>
 
 @if (loading()) {
@@ -12,101 +15,52 @@
     }
   </div>
 } @else if (data(); as d) {
-  <!-- KPIs -->
-  <div class="row g-3 mb-4">
-    <div class="col-6 col-md-4 col-xl-2">
-      <a class="stat-card card border-0 shadow-sm h-100 text-decoration-none" [routerLink]="['/admin/students']">
-        <div class="card-body">
-          <span class="stat-ic bg-primary-subtle text-primary"><app-icon name="group" /></span>
-          <div class="stat-val">{{ d.stats.students }}</div><div class="stat-lbl">Students</div>
-        </div>
-      </a>
-    </div>
-    <div class="col-6 col-md-4 col-xl-2">
-      <a class="stat-card card border-0 shadow-sm h-100 text-decoration-none" [routerLink]="['/admin/teachers']">
-        <div class="card-body">
-          <span class="stat-ic bg-info-subtle text-info"><app-icon name="supervisor_account" /></span>
-          <div class="stat-val">{{ d.stats.teachers }}</div><div class="stat-lbl">Teachers</div>
-        </div>
-      </a>
-    </div>
-    <div class="col-6 col-md-4 col-xl-2">
-      <a class="stat-card card border-0 shadow-sm h-100 text-decoration-none" [routerLink]="[base(), 'subjects']">
-        <div class="card-body">
-          <span class="stat-ic bg-warning-subtle text-warning"><app-icon name="subject" /></span>
-          <div class="stat-val">{{ d.stats.subjects }}</div><div class="stat-lbl">Subjects</div>
-        </div>
-      </a>
-    </div>
-    <div class="col-6 col-md-4 col-xl-2">
-      <a class="stat-card card border-0 shadow-sm h-100 text-decoration-none" [routerLink]="[base(), 'classes']">
-        <div class="card-body">
-          <span class="stat-ic bg-success-subtle text-success"><app-icon name="meeting_room" /></span>
-          <div class="stat-val">{{ d.stats.classes }}</div><div class="stat-lbl">Classes</div>
-        </div>
-      </a>
-    </div>
-    <div class="col-6 col-md-4 col-xl-2">
-      <a class="stat-card card border-0 shadow-sm h-100 text-decoration-none" [routerLink]="[base(), 'topics']">
-        <div class="card-body">
-          <span class="stat-ic bg-primary-subtle text-primary"><app-icon name="menu_book" /></span>
-          <div class="stat-val">{{ d.stats.published_topics }}</div><div class="stat-lbl">Published topics</div>
-        </div>
-      </a>
-    </div>
-    <div class="col-6 col-md-4 col-xl-2">
-      <a class="stat-card card border-0 shadow-sm h-100 text-decoration-none" [routerLink]="[base(), 'live-classes']">
-        <div class="card-body">
-          <span class="stat-ic bg-danger-subtle text-danger"><app-icon name="video_camera_front" /></span>
-          <div class="stat-val">{{ d.stats.live_classes }}</div><div class="stat-lbl">Live classes</div>
-        </div>
-      </a>
-    </div>
-  </div>
+  <!-- KPI strip -->
+  <app-kpi-strip class="d-block mb-4" [items]="kpis()" [cols]="6" />
 
   <div class="row g-4">
-    <!-- Quiz performance -->
-    <div class="col-lg-7">
-      <div class="card border-0 shadow-sm h-100">
+    <!-- Main column -->
+    <div class="col-lg-8">
+      <!-- Academic performance -->
+      <div class="card border-0 shadow-sm mb-4">
         <div class="card-body">
           <div class="d-flex justify-content-between align-items-center mb-1">
-            <h6 class="fw-semibold mb-0">Quiz performance by subject</h6>
+            <h6 class="fw-semibold mb-0">Academic Performance Overview</h6>
             <a class="small text-decoration-none" [routerLink]="[base(), 'analytics']">Analytics →</a>
           </div>
-          <p class="small text-body-secondary mb-2">Average score · {{ d.quiz.attempts }} graded attempts · {{ pct(d.quiz.pass_rate) }} pass rate</p>
+          <p class="small text-body-secondary mb-2">Average score by subject · {{ d.quiz.attempts }} graded attempts · {{ pct(d.quiz.pass_rate) }} pass rate</p>
           @if (d.quiz_by_subject?.length) { <div #quizChart></div> }
           @else { <div class="text-body-secondary small py-5 text-center">No graded quizzes yet.</div> }
         </div>
       </div>
-    </div>
 
-    <!-- Action items -->
-    <div class="col-lg-5">
-      <div class="card border-0 shadow-sm h-100">
+      <!-- Top performing subjects -->
+      <div class="card border-0 shadow-sm">
         <div class="card-body">
-          <h6 class="fw-semibold mb-3">Needs attention</h6>
-          <a class="action-row" [routerLink]="[base(), 'worksheets']">
-            <span class="action-ic bg-warning-subtle text-warning"><app-icon name="assignment_turned_in" /></span>
-            <span class="flex-grow-1">Worksheets to grade</span>
-            <span class="badge" [class.bg-warning]="d.action_items.worksheets_to_grade" [class.bg-light]="!d.action_items.worksheets_to_grade" [class.text-body-secondary]="!d.action_items.worksheets_to_grade">{{ d.action_items.worksheets_to_grade }}</span>
-          </a>
-          <a class="action-row" [routerLink]="[base(), 'portfolio']">
-            <span class="action-ic bg-primary-subtle text-primary"><app-icon name="folder_special" /></span>
-            <span class="flex-grow-1">Portfolio to review</span>
-            <span class="badge" [class.bg-primary]="d.action_items.portfolio_to_review" [class.bg-light]="!d.action_items.portfolio_to_review" [class.text-body-secondary]="!d.action_items.portfolio_to_review">{{ d.action_items.portfolio_to_review }}</span>
-          </a>
-          <a class="action-row" [routerLink]="[base(), 'interventions']">
-            <span class="action-ic bg-info-subtle text-info"><app-icon name="support" /></span>
-            <span class="flex-grow-1">Open interventions</span>
-            <span class="badge" [class.bg-info]="d.action_items.interventions_open" [class.bg-light]="!d.action_items.interventions_open" [class.text-body-secondary]="!d.action_items.interventions_open">{{ d.action_items.interventions_open }}</span>
-          </a>
-          <a class="action-row border-0" [routerLink]="[mgmt(), 'safeguarding']">
-            <span class="action-ic bg-danger-subtle text-danger"><app-icon name="shield" /></span>
-            <span class="flex-grow-1">Open safeguarding cases</span>
-            <span class="badge" [class.bg-danger]="d.action_items.safeguarding_open" [class.bg-light]="!d.action_items.safeguarding_open" [class.text-body-secondary]="!d.action_items.safeguarding_open">{{ d.action_items.safeguarding_open }}</span>
-          </a>
+          <h6 class="fw-semibold mb-3">Top Performing Subjects</h6>
+          @if (topSubjects().length) {
+            @for (s of topSubjects(); track s.subject) {
+              <div class="d-flex align-items-center gap-3 py-2 border-bottom">
+                <span class="flex-grow-1 fw-medium">{{ s.subject }}</span>
+                <div style="width: 180px"><app-progress-cell [value]="s.average" /></div>
+              </div>
+            }
+          } @else {
+            <div class="text-body-secondary small py-4 text-center">No subject scores yet.</div>
+          }
         </div>
       </div>
+    </div>
+
+    <!-- Right rail -->
+    <div class="col-lg-4">
+      <app-rail-card class="d-block mb-4" title="Needs Attention" icon="notifications">
+        <app-attention-list [items]="attention()" />
+      </app-rail-card>
+
+      <app-rail-card class="d-block" title="Quick Actions" icon="touch_app">
+        <app-quick-actions [actions]="quickActions()" />
+      </app-rail-card>
     </div>
   </div>
 }
