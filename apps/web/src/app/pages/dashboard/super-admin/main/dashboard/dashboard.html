@@ -8,75 +8,60 @@
     @for (i of [1,2,3,4,5,6]; track i) { <div class="col-6 col-md-4 col-xl-2"><div class="card border-0 shadow-sm"><div class="card-body dash-skel"></div></div></div> }
   </div>
 } @else if (data(); as d) {
-  <div class="row g-3 mb-4">
-    <div class="col-6 col-md-4 col-xl-2">
-      <a class="stat-card card border-0 shadow-sm h-100 text-decoration-none" [routerLink]="['/super-admin/management/institutions']"><div class="card-body">
-        <span class="stat-ic bg-primary-subtle text-primary"><app-icon name="apartment" /></span>
-        <div class="stat-val">{{ d.stats.institutions }}</div><div class="stat-lbl">Institutions</div>
-      </div></a>
-    </div>
-    <div class="col-6 col-md-4 col-xl-2">
-      <div class="stat-card card border-0 shadow-sm h-100"><div class="card-body">
-        <span class="stat-ic bg-success-subtle text-success"><app-icon name="verified" /></span>
-        <div class="stat-val">{{ d.stats.active_subscriptions }}</div><div class="stat-lbl">Active subs</div>
-      </div></div>
-    </div>
-    <div class="col-6 col-md-4 col-xl-2">
-      <a class="stat-card card border-0 shadow-sm h-100 text-decoration-none" [routerLink]="['/super-admin/management/plans']"><div class="card-body">
-        <span class="stat-ic bg-info-subtle text-info"><app-icon name="sell" /></span>
-        <div class="stat-val">{{ d.stats.plans }}</div><div class="stat-lbl">Active plans</div>
-      </div></a>
-    </div>
-    <div class="col-6 col-md-4 col-xl-2">
-      <div class="stat-card card border-0 shadow-sm h-100"><div class="card-body">
-        <span class="stat-ic bg-primary-subtle text-primary"><app-icon name="group" /></span>
-        <div class="stat-val">{{ d.stats.students }}</div><div class="stat-lbl">Students</div>
-      </div></div>
-    </div>
-    <div class="col-6 col-md-4 col-xl-2">
-      <div class="stat-card card border-0 shadow-sm h-100"><div class="card-body">
-        <span class="stat-ic bg-warning-subtle text-warning"><app-icon name="supervisor_account" /></span>
-        <div class="stat-val">{{ d.stats.teachers }}</div><div class="stat-lbl">Teachers</div>
-      </div></div>
-    </div>
-    <div class="col-6 col-md-4 col-xl-2">
-      <div class="stat-card card border-0 shadow-sm h-100"><div class="card-body">
-        <span class="stat-ic bg-success-subtle text-success"><app-icon name="payments" /></span>
-        <div class="stat-val">₦{{ d.stats.billed_naira | number }}</div><div class="stat-lbl">Billed</div>
-      </div></div>
-    </div>
-  </div>
+  <app-kpi-strip class="d-block mb-4" [items]="kpis()" [cols]="6" />
 
   <div class="row g-4">
-    <div class="col-lg-6">
-      <div class="card border-0 shadow-sm h-100"><div class="card-body">
-        <div class="d-flex justify-content-between align-items-center mb-3">
-          <h6 class="fw-semibold mb-0">Institutions</h6>
-          <a class="small text-decoration-none" [routerLink]="['/super-admin/management/institutions']">All →</a>
+    <div class="col-lg-8">
+      <div class="row g-4">
+        <!-- Institutions -->
+        <div class="col-md-6">
+          <div class="card border-0 shadow-sm h-100"><div class="card-body">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <h6 class="fw-semibold mb-0">Institutions</h6>
+              <a class="small text-decoration-none" [routerLink]="[mgmt, 'institutions']">All →</a>
+            </div>
+            @if (!d.institutions?.length) {
+              <div class="text-body-secondary small py-4 text-center">No institutions yet.</div>
+            } @else {
+              @for (inst of d.institutions; track inst.id) {
+                <a class="d-flex align-items-center gap-3 py-2 border-bottom text-decoration-none text-body" [routerLink]="[mgmt, 'institutions']">
+                  <span class="action-ic bg-primary-subtle text-primary"><app-icon name="apartment" /></span>
+                  <span class="flex-grow-1 fw-medium">{{ inst.name }}</span>
+                  <app-icon name="chevron_right" [size]="16" class="text-body-secondary" />
+                </a>
+              }
+            }
+          </div></div>
         </div>
-        @if (!d.institutions?.length) { <div class="text-body-secondary small py-3">No institutions yet.</div> }
-        @for (i of d.institutions; track i.id) {
-          <div class="d-flex align-items-center gap-3 py-2 border-bottom">
-            <span class="action-ic bg-primary-subtle text-primary"><app-icon name="school" /></span>
-            <span class="fw-medium flex-grow-1">{{ i.name }}</span>
-          </div>
-        }
-      </div></div>
+
+        <!-- Plan subscribers -->
+        <div class="col-md-6">
+          <div class="card border-0 shadow-sm h-100"><div class="card-body">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <h6 class="fw-semibold mb-0">Plan Subscribers</h6>
+              <a class="small text-decoration-none" [routerLink]="[mgmt, 'plans']">Plans →</a>
+            </div>
+            @if (!d.plans?.length) {
+              <div class="text-body-secondary small py-4 text-center">No plans yet.</div>
+            } @else {
+              @for (p of d.plans; track p.name) {
+                <div class="d-flex align-items-center gap-3 py-2 border-bottom">
+                  <span class="action-ic bg-info-subtle text-info"><app-icon name="workspace_premium" /></span>
+                  <span class="flex-grow-1 fw-medium">{{ p.name }}</span>
+                  <span class="badge bg-info-subtle text-info">{{ p.subscribers }} school{{ p.subscribers === 1 ? '' : 's' }}</span>
+                </div>
+              }
+            }
+          </div></div>
+        </div>
+      </div>
     </div>
 
-    <div class="col-lg-6">
-      <div class="card border-0 shadow-sm h-100"><div class="card-body">
-        <div class="d-flex justify-content-between align-items-center mb-3">
-          <h6 class="fw-semibold mb-0">Plan subscribers</h6>
-          <a class="small text-decoration-none" [routerLink]="['/super-admin/management/plans']">Plans →</a>
-        </div>
-        @for (p of d.plans; track p.name) {
-          <div class="d-flex align-items-center justify-content-between py-2 border-bottom">
-            <span class="fw-medium">{{ p.name }}</span>
-            <span class="badge bg-primary-subtle text-primary">{{ p.subscribers }} subscriber{{ p.subscribers === 1 ? '' : 's' }}</span>
-          </div>
-        }
-      </div></div>
+    <!-- Right rail -->
+    <div class="col-lg-4">
+      <app-rail-card class="d-block" title="Quick Actions" icon="touch_app">
+        <app-quick-actions [actions]="quickActions" />
+      </app-rail-card>
     </div>
   </div>
 }
