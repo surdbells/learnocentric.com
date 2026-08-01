@@ -1,4 +1,4 @@
-import {Component, inject, signal} from '@angular/core';
+import {Component, computed, inject, signal} from '@angular/core';
 import {DatePipe} from '@angular/common';
 import {FormsModule} from '@angular/forms';
 import {ToastrService} from 'ngx-toastr';
@@ -8,11 +8,12 @@ import {ApiService} from '../../../../../common/service/api.service';
 import {RichEditor} from '../../../../../common/rich-editor/rich-editor';
 import {RichText} from '../../../../../common/rich-editor/rich-text';
 import {Icon} from '../../../../../common/icon/icon';
+import {KpiItem, KpiStrip, TabBar, TabItem} from '../../../../../common/ui';
 
 @Component({
   selector: 'app-my-worksheets',
   standalone: true,
-  imports: [RichText, RichEditor, PageHeader, FormsModule, DatePipe, FileUpload, Icon],
+  imports: [RichText, RichEditor, PageHeader, FormsModule, DatePipe, FileUpload, Icon, KpiStrip, TabBar],
   templateUrl: './my-worksheets.html',
   styleUrl: './my-worksheets.css',
 })
@@ -28,6 +29,45 @@ export class MyWorksheets {
   current = signal<any | null>(null);
   responseText = signal('');
   attachmentUrl = signal('');
+  activeTab = signal<string>('all');
+
+  /** Bucket a worksheet by its submission state. */
+  wKey(w: any): string {
+    return w.submission?.status === 'graded' ? 'graded'
+      : w.submission?.status === 'submitted' ? 'submitted' : 'not_started';
+  }
+
+  readonly kpis = computed<KpiItem[]>(() => {
+    const a = this.available();
+    const graded = a.filter(w => w.submission?.status === 'graded');
+    const submitted = a.filter(w => w.submission?.status === 'submitted');
+    const scored = graded.filter(w => w.submission?.score != null && w.total_marks);
+    const avg = scored.length
+      ? Math.round(scored.reduce((s, w) => s + (w.submission.score / w.total_marks) * 100, 0) / scored.length)
+      : null;
+    return [
+      {label: 'Total worksheets', value: a.length, icon: 'assignment', tone: 'primary'},
+      {label: 'Completed', value: graded.length, icon: 'assignment_turned_in', tone: 'success'},
+      {label: 'Awaiting grade', value: submitted.length, icon: 'schedule', tone: submitted.length ? 'info' : 'secondary'},
+      {label: 'Average score', value: avg === null ? '—' : avg + '%', icon: 'workspace_premium', tone: 'warning'},
+    ];
+  });
+
+  readonly tabs = computed<TabItem[]>(() => {
+    const a = this.available();
+    const cnt = (k: string) => a.filter(w => this.wKey(w) === k).length;
+    return [
+      {key: 'all', label: 'All', count: a.length},
+      {key: 'not_started', label: 'Not Started', count: cnt('not_started')},
+      {key: 'submitted', label: 'Submitted', count: cnt('submitted')},
+      {key: 'graded', label: 'Completed', count: cnt('graded')},
+    ];
+  });
+
+  readonly filtered = computed<any[]>(() => {
+    const t = this.activeTab(), a = this.available();
+    return t === 'all' ? a : a.filter(w => this.wKey(w) === t);
+  });
 
   constructor() {
     this.load();
