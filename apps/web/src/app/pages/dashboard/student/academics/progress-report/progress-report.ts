@@ -1,4 +1,4 @@
-import {Component, inject, signal} from '@angular/core';
+import {Component, computed, inject, signal} from '@angular/core';
 import {DatePipe} from '@angular/common';
 import {ToastrService} from 'ngx-toastr';
 import {PageHeader} from '../../../../../common/layout/page-header/page-header';
@@ -7,13 +7,14 @@ import {AuthService} from '../../../../../common/auth/auth.service';
 import {PdfService} from '../../../../../common/service/pdf-service';
 import {Icon} from '../../../../../common/icon/icon';
 import {RichText} from '../../../../../common/rich-editor/rich-text';
+import {KpiItem, KpiStrip} from '../../../../../common/ui';
 
 const RATING_COLOR: Record<string, string> = {emerging: 'secondary', developing: 'info', proficient: 'primary', mastery: 'success'};
 
 @Component({
   selector: 'app-progress-report',
   standalone: true,
-  imports: [RichText, Icon, PageHeader, DatePipe],
+  imports: [RichText, Icon, PageHeader, DatePipe, KpiStrip],
   templateUrl: './progress-report.html',
   styleUrl: './progress-report.css',
 })
@@ -29,6 +30,19 @@ export class ProgressReport {
   selectedChild = signal<number | null>(null);
   isParent = signal(false);
   downloading = signal(false);
+
+  readonly headlineKpis = computed<KpiItem[]>(() => {
+    const r = this.report();
+    if (!r) return [];
+    const acad = r.academic?.average, ws = r.worksheets?.average;
+    const band = (v: number | null | undefined) => v == null ? 'secondary' : v >= 70 ? 'success' : v >= 50 ? 'warning' : 'danger';
+    return [
+      {label: 'Quiz average', value: this.pct(acad ?? null), icon: 'workspace_premium', tone: band(acad) as any},
+      {label: 'Worksheet average', value: this.pct(ws ?? null), icon: 'assignment_turned_in', tone: band(ws) as any},
+      {label: 'Portfolio entries', value: r.competency?.entries?.length ?? 0, icon: 'folder_special', tone: 'primary'},
+      {label: 'Live classes joined', value: `${r.attendance?.joined ?? 0}/${r.attendance?.offered ?? 0}`, icon: 'video_camera_front', tone: 'info'},
+    ];
+  });
 
   constructor() {
     const user = this.auth.getAuthSession()?.user;
