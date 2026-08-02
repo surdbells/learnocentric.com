@@ -149,6 +149,167 @@ final class GradebookAction
     }
 
     /**
+     * GET /assessment/gradebook/matrix — the learner × component grid: published
+     * academic assessments become weighted columns (weight = the component's share
+     * of total marks), graded attempts fill the cells, and each learner gets a
+     * marks-weighted average mapped to a letter grade via the school's grade bands.
+     * The competency track stays out of this grid (spec §14 keeps them separate).
+     */
+    public function matrix(Request $request, Response $response): Response
+    {
+        if (($guard = $this->guard($request, $response)) !== null) {
+            return $guard;
+        }
+        $institution = $this->resolveInstitution($request, $this->em);
+        $bands = $this->bands($institution);
+        $filters = $request->getQueryParams();
+
+        // Columns: published academic assessments (a component of the academic grade).
+        $cqb = $this->em->createQueryBuilder()->select('a')->from(Assessment::class, 'a')->join('a.subject', 's')
+            ->where('a.approvalStatus = :pub')->setParameter('pub', Lifecycle::PUBLISHED)
+            ->andWhere('a.track != :comp OR a.track IS NULL')->setParameter('comp', 'competency')
+            ->orderBy('a.createdAt', 'ASC');
+        if ($institution !== null) {
+            $cqb->andWhere('s.institution = :inst')->setParameter('inst', $institution);
+        }
+        if (!empty($filters['subject_id'])) {
+            $cqb->andWhere('a.subject = :sid')->setParameter('sid', (int) $filters['subject_id']);
+        }
+
+        $columns = [];
+        $marksById = [];
+        $totalMarks = 0;
+        foreach ($cqb->getQuery()->getResult() as $assessment) {
+            /** @var Assessment $assessment */
+            $marks = (int) $assessment->totalMarks();
+            $marksById[$assessment->getId()] = $marks;
+            $totalMarks += $marks;
+            $columns[] = [
+                'id' => $assessment->getId(),
+                'title' => $assessment->getTitle(),
+                'subject' => $assessment->getSubject()->getName(),
+                'type' => $assessment->getType(),
+                'total_marks' => $marks,
+                'sum_scores' => 0.0, // accumulators for the class average, stripped below
+                'count' => 0,
+            ];
+        }
+        // Weight each component by its share of the total marks on offer.
+        foreach ($columns as &$col) {
+            $col['weight'] = $totalMarks > 0 ? round($col['total_marks'] / $totalMarks * 100, 1) : 0.0;
+        }
+        unset($col);
+        $colIndex = [];
+        foreach ($columns as $i => $col) {
+            $colIndex[$col['id']] = $i;
+        }
+
+        // Cells: every graded academic attempt, grouped by student then assessment.
+        $aqb = $this->em->createQueryBuilder()->select('at')->from(AssessmentAttempt::class, 'at')
+            ->join('at.assessment', 'a')->join('a.subject', 's')->join('at.student', 'st')
+            ->where('at.status = :g')->setParameter('g', AssessmentAttempt::GRADED)
+            ->andWhere('a.track != :comp OR a.track IS NULL')->setParameter('comp', 'competency');
+        if ($institution !== null) {
+            $aqb->andWhere('s.institution = :inst')->setParameter('inst', $institution);
+        }
+
+        $byStudent = [];
+        foreach ($aqb->getQuery()->getResult() as $attempt) {
+            /** @var AssessmentAttempt $attempt */
+            $aid = $attempt->getAssessment()->getId();
+            if (!isset($colIndex[$aid])) {
+                continue; // component not in the published set (e.g. archived)
+            }
+            $sid = $attempt->getStudent()->getId();
+            $byStudent[$sid] ??= [
+                'student_id' => $sid,
+                'student' => $attempt->getStudent()->getFirstName() . ' ' . $attempt->getStudent()->getLastName(),
+                'scores' => [],
+            ];
+            $pct = (float) $attempt->getPercentage();
+            // Keep the best attempt per component if a learner retook it.
+            if (!isset($byStudent[$sid]['scores'][$aid]) || $pct > $byStudent[$sid]['scores'][$aid]) {
+                $byStudent[$sid]['scores'][$aid] = $pct;
+            }
+        }
+
+        $rows = [];
+        foreach ($byStudent as $s) {
+            $wSum = 0.0;
+            $wPct = 0.0;
+            foreach ($s['scores'] as $aid => $pct) {
+                $w = max(1, $marksById[$aid] ?? 1); // marks-weighted; guard 0-mark components
+                $wSum += $w;
+                $wPct += $pct * $w;
+                $columns[$colIndex[$aid]]['sum_scores'] += $pct;
+                $columns[$colIndex[$aid]]['count']++;
+            }
+            $weighted = $wSum > 0 ? round($wPct / $wSum, 1) : null;
+            $rows[] = [
+                'student_id' => $s['student_id'],
+                'student' => $s['student'],
+                'scores' => (object) $s['scores'],
+                'completed' => count($s['scores']),
+                'weighted_avg' => $weighted,
+                'grade' => $weighted === null ? null : $this->letterFor($weighted, $bands),
+            ];
+        }
+        usort($rows, static fn ($a, $b) => strcmp($a['student'], $b['student']));
+
+        // Finalise per-column class averages and drop the accumulators.
+        foreach ($columns as &$col) {
+            $col['average'] = $col['count'] > 0 ? round($col['sum_scores'] / $col['count'], 1) : null;
+            unset($col['sum_scores'], $col['count']);
+        }
+        unset($col);
+
+        return Json::write($response, [
+            'columns' => $columns,
+            'rows' => $rows,
+            'bands' => $bands,
+            'meta' => ['students' => count($rows), 'components' => count($columns), 'total_marks' => $totalMarks],
+        ]);
+    }
+
+    /**
+     * The institution's grade bands, sorted high→low, defaulting to a standard
+     * A–F scale when unset. Each band is { grade, min }.
+     *
+     * @return array<int, array{grade:string, min:int}>
+     */
+    private function bands(?Institution $institution): array
+    {
+        $settings = $institution?->getSettings() ?? [];
+        $grading = is_array($settings['grading'] ?? null) ? $settings['grading'] : [];
+        $bands = is_array($grading['bands'] ?? null) ? $grading['bands'] : [];
+        $clean = [];
+        foreach ($bands as $b) {
+            if (isset($b['grade']) && $b['grade'] !== '') {
+                $clean[] = ['grade' => (string) $b['grade'], 'min' => max(0, min(100, (int) ($b['min'] ?? 0)))];
+            }
+        }
+        if ($clean === []) {
+            $clean = [
+                ['grade' => 'A', 'min' => 70], ['grade' => 'B', 'min' => 60], ['grade' => 'C', 'min' => 50],
+                ['grade' => 'D', 'min' => 40], ['grade' => 'F', 'min' => 0],
+            ];
+        }
+        usort($clean, static fn ($a, $b) => $b['min'] <=> $a['min']);
+        return $clean;
+    }
+
+    /** @param array<int, array{grade:string, min:int}> $bands */
+    private function letterFor(float $pct, array $bands): string
+    {
+        foreach ($bands as $band) {
+            if ($pct >= $band['min']) {
+                return $band['grade'];
+            }
+        }
+        return $bands !== [] ? end($bands)['grade'] : '—';
+    }
+
+    /**
      * The institution's portfolio-into-academic weighting policy, defaulting to full
      * track separation (spec §14) when unset or when there is no institution scope.
      *

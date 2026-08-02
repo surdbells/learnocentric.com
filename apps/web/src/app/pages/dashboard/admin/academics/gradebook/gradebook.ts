@@ -20,10 +20,11 @@ export class Gradebook {
   private readonly api = inject(ApiService);
   private readonly toast = inject(ToastrService);
 
-  mode = signal<'assessments' | 'students'>('assessments');
+  mode = signal<'assessments' | 'students' | 'matrix'>('assessments');
   loading = signal(false);
   overview = signal<any[]>([]);
   rollup = signal<any[]>([]);
+  matrix = signal<any | null>(null);
   detail = signal<any | null>(null);
 
   readonly kpis = computed<KpiItem[]>(() => {
@@ -43,10 +44,30 @@ export class Gradebook {
     this.loadOverview();
   }
 
-  setMode(m: 'assessments' | 'students'): void {
+  setMode(m: 'assessments' | 'students' | 'matrix'): void {
     this.mode.set(m);
     if (m === 'students' && !this.rollup().length) this.loadStudents();
     if (m === 'assessments' && !this.overview().length) this.loadOverview();
+    if (m === 'matrix' && !this.matrix()) this.loadMatrix();
+  }
+
+  private loadMatrix(): void {
+    this.loading.set(true);
+    this.api.get<any>('/backend/assessment/gradebook/matrix').subscribe({
+      next: (res) => { this.matrix.set(res ?? null); this.loading.set(false); },
+      error: () => { this.loading.set(false); this.toast.error('Could not load the gradebook matrix'); },
+    });
+  }
+
+  /** A student's percentage for one component, or null when not attempted. */
+  cellScore(row: any, columnId: number): number | null {
+    const v = row?.scores?.[columnId];
+    return v === undefined || v === null ? null : v;
+  }
+
+  gradeColor(grade: string | null, pct: number | null): string {
+    if (!grade) return 'secondary';
+    return this.scoreColor(pct);
   }
 
   private loadOverview(): void {

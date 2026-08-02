@@ -141,6 +141,7 @@ return static function (App $app): void {
 
             // Assessment — gradebook (staff)
             $auth->get('/assessment/gradebook', GradebookAction::class . ':overview');
+            $auth->get('/assessment/gradebook/matrix', GradebookAction::class . ':matrix');
             $auth->get('/assessment/gradebook/students', GradebookAction::class . ':students');
             $auth->get('/assessment/gradebook/{id:[0-9]+}', GradebookAction::class . ':assessment');
 

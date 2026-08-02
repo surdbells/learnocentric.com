@@ -8,6 +8,7 @@
   <div class="btn-group" role="group">
     <button type="button" class="btn btn-sm" [class.btn-primary]="mode() === 'assessments'" [class.btn-outline-primary]="mode() !== 'assessments'" (click)="setMode('assessments')">By assessment</button>
     <button type="button" class="btn btn-sm" [class.btn-primary]="mode() === 'students'" [class.btn-outline-primary]="mode() !== 'students'" (click)="setMode('students')">By student</button>
+    <button type="button" class="btn btn-sm" [class.btn-primary]="mode() === 'matrix'" [class.btn-outline-primary]="mode() !== 'matrix'" (click)="setMode('matrix')">Matrix</button>
   </div>
   <button type="button" class="btn btn-sm btn-outline-secondary" [disabled]="exporting()" (click)="exportCsv()">
     <app-icon name="download" [size]="16" /> Export CSV
@@ -87,6 +88,73 @@
         </tbody>
       </table>
     </div>
+  }
+}
+
+<!-- MATRIX (learner × component, weighted) -->
+@if (mode() === 'matrix' && !loading()) {
+  @if (matrix(); as m) {
+    @if (!m.columns.length || !m.rows.length) {
+      <div class="card border-0 shadow-sm p-5 text-center text-body-secondary">
+        The matrix needs at least one published academic assessment with graded attempts.
+      </div>
+    } @else {
+      <p class="text-body-secondary small mb-2">
+        Each component is weighted by its share of total marks; the grade is the marks-weighted average mapped to your school's grade bands.
+        The competency track is kept separate (see “By student”).
+      </p>
+      <div class="table-responsive card border-0 shadow-sm">
+        <table class="table align-middle mb-0 gradebook-matrix">
+          <thead class="table-light">
+            <tr>
+              <th class="sticky-col">Student</th>
+              @for (c of m.columns; track c.id) {
+                <th class="text-center component-col">
+                  <div class="fw-semibold text-truncate" [attr.title]="c.title">{{ c.title }}</div>
+                  <div class="text-body-secondary fw-normal small text-capitalize">{{ c.type }} · {{ c.weight }}%</div>
+                </th>
+              }
+              <th class="text-center">Weighted</th>
+              <th class="text-center">Grade</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (r of m.rows; track r.student_id) {
+              <tr>
+                <td class="fw-medium sticky-col">{{ r.student }}</td>
+                @for (c of m.columns; track c.id) {
+                  <td class="text-center">
+                    @if (cellScore(r, c.id) !== null) {
+                      <span class="badge bg-{{ scoreColor(cellScore(r, c.id)) }}-subtle text-{{ scoreColor(cellScore(r, c.id)) }}">{{ cellScore(r, c.id) }}%</span>
+                    } @else {
+                      <span class="text-body-secondary" title="Not attempted">—</span>
+                    }
+                  </td>
+                }
+                <td class="text-center">
+                  @if (r.weighted_avg !== null) { <b>{{ r.weighted_avg }}%</b> } @else { <span class="text-body-secondary">—</span> }
+                </td>
+                <td class="text-center">
+                  @if (r.grade) { <span class="badge bg-{{ gradeColor(r.grade, r.weighted_avg) }} grade-badge">{{ r.grade }}</span> }
+                  @else { <span class="text-body-secondary">—</span> }
+                </td>
+              </tr>
+            }
+          </tbody>
+          <tfoot class="table-light">
+            <tr>
+              <td class="fw-semibold sticky-col">Class average</td>
+              @for (c of m.columns; track c.id) {
+                <td class="text-center text-body-secondary small">{{ c.average !== null ? c.average + '%' : '—' }}</td>
+              }
+              <td colspan="2"></td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+    }
+  } @else {
+    <div class="card border-0 shadow-sm p-5 text-center text-body-secondary">No graded attempts yet.</div>
   }
 }
 

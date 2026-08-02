@@ -1,3 +1,29 @@
 .table > :not(caption) > * > * {
   padding: 0.75rem 1rem;
 }
+
+/* Learner × component matrix */
+.gradebook-matrix .component-col {
+  min-width: 150px;
+  max-width: 190px;
+}
+.gradebook-matrix .component-col .text-truncate {
+  max-width: 170px;
+}
+.gradebook-matrix .grade-badge {
+  min-width: 2rem;
+  font-size: 0.8rem;
+}
+
+/* Keep the student name visible while scrolling the components horizontally. */
+.gradebook-matrix .sticky-col {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  background: var(--bs-body-bg);
+  min-width: 150px;
+}
+.gradebook-matrix thead .sticky-col,
+.gradebook-matrix tfoot .sticky-col {
+  background: var(--bs-tertiary-bg);
+}
