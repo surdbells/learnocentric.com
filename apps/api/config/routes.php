@@ -48,6 +48,7 @@ use App\Application\Actions\School\TeachersAction;
 use App\Application\Actions\School\TeacherStudentsAction;
 use App\Application\Actions\Storage\UploadAction;
 use App\Application\Actions\Support\SupportAction;
+use App\Application\Actions\Audit\AuditLogsAction;
 use App\Application\Actions\Export\ExportAction;
 use App\Application\Middleware\JwtAuthMiddleware;
 use App\Application\Middleware\ModuleGateMiddleware;
@@ -189,6 +190,9 @@ return static function (App $app): void {
             // Server-side CSV exports (staff) — audited via AuditLogger (report.export)
             $auth->get('/export/gradebook', ExportAction::class . ':gradebook')->setArgument('perm', 'report:export');
             $auth->get('/export/summary', ExportAction::class . ':summary')->setArgument('perm', 'report:export');
+
+            // Platform audit trail (super admin) — read-only view of AuditLog rows
+            $auth->get('/audit-logs', AuditLogsAction::class);
 
             // Content library + packages (super-admin supply chain, licensing/takedown)
             $auth->map(['GET', 'POST', 'PUT', 'DELETE'], '/content/library', ContentLibraryAction::class);

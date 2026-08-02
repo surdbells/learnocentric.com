@@ -150,6 +150,7 @@ export class UserPreferenceMenu {
         { name: "Content Library", link: "management/content-library" },
         { name: "Content Packages", link: "management/content-packages" },
         { name: "Support Centre", link: "management/support" },
+        { name: "Audit Logs", link: "management/audit-logs" },
       ]
     },
   ]

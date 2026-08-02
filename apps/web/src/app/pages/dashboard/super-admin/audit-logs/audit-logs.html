@@ -1,0 +1,55 @@
+<app-page-header icon="news" action="Audit Logs"></app-page-header>
+
+<app-kpi-strip class="d-block mb-4" [items]="kpis()" [cols]="3" />
+
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+  <div class="input-group input-group-sm" style="max-width: 320px">
+    <span class="input-group-text bg-body"><app-icon name="search" [size]="16" /></span>
+    <input type="text" class="form-control" placeholder="Search action, actor, object…"
+           [(ngModel)]="search" (keyup.enter)="runSearch()" />
+    <button type="button" class="btn btn-outline-secondary" (click)="runSearch()">Search</button>
+  </div>
+  <span class="small text-body-secondary">{{ meta().total || 0 }} entries · page {{ meta().page || 1 }} of {{ totalPages() }}</span>
+</div>
+
+<app-tab-bar class="d-block mb-3" [tabs]="tabs()" [active]="category()" (activeChange)="setCategory($event)" />
+
+<div class="card border-0 shadow-sm">
+  <div class="table-responsive">
+    <table class="table table-hover align-middle mb-0">
+      <thead>
+        <tr class="text-body-secondary small">
+          <th>Time</th><th>Actor</th><th>Action</th><th>Object</th><th>Institution</th><th>Risk</th><th>IP / device</th>
+        </tr>
+      </thead>
+      <tbody>
+        @if (loading()) {
+          <tr><td colspan="7" class="text-center text-body-secondary py-4">Loading…</td></tr>
+        } @else if (!rows().length) {
+          <tr><td colspan="7" class="text-center text-body-secondary py-4">No audit entries in this view.</td></tr>
+        } @else {
+          @for (r of rows(); track r.id) {
+            <tr>
+              <td class="small text-nowrap">{{ r.created_at | date:'MMM d, y · HH:mm' }}</td>
+              <td class="fw-medium">{{ r.actor }}</td>
+              <td><code class="small">{{ r.action_type }}</code></td>
+              <td class="small text-body-secondary">{{ r.object_type }}@if (r.object_id) { #{{ r.object_id }} }</td>
+              <td class="small text-body-secondary">{{ r.institution || '—' }}</td>
+              <td><app-status-badge [value]="r.risk" [tone]="riskColor(r.risk)" /></td>
+              <td class="small text-body-secondary text-truncate" style="max-width: 220px">{{ r.ip_device || '—' }}</td>
+            </tr>
+          }
+        }
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="d-flex justify-content-end gap-2 mt-3">
+  <button type="button" class="btn btn-sm btn-outline-secondary" [disabled]="page() <= 1 || loading()" (click)="prev()">
+    <app-icon name="chevron_left" [size]="16" /> Prev
+  </button>
+  <button type="button" class="btn btn-sm btn-outline-secondary" [disabled]="page() >= totalPages() || loading()" (click)="next()">
+    Next <app-icon name="chevron_right" [size]="16" />
+  </button>
+</div>
