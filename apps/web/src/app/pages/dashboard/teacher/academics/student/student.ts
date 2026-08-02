@@ -11,6 +11,7 @@ import {ToastrService} from 'ngx-toastr';
 import {UtilService} from '../../../../../common/service/util.service';
 import {AuthService} from '../../../../../common/auth/auth.service';
 import {SkeletonLoader} from '../../../../../common/skeleton-loader/skeleton-loader';
+import {KpiItem, KpiStrip, TabBar, TabItem} from '../../../../../common/ui';
 
 @Component({
   selector: 'app-student',
@@ -20,7 +21,9 @@ import {SkeletonLoader} from '../../../../../common/skeleton-loader/skeleton-loa
     LearnoButton,
     PageHeader,
     TableSearch,
-    SkeletonLoader
+    SkeletonLoader,
+    KpiStrip,
+    TabBar,
   ],
   templateUrl: './student.html',
   styleUrl: './student.css'
@@ -30,20 +33,44 @@ export class Student implements OnInit {
   isLoading = signal(false);
   students = signal<any[]>([]);
   searchTerm = signal<string>('');
+  classTab = signal<string>('all');
 
   selectedResult = signal<any | null>(null);
   anchorSelector = signal<string>('');
 
   @ViewChild(LearnoOffset) offsetCmp!: LearnoOffset;
 
+  readonly kpis = computed<KpiItem[]>(() => {
+    const s = this.students();
+    const active = s.filter(x => x.is_active).length;
+    const classes = new Set(s.map(x => x.class_name).filter(Boolean)).size;
+    return [
+      {label: 'Total learners', value: s.length, icon: 'group', tone: 'primary'},
+      {label: 'Active', value: active, icon: 'check_circle', tone: 'success'},
+      {label: 'Classes', value: classes, icon: 'meeting_room', tone: 'info'},
+      {label: 'Inactive', value: s.length - active, icon: 'cancel', tone: (s.length - active) ? 'warning' : 'secondary'},
+    ];
+  });
+
+  readonly classTabs = computed<TabItem[]>(() => {
+    const s = this.students();
+    const classes = [...new Set(s.map(x => x.class_name).filter(Boolean))] as string[];
+    return [
+      {key: 'all', label: 'All classes', count: s.length},
+      ...classes.map(c => ({key: c, label: c, count: s.filter(x => x.class_name === c).length})),
+    ];
+  });
+
   filterStudents = computed(() => {
     const term = this.searchTerm().toLowerCase().trim();
-    if (!term) return this.students();
+    const cls = this.classTab();
     return this.students().filter((s: any) => {
+      if (cls !== 'all' && s.class_name !== cls) return false;
+      if (!term) return true;
       const fname = (s.first_name || '').toString().toLowerCase();
       const lname = (s.last_name || '').toString().toLowerCase();
       const cname = (s.class_name || '').toString().toLowerCase();
-      return fname.includes(term) || lname.includes(term) ||  cname.includes(term);
+      return fname.includes(term) || lname.includes(term) || cname.includes(term);
     });
   });
 
