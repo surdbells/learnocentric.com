@@ -1,9 +1,10 @@
-import {Component, inject, signal} from '@angular/core';
+import {Component, computed, inject, signal} from '@angular/core';
 import {ToastrService} from 'ngx-toastr';
 import {PageHeader} from '../../../common/layout/page-header/page-header';
 import {ApiService} from '../../../common/service/api.service';
 import {Icon} from '../../../common/icon/icon';
 import {RichText} from '../../../common/rich-editor/rich-text';
+import {KpiItem, KpiStrip, TabBar, TabItem} from '../../../common/ui';
 
 /**
  * Learning resources available to the institution through its assigned content
@@ -12,7 +13,7 @@ import {RichText} from '../../../common/rich-editor/rich-text';
 @Component({
   selector: 'app-resources',
   standalone: true,
-  imports: [RichText, Icon, PageHeader],
+  imports: [RichText, Icon, PageHeader, KpiStrip, TabBar],
   templateUrl: './resources.html',
   styleUrl: './resources.css',
 })
@@ -24,6 +25,34 @@ export class Resources {
   loadError = signal<string | null>(null);
   package = signal<any | null>(null);
   resources = signal<any[]>([]);
+  activeTab = signal<string>('all');
+
+  readonly kpis = computed<KpiItem[]>(() => {
+    const r = this.resources();
+    const byType = (t: string) => r.filter(x => x.contentType === t).length;
+    return [
+      {label: 'All resources', value: r.length, icon: 'library_books', tone: 'primary'},
+      {label: 'Videos', value: byType('video'), icon: 'smart_display', tone: 'danger'},
+      {label: 'Documents', value: byType('document'), icon: 'description', tone: 'info'},
+      {label: 'Downloadable', value: r.filter(x => this.isDownloadable(x)).length, icon: 'download', tone: 'success'},
+    ];
+  });
+
+  readonly tabs = computed<TabItem[]>(() => {
+    const r = this.resources();
+    const types = [...new Set(r.map(x => x.contentType).filter(Boolean))] as string[];
+    return [
+      {key: 'all', label: 'All', count: r.length},
+      ...types.map(t => ({key: t, label: this.titleCase(t), count: r.filter(x => x.contentType === t).length})),
+    ];
+  });
+
+  readonly filtered = computed<any[]>(() => {
+    const t = this.activeTab(), r = this.resources();
+    return t === 'all' ? r : r.filter(x => x.contentType === t);
+  });
+
+  titleCase(s: string): string { return s ? s.charAt(0).toUpperCase() + s.slice(1) : ''; }
 
   constructor() {
     this.load();

@@ -24,8 +24,13 @@
   @if (!resources().length) {
     <div class="card border-0 shadow-sm p-5 text-center text-body-secondary">This package has no available resources right now.</div>
   } @else {
+    <app-kpi-strip class="d-block mb-4" [items]="kpis()" [cols]="4" />
+    <app-tab-bar class="d-block mb-3" [tabs]="tabs()" [active]="activeTab()" (activeChange)="activeTab.set($event)" />
+    @if (!filtered().length) {
+      <div class="card border-0 shadow-sm p-4 text-center text-body-secondary">No resources in this view.</div>
+    }
     <div class="row g-3">
-      @for (r of resources(); track r.id) {
+      @for (r of filtered(); track r.id) {
         <div class="col-md-6 col-xl-4">
           <div class="card border-0 shadow-sm h-100">
             <div class="card-body d-flex flex-column">
