@@ -10,6 +10,8 @@
   />
 </app-learno-modal>
 
+<app-kpi-strip class="d-block mb-4" [items]="kpis()" [cols]="3" />
+
 <app-data-grid
   endpoint="/backend/school/students"
   [columns]="columns"
