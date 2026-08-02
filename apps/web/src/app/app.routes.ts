@@ -59,6 +59,7 @@ import {SuperAdminPlans} from './pages/dashboard/super-admin/plans/plans';
 import {SuperAdminAuditLogs} from './pages/dashboard/super-admin/audit-logs/audit-logs';
 import {SuperAdminUsersRoles} from './pages/dashboard/super-admin/users-roles/users-roles';
 import {Calendar} from './pages/dashboard/admin/calendar/calendar';
+import {SchoolSetup} from './pages/dashboard/admin/school-setup/school-setup';
 import {CatalogSubjects} from './pages/dashboard/super-admin/catalog-subjects/catalog-subjects';
 import {Support} from './pages/dashboard/support/support';
 import {Resources} from './pages/dashboard/resources/resources';
@@ -87,6 +88,7 @@ export const routes: Routes = [
     component: Dashboard,
     canActivate: [authGuard],
     children: [
+      { path: "setup", component: SchoolSetup },
       { path: "calendar", component: Calendar },
       { path: "students", component: Students },
       { path: "enrollments", component: Enrollment },
@@ -147,6 +149,7 @@ export const routes: Routes = [
     canActivate: [authGuard],
     data: { user: "tutor_admin" },
     children: [
+      { path: "setup", component: SchoolSetup },
       { path: "calendar", component: Calendar },
       { path: "students", component: Students },
       { path: "enrollments", component: Enrollment },

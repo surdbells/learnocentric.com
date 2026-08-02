@@ -1,0 +1,41 @@
+<app-page-header icon="settings" action="School Setup"></app-page-header>
+
+@if (loading()) {
+  <div class="text-body-secondary p-4">Loading…</div>
+} @else {
+  <div class="row g-4 mb-4">
+    <div class="col-lg-4">
+      <div class="card border-0 shadow-sm h-100"><div class="card-body text-center d-flex flex-column align-items-center justify-content-center">
+        <app-stat-ring [value]="completePct()" caption="complete" [tone]="ringTone()" [size]="128" [stroke]="12" />
+        <h6 class="fw-semibold mt-3 mb-0">Setup progress</h6>
+        <p class="small text-body-secondary mb-0">Finish these steps to be pilot-ready.</p>
+      </div></div>
+    </div>
+    <div class="col-lg-8">
+      <app-kpi-strip [items]="kpis()" [cols]="4" />
+    </div>
+  </div>
+
+  <div class="card border-0 shadow-sm">
+    <div class="card-body">
+      <h6 class="fw-semibold mb-3">Quick Setup Checklist</h6>
+      @for (step of checklist(); track step.key) {
+        <a class="d-flex align-items-center gap-3 py-2 border-bottom text-decoration-none text-body ss-row" [routerLink]="step.link">
+          <span class="ss-check" [class.done]="step.done">
+            <app-icon [name]="step.done ? 'check' : step.icon" [size]="18" />
+          </span>
+          <div class="flex-grow-1">
+            <div class="fw-medium">{{ step.label }}</div>
+            <div class="small text-body-secondary">{{ step.hint }}</div>
+          </div>
+          @if (step.done) {
+            <span class="badge bg-success-subtle text-success">Done</span>
+          } @else {
+            <span class="badge bg-warning-subtle text-warning">To do</span>
+          }
+          <app-icon name="chevron_right" [size]="16" class="text-body-secondary" />
+        </a>
+      }
+    </div>
+  </div>
+}

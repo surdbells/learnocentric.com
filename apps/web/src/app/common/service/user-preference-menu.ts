@@ -59,6 +59,7 @@ export class UserPreferenceMenu {
 
     { name: "Management", icon: "tenancy", link: "admin/management",
       children: [
+        { name: "School Setup", link: "/admin/setup" },
         { name: "School Profile", link: "/admin/management/school-profile" },
         { name: "Settings", link: "/admin/management/settings" },
         { name: "Billing", link: "/admin/management/billing" },
@@ -120,6 +121,7 @@ export class UserPreferenceMenu {
 
     { name: "Management", icon: "tenancy", link: "academy/management",
       children: [
+        { name: "Academy Setup", link: "/academy/setup" },
         { name: "Academy Profile", link: "/academy/management/academy-profile" },
         { name: "Settings", link: "/academy/management/settings" },
         { name: "Billing", link: "/academy/management/billing" },
