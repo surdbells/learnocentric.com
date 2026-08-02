@@ -1,15 +1,16 @@
-import {Component, inject, signal} from '@angular/core';
+import {Component, computed, inject, signal} from '@angular/core';
 import {DatePipe} from '@angular/common';
 import {FormsModule} from '@angular/forms';
 import {ToastrService} from 'ngx-toastr';
 import {PageHeader} from '../../../../../common/layout/page-header/page-header';
 import {ApiService} from '../../../../../common/service/api.service';
 import {Icon} from '../../../../../common/icon/icon';
+import {KpiItem, KpiStrip, TabBar, TabItem} from '../../../../../common/ui';
 
 @Component({
   selector: 'app-my-assessments',
   standalone: true,
-  imports: [Icon, PageHeader, FormsModule, DatePipe],
+  imports: [Icon, PageHeader, FormsModule, DatePipe, KpiStrip, TabBar],
   templateUrl: './my-assessments.html',
   styleUrl: './my-assessments.css',
 })
@@ -24,6 +25,36 @@ export class MyAssessments {
   current = signal<any | null>(null);
   result = signal<any | null>(null);
   responses = signal<Record<number, any>>({});
+  activeTab = signal<string>('all');
+
+  readonly kpis = computed<KpiItem[]>(() => {
+    const a = this.available();
+    const graded = a.filter(x => x.attempt?.status === 'graded' && x.attempt?.percentage != null);
+    const avg = graded.length ? Math.round(graded.reduce((s, x) => s + x.attempt.percentage, 0) / graded.length) : null;
+    const best = graded.length ? Math.max(...graded.map(x => x.attempt.percentage)) : null;
+    return [
+      {label: 'Overall average', value: avg === null ? '—' : avg + '%', icon: 'workspace_premium', tone: avg === null ? 'secondary' : avg >= 70 ? 'success' : avg >= 50 ? 'warning' : 'danger'},
+      {label: 'Taken', value: graded.length, icon: 'assignment_turned_in', tone: 'info'},
+      {label: 'Best score', value: best === null ? '—' : best + '%', icon: 'star', tone: 'success'},
+      {label: 'Open now', value: a.length, icon: 'quiz', tone: 'primary'},
+    ];
+  });
+
+  readonly tabs = computed<TabItem[]>(() => {
+    const a = this.available();
+    const types = [...new Set(a.map(x => x.type).filter(Boolean))] as string[];
+    return [
+      {key: 'all', label: 'All', count: a.length},
+      ...types.map(t => ({key: t, label: this.titleCase(t), count: a.filter(x => x.type === t).length})),
+    ];
+  });
+
+  readonly filtered = computed<any[]>(() => {
+    const t = this.activeTab(), a = this.available();
+    return t === 'all' ? a : a.filter(x => x.type === t);
+  });
+
+  titleCase(s: string): string { return s ? s.charAt(0).toUpperCase() + s.slice(1) : ''; }
 
   constructor() {
     this.loadAvailable();
