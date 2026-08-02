@@ -203,6 +203,14 @@ return static function (App $app): void {
             // Platform analytics (super admin) — cross-institution aggregation
             $auth->get('/platform/analytics', \App\Application\Actions\Analytics\PlatformAnalyticsAction::class . ':overview');
 
+            // Platform reports engine (super admin) — templated, persisted, exportable
+            $auth->get('/platform/reports/templates', \App\Application\Actions\Analytics\ReportsAction::class . ':templates');
+            $auth->get('/platform/reports', \App\Application\Actions\Analytics\ReportsAction::class . ':list');
+            $auth->post('/platform/reports', \App\Application\Actions\Analytics\ReportsAction::class . ':generate');
+            $auth->get('/platform/reports/{id:[0-9]+}/export', \App\Application\Actions\Analytics\ReportsAction::class . ':export');
+            $auth->get('/platform/reports/{id:[0-9]+}', \App\Application\Actions\Analytics\ReportsAction::class . ':show');
+            $auth->delete('/platform/reports/{id:[0-9]+}', \App\Application\Actions\Analytics\ReportsAction::class . ':delete');
+
             // Content library + packages (super-admin supply chain, licensing/takedown)
             $auth->map(['GET', 'POST', 'PUT', 'DELETE'], '/content/library', ContentLibraryAction::class);
             $auth->get('/content/packages/{id:[0-9]+}', ContentPackagesAction::class . ':show');

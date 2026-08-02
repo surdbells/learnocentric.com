@@ -149,6 +149,7 @@ export class UserPreferenceMenu {
     { name: "Analytics", icon: "insights", link: "super-admin/management/analytics",
       children: [
         { name: "Platform Analytics", link: "management/analytics" },
+        { name: "Reports", link: "management/reports" },
       ]
     },
 
