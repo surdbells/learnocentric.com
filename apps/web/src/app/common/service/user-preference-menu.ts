@@ -146,6 +146,12 @@ export class UserPreferenceMenu {
       ]
     },
 
+    { name: "Analytics", icon: "insights", link: "super-admin/management/analytics",
+      children: [
+        { name: "Platform Analytics", link: "management/analytics" },
+      ]
+    },
+
     { name: "Management", icon: "tenancy", link: "super-admin/management",
       children: [
         { name: "Institutions", link: "management/institutions" },

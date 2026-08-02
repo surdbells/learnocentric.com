@@ -200,6 +200,9 @@ return static function (App $app): void {
             // Platform user directory (super admin) — Users & Roles
             $auth->get('/admin/users', \App\Application\Actions\Admin\PlatformUsersAction::class);
 
+            // Platform analytics (super admin) — cross-institution aggregation
+            $auth->get('/platform/analytics', \App\Application\Actions\Analytics\PlatformAnalyticsAction::class . ':overview');
+
             // Content library + packages (super-admin supply chain, licensing/takedown)
             $auth->map(['GET', 'POST', 'PUT', 'DELETE'], '/content/library', ContentLibraryAction::class);
             $auth->get('/content/packages/{id:[0-9]+}', ContentPackagesAction::class . ':show');

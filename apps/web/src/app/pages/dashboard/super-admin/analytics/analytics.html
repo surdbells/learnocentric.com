@@ -1,0 +1,165 @@
+<app-page-header icon="insights" action="Platform Analytics"></app-page-header>
+
+@if (loading()) {
+  <div class="text-body-secondary p-4">Loading platform analytics…</div>
+} @else if (!data()) {
+  <div class="card border-0 shadow-sm p-5 text-center text-body-secondary">No analytics available yet.</div>
+} @else {
+  <app-kpi-strip class="d-block mb-4" [items]="kpis()" [cols]="4" />
+
+  <div class="row g-3 mb-4">
+    <!-- Growth trends -->
+    <div class="col-lg-8">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h6 class="fw-semibold mb-0">Growth — last 6 months</h6>
+            <span class="text-body-secondary small">New sign-ups & assessment activity</span>
+          </div>
+          <div class="row g-4">
+            <div class="col-sm-6">
+              <div class="text-body-secondary small mb-1">New users</div>
+              <app-spark-bar [values]="usersSeries()" tone="info" [width]="260" [height]="56" />
+            </div>
+            <div class="col-sm-6">
+              <div class="text-body-secondary small mb-1">Assessments taken</div>
+              <app-spark-bar [values]="attemptsSeries()" tone="warning" [width]="260" [height]="56" />
+            </div>
+          </div>
+          <div class="d-flex justify-content-between mt-2 growth-axis">
+            @for (m of growth(); track m.month) {
+              <span class="text-body-secondary small">{{ m.label }}</span>
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Revenue -->
+    <div class="col-lg-4">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-body">
+          <h6 class="fw-semibold mb-3">Revenue</h6>
+          <div class="d-flex align-items-baseline gap-2">
+            <span class="display-6 fw-bold mb-0">{{ naira(totals().mrr_naira) }}</span>
+            <span class="text-body-secondary">MRR</span>
+          </div>
+          <div class="text-body-secondary small mb-3">{{ naira(totals().arr_naira) }} annualised</div>
+          <div class="d-flex align-items-center gap-2">
+            <app-icon name="verified" class="text-success" [size]="18" />
+            <span>{{ totals().active_subscriptions }} active subscription(s)</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-3 mb-4">
+    <!-- Daily active users -->
+    <div class="col-lg-8">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h6 class="fw-semibold mb-0">Daily active users</h6>
+            <span class="text-body-secondary small">Peak {{ peakDau() }} · last 14 days · from the audit trail</span>
+          </div>
+          <app-spark-bar [values]="activitySeries()" tone="primary" [width]="640" [height]="70" class="w-100 d-block" />
+          <div class="d-flex justify-content-between mt-2">
+            <span class="text-body-secondary small">{{ activity()[0]?.day | date:'MMM d' }}</span>
+            <span class="text-body-secondary small">{{ activity()[activity().length - 1]?.day | date:'MMM d' }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Users by role -->
+    <div class="col-lg-4">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-body">
+          <h6 class="fw-semibold mb-3">Users by role</h6>
+          @for (r of roles(); track r.label) {
+            <div class="mb-2">
+              <div class="d-flex justify-content-between small mb-1">
+                <span>{{ r.label }}</span><span class="fw-medium">{{ r.count }}</span>
+              </div>
+              <div class="role-bar"><span [style.width.%]="r.pct"></span></div>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Content readiness -->
+  <div class="row g-3 mb-4">
+    <div class="col-6 col-md-3">
+      <div class="card border-0 shadow-sm text-center py-3"><div class="fs-4 fw-bold">{{ totals().subjects }}</div><div class="text-body-secondary small">Subjects</div></div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="card border-0 shadow-sm text-center py-3"><div class="fs-4 fw-bold">{{ totals().assessments }}</div><div class="text-body-secondary small">Assessments</div></div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="card border-0 shadow-sm text-center py-3"><div class="fs-4 fw-bold">{{ totals().published_assessments }}</div><div class="text-body-secondary small">Published</div></div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="card border-0 shadow-sm text-center py-3"><div class="fs-4 fw-bold">{{ totals().teachers }}</div><div class="text-body-secondary small">Teachers</div></div>
+    </div>
+  </div>
+
+  <!-- Institution engagement leaderboard -->
+  <div class="card border-0 shadow-sm mb-4">
+    <div class="card-body pb-0">
+      <h6 class="fw-semibold mb-1">Institution engagement</h6>
+      <p class="text-body-secondary small mb-0">Ranked by graded attempts; schools with no activity surface at the bottom for follow-up.</p>
+    </div>
+    <div class="table-responsive">
+      <table class="table align-middle mb-0">
+        <thead class="table-light">
+          <tr>
+            <th>Institution</th><th>Status</th><th class="text-center">Users</th><th class="text-center">Learners</th>
+            <th class="text-center">Attempts</th><th class="text-center">Avg score</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (i of institutions(); track i.id) {
+            <tr [class.table-warning]="i.attempts === 0">
+              <td class="fw-medium">{{ i.name }} <span class="text-body-secondary small text-capitalize">· {{ i.type }}</span></td>
+              <td><app-status-badge [value]="i.status" /></td>
+              <td class="text-center">{{ i.users }}</td>
+              <td class="text-center">{{ i.students }}</td>
+              <td class="text-center">
+                @if (i.attempts > 0) { {{ i.attempts }} }
+                @else { <span class="badge bg-warning-subtle text-warning">No activity</span> }
+              </td>
+              <td class="text-center">
+                @if (i.avg_score !== null) { <span class="badge bg-{{ scoreTone(i.avg_score) }}-subtle text-{{ scoreTone(i.avg_score) }}">{{ i.avg_score }}%</span> }
+                @else { <span class="text-body-secondary">—</span> }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Plan distribution -->
+  @if (plans().length) {
+    <div class="card border-0 shadow-sm">
+      <div class="card-body">
+        <h6 class="fw-semibold mb-3">Subscription plans</h6>
+        <div class="row g-3">
+          @for (p of plans(); track p.name) {
+            <div class="col-sm-4">
+              <div class="border rounded p-3 d-flex justify-content-between align-items-center">
+                <span class="fw-medium">{{ p.name }}</span>
+                <span class="badge bg-primary-subtle text-primary">{{ p.subscribers }} subscriber(s)</span>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  }
+
+  <div class="text-body-secondary small mt-3">Generated {{ data().generated_at | date:'medium' }}</div>
+}

@@ -1,0 +1,24 @@
+:host {
+  display: block;
+}
+
+/* Horizontal role-distribution bars */
+.role-bar {
+  height: 8px;
+  border-radius: 4px;
+  background: var(--bs-tertiary-bg);
+  overflow: hidden;
+}
+.role-bar > span {
+  display: block;
+  height: 100%;
+  border-radius: 4px;
+  background: var(--brand-500, var(--bs-primary));
+  transition: width 0.3s ease;
+}
+
+/* Month labels spread under the growth sparklines */
+.growth-axis span {
+  flex: 1 1 0;
+  text-align: center;
+}
