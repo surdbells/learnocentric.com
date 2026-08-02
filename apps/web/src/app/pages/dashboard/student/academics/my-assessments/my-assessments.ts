@@ -1,5 +1,5 @@
-import {Component, computed, inject, signal} from '@angular/core';
-import {DatePipe} from '@angular/common';
+import {Component, computed, inject, OnDestroy, PLATFORM_ID, signal} from '@angular/core';
+import {DatePipe, isPlatformBrowser} from '@angular/common';
 import {FormsModule} from '@angular/forms';
 import {ToastrService} from 'ngx-toastr';
 import {PageHeader} from '../../../../../common/layout/page-header/page-header';
@@ -14,9 +14,10 @@ import {KpiItem, KpiStrip, TabBar, TabItem} from '../../../../../common/ui';
   templateUrl: './my-assessments.html',
   styleUrl: './my-assessments.css',
 })
-export class MyAssessments {
+export class MyAssessments implements OnDestroy {
   private readonly api = inject(ApiService);
   private readonly toast = inject(ToastrService);
+  private readonly platformId = inject(PLATFORM_ID);
 
   mode = signal<'list' | 'take' | 'result'>('list');
   loading = signal(false);
@@ -26,6 +27,11 @@ export class MyAssessments {
   result = signal<any | null>(null);
   responses = signal<Record<number, any>>({});
   activeTab = signal<string>('all');
+
+  // Timed-quiz engine
+  remaining = signal<number>(0); // seconds left
+  private timerId: any = null;
+  private deadline = 0;          // epoch ms; 0 = untimed
 
   readonly kpis = computed<KpiItem[]>(() => {
     const a = this.available();
@@ -76,6 +82,7 @@ export class MyAssessments {
         this.responses.set({});
         this.mode.set('take');
         this.busy.set(false);
+        this.startTimer(attempt);
       },
       error: (e) => { this.toast.error(e?.error?.error || 'Could not start'); this.busy.set(false); },
     });
@@ -108,14 +115,65 @@ export class MyAssessments {
   }
 
   answered(): number {
-    return Object.values(this.responses()).filter(
-      (v) => v !== null && v !== undefined && v !== '' && !(Array.isArray(v) && v.length === 0),
-    ).length;
+    return Object.values(this.responses()).filter((v) => this.isAnswered(v)).length;
   }
+
+  isAnswered(v: any): boolean {
+    return v !== null && v !== undefined && v !== '' && !(Array.isArray(v) && v.length === 0);
+  }
+
+  // --- Timed-quiz engine ---
+  /** True when this attempt has a countdown running. */
+  timed(): boolean { return this.deadline > 0; }
+
+  private startTimer(att: any): void {
+    this.clearTimer();
+    this.deadline = 0;
+    const dur = Number(att?.duration_minutes) || 0;
+    if (!dur || !att?.started_at || !isPlatformBrowser(this.platformId)) return;
+    this.deadline = new Date(att.started_at).getTime() + dur * 60_000;
+    this.tick();
+    this.timerId = setInterval(() => this.tick(), 1000);
+  }
+
+  private tick(): void {
+    const secs = Math.max(0, Math.round((this.deadline - Date.now()) / 1000));
+    this.remaining.set(secs);
+    if (secs <= 0) {
+      this.clearTimer();
+      if (this.mode() === 'take' && !this.busy()) {
+        this.toast.info('Time is up — submitting your answers.');
+        this.submit();
+      }
+    }
+  }
+
+  private clearTimer(): void {
+    if (this.timerId) { clearInterval(this.timerId); this.timerId = null; }
+  }
+
+  formatTime(s: number): string {
+    const m = Math.floor(s / 60), sec = s % 60;
+    return `${m}:${sec.toString().padStart(2, '0')}`;
+  }
+
+  /** Timer is in the last 60 seconds — used to flash the badge. */
+  timeCritical(): boolean { return this.timed() && this.remaining() <= 60; }
+
+  /** Question-navigator: jump to a question and report whether it's answered. */
+  qAnswered(qid: number): boolean { return this.isAnswered(this.responses()[qid]); }
+  scrollToQ(qid: number): void {
+    if (isPlatformBrowser(this.platformId)) {
+      document.getElementById('q_' + qid)?.scrollIntoView({behavior: 'smooth', block: 'center'});
+    }
+  }
+
+  ngOnDestroy(): void { this.clearTimer(); }
 
   submit(): void {
     const attempt = this.current();
     if (!attempt) return;
+    this.clearTimer();
     const answers = (attempt.questions ?? []).map((q: any) => ({question_id: q.question_id, response: this.responses()[q.question_id] ?? null}));
     this.busy.set(true);
     this.api.post<any>(`/backend/assessment/attempts/${attempt.id}/submit`, {answers}).subscribe({
@@ -125,6 +183,7 @@ export class MyAssessments {
   }
 
   backToList(): void {
+    this.clearTimer();
     this.current.set(null);
     this.result.set(null);
     this.mode.set('list');

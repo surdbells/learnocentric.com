@@ -204,7 +204,10 @@ final class AttemptsAction
             ];
         }
 
-        return $attempt->toArray() + ['questions' => $questions];
+        return $attempt->toArray() + [
+            'questions' => $questions,
+            'duration_minutes' => $attempt->getAssessment()->toArray()['duration_minutes'],
+        ];
     }
 
     /** Graded view: includes each answer's correctness and the question explanation. */

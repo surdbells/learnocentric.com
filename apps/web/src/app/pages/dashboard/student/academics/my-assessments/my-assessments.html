@@ -60,12 +60,30 @@
     <div class="card-body">
       <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-1">
         <h5 class="fw-semibold mb-0">{{ att.assessment }}</h5>
-        <span class="text-body-secondary small">{{ answered() }} / {{ att.questions.length }} answered</span>
+        <div class="d-flex align-items-center gap-2">
+          @if (timed()) {
+            <span class="badge d-inline-flex align-items-center gap-1"
+                  [class.bg-danger]="timeCritical()" [class.text-white]="timeCritical()"
+                  [class.bg-primary-subtle]="!timeCritical()" [class.text-primary]="!timeCritical()">
+              <app-icon name="schedule" [size]="15" /> {{ formatTime(remaining()) }}
+            </span>
+          }
+          <span class="text-body-secondary small">{{ answered() }} / {{ att.questions.length }} answered</span>
+        </div>
       </div>
-      <p class="text-body-secondary small mb-4">Answer the questions below, then submit for instant marking.</p>
+      <p class="text-body-secondary small mb-3">Answer the questions below, then submit for instant marking.</p>
+
+      <!-- Question navigator -->
+      <div class="q-nav d-flex flex-wrap gap-1 mb-4">
+        @for (q of att.questions; track q.question_id) {
+          <button type="button" class="q-nav-btn" [class.done]="qAnswered(q.question_id)"
+                  [attr.title]="'Question ' + (q.position + 1) + (qAnswered(q.question_id) ? ' — answered' : '')"
+                  (click)="scrollToQ(q.question_id)">{{ q.position + 1 }}</button>
+        }
+      </div>
 
       @for (q of att.questions; track q.question_id) {
-        <div class="q-block py-3 border-top">
+        <div class="q-block py-3 border-top" [id]="'q_' + q.question_id">
           <div class="fw-medium mb-2">{{ q.position + 1 }}. {{ q.stem }}
             <span class="text-body-secondary fw-normal small">({{ q.marks }} mark(s))</span>
           </div>

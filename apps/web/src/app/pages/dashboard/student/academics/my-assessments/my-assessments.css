@@ -21,3 +21,28 @@
 .q-block:first-of-type {
   border-top: 0 !important;
 }
+
+/* Question navigator */
+.q-nav-btn {
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  border: 1px solid var(--bs-border-color);
+  background: var(--bs-body-bg);
+  color: var(--bs-body-color);
+  font-size: 0.82rem;
+  font-weight: 600;
+  line-height: 1;
+  transition: all 0.12s ease;
+}
+
+.q-nav-btn:hover {
+  border-color: var(--bs-primary);
+  color: var(--bs-primary);
+}
+
+.q-nav-btn.done {
+  background: var(--bs-primary);
+  border-color: var(--bs-primary);
+  color: #fff;
+}
