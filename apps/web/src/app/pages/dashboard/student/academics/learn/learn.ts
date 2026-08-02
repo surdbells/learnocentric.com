@@ -9,13 +9,14 @@ import {MediaEmbed} from '../../../../../common/media-embed/media-embed';
 import {RichEditor} from '../../../../../common/rich-editor/rich-editor';
 import {RichText} from '../../../../../common/rich-editor/rich-text';
 import {FormsModule} from '@angular/forms';
+import {KpiItem, KpiStrip, TabBar, TabItem} from '../../../../../common/ui';
 
 const STAGE_ICON: Record<string, string> = {lesson: 'menu_book', quiz: 'quiz', worksheet: 'assignment_turned_in', portfolio: 'folder_special'};
 
 @Component({
   selector: 'app-learn',
   standalone: true,
-  imports: [Icon, PageHeader, MediaEmbed, RichEditor, RichText, FormsModule, DatePipe],
+  imports: [Icon, PageHeader, MediaEmbed, RichEditor, RichText, FormsModule, DatePipe, KpiStrip, TabBar],
   templateUrl: './learn.html',
   styleUrl: './learn.css',
 })
@@ -40,6 +41,38 @@ export class Learn {
   activeTab = signal<string>('lesson');
   // Which media item is playing in the Media tab
   activeMediaIndex = signal(0);
+
+  // List-view status filter (distinct from the in-lesson content tabs above)
+  listTab = signal<string>('all');
+
+  /** Bucket a topic by its learning progress. */
+  lessonKey(t: any): string { return t.complete ? 'completed' : (t.progress > 0 ? 'in_progress' : 'not_started'); }
+
+  readonly lessonKpis = computed<KpiItem[]>(() => {
+    const t = this.topics();
+    return [
+      {label: 'Total lessons', value: t.length, icon: 'menu_book', tone: 'primary'},
+      {label: 'Completed', value: t.filter(x => x.complete).length, icon: 'check_circle', tone: 'success'},
+      {label: 'In progress', value: t.filter(x => !x.complete && x.progress > 0).length, icon: 'play_circle', tone: 'info'},
+      {label: 'Not started', value: t.filter(x => !x.progress).length, icon: 'schedule', tone: 'warning'},
+    ];
+  });
+
+  readonly listTabs = computed<TabItem[]>(() => {
+    const t = this.topics();
+    const cnt = (k: string) => t.filter(x => this.lessonKey(x) === k).length;
+    return [
+      {key: 'all', label: 'All', count: t.length},
+      {key: 'in_progress', label: 'In Progress', count: cnt('in_progress')},
+      {key: 'completed', label: 'Completed', count: cnt('completed')},
+      {key: 'not_started', label: 'Not Started', count: cnt('not_started')},
+    ];
+  });
+
+  readonly listFiltered = computed<any[]>(() => {
+    const k = this.listTab(), t = this.topics();
+    return k === 'all' ? t : t.filter(x => this.lessonKey(x) === k);
+  });
 
   constructor() {
     this.load();

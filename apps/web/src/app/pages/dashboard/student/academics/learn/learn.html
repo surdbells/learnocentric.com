@@ -14,8 +14,13 @@
   } @else if (!topics().length) {
     <div class="card border-0 shadow-sm p-5 text-center text-body-secondary">No lessons are published for you yet.</div>
   } @else {
+    <app-kpi-strip class="d-block mb-4" [items]="lessonKpis()" [cols]="4" />
+    <app-tab-bar class="d-block mb-3" [tabs]="listTabs()" [active]="listTab()" (activeChange)="listTab.set($event)" />
+    @if (!listFiltered().length) {
+      <div class="card border-0 shadow-sm p-4 text-center text-body-secondary">No lessons in this view.</div>
+    }
     <div class="row g-3">
-      @for (t of topics(); track t.id) {
+      @for (t of listFiltered(); track t.id) {
         <div class="col-md-6 col-xl-4">
           <div class="card border-0 shadow-sm h-100">
             <div class="card-body d-flex flex-column">
