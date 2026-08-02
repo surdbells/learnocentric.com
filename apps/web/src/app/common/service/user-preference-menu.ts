@@ -18,6 +18,7 @@ export class UserPreferenceMenu {
     { name: "Main", icon: "dashboard", link: "admin/main",
       children: [
         { name: "Dashboard", link: "/admin/main" },
+        { name: "Calendar", link: "/admin/calendar" },
       ]
     },
 
@@ -78,6 +79,7 @@ export class UserPreferenceMenu {
     { name: "Main", icon: "dashboard", link: "academy/main",
       children: [
         { name: "Dashboard", link: "/academy/main" },
+        { name: "Calendar", link: "/academy/calendar" },
       ]
     },
 

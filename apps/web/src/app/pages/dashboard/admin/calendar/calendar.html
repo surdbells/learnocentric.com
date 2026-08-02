@@ -1,0 +1,38 @@
+<app-page-header icon="calendar_month" action="Calendar"></app-page-header>
+
+<app-kpi-strip class="d-block mb-4" [items]="kpis()" [cols]="4" />
+
+<app-tab-bar class="d-block mb-3" [tabs]="tabs()" [active]="typeTab()" (activeChange)="typeTab.set($event)" />
+
+@if (loading()) {
+  <div class="text-body-secondary p-4">Loading…</div>
+} @else if (!filtered().length) {
+  <div class="card border-0 shadow-sm p-5 text-center text-body-secondary">No events in this view.</div>
+} @else {
+  @for (day of grouped(); track day.date) {
+    <div class="mb-3">
+      <div class="cal-date small fw-semibold text-body-secondary mb-2">{{ day.date | date:'EEEE, MMMM d, y' }}</div>
+      <div class="card border-0 shadow-sm">
+        <div class="card-body p-0">
+          @for (e of day.items; track $index) {
+            <div class="d-flex align-items-center gap-3 px-3 py-2 border-bottom cal-row">
+              <span class="cal-ic bg-{{ typeColor(e.type) }}-subtle text-{{ typeColor(e.type) }}">
+                <app-icon [name]="typeIcon(e.type)" [size]="18" />
+              </span>
+              <div class="flex-grow-1">
+                <div class="fw-medium">{{ e.title }}</div>
+                <div class="small text-body-secondary">{{ typeLabel(e.type) }} · {{ e.subject }}</div>
+              </div>
+              @if (e.type === 'live_class') {
+                <span class="small text-body-secondary text-nowrap">{{ e.datetime | date:'h:mm a' }}</span>
+                <span class="badge text-capitalize bg-{{ typeColor(e.type) }}-subtle text-{{ typeColor(e.type) }}">{{ e.status }}</span>
+              } @else {
+                <span class="badge bg-warning-subtle text-warning">Due</span>
+              }
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  }
+}
