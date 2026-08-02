@@ -13,6 +13,7 @@ import { DatePipe } from '@angular/common';
 import { LearnoModal } from "../../../../components/learno-modal/learno-modal";
 import { InstitutionForm } from "../../../../components/forms/institution-form/institution-form";
 import { FormsModule } from '@angular/forms';
+import {KpiItem, KpiStrip, TabBar, TabItem} from '../../../../common/ui';
 
 @Component({
   selector: 'app-super-admin-institutions',
@@ -30,7 +31,9 @@ import { FormsModule } from '@angular/forms';
     RouterLink,
     LearnoModal,
     InstitutionForm,
-    FormsModule
+    FormsModule,
+    KpiStrip,
+    TabBar,
 ],
   templateUrl: './institutions.html',
   styleUrl: './institutions.css'
@@ -48,6 +51,29 @@ export class SuperAdminInstitutions implements OnInit {
   selectedInstitution = signal<any | null>(null);
   anchorSelector = signal<string>('');
   searchTerm = signal<string>('');
+  typeTab = signal<string>('all');
+
+  readonly kpis = computed<KpiItem[]>(() => {
+    const i = this.institutions();
+    const byType = (t: string) => i.filter(x => x.type === t).length;
+    const active = i.filter(x => (x.status ?? 'active') === 'active').length;
+    return [
+      {label: 'Total institutions', value: i.length, icon: 'apartment', tone: 'primary'},
+      {label: 'Schools', value: byType('school'), icon: 'school', tone: 'info'},
+      {label: 'Academies', value: byType('academy'), icon: 'workspace_premium', tone: 'warning'},
+      {label: 'Active', value: active, icon: 'check_circle', tone: 'success'},
+    ];
+  });
+
+  readonly typeTabs = computed<TabItem[]>(() => {
+    const i = this.institutions();
+    return [
+      {key: 'all', label: 'All', count: i.length},
+      {key: 'school', label: 'Schools', count: i.filter(x => x.type === 'school').length},
+      {key: 'academy', label: 'Academies', count: i.filter(x => x.type === 'academy').length},
+    ];
+  });
+
   packages = signal<any[]>([]);
   assignPackageId = signal<string>('');
   assigning = signal<boolean>(false);
@@ -57,8 +83,10 @@ export class SuperAdminInstitutions implements OnInit {
 
   filteredInstitutions = computed(() => {
     const term = this.searchTerm().toLowerCase().trim();
-    if (!term) return this.institutions();
+    const typeFilter = this.typeTab();
     return this.institutions().filter((i: any) => {
+      if (typeFilter !== 'all' && i.type !== typeFilter) return false;
+      if (!term) return true;
       const name = (i.name || '').toString().toLowerCase();
       const email = (i.email || '').toString().toLowerCase();
       const phone = (i.phone || '').toString().toLowerCase();
@@ -99,6 +127,7 @@ export class SuperAdminInstitutions implements OnInit {
             phone: i.phone ?? i.contactPhone ?? '',
             createdAt: i.createdAt ?? i.created_date ?? i.created_on ?? null,
             address: i.address ?? '',
+            status: i.status ?? 'active',
             logoUrl: i.logo_url,
             primaryColor: i.primary_color,
             secondaryColor: i.secondary_color,

@@ -90,6 +90,8 @@
 
 <div class="row">
   <div class="col-12">
+    <app-kpi-strip class="d-block mb-4" [items]="kpis()" [cols]="4" />
+    <app-tab-bar class="d-block mb-3" [tabs]="typeTabs()" [active]="typeTab()" (activeChange)="typeTab.set($event)" />
     <app-table-search (search)="onSearch($event)" />
     <app-skeleton-loader [isLoading]="isLoading()" variant="table" [rows]="5" [columns]="5">
       <app-data-table
