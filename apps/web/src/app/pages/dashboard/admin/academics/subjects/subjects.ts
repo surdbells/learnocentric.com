@@ -1,9 +1,10 @@
-import {Component, inject, signal} from '@angular/core';
+import {Component, computed, inject, signal} from '@angular/core';
 import {ToastrService} from 'ngx-toastr';
 import {PageHeader} from '../../../../../common/layout/page-header/page-header';
 import {Icon} from '../../../../../common/icon/icon';
 import {ApiService} from '../../../../../common/service/api.service';
 import {RichText} from '../../../../../common/rich-editor/rich-text';
+import {KpiItem, KpiStrip, TabBar, TabItem} from '../../../../../common/ui';
 
 /**
  * Subjects are defined in the platform catalogue by the SaaS admin; a school
@@ -13,7 +14,7 @@ import {RichText} from '../../../../../common/rich-editor/rich-text';
 @Component({
   selector: 'app-subjects',
   standalone: true,
-  imports: [RichText, PageHeader, Icon],
+  imports: [RichText, PageHeader, Icon, KpiStrip, TabBar],
   templateUrl: './subjects.html',
   styleUrl: './subjects.css',
 })
@@ -24,6 +25,34 @@ export class Subjects {
   loading = signal(true);
   busy = signal<number | null>(null);
   catalog = signal<any[]>([]);
+  listTab = signal<string>('all');
+
+  readonly kpis = computed<KpiItem[]>(() => {
+    const c = this.catalog();
+    const adopted = c.filter(x => x.adopted).length;
+    return [
+      {label: 'Catalogue subjects', value: c.length, icon: 'subject', tone: 'primary'},
+      {label: 'Offered by school', value: adopted, icon: 'check_circle', tone: 'success'},
+      {label: 'Available to add', value: c.length - adopted, icon: 'add', tone: 'info'},
+    ];
+  });
+
+  readonly tabs = computed<TabItem[]>(() => {
+    const c = this.catalog();
+    const adopted = c.filter(x => x.adopted).length;
+    return [
+      {key: 'all', label: 'All', count: c.length},
+      {key: 'offered', label: 'Offered', count: adopted},
+      {key: 'available', label: 'Available', count: c.length - adopted},
+    ];
+  });
+
+  readonly filtered = computed<any[]>(() => {
+    const t = this.listTab(), c = this.catalog();
+    if (t === 'offered') return c.filter(x => x.adopted);
+    if (t === 'available') return c.filter(x => !x.adopted);
+    return c;
+  });
 
   constructor() { this.load(); }
 
