@@ -194,6 +194,9 @@ return static function (App $app): void {
             // Platform audit trail (super admin) — read-only view of AuditLog rows
             $auth->get('/audit-logs', AuditLogsAction::class);
 
+            // Platform user directory (super admin) — Users & Roles
+            $auth->get('/admin/users', \App\Application\Actions\Admin\PlatformUsersAction::class);
+
             // Content library + packages (super-admin supply chain, licensing/takedown)
             $auth->map(['GET', 'POST', 'PUT', 'DELETE'], '/content/library', ContentLibraryAction::class);
             $auth->get('/content/packages/{id:[0-9]+}', ContentPackagesAction::class . ':show');

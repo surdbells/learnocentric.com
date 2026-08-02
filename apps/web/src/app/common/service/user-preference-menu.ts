@@ -149,6 +149,7 @@ export class UserPreferenceMenu {
         { name: "Subscription Plans", link: "management/plans" },
         { name: "Content Library", link: "management/content-library" },
         { name: "Content Packages", link: "management/content-packages" },
+        { name: "Users & Roles", link: "management/users-roles" },
         { name: "Support Centre", link: "management/support" },
         { name: "Audit Logs", link: "management/audit-logs" },
       ]

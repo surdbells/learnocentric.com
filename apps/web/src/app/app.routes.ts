@@ -57,6 +57,7 @@ import {SuperAdminContentLibrary} from './pages/dashboard/super-admin/content-li
 import {SuperAdminContentPackages} from './pages/dashboard/super-admin/content-packages/content-packages';
 import {SuperAdminPlans} from './pages/dashboard/super-admin/plans/plans';
 import {SuperAdminAuditLogs} from './pages/dashboard/super-admin/audit-logs/audit-logs';
+import {SuperAdminUsersRoles} from './pages/dashboard/super-admin/users-roles/users-roles';
 import {CatalogSubjects} from './pages/dashboard/super-admin/catalog-subjects/catalog-subjects';
 import {Support} from './pages/dashboard/support/support';
 import {Resources} from './pages/dashboard/resources/resources';
@@ -318,6 +319,7 @@ export const routes: Routes = [
           { path: "content-packages", component: SuperAdminContentPackages },
           { path: "plans", component: SuperAdminPlans },
           { path: "support", component: Support },
+          { path: "users-roles", component: SuperAdminUsersRoles },
           { path: "audit-logs", component: SuperAdminAuditLogs }
         ]
       }
