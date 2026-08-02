@@ -97,6 +97,66 @@ final class PortfolioAction
         return Json::write($response, ['data' => array_map(static fn (PortfolioEntry $p) => $p->toArray(), $entries), 'meta' => ['total' => count($entries)]]);
     }
 
+    /**
+     * GET /assessment/portfolio/tasks — the student's task-driven portfolio: every
+     * topic that expects evidence (i.e. an assigned task) joined with the student's
+     * latest submission, so the UI can show per-task status, brief and rating.
+     */
+    public function tasks(Request $request, Response $response): Response
+    {
+        $student = $this->currentUser($request);
+        $classIds = $this->studentClassIds($student);
+
+        $qb = $this->em->createQueryBuilder()->select('t')->from(Topic::class, 't')->join('t.subject', 's')
+            ->where('t.approvalStatus = :pub')->setParameter('pub', Lifecycle::PUBLISHED)
+            ->andWhere("t.portfolioEvidenceExpected IS NOT NULL AND t.portfolioEvidenceExpected <> ''")
+            ->orderBy('t.weekNumber', 'ASC')->addOrderBy('t.title', 'ASC');
+        if ($student->getInstitution() !== null) {
+            $qb->andWhere('s.institution = :inst')->setParameter('inst', $student->getInstitution());
+        }
+        if (!empty($classIds)) {
+            $qb->andWhere('t.schoolClass IS NULL OR t.schoolClass IN (:cids)')->setParameter('cids', $classIds);
+        } else {
+            $qb->andWhere('t.schoolClass IS NULL');
+        }
+
+        // Latest submission per topic, keyed by topic id, in one pass.
+        $byTopic = [];
+        foreach ($this->em->getRepository(PortfolioEntry::class)->findBy(['student' => $student], ['createdAt' => 'DESC']) as $entry) {
+            /** @var PortfolioEntry $entry */
+            $tid = $entry->getTopic()->getId();
+            if (!isset($byTopic[$tid])) {
+                $byTopic[$tid] = $entry;
+            }
+        }
+
+        $rows = [];
+        foreach ($qb->getQuery()->getResult() as $topic) {
+            /** @var Topic $topic */
+            $ta = $topic->toArray();
+            $entry = $byTopic[$topic->getId()] ?? null;
+            $status = $entry === null ? 'to_do' : $entry->getStatus();
+            $rows[] = [
+                'task_id' => $topic->getId(),
+                'title' => $topic->getTitle(),
+                'subject' => $topic->getSubject()->getName(),
+                'week_number' => $ta['week_number'],
+                'brief' => $ta['portfolio_evidence_expected'],
+                'objective' => $ta['objective'],
+                'competency_built' => $ta['competency_built'],
+                'status' => $status,
+                'entry_id' => $entry?->getId(),
+                'competency_rating' => $entry?->toArray()['competency_rating'] ?? null,
+                'reviewer_feedback' => $entry?->toArray()['reviewer_feedback'] ?? null,
+                'reviewed_by' => $entry?->toArray()['reviewed_by'] ?? null,
+                'evidence_url' => $entry?->toArray()['evidence_url'] ?? null,
+                'submitted_at' => $entry?->toArray()['submitted_at'] ?? null,
+            ];
+        }
+
+        return Json::write($response, ['data' => $rows, 'meta' => ['total' => count($rows)]]);
+    }
+
     /** GET /assessment/portfolio/topics — topics that expect evidence, for the student's classes. */
     public function topics(Request $request, Response $response): Response
     {

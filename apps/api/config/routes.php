@@ -158,6 +158,7 @@ return static function (App $app): void {
             // Portfolio — competency-track evidence (student submit, staff review)
             $auth->map(['GET', 'POST', 'PUT', 'DELETE'], '/assessment/portfolio', PortfolioAction::class);
             $auth->get('/assessment/portfolio/mine', PortfolioAction::class . ':mine');
+            $auth->get('/assessment/portfolio/tasks', PortfolioAction::class . ':tasks');
             $auth->get('/assessment/portfolio/topics', PortfolioAction::class . ':topics');
             $auth->post('/assessment/portfolio/{id:[0-9]+}/review', PortfolioAction::class . ':review');
 

@@ -1,3 +1,34 @@
 :host {
   display: block;
 }
+
+.task-card {
+  transition: box-shadow 0.15s ease, transform 0.15s ease;
+}
+.task-card:hover {
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1) !important;
+}
+.task-card.reviewed {
+  border-left: 3px solid var(--bs-success) !important;
+}
+
+.task-brief {
+  background: var(--bs-tertiary-bg);
+  border-radius: 8px;
+  padding: 0.6rem 0.75rem;
+  line-height: 1.45;
+}
+.alert.task-brief {
+  background: var(--bs-tertiary-bg);
+}
+
+.stars {
+  display: inline-flex;
+  gap: 1px;
+}
+.star-on {
+  color: var(--bs-warning);
+}
+.star-off {
+  color: var(--bs-border-color);
+}
