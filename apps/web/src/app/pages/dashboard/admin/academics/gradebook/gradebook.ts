@@ -1,17 +1,18 @@
-import {Component, inject, signal} from '@angular/core';
+import {Component, computed, inject, signal} from '@angular/core';
 import {DatePipe} from '@angular/common';
 import {ToastrService} from 'ngx-toastr';
 import {PageHeader} from '../../../../../common/layout/page-header/page-header';
 import {LearnoModal} from '../../../../../components/learno-modal/learno-modal';
 import {ApiService} from '../../../../../common/service/api.service';
 import {Icon} from '../../../../../common/icon/icon';
+import {KpiItem, KpiStrip} from '../../../../../common/ui';
 
 declare const bootstrap: any;
 
 @Component({
   selector: 'app-gradebook',
   standalone: true,
-  imports: [PageHeader, LearnoModal, DatePipe, Icon],
+  imports: [PageHeader, LearnoModal, DatePipe, Icon, KpiStrip],
   templateUrl: './gradebook.html',
   styleUrl: './gradebook.css',
 })
@@ -24,6 +25,19 @@ export class Gradebook {
   overview = signal<any[]>([]);
   rollup = signal<any[]>([]);
   detail = signal<any | null>(null);
+
+  readonly kpis = computed<KpiItem[]>(() => {
+    const o = this.overview();
+    const attempts = o.reduce((s, x) => s + (x.attempts || 0), 0);
+    const avg = o.length ? Math.round(o.reduce((s, x) => s + (x.average || 0), 0) / o.length) : null;
+    const passRate = o.length ? Math.round(o.reduce((s, x) => s + (x.pass_rate || 0), 0) / o.length) : null;
+    return [
+      {label: 'Assessments', value: o.length, icon: 'quiz', tone: 'primary'},
+      {label: 'Total attempts', value: attempts, icon: 'assignment_turned_in', tone: 'info'},
+      {label: 'Class average', value: avg === null ? '—' : avg + '%', icon: 'workspace_premium', tone: avg === null ? 'secondary' : avg >= 70 ? 'success' : avg >= 50 ? 'warning' : 'danger'},
+      {label: 'Avg pass rate', value: passRate === null ? '—' : passRate + '%', icon: 'check_circle', tone: 'success'},
+    ];
+  });
 
   constructor() {
     this.loadOverview();

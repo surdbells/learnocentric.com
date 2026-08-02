@@ -1,5 +1,9 @@
 <app-page-header icon="grading" action="Gradebook"></app-page-header>
 
+@if (overview().length) {
+  <app-kpi-strip class="d-block mb-4" [items]="kpis()" [cols]="4" />
+}
+
 <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
   <div class="btn-group" role="group">
     <button type="button" class="btn btn-sm" [class.btn-primary]="mode() === 'assessments'" [class.btn-outline-primary]="mode() !== 'assessments'" (click)="setMode('assessments')">By assessment</button>
