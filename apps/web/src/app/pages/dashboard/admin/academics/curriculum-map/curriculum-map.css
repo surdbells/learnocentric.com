@@ -1,0 +1,11 @@
+:host {
+  display: block;
+}
+
+.map-table td {
+  vertical-align: middle;
+}
+
+.table-success-subtle > * {
+  background: var(--bs-success-bg-subtle);
+}

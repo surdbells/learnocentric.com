@@ -17,6 +17,7 @@ import {LessonContent} from "./pages/dashboard/admin/academics/lesson-content/le
 import {DeliveryPackDetail} from "./pages/dashboard/admin/academics/delivery-pack-detail/delivery-pack-detail";
 import {SchemeOfWork} from "./pages/dashboard/admin/academics/scheme-of-work/scheme-of-work";
 import {SchemeDetail} from "./pages/dashboard/admin/academics/scheme-detail/scheme-detail";
+import {CurriculumMap} from "./pages/dashboard/admin/academics/curriculum-map/curriculum-map";
 import {QuestionBank} from "./pages/dashboard/admin/academics/question-bank/question-bank";
 import {Assessments} from "./pages/dashboard/admin/academics/assessments/assessments";
 import {Gradebook} from "./pages/dashboard/admin/academics/gradebook/gradebook";
@@ -121,6 +122,7 @@ export const routes: Routes = [
           { path: "delivery-pack", component: DeliveryPackDetail, data: { user: "admin" } },
           { path: "scheme-of-work", component: SchemeOfWork, data: { user: "admin" } },
           { path: "scheme-coverage", component: SchemeDetail, data: { user: "admin" } },
+          { path: "curriculum-map", component: CurriculumMap, data: { user: "admin" } },
           { path: "question-bank", component: QuestionBank, canActivate: [moduleGuard('assessments')], data: { user: "admin" } },
           { path: "assessments", component: Assessments, canActivate: [moduleGuard('assessments')], data: { user: "admin" } },
           { path: "worksheets", component: Worksheets, canActivate: [moduleGuard('worksheets')], data: { user: "admin" } },
@@ -187,6 +189,7 @@ export const routes: Routes = [
           { path: "delivery-pack", component: DeliveryPackDetail },
           { path: "scheme-of-work", component: SchemeOfWork },
           { path: "scheme-coverage", component: SchemeDetail },
+          { path: "curriculum-map", component: CurriculumMap },
           { path: "question-bank", component: QuestionBank, canActivate: [moduleGuard('assessments')] },
           { path: "assessments", component: Assessments, canActivate: [moduleGuard('assessments')] },
           { path: "worksheets", component: Worksheets, canActivate: [moduleGuard('worksheets')] },
@@ -244,6 +247,7 @@ export const routes: Routes = [
           { path: "delivery-pack", component: DeliveryPackDetail },
           { path: "scheme-of-work", component: SchemeOfWork },
           { path: "scheme-coverage", component: SchemeDetail },
+          { path: "curriculum-map", component: CurriculumMap },
           { path: "question-bank", component: QuestionBank, canActivate: [moduleGuard('assessments')] },
           { path: "assessments", component: Assessments, canActivate: [moduleGuard('assessments')] },
           { path: "worksheets", component: Worksheets, canActivate: [moduleGuard('worksheets')] },

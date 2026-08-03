@@ -1,0 +1,98 @@
+<app-page-header icon="dashboard" action="Curriculum Map"></app-page-header>
+
+<!-- Filters -->
+<div class="card border-0 shadow-sm mb-4">
+  <div class="card-body">
+    <div class="row g-3 align-items-end">
+      <div class="col-md-5">
+        <label class="form-label" for="cm_class">Class (optional)</label>
+        <select id="cm_class" class="form-select" [ngModel]="classId()" (ngModelChange)="classId.set($event); load()">
+          <option [ngValue]="null">All classes</option>
+          @for (c of classes(); track c.id) { <option [ngValue]="c.id">{{ c.label || c.name }}</option> }
+        </select>
+      </div>
+      <div class="col-md-5">
+        <label class="form-label" for="cm_term">Term (optional)</label>
+        <select id="cm_term" class="form-select" [ngModel]="termId()" (ngModelChange)="termId.set($event); load()">
+          <option [ngValue]="null">All terms</option>
+          @for (t of terms(); track t.id) { <option [ngValue]="t.id">{{ t.name || t.label }}</option> }
+        </select>
+      </div>
+    </div>
+  </div>
+</div>
+
+@if (loading()) {
+  <div class="text-body-secondary p-4">Loading curriculum map…</div>
+} @else if (!subjects().length) {
+  <div class="card border-0 shadow-sm p-5 text-center text-body-secondary">No topics found for this view.</div>
+} @else {
+  <div class="row g-3 mb-4">
+    <div class="col-lg-9"><app-kpi-strip class="d-block" [items]="kpis()" [cols]="4" /></div>
+    <div class="col-lg-3">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-body text-center d-flex flex-column justify-content-center py-3">
+          <app-stat-ring class="mx-auto" [value]="stats().coverage_pct" caption="ready" [tone]="coverageTone()" [size]="104" [stroke]="10" />
+          <div class="text-body-secondary small mt-2">{{ stats().ready }}/{{ stats().topics }} topics fully ready</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Legend -->
+  <div class="d-flex flex-wrap gap-3 mb-3 small text-body-secondary">
+    <span><app-icon name="check_circle" [size]="14" class="text-success" /> Published</span>
+    <span><app-icon name="schedule" [size]="14" class="text-warning" /> In progress</span>
+    <span><app-icon name="circle" [size]="14" class="text-secondary" /> Missing</span>
+    <span class="ms-2">A topic is <b>ready</b> once its pack and assessment are published.</span>
+  </div>
+
+  <!-- Per-subject grids -->
+  @for (sub of subjects(); track sub.subject_id) {
+    <div class="card border-0 shadow-sm mb-3">
+      <div class="card-body pb-0 d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <h6 class="fw-semibold mb-0">{{ sub.subject }}</h6>
+        <span class="badge bg-{{ sub.coverage_pct >= 80 ? 'success' : sub.coverage_pct >= 40 ? 'warning' : 'danger' }}-subtle text-{{ sub.coverage_pct >= 80 ? 'success' : sub.coverage_pct >= 40 ? 'warning' : 'danger' }}">
+          {{ sub.ready }}/{{ sub.total }} ready · {{ sub.coverage_pct }}%
+        </span>
+      </div>
+      <div class="table-responsive">
+        <table class="table align-middle mb-0 map-table">
+          <thead class="table-light">
+            <tr>
+              <th class="text-center">Wk</th><th>Topic</th>
+              <th class="text-center">Pack</th><th class="text-center">Assessment</th>
+              <th class="text-center">Portfolio</th><th class="text-center">Questions</th><th class="text-center">Ready</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (t of sub.topics; track t.id) {
+              <tr [class.table-success-subtle]="t.ready">
+                <td class="text-center fw-semibold">{{ t.week_number || '—' }}</td>
+                <td class="fw-medium">{{ t.title }}</td>
+                <td class="text-center">
+                  <app-icon [name]="cellIcon(t.pack)" [size]="18" class="text-{{ cellTone(t.pack) }}" [attr.title]="cellLabel(t.pack)" />
+                </td>
+                <td class="text-center">
+                  <app-icon [name]="cellIcon(t.assessment)" [size]="18" class="text-{{ cellTone(t.assessment) }}" [attr.title]="cellLabel(t.assessment)" />
+                </td>
+                <td class="text-center">
+                  @if (t.portfolio === 'expected') { <app-icon name="folder_special" [size]="18" class="text-primary" title="Task expected" /> }
+                  @else { <app-icon name="circle" [size]="18" class="text-secondary" title="No task" /> }
+                </td>
+                <td class="text-center">
+                  <span class="badge" [class.bg-light]="t.questions === 0" [class.text-body-secondary]="t.questions === 0"
+                        [class.bg-info-subtle]="t.questions > 0" [class.text-info]="t.questions > 0">{{ t.questions }}</span>
+                </td>
+                <td class="text-center">
+                  @if (t.ready) { <app-icon name="check_circle" [size]="18" class="text-success" /> }
+                  @else { <span class="text-body-secondary">—</span> }
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  }
+}

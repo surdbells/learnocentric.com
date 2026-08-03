@@ -109,6 +109,7 @@ return static function (App $app): void {
             $auth->post('/curriculum/topics/{id:[0-9]+}/transition', TopicsAction::class . ':transition');
             $auth->get('/curriculum/topics/{id:[0-9]+}/history', TopicsAction::class . ':history');
             $auth->get('/curriculum/review-queue', ReviewQueueAction::class);
+            $auth->get('/curriculum/map', \App\Application\Actions\Curriculum\CurriculumMapAction::class);
 
             // Delivery packs — author lesson content (staff), lifecycle-governed
             $auth->map(['GET', 'POST', 'PUT', 'DELETE'], '/curriculum/delivery-packs', DeliveryPacksAction::class);
