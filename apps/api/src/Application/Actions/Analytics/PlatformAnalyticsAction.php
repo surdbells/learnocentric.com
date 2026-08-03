@@ -45,6 +45,7 @@ final class PlatformAnalyticsAction
             'totals' => $this->totals(),
             'deltas' => $this->deltas($now),
             'roles' => $this->roleBreakdown(),
+            'content_readiness' => $this->contentReadiness(),
             'growth' => $this->growth($now),
             'activity' => $this->dailyActiveUsers($now, 21),
             'completion_trend' => $this->completionTrend($now),
@@ -75,13 +76,18 @@ final class PlatformAnalyticsAction
                 ->setParameter('from', $from)->setParameter('to', $to)->getQuery()->getSingleScalarResult();
         };
 
+        $roleCreated = function (string $role, DateTimeImmutable $from, DateTimeImmutable $to): int {
+            return (int) $this->em->createQueryBuilder()->select('COUNT(u.id)')->from(User::class, 'u')->join('u.role', 'r')
+                ->where('r.code = :role')->andWhere('u.createdAt >= :from')->andWhere('u.createdAt < :to')
+                ->setParameter('role', $role)->setParameter('from', $from)->setParameter('to', $to)->getQuery()->getSingleScalarResult();
+        };
+
         return [
             'users' => $pct($countCreated(User::class, 'createdAt', $mid, $now), $countCreated(User::class, 'createdAt', $start, $mid)),
             'institutions' => $pct($countCreated(Institution::class, 'createdAt', $mid, $now), $countCreated(Institution::class, 'createdAt', $start, $mid)),
-            'attempts' => $pct(
-                $this->gradedBetween($mid, $now),
-                $this->gradedBetween($start, $mid),
-            ),
+            'students' => $pct($roleCreated('student', $mid, $now), $roleCreated('student', $start, $mid)),
+            'teachers' => $pct($roleCreated('teacher', $mid, $now), $roleCreated('teacher', $start, $mid)),
+            'attempts' => $pct($this->gradedBetween($mid, $now), $this->gradedBetween($start, $mid)),
         ];
     }
 
@@ -239,6 +245,27 @@ final class PlatformAnalyticsAction
             'active_subscriptions' => count($active),
             'mrr_naira' => $mrr / 100,
             'arr_naira' => $mrr * 12 / 100,
+        ];
+    }
+
+    /**
+     * Delivery-pack readiness across the platform: published (approved assets),
+     * in-review (pending), and drafts (missing/incomplete).
+     *
+     * @return array<string, int>
+     */
+    private function contentReadiness(): array
+    {
+        $rows = $this->em->createQueryBuilder()->select('p.status AS st', 'COUNT(p.id) AS c')
+            ->from(\App\Domain\Entity\TopicDeliveryPack::class, 'p')->groupBy('p.status')->getQuery()->getArrayResult();
+        $by = [];
+        foreach ($rows as $r) {
+            $by[(string) $r['st']] = (int) $r['c'];
+        }
+        return [
+            'published' => $by[Lifecycle::PUBLISHED] ?? 0,
+            'pending' => ($by[Lifecycle::REVIEW] ?? 0) + ($by[Lifecycle::APPROVED] ?? 0),
+            'draft' => $by[Lifecycle::DRAFT] ?? 0,
         ];
     }
 

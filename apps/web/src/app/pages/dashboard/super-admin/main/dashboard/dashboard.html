@@ -1,67 +1,122 @@
 <div class="dash-hero mb-4">
-  <h4 class="fw-bold mb-1">Platform overview</h4>
-  <p class="text-body-secondary mb-0">Institutions, subscriptions and reach across LearnoCentric.</p>
+  <h4 class="fw-bold mb-1">Super Admin Dashboard</h4>
+  <p class="text-body-secondary mb-0">Platform-wide operations, quality, compliance and growth overview.</p>
 </div>
 
 @if (loading()) {
   <div class="row g-3">
     @for (i of [1,2,3,4,5,6]; track i) { <div class="col-6 col-md-4 col-xl-2"><div class="card border-0 shadow-sm"><div class="card-body dash-skel"></div></div></div> }
   </div>
-} @else if (data(); as d) {
+} @else {
   <app-kpi-strip class="d-block mb-4" [items]="kpis()" [cols]="6" />
 
-  <div class="row g-4">
-    <div class="col-lg-8">
-      <div class="row g-4">
-        <!-- Institutions -->
-        <div class="col-md-6">
-          <div class="card border-0 shadow-sm h-100"><div class="card-body">
-            <div class="d-flex justify-content-between align-items-center mb-3">
-              <h6 class="fw-semibold mb-0">Institutions</h6>
-              <a class="small text-decoration-none" [routerLink]="[mgmt, 'institutions']">All →</a>
-            </div>
-            @if (!d.institutions?.length) {
-              <div class="text-body-secondary small py-4 text-center">No institutions yet.</div>
-            } @else {
-              @for (inst of d.institutions; track inst.id) {
-                <a class="d-flex align-items-center gap-3 py-2 border-bottom text-decoration-none text-body" [routerLink]="[mgmt, 'institutions']">
-                  <span class="action-ic bg-primary-subtle text-primary"><app-icon name="apartment" /></span>
-                  <span class="flex-grow-1 fw-medium">{{ inst.name }}</span>
-                  <app-icon name="chevron_right" [size]="16" class="text-body-secondary" />
-                </a>
-              }
+  <!-- Row 1: usage trend · subscription status · content readiness · revenue -->
+  <div class="row g-3 mb-3">
+    <div class="col-xl-5 col-lg-6">
+      <div class="card border-0 shadow-sm h-100"><div class="card-body">
+        <h6 class="fw-semibold mb-2">Platform usage trend</h6>
+        <p class="text-body-secondary small mb-2">New users per month · last 6 months</p>
+        <app-line-chart [points]="usageSeries()" [labels]="usageLabels()" tone="primary" />
+      </div></div>
+    </div>
+    <div class="col-xl-4 col-lg-6">
+      <div class="card border-0 shadow-sm h-100"><div class="card-body">
+        <h6 class="fw-semibold mb-3">Subscription status</h6>
+        @if (subDonut().length) { <app-donut-chart [segments]="subDonut()" caption="subs" /> }
+        @else { <div class="text-body-secondary small">No subscriptions yet.</div> }
+      </div></div>
+    </div>
+    <div class="col-xl-3">
+      <div class="row g-3 h-100">
+        <div class="col-12">
+          <div class="card border-0 shadow-sm"><div class="card-body py-3">
+            <h6 class="fw-semibold mb-2">Content readiness</h6>
+            @if (readiness(); as r) {
+              <div class="d-flex justify-content-between small py-1"><span class="text-success"><app-icon name="check_circle" [size]="14" /> Published</span><b>{{ r.published }}</b></div>
+              <div class="d-flex justify-content-between small py-1"><span class="text-warning"><app-icon name="schedule" [size]="14" /> Pending review</span><b>{{ r.pending }}</b></div>
+              <div class="d-flex justify-content-between small py-1"><span class="text-body-secondary"><app-icon name="edit_note" [size]="14" /> Draft</span><b>{{ r.draft }}</b></div>
             }
           </div></div>
         </div>
-
-        <!-- Plan subscribers -->
-        <div class="col-md-6">
-          <div class="card border-0 shadow-sm h-100"><div class="card-body">
-            <div class="d-flex justify-content-between align-items-center mb-3">
-              <h6 class="fw-semibold mb-0">Plan Subscribers</h6>
-              <a class="small text-decoration-none" [routerLink]="[mgmt, 'plans']">Plans →</a>
-            </div>
-            @if (!d.plans?.length) {
-              <div class="text-body-secondary small py-4 text-center">No plans yet.</div>
-            } @else {
-              @for (p of d.plans; track p.name) {
-                <div class="d-flex align-items-center gap-3 py-2 border-bottom">
-                  <span class="action-ic bg-info-subtle text-info"><app-icon name="workspace_premium" /></span>
-                  <span class="flex-grow-1 fw-medium">{{ p.name }}</span>
-                  <span class="badge bg-info-subtle text-info">{{ p.subscribers }} school{{ p.subscribers === 1 ? '' : 's' }}</span>
-                </div>
-              }
+        <div class="col-12">
+          <div class="card border-0 shadow-sm"><div class="card-body py-3">
+            <h6 class="fw-semibold mb-2">Revenue</h6>
+            @if (revenue(); as rev) {
+              <div class="fs-5 fw-bold">{{ naira(rev.mrr_naira) }} <span class="text-body-secondary fs-6 fw-normal">MRR</span></div>
+              <div class="text-body-secondary small">{{ naira(rev.arr_naira) }} ARR · {{ naira(rev.collected_naira) }} collected</div>
             }
           </div></div>
         </div>
       </div>
     </div>
+  </div>
 
-    <!-- Right rail -->
-    <div class="col-lg-4">
-      <app-rail-card class="d-block" title="Quick Actions" icon="touch_app">
-        <app-quick-actions [actions]="quickActions" />
-      </app-rail-card>
+  <!-- Row 2: schools requiring attention · support tickets · safeguarding · quick actions -->
+  <div class="row g-3">
+    <div class="col-xl-5">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-body pb-2 d-flex justify-content-between align-items-center">
+          <h6 class="fw-semibold mb-0">Schools requiring attention</h6>
+          <a class="small text-decoration-none" [routerLink]="[mgmt, 'analytics']">View all →</a>
+        </div>
+        <div class="table-responsive">
+          <table class="table align-middle mb-0 small">
+            <thead class="table-light"><tr><th>School</th><th>Issue</th><th class="text-end">Learners</th></tr></thead>
+            <tbody>
+              @for (a of attention(); track a.id) {
+                <tr>
+                  <td class="fw-medium">{{ a.name }}</td>
+                  <td class="text-body-secondary">{{ a.students > 0 ? 'No assessment activity' : 'No learners enrolled' }}</td>
+                  <td class="text-end">{{ a.students }}</td>
+                </tr>
+              } @empty {
+                <tr><td colspan="3" class="text-success small py-3"><app-icon name="check_circle" [size]="15" /> All schools are active.</td></tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-xl-4">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-body pb-2 d-flex justify-content-between align-items-center">
+          <h6 class="fw-semibold mb-0">Recent support tickets</h6>
+          <a class="small text-decoration-none" [routerLink]="[mgmt, 'support']">View all →</a>
+        </div>
+        <div class="card-body pt-2">
+          @for (t of recentTickets(); track t.id) {
+            <div class="d-flex justify-content-between align-items-start gap-2 py-2 border-top">
+              <div>
+                <div class="fw-medium small">{{ t.subject }}</div>
+                <div class="text-body-secondary small">{{ t.reference }}@if (t.institution) { · {{ t.institution }} }</div>
+              </div>
+              <app-status-badge [value]="t.status" [map]="statusTones" />
+            </div>
+          } @empty { <div class="text-body-secondary small py-3">No open tickets.</div> }
+        </div>
+      </div>
+    </div>
+
+    <div class="col-xl-3">
+      <div class="row g-3">
+        <div class="col-12">
+          <div class="card border-0 shadow-sm"><div class="card-body py-3">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <h6 class="fw-semibold mb-0">Safeguarding</h6>
+              <a class="small text-decoration-none" [routerLink]="[mgmt, 'safeguarding']">View →</a>
+            </div>
+            @if (sgAlerts(); as sg) {
+              <div class="d-flex justify-content-between small py-1"><span>Open cases</span><b>{{ sg.open }}</b></div>
+              <div class="d-flex justify-content-between small py-1"><span class="text-danger">Escalated</span><b class="text-danger">{{ sg.escalated }}</b></div>
+              <div class="d-flex justify-content-between small py-1"><span class="text-danger">Critical (open)</span><b class="text-danger">{{ sg.critical_open }}</b></div>
+            } @else { <div class="text-body-secondary small">No data.</div> }
+          </div></div>
+        </div>
+        <div class="col-12">
+          <app-quick-actions [actions]="quickActions" />
+        </div>
+      </div>
     </div>
   </div>
 }
