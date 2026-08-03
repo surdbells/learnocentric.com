@@ -5,161 +5,119 @@
 } @else if (!data()) {
   <div class="card border-0 shadow-sm p-5 text-center text-body-secondary">No analytics available yet.</div>
 } @else {
-  <app-kpi-strip class="d-block mb-4" [items]="kpis()" [cols]="4" />
+  <p class="text-body-secondary mb-3">Usage, adoption and academic activity across every institution.</p>
+  <app-kpi-strip class="d-block mb-4" [items]="kpis()" [cols]="6" />
 
-  <div class="row g-3 mb-4">
-    <!-- Growth trends -->
-    <div class="col-lg-8">
-      <div class="card border-0 shadow-sm h-100">
-        <div class="card-body">
-          <div class="d-flex justify-content-between align-items-center mb-3">
-            <h6 class="fw-semibold mb-0">Growth — last 6 months</h6>
-            <span class="text-body-secondary small">New sign-ups & assessment activity</span>
-          </div>
-          <div class="row g-4">
-            <div class="col-sm-6">
-              <div class="text-body-secondary small mb-1">New users</div>
-              <app-spark-bar [values]="usersSeries()" tone="info" [width]="260" [height]="56" />
-            </div>
-            <div class="col-sm-6">
-              <div class="text-body-secondary small mb-1">Assessments taken</div>
-              <app-spark-bar [values]="attemptsSeries()" tone="warning" [width]="260" [height]="56" />
-            </div>
-          </div>
-          <div class="d-flex justify-content-between mt-2 growth-axis">
-            @for (m of growth(); track m.month) {
-              <span class="text-body-secondary small">{{ m.label }}</span>
-            }
-          </div>
+  <!-- Row 1: usage trend · top institutions · attention -->
+  <div class="row g-3 mb-3">
+    <div class="col-xl-6">
+      <div class="card border-0 shadow-sm h-100"><div class="card-body">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <h6 class="fw-semibold mb-0">Platform usage trend</h6>
+          <span class="text-body-secondary small">Peak {{ peakDau() }} DAU · last 21 days</span>
         </div>
-      </div>
+        <app-line-chart [points]="dauSeries()" [labels]="dauLabels()" tone="primary" />
+      </div></div>
     </div>
-
-    <!-- Revenue -->
-    <div class="col-lg-4">
-      <div class="card border-0 shadow-sm h-100">
-        <div class="card-body">
-          <h6 class="fw-semibold mb-3">Revenue</h6>
-          <div class="d-flex align-items-baseline gap-2">
-            <span class="display-6 fw-bold mb-0">{{ naira(totals().mrr_naira) }}</span>
-            <span class="text-body-secondary">MRR</span>
-          </div>
-          <div class="text-body-secondary small mb-3">{{ naira(totals().arr_naira) }} annualised</div>
-          <div class="d-flex align-items-center gap-2">
-            <app-icon name="verified" class="text-success" [size]="18" />
-            <span>{{ totals().active_subscriptions }} active subscription(s)</span>
-          </div>
-        </div>
-      </div>
+    <div class="col-xl-3 col-md-6">
+      <div class="card border-0 shadow-sm h-100"><div class="card-body">
+        <h6 class="fw-semibold mb-3">Top active institutions</h6>
+        @if (topInstitutions().length) { <app-bar-list [items]="topInstitutions()" tone="primary" /> }
+        @else { <div class="text-body-secondary small">No graded activity yet.</div> }
+      </div></div>
     </div>
-  </div>
-
-  <div class="row g-3 mb-4">
-    <!-- Daily active users -->
-    <div class="col-lg-8">
-      <div class="card border-0 shadow-sm h-100">
-        <div class="card-body">
-          <div class="d-flex justify-content-between align-items-center mb-3">
-            <h6 class="fw-semibold mb-0">Daily active users</h6>
-            <span class="text-body-secondary small">Peak {{ peakDau() }} · last 14 days · from the audit trail</span>
-          </div>
-          <app-spark-bar [values]="activitySeries()" tone="primary" [width]="640" [height]="70" class="w-100 d-block" />
-          <div class="d-flex justify-content-between mt-2">
-            <span class="text-body-secondary small">{{ activity()[0]?.day | date:'MMM d' }}</span>
-            <span class="text-body-secondary small">{{ activity()[activity().length - 1]?.day | date:'MMM d' }}</span>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Users by role -->
-    <div class="col-lg-4">
-      <div class="card border-0 shadow-sm h-100">
-        <div class="card-body">
-          <h6 class="fw-semibold mb-3">Users by role</h6>
-          @for (r of roles(); track r.label) {
-            <div class="mb-2">
-              <div class="d-flex justify-content-between small mb-1">
-                <span>{{ r.label }}</span><span class="fw-medium">{{ r.count }}</span>
-              </div>
-              <div class="role-bar"><span [style.width.%]="r.pct"></span></div>
+    <div class="col-xl-3 col-md-6">
+      <div class="card border-0 shadow-sm h-100"><div class="card-body">
+        <h6 class="fw-semibold mb-3">Schools needing attention</h6>
+        @if (attention().length) {
+          @for (a of attention(); track a.name) {
+            <div class="d-flex align-items-start gap-2 py-2 border-top">
+              <span class="dot-danger mt-1"></span>
+              <div><div class="fw-medium small">{{ a.name }}</div><div class="text-body-secondary small">{{ a.reason }}</div></div>
             </div>
           }
+        } @else { <div class="text-success small d-flex align-items-center gap-1"><app-icon name="check_circle" [size]="15" /> Every school is active.</div> }
+      </div></div>
+    </div>
+  </div>
+
+  <!-- Row 2: usage by role · completion trend · content by subject -->
+  <div class="row g-3 mb-3">
+    <div class="col-xl-4">
+      <div class="card border-0 shadow-sm h-100"><div class="card-body">
+        <h6 class="fw-semibold mb-3">Usage by role</h6>
+        <app-donut-chart [segments]="roleDonut()" caption="users" />
+      </div></div>
+    </div>
+    <div class="col-xl-4">
+      <div class="card border-0 shadow-sm h-100"><div class="card-body">
+        <h6 class="fw-semibold mb-3">Assessment completion trend</h6>
+        <app-stacked-bar [labels]="completionLabels()" [series]="completionSeries()" />
+      </div></div>
+    </div>
+    <div class="col-xl-4">
+      <div class="card border-0 shadow-sm h-100"><div class="card-body">
+        <h6 class="fw-semibold mb-3">Content consumption by subject</h6>
+        @if (contentBars().length) { <app-bar-list [items]="contentBars()" /> }
+        @else { <div class="text-body-secondary small">No graded attempts yet.</div> }
+      </div></div>
+    </div>
+  </div>
+
+  <!-- Row 3: heatmap · recent activity -->
+  <div class="row g-3 mb-3">
+    <div class="col-xl-7">
+      <div class="card border-0 shadow-sm h-100"><div class="card-body">
+        <h6 class="fw-semibold mb-3">Engagement heatmap <span class="text-body-secondary small fw-normal">· active users by weekday</span></h6>
+        <app-heat-grid [cols]="heatCols" [rows]="heatRows()" />
+      </div></div>
+    </div>
+    <div class="col-xl-5">
+      <div class="card border-0 shadow-sm h-100"><div class="card-body">
+        <h6 class="fw-semibold mb-3">Recent platform activity</h6>
+        @for (r of recentActivity(); track $index) {
+          <div class="d-flex justify-content-between align-items-center py-2 border-top">
+            <div class="d-flex align-items-center gap-2">
+              <span class="dot-primary"></span>
+              <span class="small">{{ r.action }}@if (r.object) { <span class="text-body-secondary"> · {{ r.object }}</span> }</span>
+            </div>
+            <span class="text-body-secondary small">{{ r.when | date:'MMM d, h:mm a' }}</span>
+          </div>
+        }
+        @if (!recentActivity().length) { <div class="text-body-secondary small">No recent activity.</div> }
+      </div></div>
+    </div>
+  </div>
+
+  <!-- Row 4: revenue + plans -->
+  <div class="row g-3">
+    <div class="col-xl-4">
+      <div class="card border-0 shadow-sm h-100"><div class="card-body">
+        <h6 class="fw-semibold mb-2">Revenue</h6>
+        <div class="d-flex align-items-baseline gap-2">
+          <span class="display-6 fw-bold">{{ naira(totals().mrr_naira) }}</span><span class="text-body-secondary">MRR</span>
         </div>
-      </div>
+        <div class="text-body-secondary small mb-2">{{ naira(totals().arr_naira) }} annualised</div>
+        <div class="d-flex align-items-center gap-2"><app-icon name="verified" class="text-success" [size]="16" />
+          <span class="small">{{ totals().active_subscriptions }} active subscription(s)</span></div>
+      </div></div>
     </div>
-  </div>
-
-  <!-- Content readiness -->
-  <div class="row g-3 mb-4">
-    <div class="col-6 col-md-3">
-      <div class="card border-0 shadow-sm text-center py-3"><div class="fs-4 fw-bold">{{ totals().subjects }}</div><div class="text-body-secondary small">Subjects</div></div>
-    </div>
-    <div class="col-6 col-md-3">
-      <div class="card border-0 shadow-sm text-center py-3"><div class="fs-4 fw-bold">{{ totals().assessments }}</div><div class="text-body-secondary small">Assessments</div></div>
-    </div>
-    <div class="col-6 col-md-3">
-      <div class="card border-0 shadow-sm text-center py-3"><div class="fs-4 fw-bold">{{ totals().published_assessments }}</div><div class="text-body-secondary small">Published</div></div>
-    </div>
-    <div class="col-6 col-md-3">
-      <div class="card border-0 shadow-sm text-center py-3"><div class="fs-4 fw-bold">{{ totals().teachers }}</div><div class="text-body-secondary small">Teachers</div></div>
-    </div>
-  </div>
-
-  <!-- Institution engagement leaderboard -->
-  <div class="card border-0 shadow-sm mb-4">
-    <div class="card-body pb-0">
-      <h6 class="fw-semibold mb-1">Institution engagement</h6>
-      <p class="text-body-secondary small mb-0">Ranked by graded attempts; schools with no activity surface at the bottom for follow-up.</p>
-    </div>
-    <div class="table-responsive">
-      <table class="table align-middle mb-0">
-        <thead class="table-light">
-          <tr>
-            <th>Institution</th><th>Status</th><th class="text-center">Users</th><th class="text-center">Learners</th>
-            <th class="text-center">Attempts</th><th class="text-center">Avg score</th>
-          </tr>
-        </thead>
-        <tbody>
-          @for (i of institutions(); track i.id) {
-            <tr [class.table-warning]="i.attempts === 0">
-              <td class="fw-medium">{{ i.name }} <span class="text-body-secondary small text-capitalize">· {{ i.type }}</span></td>
-              <td><app-status-badge [value]="i.status" /></td>
-              <td class="text-center">{{ i.users }}</td>
-              <td class="text-center">{{ i.students }}</td>
-              <td class="text-center">
-                @if (i.attempts > 0) { {{ i.attempts }} }
-                @else { <span class="badge bg-warning-subtle text-warning">No activity</span> }
-              </td>
-              <td class="text-center">
-                @if (i.avg_score !== null) { <span class="badge bg-{{ scoreTone(i.avg_score) }}-subtle text-{{ scoreTone(i.avg_score) }}">{{ i.avg_score }}%</span> }
-                @else { <span class="text-body-secondary">—</span> }
-              </td>
-            </tr>
-          }
-        </tbody>
-      </table>
-    </div>
-  </div>
-
-  <!-- Plan distribution -->
-  @if (plans().length) {
-    <div class="card border-0 shadow-sm">
-      <div class="card-body">
+    <div class="col-xl-8">
+      <div class="card border-0 shadow-sm h-100"><div class="card-body">
         <h6 class="fw-semibold mb-3">Subscription plans</h6>
-        <div class="row g-3">
+        <div class="row g-2">
           @for (p of plans(); track p.name) {
             <div class="col-sm-4">
               <div class="border rounded p-3 d-flex justify-content-between align-items-center">
                 <span class="fw-medium">{{ p.name }}</span>
-                <span class="badge bg-primary-subtle text-primary">{{ p.subscribers }} subscriber(s)</span>
+                <span class="badge bg-primary-subtle text-primary">{{ p.subscribers }}</span>
               </div>
             </div>
           }
         </div>
-      </div>
+      </div></div>
     </div>
-  }
+  </div>
 
   <div class="text-body-secondary small mt-3">Generated {{ data().generated_at | date:'medium' }}</div>
 }

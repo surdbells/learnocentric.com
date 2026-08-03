@@ -2,23 +2,12 @@
   display: block;
 }
 
-/* Horizontal role-distribution bars */
-.role-bar {
+.dot-primary,
+.dot-danger {
+  width: 8px;
   height: 8px;
-  border-radius: 4px;
-  background: var(--bs-tertiary-bg);
-  overflow: hidden;
+  border-radius: 50%;
+  flex: 0 0 auto;
 }
-.role-bar > span {
-  display: block;
-  height: 100%;
-  border-radius: 4px;
-  background: var(--brand-500, var(--bs-primary));
-  transition: width 0.3s ease;
-}
-
-/* Month labels spread under the growth sparklines */
-.growth-axis span {
-  flex: 1 1 0;
-  text-align: center;
-}
+.dot-primary { background: var(--brand-500, var(--bs-primary)); }
+.dot-danger { background: var(--bs-danger); }

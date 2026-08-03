@@ -43,13 +43,172 @@ final class PlatformAnalyticsAction
 
         return Json::write($response, [
             'totals' => $this->totals(),
+            'deltas' => $this->deltas($now),
             'roles' => $this->roleBreakdown(),
             'growth' => $this->growth($now),
-            'activity' => $this->dailyActiveUsers($now, 14),
+            'activity' => $this->dailyActiveUsers($now, 21),
+            'completion_trend' => $this->completionTrend($now),
+            'content_by_subject' => $this->contentBySubject(),
+            'heatmap' => $this->heatmap($now, 4),
+            'recent_activity' => $this->recentActivity(),
             'institutions' => $this->leaderboard(),
             'plans' => $this->planBreakdown(),
             'generated_at' => $now->format(DATE_ATOM),
         ]);
+    }
+
+    /**
+     * Period-over-period deltas (last 30 days vs the 30 before) for the headline
+     * figures, so KPI cards can show a real trend arrow. Percentages are signed.
+     *
+     * @return array<string, float>
+     */
+    private function deltas(DateTimeImmutable $now): array
+    {
+        $mid = $now->modify('-30 days');
+        $start = $now->modify('-60 days');
+        $pct = static fn (int $cur, int $prev): float => $prev > 0 ? round(($cur - $prev) / $prev * 100, 1) : ($cur > 0 ? 100.0 : 0.0);
+
+        $countCreated = function (string $entity, string $field, DateTimeImmutable $from, DateTimeImmutable $to): int {
+            return (int) $this->em->createQueryBuilder()->select('COUNT(e.id)')->from($entity, 'e')
+                ->where("e.$field >= :from")->andWhere("e.$field < :to")
+                ->setParameter('from', $from)->setParameter('to', $to)->getQuery()->getSingleScalarResult();
+        };
+
+        return [
+            'users' => $pct($countCreated(User::class, 'createdAt', $mid, $now), $countCreated(User::class, 'createdAt', $start, $mid)),
+            'institutions' => $pct($countCreated(Institution::class, 'createdAt', $mid, $now), $countCreated(Institution::class, 'createdAt', $start, $mid)),
+            'attempts' => $pct(
+                $this->gradedBetween($mid, $now),
+                $this->gradedBetween($start, $mid),
+            ),
+        ];
+    }
+
+    private function gradedBetween(DateTimeImmutable $from, DateTimeImmutable $to): int
+    {
+        return (int) $this->em->createQueryBuilder()->select('COUNT(at.id)')->from(AssessmentAttempt::class, 'at')
+            ->where('at.status = :g')->andWhere('at.submittedAt >= :from')->andWhere('at.submittedAt < :to')
+            ->setParameter('g', AssessmentAttempt::GRADED)->setParameter('from', $from)->setParameter('to', $to)
+            ->getQuery()->getSingleScalarResult();
+    }
+
+    /**
+     * Completed vs in-progress attempts per month (last 6) for a stacked trend.
+     *
+     * @return array<int, array{month:string, completed:int, in_progress:int}>
+     */
+    private function completionTrend(DateTimeImmutable $now): array
+    {
+        $months = [];
+        $order = [];
+        for ($i = 5; $i >= 0; $i--) {
+            $key = $now->modify("first day of -$i month")->format('Y-m');
+            $order[] = $key;
+            $months[$key] = ['month' => $key, 'completed' => 0, 'in_progress' => 0];
+        }
+        $rows = $this->em->createQueryBuilder()->select('at.status AS st', 'at.submittedAt AS sub', 'at.startedAt AS started')
+            ->from(AssessmentAttempt::class, 'at')->getQuery()->getArrayResult();
+        foreach ($rows as $r) {
+            $when = $r['sub'] ?? $r['started'];
+            if ($when === null) {
+                continue;
+            }
+            $key = $when->format('Y-m');
+            if (!isset($months[$key])) {
+                continue;
+            }
+            if ($r['st'] === AssessmentAttempt::GRADED) {
+                $months[$key]['completed']++;
+            } else {
+                $months[$key]['in_progress']++;
+            }
+        }
+        return array_map(static fn (string $k) => $months[$k], $order);
+    }
+
+    /**
+     * Graded attempts grouped by subject — content consumption signal.
+     *
+     * @return array<int, array{subject:string, count:int}>
+     */
+    private function contentBySubject(): array
+    {
+        $rows = $this->em->createQueryBuilder()->select('s.name AS subject', 'COUNT(at.id) AS c')
+            ->from(AssessmentAttempt::class, 'at')->join('at.assessment', 'a')->join('a.subject', 's')
+            ->where('at.status = :g')->setParameter('g', AssessmentAttempt::GRADED)
+            ->groupBy('s.name')->orderBy('c', 'DESC')->getQuery()->getArrayResult();
+        return array_map(static fn (array $r) => ['subject' => (string) $r['subject'], 'count' => (int) $r['c']], $rows);
+    }
+
+    /**
+     * Distinct active users per weekday across the last $weeks weeks (from the
+     * audit trail) — a week × weekday engagement heatmap.
+     *
+     * @return array<int, array{label:string, values:int[]}>
+     */
+    private function heatmap(DateTimeImmutable $now, int $weeks): array
+    {
+        // Monday-anchored week start for the earliest week in the window.
+        $todayDow = (int) $now->format('N'); // 1=Mon..7=Sun
+        $thisMonday = $now->modify('-' . ($todayDow - 1) . ' days')->setTime(0, 0);
+        $start = $thisMonday->modify('-' . ($weeks - 1) . ' weeks');
+
+        // seen[weekIndex][weekday] = set of userIds
+        $seen = [];
+        for ($w = 0; $w < $weeks; $w++) {
+            $seen[$w] = array_fill(0, 7, []);
+        }
+        $rows = $this->em->createQueryBuilder()->select('a.userId AS uid', 'a.createdAt AS d')
+            ->from(AuditLog::class, 'a')->where('a.createdAt >= :start')->andWhere('a.userId IS NOT NULL')
+            ->setParameter('start', $start)->getQuery()->getArrayResult();
+        foreach ($rows as $r) {
+            /** @var DateTimeImmutable $d */
+            $d = $r['d'];
+            $weekIdx = (int) floor(($d->getTimestamp() - $start->getTimestamp()) / (7 * 86400));
+            if ($weekIdx < 0 || $weekIdx >= $weeks) {
+                continue;
+            }
+            $dow = (int) $d->format('N') - 1;
+            $seen[$weekIdx][$dow][(int) $r['uid']] = true;
+        }
+
+        $out = [];
+        for ($w = 0; $w < $weeks; $w++) {
+            $label = $start->modify("+$w weeks")->format('M j');
+            $out[] = ['label' => $label, 'values' => array_map(static fn (array $s) => count($s), $seen[$w])];
+        }
+        return $out;
+    }
+
+    /**
+     * The most recent platform actions, humanised for a feed.
+     *
+     * @return array<int, array{action:string, object:string|null, when:string}>
+     */
+    private function recentActivity(): array
+    {
+        $labels = [
+            'attempt.submit' => 'Assessment submitted',
+            'attempt.start' => 'Assessment started',
+            'report.generate' => 'Report generated',
+            'portfolio.review' => 'Portfolio reviewed',
+            'portfolio.submit' => 'Portfolio evidence submitted',
+            'safeguarding.report' => 'Safeguarding concern reported',
+            'safeguarding.platform_update' => 'Safeguarding case triaged',
+            'institution.settings' => 'School settings updated',
+            'platform.settings' => 'Platform settings updated',
+            'deliverypack.create' => 'Delivery pack created',
+        ];
+        $rows = $this->em->createQueryBuilder()->select('a.actionType AS act', 'a.objectType AS obj', 'a.createdAt AS d')
+            ->from(AuditLog::class, 'a')->orderBy('a.createdAt', 'DESC')->setMaxResults(8)->getQuery()->getArrayResult();
+        return array_map(static function (array $r) use ($labels) {
+            return [
+                'action' => $labels[$r['act']] ?? ucfirst(str_replace(['.', '_'], ' ', (string) $r['act'])),
+                'object' => $r['obj'],
+                'when' => $r['d']->format(DATE_ATOM),
+            ];
+        }, $rows);
     }
 
     /** @return array<string, int|float|null> */
