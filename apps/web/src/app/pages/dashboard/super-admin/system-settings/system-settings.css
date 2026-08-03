@@ -1,0 +1,13 @@
+:host {
+  display: block;
+}
+
+/* Use the brand green for the switches so they match the theme. */
+.form-check-input:checked {
+  background-color: var(--brand-500, var(--bs-primary));
+  border-color: var(--brand-500, var(--bs-primary));
+}
+.form-check-input:focus {
+  border-color: var(--brand-400, var(--bs-primary));
+  box-shadow: 0 0 0 0.2rem rgba(var(--bs-primary-rgb), 0.2);
+}

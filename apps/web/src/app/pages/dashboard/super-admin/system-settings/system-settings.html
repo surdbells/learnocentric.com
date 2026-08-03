@@ -1,0 +1,153 @@
+<app-page-header icon="settings" action="System Settings"></app-page-header>
+
+@if (loading()) {
+  <div class="text-body-secondary p-4">Loading system settings…</div>
+} @else if (model) {
+  <div class="row g-4">
+    <!-- General -->
+    <div class="col-12">
+      <div class="card border-0 shadow-sm">
+        <div class="card-body">
+          <h6 class="fw-semibold mb-1"><app-icon name="settings" [size]="18" class="me-1 text-body-secondary" /> General</h6>
+          <p class="text-body-secondary small mb-3">Platform identity and availability.</p>
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label" for="s_name">Platform name</label>
+              <input id="s_name" type="text" class="form-control" [(ngModel)]="model.general.platform_name" />
+            </div>
+            <div class="col-md-6">
+              <label class="form-label" for="s_email">Support email</label>
+              <input id="s_email" type="email" class="form-control" placeholder="support@example.com" [(ngModel)]="model.general.support_email" />
+            </div>
+            <div class="col-md-6">
+              <label class="form-label" for="s_locale">Default language</label>
+              <select id="s_locale" class="form-select" [(ngModel)]="model.general.default_locale">
+                @for (l of locales; track l.v) { <option [value]="l.v">{{ l.label }}</option> }
+              </select>
+            </div>
+            <div class="col-md-6 d-flex align-items-end">
+              <div class="form-check form-switch">
+                <input class="form-check-input" type="checkbox" id="s_maint" [(ngModel)]="model.general.maintenance_mode" />
+                <label class="form-check-label" for="s_maint">Maintenance mode</label>
+              </div>
+            </div>
+            @if (model.general.maintenance_mode) {
+              <div class="col-12">
+                <label class="form-label" for="s_maint_msg">Maintenance message</label>
+                <input id="s_maint_msg" type="text" class="form-control" placeholder="Shown to users while the platform is offline" [(ngModel)]="model.general.maintenance_message" />
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Feature flags -->
+    <div class="col-lg-6">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-center mb-1">
+            <h6 class="fw-semibold mb-0"><app-icon name="layers" [size]="18" class="me-1 text-body-secondary" /> Feature flags</h6>
+            <span class="badge bg-primary-subtle text-primary">{{ enabledFlags() }}/{{ featureFlags.length }} on</span>
+          </div>
+          <p class="text-body-secondary small mb-3">Turn platform modules on or off for every institution.</p>
+          @for (f of featureFlags; track f.key) {
+            <div class="d-flex justify-content-between align-items-start gap-3 py-2 border-top">
+              <div>
+                <div class="fw-medium">{{ f.label }}</div>
+                <div class="text-body-secondary small">{{ f.hint }}</div>
+              </div>
+              <div class="form-check form-switch mt-1">
+                <input class="form-check-input" type="checkbox" [id]="'ff_' + f.key" [(ngModel)]="model.feature_flags[f.key]" />
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-6">
+      <!-- Registration -->
+      <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body">
+          <h6 class="fw-semibold mb-1"><app-icon name="person_add" [size]="18" class="me-1 text-body-secondary" /> Registration</h6>
+          <p class="text-body-secondary small mb-3">How new accounts are created.</p>
+          <div class="form-check form-switch mb-2">
+            <input class="form-check-input" type="checkbox" id="r_signup" [(ngModel)]="model.registration.allow_self_signup" />
+            <label class="form-check-label" for="r_signup">Allow public self sign-up</label>
+          </div>
+          <div class="form-check form-switch">
+            <input class="form-check-input" type="checkbox" id="r_verify" [(ngModel)]="model.registration.require_email_verification" />
+            <label class="form-check-label" for="r_verify">Require email verification</label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Security -->
+      <div class="card border-0 shadow-sm">
+        <div class="card-body">
+          <h6 class="fw-semibold mb-1"><app-icon name="shield" [size]="18" class="me-1 text-body-secondary" /> Security</h6>
+          <p class="text-body-secondary small mb-3">Authentication and access policy.</p>
+          <div class="row g-3 mb-2">
+            <div class="col-6">
+              <label class="form-label" for="sec_len">Min password length</label>
+              <input id="sec_len" type="number" min="6" max="64" class="form-control" [(ngModel)]="model.security.password_min_length" />
+            </div>
+            <div class="col-6">
+              <label class="form-label" for="sec_to">Session timeout (min)</label>
+              <input id="sec_to" type="number" min="5" max="1440" class="form-control" [(ngModel)]="model.security.session_timeout_minutes" />
+            </div>
+          </div>
+          <div class="form-check form-switch mb-2">
+            <input class="form-check-input" type="checkbox" id="sec_2fa" [(ngModel)]="model.security.enforce_2fa" />
+            <label class="form-check-label" for="sec_2fa">Enforce two-factor authentication</label>
+          </div>
+          <div class="form-check form-switch">
+            <input class="form-check-input" type="checkbox" id="sec_rbac" [(ngModel)]="model.security.rbac_enforce" />
+            <label class="form-check-label" for="sec_rbac">Enforce role-based access control</label>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Integrations -->
+    <div class="col-12">
+      <div class="card border-0 shadow-sm">
+        <div class="card-body">
+          <h6 class="fw-semibold mb-1"><app-icon name="cloud_upload" [size]="18" class="me-1 text-body-secondary" /> Integrations</h6>
+          <p class="text-body-secondary small mb-3">Third-party providers. Credentials are configured on the server, never stored here.</p>
+          <div class="row g-3">
+            <div class="col-md-4">
+              <div class="form-check form-switch mb-2">
+                <input class="form-check-input" type="checkbox" id="int_email" [(ngModel)]="model.integrations.email_enabled" />
+                <label class="form-check-label fw-medium" for="int_email">Email</label>
+              </div>
+              <input type="text" class="form-control" placeholder="Provider (e.g. SendGrid)" [(ngModel)]="model.integrations.email_provider" [disabled]="!model.integrations.email_enabled" />
+            </div>
+            <div class="col-md-4">
+              <div class="form-check form-switch mb-2">
+                <input class="form-check-input" type="checkbox" id="int_sms" [(ngModel)]="model.integrations.sms_enabled" />
+                <label class="form-check-label fw-medium" for="int_sms">SMS</label>
+              </div>
+              <input type="text" class="form-control" placeholder="Provider (e.g. Twilio)" [(ngModel)]="model.integrations.sms_provider" [disabled]="!model.integrations.sms_enabled" />
+            </div>
+            <div class="col-md-4">
+              <div class="form-check form-switch mb-2">
+                <input class="form-check-input" type="checkbox" id="int_pay" [(ngModel)]="model.integrations.payments_enabled" />
+                <label class="form-check-label fw-medium" for="int_pay">Payments</label>
+              </div>
+              <input type="text" class="form-control" placeholder="Provider (e.g. Paystack)" [(ngModel)]="model.integrations.payment_provider" [disabled]="!model.integrations.payments_enabled" />
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="d-flex justify-content-end gap-2 mt-4">
+    <button type="button" class="btn btn-light" [disabled]="saving()" (click)="load()">Reset</button>
+    <button type="button" class="btn btn-primary" [disabled]="saving()" (click)="save()">
+      @if (saving()) { Saving… } @else { <app-icon name="check" [size]="16" /> Save changes }
+    </button>
+  </div>
+}

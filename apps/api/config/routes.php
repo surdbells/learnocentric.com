@@ -211,6 +211,9 @@ return static function (App $app): void {
             $auth->get('/platform/reports/{id:[0-9]+}', \App\Application\Actions\Analytics\ReportsAction::class . ':show');
             $auth->delete('/platform/reports/{id:[0-9]+}', \App\Application\Actions\Analytics\ReportsAction::class . ':delete');
 
+            // Platform system settings (super admin) — general/flags/security/integrations
+            $auth->map(['GET', 'PUT'], '/platform/settings', \App\Application\Actions\Analytics\SystemSettingsAction::class);
+
             // Content library + packages (super-admin supply chain, licensing/takedown)
             $auth->map(['GET', 'POST', 'PUT', 'DELETE'], '/content/library', ContentLibraryAction::class);
             $auth->get('/content/packages/{id:[0-9]+}', ContentPackagesAction::class . ':show');

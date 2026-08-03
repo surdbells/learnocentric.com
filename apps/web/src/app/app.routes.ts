@@ -60,6 +60,7 @@ import {SuperAdminAuditLogs} from './pages/dashboard/super-admin/audit-logs/audi
 import {SuperAdminUsersRoles} from './pages/dashboard/super-admin/users-roles/users-roles';
 import {SuperAdminAnalytics} from './pages/dashboard/super-admin/analytics/analytics'; // platform analytics (Phase 5)
 import {SuperAdminReports} from './pages/dashboard/super-admin/reports/reports';
+import {SuperAdminSystemSettings} from './pages/dashboard/super-admin/system-settings/system-settings';
 import {Calendar} from './pages/dashboard/admin/calendar/calendar';
 import {SchoolSetup} from './pages/dashboard/admin/school-setup/school-setup';
 import {CatalogSubjects} from './pages/dashboard/super-admin/catalog-subjects/catalog-subjects';
@@ -330,7 +331,8 @@ export const routes: Routes = [
           { path: "users-roles", component: SuperAdminUsersRoles },
           { path: "audit-logs", component: SuperAdminAuditLogs },
           { path: "analytics", component: SuperAdminAnalytics },
-          { path: "reports", component: SuperAdminReports }
+          { path: "reports", component: SuperAdminReports },
+          { path: "system-settings", component: SuperAdminSystemSettings }
         ]
       }
     ]

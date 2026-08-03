@@ -163,6 +163,7 @@ export class UserPreferenceMenu {
         { name: "Users & Roles", link: "management/users-roles" },
         { name: "Support Centre", link: "management/support" },
         { name: "Audit Logs", link: "management/audit-logs" },
+        { name: "System Settings", link: "management/system-settings" },
       ]
     },
   ]
