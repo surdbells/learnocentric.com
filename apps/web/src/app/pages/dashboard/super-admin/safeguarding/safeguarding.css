@@ -1,0 +1,26 @@
+:host {
+  display: block;
+}
+
+.role-bar {
+  height: 8px;
+  border-radius: 4px;
+  background: var(--bs-tertiary-bg);
+  overflow: hidden;
+}
+.role-bar > span {
+  display: block;
+  height: 100%;
+  border-radius: 4px;
+  background: var(--brand-500, var(--bs-primary));
+  transition: width 0.3s ease;
+}
+
+.case-summary {
+  max-width: 320px;
+}
+
+/* Subtle tint for open critical cases in the register. */
+.table-danger-subtle > * {
+  background: var(--bs-danger-bg-subtle);
+}

@@ -1,0 +1,153 @@
+<app-page-header icon="shield" action="Safeguarding & Compliance"></app-page-header>
+
+@if (loading()) {
+  <div class="text-body-secondary p-4">Loading safeguarding register…</div>
+} @else if (mode() === 'list') {
+  <app-kpi-strip class="d-block mb-4" [items]="kpis()" [cols]="4" />
+
+  <div class="row g-3 mb-4">
+    <!-- Compliance -->
+    <div class="col-lg-4">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-body">
+          <h6 class="fw-semibold mb-1">Lead compliance</h6>
+          <p class="text-body-secondary small mb-3">Institutions with a designated safeguarding lead.</p>
+          @if (overview()?.compliance; as c) {
+            <div class="d-flex align-items-baseline gap-2 mb-2">
+              <span class="display-6 fw-bold">{{ c.with_lead }}</span>
+              <span class="text-body-secondary">/ {{ c.total }} schools</span>
+            </div>
+            <div class="role-bar mb-2"><span [style.width.%]="c.total ? (c.with_lead / c.total) * 100 : 0"></span></div>
+            @if (c.without_lead > 0) {
+              <div class="small text-warning d-flex align-items-center gap-1">
+                <app-icon name="cancel" [size]="15" /> {{ c.without_lead }} school(s) have no lead named
+              </div>
+            } @else {
+              <div class="small text-success d-flex align-items-center gap-1"><app-icon name="check_circle" [size]="15" /> All schools covered</div>
+            }
+          }
+        </div>
+      </div>
+    </div>
+
+    <!-- Institution breakdown -->
+    <div class="col-lg-8">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-body pb-0">
+          <h6 class="fw-semibold mb-1">By institution</h6>
+          <p class="text-body-secondary small mb-2">Open caseload and lead status per school.</p>
+        </div>
+        <div class="table-responsive">
+          <table class="table align-middle mb-0">
+            <thead class="table-light">
+              <tr><th>Institution</th><th class="text-center">Total</th><th class="text-center">Open</th><th class="text-center">Escalated</th><th class="text-center">Lead</th></tr>
+            </thead>
+            <tbody>
+              @for (i of institutions(); track i.name) {
+                <tr [class.table-warning]="i.escalated > 0">
+                  <td class="fw-medium">{{ i.name }}</td>
+                  <td class="text-center">{{ i.total }}</td>
+                  <td class="text-center">{{ i.open }}</td>
+                  <td class="text-center">
+                    @if (i.escalated > 0) { <span class="badge bg-danger">{{ i.escalated }}</span> } @else { 0 }
+                  </td>
+                  <td class="text-center">
+                    @if (i.has_lead) { <app-icon name="check_circle" class="text-success" [size]="18" /> }
+                    @else { <span class="badge bg-warning-subtle text-warning">No lead</span> }
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Cases -->
+  <app-tab-bar class="d-block mb-3" [tabs]="tabs()" [active]="activeTab()" (activeChange)="activeTab.set($event)" />
+  @if (!filtered().length) {
+    <div class="card border-0 shadow-sm p-4 text-center text-body-secondary">No cases in this view.</div>
+  } @else {
+    <div class="table-responsive card border-0 shadow-sm">
+      <table class="table align-middle mb-0">
+        <thead class="table-light">
+          <tr><th>Concern</th><th>Institution</th><th>Category</th><th>Severity</th><th>Status</th><th>Reported</th><th></th></tr>
+        </thead>
+        <tbody>
+          @for (c of filtered(); track c.id) {
+            <tr [class.table-danger-subtle]="c.severity === 'critical' && c.status !== 'closed'">
+              <td class="fw-medium case-summary">{{ c.summary }}</td>
+              <td class="text-body-secondary">{{ c.institution }}</td>
+              <td><span class="badge bg-light text-body-secondary">{{ titleCase(c.category) }}</span></td>
+              <td><span class="badge bg-{{ severityTone(c.severity) }}-subtle text-{{ severityTone(c.severity) }} text-capitalize">{{ c.severity }}</span></td>
+              <td><app-status-badge [value]="c.status" [map]="statusTones" [label]="statusLabel(c.status)" /></td>
+              <td class="text-body-secondary small">{{ c.created_at | date:'mediumDate' }}</td>
+              <td class="text-end"><button type="button" class="btn btn-sm btn-outline-secondary" (click)="view(c)">Triage</button></td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+}
+
+<!-- Case detail / triage -->
+@if (mode() === 'view' && current(); as c) {
+  <button type="button" class="btn btn-link btn-sm px-0 mb-2 text-decoration-none" (click)="backToList()">
+    <app-icon name="arrow_back" [size]="16" /> Back to register
+  </button>
+
+  <div class="row g-3">
+    <div class="col-lg-7">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-start gap-2 mb-2">
+            <h5 class="fw-semibold mb-0">{{ c.summary }}</h5>
+            <span class="badge bg-{{ severityTone(c.severity) }}-subtle text-{{ severityTone(c.severity) }} text-capitalize">{{ c.severity }}</span>
+          </div>
+          <div class="text-body-secondary small mb-3">
+            {{ c.institution }} · {{ titleCase(c.category) }} · reported {{ c.created_at | date:'medium' }}
+          </div>
+          @if (c.details) { <p class="mb-3">{{ c.details }}</p> }
+
+          <dl class="row small mb-0">
+            <dt class="col-4 text-body-secondary fw-normal">Learner</dt><dd class="col-8">{{ c.student || '—' }}</dd>
+            <dt class="col-4 text-body-secondary fw-normal">Reported by</dt><dd class="col-8">{{ c.reported_by || '—' }}</dd>
+            <dt class="col-4 text-body-secondary fw-normal">Access level</dt><dd class="col-8 text-capitalize">{{ c.access_level }}</dd>
+            @if (c.handled_by) { <dt class="col-4 text-body-secondary fw-normal">Handled by</dt><dd class="col-8">{{ c.handled_by }}</dd> }
+            @if (c.closed_at) { <dt class="col-4 text-body-secondary fw-normal">Closed</dt><dd class="col-8">{{ c.closed_at | date:'medium' }}</dd> }
+          </dl>
+        </div>
+      </div>
+    </div>
+
+    <!-- Triage -->
+    <div class="col-lg-5">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-body">
+          <h6 class="fw-semibold mb-3">Platform triage</h6>
+          <div class="mb-3">
+            <label class="form-label" for="t_status">Status</label>
+            <select id="t_status" class="form-select" [(ngModel)]="triage.status">
+              @for (s of statuses; track s) { <option [value]="s">{{ statusLabel(s) }}</option> }
+            </select>
+          </div>
+          <div class="mb-3">
+            <label class="form-label" for="t_sev">Severity</label>
+            <select id="t_sev" class="form-select text-capitalize" [(ngModel)]="triage.severity">
+              @for (s of severities; track s) { <option [value]="s">{{ s }}</option> }
+            </select>
+          </div>
+          <div class="mb-3">
+            <label class="form-label" for="t_out">Outcome / note</label>
+            <textarea id="t_out" rows="3" class="form-control" placeholder="Record the platform action taken…" [(ngModel)]="triage.outcome"></textarea>
+          </div>
+          <button type="button" class="btn btn-primary w-100" [disabled]="saving()" (click)="saveTriage()">
+            @if (saving()) { Saving… } @else { Save triage }
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+}

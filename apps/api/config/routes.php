@@ -214,6 +214,11 @@ return static function (App $app): void {
             // Platform system settings (super admin) — general/flags/security/integrations
             $auth->map(['GET', 'PUT'], '/platform/settings', \App\Application\Actions\Analytics\SystemSettingsAction::class);
 
+            // Platform safeguarding & compliance (super admin) — cross-institution register
+            $auth->get('/platform/safeguarding/overview', \App\Application\Actions\Analytics\PlatformSafeguardingAction::class . ':overview');
+            $auth->get('/platform/safeguarding/cases', \App\Application\Actions\Analytics\PlatformSafeguardingAction::class . ':cases');
+            $auth->put('/platform/safeguarding/{id:[0-9]+}', \App\Application\Actions\Analytics\PlatformSafeguardingAction::class . ':update');
+
             // Content library + packages (super-admin supply chain, licensing/takedown)
             $auth->map(['GET', 'POST', 'PUT', 'DELETE'], '/content/library', ContentLibraryAction::class);
             $auth->get('/content/packages/{id:[0-9]+}', ContentPackagesAction::class . ':show');

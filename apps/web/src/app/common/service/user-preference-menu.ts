@@ -150,6 +150,7 @@ export class UserPreferenceMenu {
       children: [
         { name: "Platform Analytics", link: "management/analytics" },
         { name: "Reports", link: "management/reports" },
+        { name: "Safeguarding", link: "management/safeguarding" },
       ]
     },
 
