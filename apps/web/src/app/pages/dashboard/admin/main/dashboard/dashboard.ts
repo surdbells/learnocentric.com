@@ -1,53 +1,96 @@
-import {afterNextRender, Component, computed, ElementRef, inject, signal, ViewChild} from '@angular/core';
+import {Component, computed, inject, PLATFORM_ID, signal} from '@angular/core';
+import {DatePipe, isPlatformBrowser} from '@angular/common';
 import {RouterLink} from '@angular/router';
+import {forkJoin, of} from 'rxjs';
+import {catchError} from 'rxjs/operators';
 import {AuthService} from '../../../../../common/auth/auth.service';
 import {ApiService} from '../../../../../common/service/api.service';
 import {Icon} from '../../../../../common/icon/icon';
 import {
-  AttentionItem, AttentionList, KpiItem, KpiStrip, ProgressCell, QuickAction, QuickActions, RailCard,
+  AttentionItem, AttentionList, KpiItem, KpiStrip, QuickAction, QuickActions,
+  DonutChart, DonutSegment, StackedBar, BarSeries, BarList, BarItem,
 } from '../../../../../common/ui';
+
+interface ActivityRow { label: string; value: number; icon: string; }
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [Icon, RouterLink, KpiStrip, RailCard, AttentionList, QuickActions, ProgressCell],
+  imports: [Icon, RouterLink, DatePipe, KpiStrip, AttentionList, QuickActions, DonutChart, StackedBar, BarList],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.css',
 })
 export class AdminDashboard {
-  @ViewChild('quizChart') quizChart!: ElementRef<HTMLDivElement>;
-
   private readonly auth = inject(AuthService);
   private readonly api = inject(ApiService);
+  private readonly platformId = inject(PLATFORM_ID);
 
   loading = signal(true);
   data = signal<any | null>(null);
+  events = signal<any[]>([]);
   firstName = signal('');
   root = signal('/admin');
   base = computed(() => `${this.root()}/academics`);
   mgmt = computed(() => `${this.root()}/management`);
   comm = computed(() => `${this.root()}/communication`);
-  private chart: any = null;
 
   constructor() {
     const user = this.auth.getAuthSession()?.user;
     this.firstName.set(user?.firstName ?? 'there');
     this.root.set(user?.role === 'tutor_admin' ? '/academy' : '/admin');
-    afterNextRender(() => this.load());
+    if (isPlatformBrowser(this.platformId)) this.load();
+    else this.loading.set(false);
   }
 
-  /** KPI strip — real counts from /dashboard/admin (deltas/sparklines await the Phase-4 trend endpoint). */
   readonly kpis = computed<KpiItem[]>(() => {
     const d = this.data();
     if (!d) return [];
-    const s = d.stats, b = this.base(), r = this.root();
+    const s = d.stats, q = d.quiz, b = this.base(), r = this.root();
     return [
-      {label: 'Students', value: s.students, icon: 'group', tone: 'primary', link: `${r}/students`},
-      {label: 'Teachers', value: s.teachers, icon: 'supervisor_account', tone: 'info', link: `${r}/teachers`},
-      {label: 'Subjects', value: s.subjects, icon: 'subject', tone: 'warning', link: `${b}/subjects`},
-      {label: 'Classes', value: s.classes, icon: 'meeting_room', tone: 'success', link: `${b}/classes`},
-      {label: 'Published topics', value: s.published_topics, icon: 'menu_book', tone: 'primary', link: `${b}/topics`},
-      {label: 'Live classes', value: s.live_classes, icon: 'video_camera_front', tone: 'danger', link: `${b}/live-classes`},
+      {label: 'Total learners', value: s.students, icon: 'group', tone: 'primary', link: `${r}/students`},
+      {label: 'Total teachers', value: s.teachers, icon: 'supervisor_account', tone: 'info', link: `${r}/teachers`},
+      {label: 'Total classes', value: s.classes, icon: 'meeting_room', tone: 'success', link: `${b}/classes`},
+      {label: 'Subjects offered', value: s.subjects, icon: 'subject', tone: 'warning', link: `${b}/subjects`},
+      {label: 'Pass rate', value: q.pass_rate === null ? '—' : q.pass_rate + '%', sublabel: q.attempts + ' attempts', icon: 'check_circle', tone: 'success'},
+      {label: 'Overall performance', value: q.average === null ? '—' : q.average + '%', icon: 'trending_up', tone: q.average >= 70 ? 'success' : q.average >= 50 ? 'warning' : 'danger'},
+    ];
+  });
+
+  // Academic performance — average per subject (vertical bars)
+  readonly academicLabels = computed<string[]>(() => (this.data()?.quiz_by_subject ?? []).map((q: any) => q.subject));
+  readonly academicSeries = computed<BarSeries[]>(() => [
+    {label: 'Average %', tone: 'primary', values: (this.data()?.quiz_by_subject ?? []).map((q: any) => q.average)},
+  ]);
+
+  // Curriculum coverage donut
+  readonly coverageDonut = computed<DonutSegment[]>(() => {
+    const c = this.data()?.curriculum_coverage;
+    if (!c) return [];
+    const segs: DonutSegment[] = [
+      {label: 'On track', value: c.on_track, tone: 'success'},
+      {label: 'Behind', value: c.behind, tone: 'warning'},
+      {label: 'At risk', value: c.at_risk, tone: 'danger'},
+    ];
+    return segs.filter(s => s.value > 0);
+  });
+  readonly coveragePct = computed<number>(() => this.data()?.curriculum_coverage?.coverage_pct ?? 0);
+
+  // Top performing subjects
+  readonly topSubjects = computed<BarItem[]>(() => {
+    const rows = this.data()?.quiz_by_subject ?? [];
+    return [...rows].sort((a: any, b: any) => b.average - a.average).slice(0, 6)
+      .map((q: any) => ({label: q.subject, value: q.average, tone: q.average >= 70 ? 'success' : q.average >= 50 ? 'warning' : 'danger'}));
+  });
+
+  readonly teacherActivity = computed<ActivityRow[]>(() => {
+    const a = this.data()?.teacher_activity;
+    if (!a) return [];
+    return [
+      {label: 'Delivery packs published', value: a.delivery_packs, icon: 'layers'},
+      {label: 'Live classes', value: a.live_classes, icon: 'video_camera_front'},
+      {label: 'Assessments published', value: a.assessments, icon: 'quiz'},
+      {label: 'Worksheets graded', value: a.worksheets_graded, icon: 'assignment_turned_in'},
+      {label: 'Feedback given', value: a.feedback_given, icon: 'forum'},
     ];
   });
 
@@ -63,6 +106,8 @@ export class AdminDashboard {
     ];
   });
 
+  readonly upcomingEvents = computed<any[]>(() => this.events().slice(0, 4));
+
   readonly quickActions = computed<QuickAction[]>(() => {
     const r = this.root(), b = this.base(), c = this.comm();
     return [
@@ -73,37 +118,18 @@ export class AdminDashboard {
     ];
   });
 
-  /** Top performing subjects, derived from quiz averages. */
-  readonly topSubjects = computed<Array<{subject: string; average: number}>>(() => {
-    const rows = this.data()?.quiz_by_subject ?? [];
-    return [...rows].sort((a, b) => b.average - a.average).slice(0, 5);
-  });
-
   refresh(): void { this.loading.set(true); this.load(); }
 
   private load(): void {
-    this.api.get<any>('/backend/dashboard/admin').subscribe({
-      next: (res) => { this.data.set(res); this.loading.set(false); setTimeout(() => this.renderChart(res)); },
-      error: () => this.loading.set(false),
+    forkJoin({
+      dash: this.api.get<any>('/backend/dashboard/admin').pipe(catchError(() => of(null))),
+      cal: this.api.get<any>('/backend/school/calendar').pipe(catchError(() => of(null))),
+    }).subscribe((res) => {
+      this.data.set(res.dash);
+      const ev = res.cal?.events ?? res.cal?.data ?? (Array.isArray(res.cal) ? res.cal : []);
+      this.events.set(ev);
+      this.loading.set(false);
     });
-  }
-
-  private async renderChart(d: any): Promise<void> {
-    if (!this.quizChart?.nativeElement || !d.quiz_by_subject?.length) return;
-    const {default: ApexCharts} = await import('apexcharts');
-    this.chart?.destroy();
-    this.chart = new ApexCharts(this.quizChart.nativeElement, {
-      chart: {type: 'bar', height: 280, toolbar: {show: false}, fontFamily: 'inherit'},
-      series: [{name: 'Average', data: d.quiz_by_subject.map((q: any) => q.average)}],
-      xaxis: {categories: d.quiz_by_subject.map((q: any) => q.subject)},
-      yaxis: {max: 100},
-      colors: ['#39c645'],
-      plotOptions: {bar: {borderRadius: 6, columnWidth: '45%'}},
-      dataLabels: {enabled: true, formatter: (v: number) => v + '%'},
-      grid: {borderColor: 'rgba(128,128,128,.15)'},
-      tooltip: {y: {formatter: (v: number) => v + '%'}},
-    });
-    this.chart.render();
   }
 
   pct(v: number | null): string { return v === null || v === undefined ? '—' : v + '%'; }

@@ -1,3 +1,39 @@
 :host {
   display: block;
 }
+
+.act-ic {
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--brand-50, var(--bs-primary-bg-subtle));
+  color: var(--brand-600, var(--bs-primary));
+  flex: 0 0 auto;
+}
+
+.ev-date {
+  width: 42px;
+  flex: 0 0 auto;
+  border-radius: 8px;
+  padding: 4px 0;
+  background: var(--brand-50, var(--bs-primary-bg-subtle));
+  color: var(--brand-700, var(--bs-primary));
+}
+.ev-day { font-size: 1rem; line-height: 1.1; }
+.ev-mon { font-size: 0.62rem; letter-spacing: 0.04em; }
+
+.sg-banner {
+  background: var(--bs-success-bg-subtle);
+}
+
+.dash-skel {
+  height: 84px;
+  background: linear-gradient(90deg, var(--bs-tertiary-bg) 25%, var(--bs-secondary-bg) 50%, var(--bs-tertiary-bg) 75%);
+  background-size: 200% 100%;
+  animation: dash-shimmer 1.3s infinite;
+  border-radius: 6px;
+}
+@keyframes dash-shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }

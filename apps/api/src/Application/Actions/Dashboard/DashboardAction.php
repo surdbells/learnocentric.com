@@ -23,6 +23,7 @@ use App\Domain\Entity\Subscription;
 use App\Domain\Entity\SubscriptionPlan;
 use App\Domain\Entity\TeacherAssignment;
 use App\Domain\Entity\Topic;
+use App\Domain\Entity\TopicDeliveryPack;
 use App\Domain\Entity\TopicProgress;
 use App\Domain\Entity\User;
 use App\Domain\Entity\Worksheet;
@@ -68,7 +69,79 @@ final class DashboardAction
             ],
             'quiz' => ['average' => $quizAvg, 'pass_rate' => $passRate, 'attempts' => count($attempts)],
             'quiz_by_subject' => $this->quizBySubject($attempts),
+            'curriculum_coverage' => $this->curriculumCoverage($inst),
+            'teacher_activity' => $this->teacherActivity($inst),
         ]);
+    }
+
+    /**
+     * Curriculum coverage split for the coverage donut: a published topic is
+     * On track when it has a published delivery pack, Behind when a pack exists
+     * but isn't published yet, and At risk when it has no pack at all.
+     *
+     * @return array{on_track:int, behind:int, at_risk:int, total:int, coverage_pct:int}
+     */
+    private function curriculumCoverage(?Institution $inst): array
+    {
+        $qb = $this->em->createQueryBuilder()->select('t.id AS tid', 'p.status AS pstatus')
+            ->from(Topic::class, 't')->join('t.subject', 's')
+            ->leftJoin(TopicDeliveryPack::class, 'p', \Doctrine\ORM\Query\Expr\Join::WITH, 'p.topic = t')
+            ->where('t.approvalStatus = :pub')->setParameter('pub', Lifecycle::PUBLISHED);
+        if ($inst !== null) {
+            $qb->andWhere('s.institution = :inst')->setParameter('inst', $inst);
+        }
+        $onTrack = $behind = $atRisk = 0;
+        foreach ($qb->getQuery()->getArrayResult() as $r) {
+            if ($r['pstatus'] === Lifecycle::PUBLISHED) {
+                $onTrack++;
+            } elseif ($r['pstatus'] === null) {
+                $atRisk++;
+            } else {
+                $behind++;
+            }
+        }
+        $total = $onTrack + $behind + $atRisk;
+        return [
+            'on_track' => $onTrack, 'behind' => $behind, 'at_risk' => $atRisk, 'total' => $total,
+            'coverage_pct' => $total > 0 ? (int) round($onTrack / $total * 100) : 0,
+        ];
+    }
+
+    /**
+     * Teacher delivery activity counts for the activity panel — all real totals
+     * over the institution.
+     *
+     * @return array<string, int>
+     */
+    private function teacherActivity(?Institution $inst): array
+    {
+        return [
+            'delivery_packs' => $this->countDeliveryPacks($inst),
+            'live_classes' => $this->countScoped(LiveClass::class, 'lc', $inst, null, 'lc.subject'),
+            'assessments' => $this->countPublished(Assessment::class, 'a', $inst),
+            'feedback_given' => $this->countFeedback($inst),
+            'worksheets_graded' => $this->countSubmissions($inst, WorksheetSubmission::GRADED),
+        ];
+    }
+
+    private function countDeliveryPacks(?Institution $inst): int
+    {
+        $qb = $this->em->createQueryBuilder()->select('COUNT(p.id)')->from(TopicDeliveryPack::class, 'p')
+            ->join('p.topic', 't')->join('t.subject', 's')
+            ->where('p.status = :pub')->setParameter('pub', Lifecycle::PUBLISHED);
+        if ($inst !== null) {
+            $qb->andWhere('s.institution = :inst')->setParameter('inst', $inst);
+        }
+        return (int) $qb->getQuery()->getSingleScalarResult();
+    }
+
+    private function countFeedback(?Institution $inst): int
+    {
+        $qb = $this->em->createQueryBuilder()->select('COUNT(f.id)')->from(FeedbackNote::class, 'f')->join('f.student', 'st');
+        if ($inst !== null) {
+            $qb->andWhere('st.institution = :inst')->setParameter('inst', $inst);
+        }
+        return (int) $qb->getQuery()->getSingleScalarResult();
     }
 
     /** GET /dashboard/teacher — my classes + things needing my attention. */
