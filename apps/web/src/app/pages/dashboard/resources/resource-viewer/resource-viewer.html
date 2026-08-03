@@ -1,0 +1,103 @@
+<app-page-header icon="play_circle" action="Resource Viewer"></app-page-header>
+
+<!-- Picker -->
+<div class="card border-0 shadow-sm mb-4">
+  <div class="card-body">
+    <label class="form-label" for="rv_pick">Choose a resource</label>
+    <select id="rv_pick" class="form-select" [ngModel]="selectedId()" (ngModelChange)="selectedId.set($event); onSelect()">
+      <option [ngValue]="null" disabled>Select a resource to view</option>
+      @for (r of resources(); track r.id) {
+        <option [ngValue]="r.id">{{ r.title }} ({{ titleCase(r.contentType) }})</option>
+      }
+    </select>
+  </div>
+</div>
+
+@if (loading()) {
+  <div class="text-body-secondary p-4">Loading resources…</div>
+} @else if (!selectedId()) {
+  <div class="card border-0 shadow-sm p-5 text-center text-body-secondary">
+    Choose a resource to watch, read or listen to it in-app.
+  </div>
+} @else if (current(); as r) {
+  <div class="row g-3">
+    <!-- Viewer -->
+    <div class="col-lg-8">
+      <div class="card border-0 shadow-sm mb-3">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-start gap-2 mb-2">
+            <h5 class="fw-semibold mb-0">{{ r.title }}</h5>
+            <span class="badge bg-light text-body-secondary text-capitalize d-inline-flex align-items-center gap-1">
+              <app-icon [name]="typeIcon(r.contentType)" [size]="14" /> {{ r.contentType }}
+            </span>
+          </div>
+
+          @switch (viewMode()) {
+            @case ('youtube') { <div class="ratio ratio-16x9 rounded overflow-hidden"><iframe [src]="embedUrl()" title="Video" allowfullscreen allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe></div> }
+            @case ('vimeo') { <div class="ratio ratio-16x9 rounded overflow-hidden"><iframe [src]="embedUrl()" title="Video" allowfullscreen></iframe></div> }
+            @case ('video') { <video class="w-100 rounded" controls [src]="r.file_url"></video> }
+            @case ('pdf') { <div class="ratio ratio-4x3 rounded overflow-hidden border"><iframe [src]="embedUrl()" title="Document"></iframe></div> }
+            @case ('image') { <img class="img-fluid rounded" [src]="r.file_url" [alt]="r.title" /> }
+            @case ('audio') { <audio class="w-100" controls [src]="r.file_url"></audio> }
+            @case ('link') {
+              <div class="text-center py-4">
+                <app-icon name="folder_open" [size]="40" class="text-body-secondary mb-2" />
+                <p class="text-body-secondary mb-3">This resource opens in a new tab.</p>
+                <a class="btn btn-primary" [href]="r.file_url" target="_blank" rel="noopener"><app-icon name="arrow_forward" [size]="16" /> Open resource</a>
+              </div>
+            }
+            @default { <div class="text-body-secondary text-center py-4">No preview available for this resource.</div> }
+          }
+
+          @if (r.description) { <div class="mt-3"><app-rich-text [value]="r.description" /></div> }
+        </div>
+      </div>
+
+      <!-- Notes -->
+      <div class="card border-0 shadow-sm">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <h6 class="fw-semibold mb-0"><app-icon name="edit_note" [size]="16" class="text-body-secondary me-1" /> My notes</h6>
+            <button type="button" class="btn btn-sm btn-outline-secondary" (click)="saveNotes()">Save notes</button>
+          </div>
+          <textarea class="form-control" rows="4" placeholder="Jot down what you learned…" [ngModel]="notes()" (ngModelChange)="notes.set($event)"></textarea>
+          <div class="text-body-secondary small mt-1">Saved on this device.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Details rail -->
+    <div class="col-lg-4">
+      <div class="card border-0 shadow-sm mb-3">
+        <div class="card-body">
+          <button type="button" class="btn w-100 mb-3" [class.btn-success]="done()" [class.btn-outline-success]="!done()" (click)="toggleDone()">
+            <app-icon [name]="done() ? 'check_circle' : 'circle'" [size]="16" /> {{ done() ? 'Completed' : 'Mark as complete' }}
+          </button>
+
+          @if (isDownloadable(r)) {
+            <a class="btn btn-outline-secondary w-100 mb-3" [href]="r.file_url" [attr.download]="r.file_name || ''" target="_blank" rel="noopener">
+              <app-icon name="download" [size]="16" /> Download
+            </a>
+          }
+
+          <h6 class="fw-semibold mb-2">Details</h6>
+          <dl class="row small mb-0">
+            @if (r.subjectArea) { <dt class="col-5 text-body-secondary fw-normal">Subject</dt><dd class="col-7">{{ r.subjectArea }}</dd> }
+            @if (r.gradeLevel) { <dt class="col-5 text-body-secondary fw-normal">Grade</dt><dd class="col-7">{{ r.gradeLevel }}</dd> }
+            @if (r.difficultyLevel) { <dt class="col-5 text-body-secondary fw-normal">Difficulty</dt><dd class="col-7 text-capitalize">{{ r.difficultyLevel }}</dd> }
+            @if (r.file_size) { <dt class="col-5 text-body-secondary fw-normal">Size</dt><dd class="col-7">{{ fileSizeLabel(r.file_size) }}</dd> }
+            @if (r.source) { <dt class="col-5 text-body-secondary fw-normal">Source</dt><dd class="col-7">{{ r.source }}</dd> }
+            <dt class="col-5 text-body-secondary fw-normal">Licence</dt><dd class="col-7 text-uppercase">{{ r.licence }}</dd>
+            <dt class="col-5 text-body-secondary fw-normal">Added</dt><dd class="col-7">{{ r.created_at | date:'mediumDate' }}</dd>
+          </dl>
+
+          @if (r.tags?.length) {
+            <div class="mt-3">
+              @for (t of r.tags; track t) { <span class="badge bg-primary-subtle text-primary me-1 mb-1">{{ t }}</span> }
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+}

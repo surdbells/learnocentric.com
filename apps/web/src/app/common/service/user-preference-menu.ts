@@ -56,6 +56,7 @@ export class UserPreferenceMenu {
         { name: "Analytics", link: "/admin/academics/analytics", module: "analytics" },
         { name: "Interventions", link: "/admin/academics/interventions", module: "interventions" },
         { name: "Resources", link: "/admin/academics/resources" },
+        { name: "Resource Viewer", link: "/admin/academics/resource-viewer" },
       ]
     },
 
@@ -120,6 +121,7 @@ export class UserPreferenceMenu {
         { name: "Analytics", link: "/academy/academics/analytics", module: "analytics" },
         { name: "Interventions", link: "/academy/academics/interventions", module: "interventions" },
         { name: "Resources", link: "/academy/academics/resources" },
+        { name: "Resource Viewer", link: "/academy/academics/resource-viewer" },
       ]
     },
 
@@ -201,6 +203,7 @@ export class UserPreferenceMenu {
         { name: "Interventions", link: "/teacher/academics/interventions", module: "interventions" },
         { name: "Safeguarding", link: "/teacher/academics/safeguarding", module: "safeguarding" },
         { name: "Resources", link: "/teacher/academics/resources" },
+        { name: "Resource Viewer", link: "/teacher/academics/resource-viewer" },
       ]
     },
 
@@ -234,6 +237,7 @@ export class UserPreferenceMenu {
         { name: "Feedback", link: "/student/academics/feedback" },
         { name: "Live Classes", link: "/student/academics/live-classes", module: "live_classes" },
         { name: "Resources", link: "/student/academics/resources" },
+        { name: "Resource Viewer", link: "/student/academics/resource-viewer" },
         { name: "Progress Report", link: "/student/academics/progress-report", module: "analytics" },
       ]
     },

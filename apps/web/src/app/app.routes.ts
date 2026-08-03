@@ -70,6 +70,7 @@ import {SchoolSetup} from './pages/dashboard/admin/school-setup/school-setup';
 import {CatalogSubjects} from './pages/dashboard/super-admin/catalog-subjects/catalog-subjects';
 import {Support} from './pages/dashboard/support/support';
 import {Resources} from './pages/dashboard/resources/resources';
+import {ResourceViewer} from './pages/dashboard/resources/resource-viewer/resource-viewer';
 import {Messages} from './pages/dashboard/messages/messages';
 import {Announcements} from './pages/dashboard/announcements/announcements';
 
@@ -130,6 +131,7 @@ export const routes: Routes = [
           { path: "analytics", component: Analytics, canActivate: [moduleGuard('analytics')], data: { user: "admin" } },
           { path: "interventions", component: Interventions, canActivate: [moduleGuard('interventions')], data: { user: "admin" } },
           { path: "resources", component: Resources, data: { user: "admin" } },
+          { path: "resource-viewer", component: ResourceViewer, data: { user: "admin" } },
         ]
       },
       {
@@ -195,6 +197,7 @@ export const routes: Routes = [
           { path: "analytics", component: Analytics, canActivate: [moduleGuard('analytics')] },
           { path: "interventions", component: Interventions, canActivate: [moduleGuard('interventions')] },
           { path: "resources", component: Resources },
+          { path: "resource-viewer", component: ResourceViewer },
         ]
       },
       {
@@ -252,6 +255,7 @@ export const routes: Routes = [
           { path: "interventions", component: Interventions, canActivate: [moduleGuard('interventions')] },
           { path: "safeguarding", component: Safeguarding, canActivate: [moduleGuard('safeguarding')] },
           { path: "resources", component: Resources },
+          { path: "resource-viewer", component: ResourceViewer },
         ]
       },
       {
@@ -294,6 +298,7 @@ export const routes: Routes = [
           { path: "feedback", component: MyFeedback },
           { path: "live-classes", component: MyLiveClasses, canActivate: [moduleGuard('live_classes')] },
           { path: "resources", component: Resources },
+          { path: "resource-viewer", component: ResourceViewer },
           { path: "progress-report", component: ProgressReport, canActivate: [moduleGuard('analytics')] },
         ]
       },
