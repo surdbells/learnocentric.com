@@ -115,6 +115,7 @@ return static function (App $app): void {
             $auth->post('/curriculum/delivery-packs/bulk-delete', DeliveryPacksAction::class . ':bulkDelete');
             $auth->post('/curriculum/delivery-packs/{id:[0-9]+}/transition', DeliveryPacksAction::class . ':transition');
             $auth->get('/curriculum/delivery-packs/{id:[0-9]+}/history', DeliveryPacksAction::class . ':history');
+            $auth->get('/curriculum/delivery-packs/{id:[0-9]+}', DeliveryPacksAction::class . ':show');
 
             // Assessment — question bank (answer-validation gate) + lifecycle
             $auth->map(['GET', 'POST', 'PUT', 'DELETE'], '/assessment/questions', QuestionsAction::class);

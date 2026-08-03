@@ -43,6 +43,7 @@ export class UserPreferenceMenu {
         { name: "Subjects", link: "/admin/academics/subjects" },
         { name: "Topics", link: "/admin/academics/topics" },
         { name: "Lesson Content", link: "/admin/academics/lesson-content" },
+        { name: "Delivery Pack", link: "/admin/academics/delivery-pack" },
         { name: "Scheme of Work", link: "/admin/academics/scheme-of-work" },
         { name: "Scheme Coverage", link: "/admin/academics/scheme-coverage" },
         { name: "Question Bank", link: "/admin/academics/question-bank", module: "assessments" },
@@ -106,6 +107,7 @@ export class UserPreferenceMenu {
         { name: "Subjects", link: "/academy/academics/subjects" },
         { name: "Topics", link: "/academy/academics/topics" },
         { name: "Lesson Content", link: "/academy/academics/lesson-content" },
+        { name: "Delivery Pack", link: "/academy/academics/delivery-pack" },
         { name: "Scheme of Work", link: "/academy/academics/scheme-of-work" },
         { name: "Scheme Coverage", link: "/academy/academics/scheme-coverage" },
         { name: "Question Bank", link: "/academy/academics/question-bank", module: "assessments" },
@@ -185,6 +187,7 @@ export class UserPreferenceMenu {
       children: [
         { name: "Topics", link: "/teacher/academics/topics" },
         { name: "Lesson Content", link: "/teacher/academics/lesson-content" },
+        { name: "Delivery Pack", link: "/teacher/academics/delivery-pack" },
         { name: "Scheme of Work", link: "/teacher/academics/scheme-of-work" },
         { name: "Scheme Coverage", link: "/teacher/academics/scheme-coverage" },
         { name: "Question Bank", link: "/teacher/academics/question-bank", module: "assessments" },

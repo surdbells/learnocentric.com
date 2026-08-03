@@ -126,6 +126,54 @@ final class DeliveryPacksAction
         return Json::write($response, ['deleted' => true, 'id' => $id]);
     }
 
+    /**
+     * GET /curriculum/delivery-packs/{id} — the full pack for its detail page:
+     * content, a materials-readiness checklist, the parent topic's context
+     * (objective + misconception watch) and the lifecycle history.
+     */
+    public function show(Request $request, Response $response, array $args): Response
+    {
+        $pack = $this->em->getRepository(TopicDeliveryPack::class)->find((int) $args['id']);
+        if ($pack === null) {
+            return Json::error($response, 'Delivery pack not found.', 404);
+        }
+        $arr = $pack->toArray();
+        $topic = $pack->getTopic();
+        $ta = $topic->toArray();
+
+        $materials = [
+            'teacher_guide' => !empty($arr['teacher_guide']),
+            'learner_note' => !empty($arr['learner_note']),
+            'video' => !empty($arr['video_url']),
+            'worked_examples' => !empty($arr['worked_examples']),
+            'parent_wording' => !empty($arr['parent_wording']),
+        ];
+        $present = count(array_filter($materials));
+        $total = count($materials);
+
+        return Json::write($response, [
+            'pack' => $this->row($pack),
+            'topic' => [
+                'id' => $topic->getId(),
+                'title' => $ta['title'],
+                'subject' => $ta['subject'],
+                'class_label' => $ta['class_label'],
+                'week_number' => $ta['week_number'],
+                'objective' => $ta['objective'],
+                'real_life_relevance' => $ta['real_life_relevance'],
+                'misconceptions' => is_array($ta['misconceptions']) ? $ta['misconceptions'] : [],
+            ],
+            'readiness' => [
+                'materials' => $materials,
+                'present' => $present,
+                'total' => $total,
+                'percent' => (int) round($present / $total * 100),
+                'ready' => $pack->getStatus() === Lifecycle::PUBLISHED,
+            ],
+            'history' => array_map(static fn ($v) => $v->toArray(), $this->lifecycle->history($pack)),
+        ]);
+    }
+
     public function transition(Request $request, Response $response, array $args): Response
     {
         $pack = $this->em->getRepository(TopicDeliveryPack::class)->find((int) $args['id']);

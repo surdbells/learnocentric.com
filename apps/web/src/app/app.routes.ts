@@ -14,6 +14,7 @@ import {SchoolClasses} from "./pages/dashboard/admin/academics/school-classes/sc
 import {Subjects} from "./pages/dashboard/admin/academics/subjects/subjects";
 import {Topics} from "./pages/dashboard/admin/academics/topics/topics";
 import {LessonContent} from "./pages/dashboard/admin/academics/lesson-content/lesson-content";
+import {DeliveryPackDetail} from "./pages/dashboard/admin/academics/delivery-pack-detail/delivery-pack-detail";
 import {SchemeOfWork} from "./pages/dashboard/admin/academics/scheme-of-work/scheme-of-work";
 import {SchemeDetail} from "./pages/dashboard/admin/academics/scheme-detail/scheme-detail";
 import {QuestionBank} from "./pages/dashboard/admin/academics/question-bank/question-bank";
@@ -116,6 +117,7 @@ export const routes: Routes = [
           { path: "subjects", component: Subjects, data: { user: "admin" } },
           { path: "topics", component: Topics, data: { user: "admin" } },
           { path: "lesson-content", component: LessonContent, data: { user: "admin" } },
+          { path: "delivery-pack", component: DeliveryPackDetail, data: { user: "admin" } },
           { path: "scheme-of-work", component: SchemeOfWork, data: { user: "admin" } },
           { path: "scheme-coverage", component: SchemeDetail, data: { user: "admin" } },
           { path: "question-bank", component: QuestionBank, canActivate: [moduleGuard('assessments')], data: { user: "admin" } },
@@ -180,6 +182,7 @@ export const routes: Routes = [
           { path: "subjects", component: Subjects },
           { path: "topics", component: Topics },
           { path: "lesson-content", component: LessonContent },
+          { path: "delivery-pack", component: DeliveryPackDetail },
           { path: "scheme-of-work", component: SchemeOfWork },
           { path: "scheme-coverage", component: SchemeDetail },
           { path: "question-bank", component: QuestionBank, canActivate: [moduleGuard('assessments')] },
@@ -235,6 +238,7 @@ export const routes: Routes = [
         children: [
           { path: "topics", component: Topics },
           { path: "lesson-content", component: LessonContent },
+          { path: "delivery-pack", component: DeliveryPackDetail },
           { path: "scheme-of-work", component: SchemeOfWork },
           { path: "scheme-coverage", component: SchemeDetail },
           { path: "question-bank", component: QuestionBank, canActivate: [moduleGuard('assessments')] },

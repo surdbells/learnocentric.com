@@ -1,0 +1,149 @@
+<app-page-header icon="library_books" action="Delivery Pack"></app-page-header>
+
+<!-- Pack picker -->
+<div class="card border-0 shadow-sm mb-4">
+  <div class="card-body">
+    <label class="form-label" for="dp_pack">Choose a delivery pack</label>
+    <select id="dp_pack" class="form-select" [ngModel]="selectedId()" (ngModelChange)="selectedId.set($event); load()">
+      <option [ngValue]="null" disabled>Select a topic's delivery pack</option>
+      @for (p of packs(); track p.id) {
+        <option [ngValue]="p.id">{{ p.topic }} · {{ p.subject }} ({{ titleCase(p.status) }})</option>
+      }
+    </select>
+  </div>
+</div>
+
+@if (loading()) {
+  <div class="text-body-secondary p-4">Loading pack…</div>
+} @else if (!selectedId()) {
+  <div class="card border-0 shadow-sm p-5 text-center text-body-secondary">
+    Choose a delivery pack to review its lesson materials, readiness and misconception watch.
+  </div>
+} @else if (detail(); as d) {
+  <!-- Header + readiness -->
+  <div class="row g-3 mb-4">
+    <div class="col-lg-8">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-start gap-2 mb-1">
+            <h5 class="fw-semibold mb-0">{{ topic().title }}</h5>
+            <app-status-badge [value]="pack().status" [map]="statusTones" />
+          </div>
+          <div class="text-body-secondary small mb-3">
+            {{ topic().subject }}@if (topic().class_label) { · {{ topic().class_label }} }@if (topic().week_number) { · Week {{ topic().week_number }} } · v{{ pack().version }}
+          </div>
+          @if (topic().objective) {
+            <div class="mb-2"><span class="fw-medium small text-body-secondary">Objective</span><div>{{ topic().objective }}</div></div>
+          }
+          @if (topic().real_life_relevance) {
+            <div><span class="fw-medium small text-body-secondary">Real-life relevance</span><div>{{ topic().real_life_relevance }}</div></div>
+          }
+        </div>
+      </div>
+    </div>
+
+    <!-- Readiness panel -->
+    <div class="col-lg-4">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-body">
+          <div class="d-flex align-items-center gap-3">
+            <app-stat-ring [value]="readiness().percent" caption="ready" [tone]="readinessTone()" [size]="86" [stroke]="9" />
+            <div class="flex-grow-1">
+              <div class="fw-semibold mb-1">{{ readiness().present }}/{{ readiness().total }} materials</div>
+              @for (m of materialKeys; track m.key) {
+                <div class="d-flex align-items-center gap-2 small mat-row" [class.text-body-secondary]="!materialOn(m.key)">
+                  <app-icon [name]="materialOn(m.key) ? 'check_circle' : 'circle'" [size]="14"
+                            [class.text-success]="materialOn(m.key)" [class.text-body-secondary]="!materialOn(m.key)" />
+                  {{ m.label }}
+                </div>
+              }
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Misconception watch -->
+  @if (misconceptions().length) {
+    <div class="card border-0 shadow-sm mb-4 border-warning-subtle">
+      <div class="card-body">
+        <h6 class="fw-semibold mb-2"><app-icon name="cancel" [size]="16" class="text-warning me-1" /> Misconception watch</h6>
+        <ul class="mb-0 ps-3">
+          @for (m of misconceptions(); track $index) { <li class="mb-1">{{ m }}</li> }
+        </ul>
+      </div>
+    </div>
+  }
+
+  <!-- Content sections -->
+  <div class="row g-3">
+    @if (pack().teacher_guide) {
+      <div class="col-lg-6">
+        <div class="card border-0 shadow-sm h-100"><div class="card-body">
+          <h6 class="fw-semibold mb-2"><app-icon name="description" [size]="16" class="text-body-secondary me-1" /> Teacher guide</h6>
+          <app-rich-text [value]="pack().teacher_guide" />
+        </div></div>
+      </div>
+    }
+    @if (pack().learner_note) {
+      <div class="col-lg-6">
+        <div class="card border-0 shadow-sm h-100"><div class="card-body">
+          <h6 class="fw-semibold mb-2"><app-icon name="menu_book" [size]="16" class="text-body-secondary me-1" /> Learner note</h6>
+          <app-rich-text [value]="pack().learner_note" />
+        </div></div>
+      </div>
+    }
+    @if (pack().worked_examples) {
+      <div class="col-lg-6">
+        <div class="card border-0 shadow-sm h-100"><div class="card-body">
+          <h6 class="fw-semibold mb-2"><app-icon name="edit_note" [size]="16" class="text-body-secondary me-1" /> Worked examples</h6>
+          <app-rich-text [value]="pack().worked_examples" />
+        </div></div>
+      </div>
+    }
+    @if (pack().parent_wording) {
+      <div class="col-lg-6">
+        <div class="card border-0 shadow-sm h-100"><div class="card-body">
+          <h6 class="fw-semibold mb-2"><app-icon name="forum" [size]="16" class="text-body-secondary me-1" /> Parent wording</h6>
+          <app-rich-text [value]="pack().parent_wording" />
+        </div></div>
+      </div>
+    }
+  </div>
+
+  <!-- Media + video -->
+  @if (pack().video_url || media().length) {
+    <div class="card border-0 shadow-sm mt-3">
+      <div class="card-body">
+        <h6 class="fw-semibold mb-2"><app-icon name="video" [size]="16" class="text-body-secondary me-1" /> Media & resources</h6>
+        @if (pack().video_url) {
+          <a class="d-inline-flex align-items-center gap-1 mb-2" [href]="pack().video_url" target="_blank" rel="noopener">
+            <app-icon name="play_circle" [size]="16" /> Lesson video
+          </a>
+        }
+        @for (m of media(); track $index) {
+          <a class="d-flex align-items-center gap-2 py-1" [href]="m.url" target="_blank" rel="noopener">
+            <app-icon name="folder" [size]="15" class="text-body-secondary" /> {{ m.name || m.url }}
+          </a>
+        }
+      </div>
+    </div>
+  }
+
+  <!-- Lifecycle history -->
+  @if (history().length) {
+    <div class="card border-0 shadow-sm mt-3">
+      <div class="card-body">
+        <h6 class="fw-semibold mb-3"><app-icon name="schedule" [size]="16" class="text-body-secondary me-1" /> Lifecycle history</h6>
+        @for (h of history(); track $index) {
+          <div class="d-flex gap-2 py-1 small">
+            <span class="text-body-secondary">{{ h.created_at | date:'medium' }}</span>
+            <span class="fw-medium text-capitalize">{{ h.to_status || h.status }}</span>
+            @if (h.note) { <span class="text-body-secondary">— {{ h.note }}</span> }
+          </div>
+        }
+      </div>
+    </div>
+  }
+}
