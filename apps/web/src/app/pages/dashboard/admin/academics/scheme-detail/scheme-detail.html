@@ -1,0 +1,110 @@
+<app-page-header icon="calendar_month" action="Scheme of Work"></app-page-header>
+
+<!-- Scheme picker -->
+<div class="card border-0 shadow-sm mb-4">
+  <div class="card-body">
+    <div class="row g-3 align-items-end">
+      <div class="col-md-4">
+        <label class="form-label" for="sd_class">Class</label>
+        <select id="sd_class" class="form-select" [ngModel]="classId()" (ngModelChange)="classId.set($event); load()">
+          <option [ngValue]="null" disabled>Choose a class</option>
+          @for (c of classes(); track c.id) { <option [ngValue]="c.id">{{ c.label || c.name }}</option> }
+        </select>
+      </div>
+      <div class="col-md-4">
+        <label class="form-label" for="sd_subject">Subject</label>
+        <select id="sd_subject" class="form-select" [ngModel]="subjectId()" (ngModelChange)="subjectId.set($event); load()">
+          <option [ngValue]="null" disabled>Choose a subject</option>
+          @for (s of subjects(); track s.id) { <option [ngValue]="s.id">{{ s.name }}</option> }
+        </select>
+      </div>
+      <div class="col-md-4">
+        <label class="form-label" for="sd_term">Term (optional)</label>
+        <select id="sd_term" class="form-select" [ngModel]="termId()" (ngModelChange)="termId.set($event); load()">
+          <option [ngValue]="null">All terms</option>
+          @for (t of terms(); track t.id) { <option [ngValue]="t.id">{{ t.name || t.label }}</option> }
+        </select>
+      </div>
+    </div>
+  </div>
+</div>
+
+@if (loading()) {
+  <div class="text-body-secondary p-4">Loading scheme…</div>
+} @else if (!classId() || !subjectId()) {
+  <div class="card border-0 shadow-sm p-5 text-center text-body-secondary">
+    Choose a class and subject to view its weekly scheme of work and delivery-pack readiness.
+  </div>
+} @else if (detail() && !weeks().length) {
+  <div class="card border-0 shadow-sm p-5 text-center text-body-secondary">
+    No scheme of work has been planned for {{ header()?.class_label }} · {{ header()?.subject }} yet.
+  </div>
+} @else if (detail()) {
+  <!-- Header -->
+  <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+    <h5 class="fw-semibold mb-0">{{ header().class_label }} · {{ header().subject }}</h5>
+  </div>
+
+  <div class="row g-3 mb-4">
+    <div class="col-lg-9">
+      <app-kpi-strip class="d-block" [items]="kpis()" [cols]="4" />
+    </div>
+    <div class="col-lg-3">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-body text-center d-flex flex-column justify-content-center py-3">
+          <app-stat-ring class="mx-auto" [value]="stats().coverage_pct" caption="packs ready" [tone]="coverageTone()" [size]="104" [stroke]="10" />
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Weekly plan -->
+  <div class="table-responsive card border-0 shadow-sm">
+    <table class="table align-middle mb-0 scheme-table">
+      <thead class="table-light">
+        <tr>
+          <th class="text-center">Wk</th><th>Topic & objective</th><th>Teacher</th>
+          <th class="text-center">Materials</th><th class="text-center">Pack</th><th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (w of weeks(); track w.id) {
+          <tr>
+            <td class="text-center fw-semibold">{{ w.week_number }}</td>
+            <td>
+              @if (w.topic) {
+                <div class="fw-medium">{{ w.topic }}</div>
+                @if (w.objective) { <div class="text-body-secondary small">{{ w.objective }}</div> }
+              } @else {
+                <span class="text-body-secondary fst-italic">No topic set</span>
+              }
+            </td>
+            <td class="text-body-secondary small">{{ w.assigned_teacher || '—' }}</td>
+            <td class="text-center">
+              @if (w.pack) {
+                <span class="materials" [attr.title]="materialsReady(w) + ' of 4 materials'">
+                  @for (m of materialKeys; track m.key) {
+                    <app-icon [name]="m.icon" [size]="15" [attr.title]="m.label"
+                              [class.mat-on]="w.pack.materials[m.key]" [class.mat-off]="!w.pack.materials[m.key]" />
+                  }
+                </span>
+              } @else {
+                <span class="text-body-secondary small">—</span>
+              }
+            </td>
+            <td class="text-center">
+              @if (w.pack?.ready) {
+                <span class="badge bg-success-subtle text-success"><app-icon name="check_circle" [size]="13" /> Ready</span>
+              } @else if (w.pack) {
+                <span class="badge bg-warning-subtle text-warning">{{ titleCase(w.pack.status) }}</span>
+              } @else {
+                <span class="badge bg-secondary-subtle text-secondary">No pack</span>
+              }
+            </td>
+            <td><app-status-badge [value]="w.status" [map]="statusTones" /></td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+}

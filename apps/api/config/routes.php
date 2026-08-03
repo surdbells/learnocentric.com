@@ -91,6 +91,7 @@ return static function (App $app): void {
             $auth->post('/school/classes/bulk-delete', ClassesAction::class . ':bulkDelete');
             $auth->map(['GET', 'POST', 'PUT', 'DELETE'], '/school/enrollments', EnrollmentsAction::class);
             $auth->map(['GET', 'POST', 'PUT', 'DELETE'], '/school/scheme-of-work', SchemeOfWorkAction::class);
+            $auth->get('/school/scheme-of-work/detail', SchemeOfWorkAction::class . ':detail');
             $auth->post('/school/scheme-of-work/bulk-delete', SchemeOfWorkAction::class . ':bulkDelete');
             $auth->post('/school/scheme-of-work/{id:[0-9]+}/transition', SchemeOfWorkAction::class . ':transition');
             $auth->get('/school/scheme-of-work/{id:[0-9]+}/history', SchemeOfWorkAction::class . ':history');

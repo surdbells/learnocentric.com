@@ -81,6 +81,119 @@ final class SchemeOfWorkAction
         return Json::write($response, Paginator::paginate($qb, 'sow', $query, ['week_number' => 'sow.weekNumber', 'status' => 'sow.status'], $mapper));
     }
 
+    /**
+     * GET /school/scheme-of-work/detail?class_id=&subject_id=&term_id= — the full
+     * weekly plan for one class × subject (× term) as a coherent scheme: ordered
+     * weeks with objective, assigned teacher, lifecycle status and delivery-pack
+     * readiness, plus coverage stats. This is the detail view behind the grid.
+     */
+    public function detail(Request $request, Response $response): Response
+    {
+        $institution = $this->resolveInstitution($request, $this->em);
+        $params = $request->getQueryParams();
+        $classId = (int) ($params['class_id'] ?? 0);
+        $subjectId = (int) ($params['subject_id'] ?? 0);
+        $termId = isset($params['term_id']) && $params['term_id'] !== '' ? (int) $params['term_id'] : null;
+        if ($classId === 0 || $subjectId === 0) {
+            return Json::error($response, 'A class and a subject are required.', 422);
+        }
+
+        $qb = $this->em->createQueryBuilder()->select('sow', 't')->from(SchemeOfWork::class, 'sow')
+            ->leftJoin('sow.topic', 't')->join('sow.subject', 's')
+            ->where('sow.schoolClass = :cid')->andWhere('sow.subject = :sid')
+            ->setParameter('cid', $classId)->setParameter('sid', $subjectId)
+            ->orderBy('sow.weekNumber', 'ASC');
+        if ($institution !== null) {
+            $qb->andWhere('s.institution = :inst')->setParameter('inst', $institution);
+        }
+        if ($termId !== null) {
+            $qb->andWhere('sow.term = :tid')->setParameter('tid', $termId);
+        }
+        /** @var SchemeOfWork[] $rows */
+        $rows = $qb->getQuery()->getResult();
+        $arrays = array_map(static fn (SchemeOfWork $s) => $s->toArray(), $rows);
+
+        // Delivery-pack readiness for the topics in this scheme, in one lookup.
+        $topicIds = array_values(array_filter(array_map(static fn (array $a) => $a['topic_id'], $arrays)));
+        $packByTopic = [];
+        if ($topicIds !== []) {
+            $packs = $this->em->createQueryBuilder()->select('p', 'pt')->from(\App\Domain\Entity\TopicDeliveryPack::class, 'p')
+                ->join('p.topic', 'pt')->where('pt.id IN (:ids)')->setParameter('ids', $topicIds)->getQuery()->getResult();
+            foreach ($packs as $p) {
+                /** @var \App\Domain\Entity\TopicDeliveryPack $p */
+                $packByTopic[$p->toArray()['topic_id']] = $p->toArray();
+            }
+        }
+
+        // Assigned-teacher names in one lookup.
+        $teacherIds = array_values(array_filter(array_map(static fn (array $a) => $a['assigned_teacher_id'], $arrays)));
+        $teacherName = [];
+        if ($teacherIds !== []) {
+            foreach ($this->em->getRepository(User::class)->findBy(['id' => $teacherIds]) as $u) {
+                /** @var User $u */
+                $teacherName[$u->getId()] = $u->getFirstName() . ' ' . $u->getLastName();
+            }
+        }
+
+        $byStatus = [];
+        $weeksWithTopic = 0;
+        $packsReady = 0;
+        $weeks = [];
+        foreach ($arrays as $a) {
+            $byStatus[$a['status']] = ($byStatus[$a['status']] ?? 0) + 1;
+            if ($a['topic_id'] !== null) {
+                $weeksWithTopic++;
+            }
+            $packArr = $a['topic_id'] !== null ? ($packByTopic[$a['topic_id']] ?? null) : null;
+            $ready = $packArr !== null && $packArr['status'] === Lifecycle::PUBLISHED;
+            if ($ready) {
+                $packsReady++;
+            }
+            $weeks[] = [
+                'id' => $a['id'],
+                'week_number' => $a['week_number'],
+                'topic_id' => $a['topic_id'],
+                'topic' => $a['topic'],
+                'objective' => $a['objective'],
+                'status' => $a['status'],
+                'assigned_teacher' => $a['assigned_teacher_id'] !== null ? ($teacherName[$a['assigned_teacher_id']] ?? null) : null,
+                'pack' => $packArr === null ? null : [
+                    'status' => $packArr['status'],
+                    'ready' => $ready,
+                    'materials' => [
+                        'teacher_guide' => !empty($packArr['teacher_guide']),
+                        'learner_note' => !empty($packArr['learner_note']),
+                        'video' => !empty($packArr['video_url']),
+                        'worked_examples' => !empty($packArr['worked_examples']),
+                    ],
+                ],
+            ];
+        }
+
+        $first = $arrays[0] ?? null;
+        $total = count($arrays);
+        $header = [
+            'class_id' => $classId,
+            'class_label' => $first['class_label'] ?? null,
+            'subject_id' => $subjectId,
+            'subject' => $first['subject'] ?? null,
+            'term_id' => $termId,
+        ];
+
+        return Json::write($response, [
+            'header' => $header,
+            'weeks' => $weeks,
+            'stats' => [
+                'total_weeks' => $total,
+                'weeks_with_topic' => $weeksWithTopic,
+                'packs_ready' => $packsReady,
+                'coverage_pct' => $total > 0 ? (int) round($packsReady / $total * 100) : 0,
+                'topic_pct' => $total > 0 ? (int) round($weeksWithTopic / $total * 100) : 0,
+                'by_status' => $byStatus,
+            ],
+        ]);
+    }
+
     private function create(Request $request, Response $response): Response
     {
         $body = (array) $request->getParsedBody();
