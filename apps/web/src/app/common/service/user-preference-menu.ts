@@ -159,6 +159,7 @@ export class UserPreferenceMenu {
         { name: "Institutions", link: "management/institutions" },
         { name: "Subjects", link: "management/subjects" },
         { name: "Subscription Plans", link: "management/plans" },
+        { name: "Billing", link: "management/billing" },
         { name: "Content Library", link: "management/content-library" },
         { name: "Content Packages", link: "management/content-packages" },
         { name: "Users & Roles", link: "management/users-roles" },

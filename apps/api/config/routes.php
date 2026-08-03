@@ -214,6 +214,11 @@ return static function (App $app): void {
             // Platform system settings (super admin) — general/flags/security/integrations
             $auth->map(['GET', 'PUT'], '/platform/settings', \App\Application\Actions\Analytics\SystemSettingsAction::class);
 
+            // Platform billing depth (super admin) — revenue, renewals, invoices, payment issues
+            $auth->get('/platform/billing/overview', \App\Application\Actions\Analytics\PlatformBillingAction::class . ':overview');
+            $auth->get('/platform/billing/invoices', \App\Application\Actions\Analytics\PlatformBillingAction::class . ':invoices');
+            $auth->get('/platform/billing/subscriptions', \App\Application\Actions\Analytics\PlatformBillingAction::class . ':subscriptions');
+
             // Platform safeguarding & compliance (super admin) — cross-institution register
             $auth->get('/platform/safeguarding/overview', \App\Application\Actions\Analytics\PlatformSafeguardingAction::class . ':overview');
             $auth->get('/platform/safeguarding/cases', \App\Application\Actions\Analytics\PlatformSafeguardingAction::class . ':cases');
