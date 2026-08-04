@@ -163,12 +163,17 @@ final class DashboardAction
             $students += (int) $this->em->getRepository(Enrollment::class)->count(['schoolClass' => $cid]);
         }
 
+        $subjIds = array_keys($subjectIds);
+        $pending = $this->pendingSubmissions($subjIds);
+
         return Json::write($response, [
             'stats' => [
                 'my_classes' => count($classIds),
                 'my_subjects' => count($subjectIds),
                 'my_students' => $students,
                 'upcoming_live' => $this->myUpcomingLive($me),
+                'pending_reviews' => count($pending),
+                'upcoming_assessments' => $this->upcomingAssessments($subjIds),
             ],
             'action_items' => [
                 'worksheets_to_grade' => $this->countSubmissions($inst, WorksheetSubmission::SUBMITTED),
@@ -178,8 +183,106 @@ final class DashboardAction
                     ->setParameter('me', $me)->setParameter('open', [Intervention::OPEN, Intervention::IN_PROGRESS])
                     ->getQuery()->getSingleScalarResult(),
             ],
+            'pending_submissions' => $pending,
+            'class_performance' => $this->classPerformance($assignments),
             'upcoming' => $this->upcomingLiveList($me),
         ]);
+    }
+
+    /**
+     * Submissions awaiting the teacher's review across worksheets and portfolio,
+     * scoped to the subjects they teach. Newest first, capped for the panel.
+     *
+     * @param int[] $subjectIds
+     * @return array<int, array<string, mixed>>
+     */
+    private function pendingSubmissions(array $subjectIds): array
+    {
+        if ($subjectIds === []) {
+            return [];
+        }
+        $rows = [];
+
+        $ws = $this->em->createQueryBuilder()->select('ws', 'w', 't', 'st')->from(WorksheetSubmission::class, 'ws')
+            ->join('ws.worksheet', 'w')->join('w.topic', 't')->join('ws.student', 'st')
+            ->where('ws.status = :st')->andWhere('t.subject IN (:subs)')
+            ->setParameter('st', WorksheetSubmission::SUBMITTED)->setParameter('subs', $subjectIds)
+            ->orderBy('ws.id', 'DESC')->setMaxResults(8)->getQuery()->getResult();
+        foreach ($ws as $s) {
+            /** @var WorksheetSubmission $s */
+            $rows[] = [
+                'learner' => $s->getStudent()->getFirstName() . ' ' . $s->getStudent()->getLastName(),
+                'type' => 'Worksheet',
+                'topic' => $s->getWorksheet()->getTopic()->getTitle(),
+                'subject' => $s->getWorksheet()->getTopic()->getSubject()->getName(),
+                'submitted_at' => $s->getCreatedAt()->format(DATE_ATOM),
+                'status' => 'Pending review',
+            ];
+        }
+
+        $pf = $this->em->createQueryBuilder()->select('p', 't', 'st')->from(PortfolioEntry::class, 'p')
+            ->join('p.topic', 't')->join('p.student', 'st')
+            ->where('p.status = :st')->andWhere('t.subject IN (:subs)')
+            ->setParameter('st', PortfolioEntry::SUBMITTED)->setParameter('subs', $subjectIds)
+            ->orderBy('p.id', 'DESC')->setMaxResults(8)->getQuery()->getResult();
+        foreach ($pf as $p) {
+            /** @var PortfolioEntry $p */
+            $rows[] = [
+                'learner' => $p->getStudent()->getFirstName() . ' ' . $p->getStudent()->getLastName(),
+                'type' => 'Portfolio task',
+                'topic' => $p->getTopic()->getTitle(),
+                'subject' => $p->getTopic()->getSubject()->getName(),
+                'submitted_at' => $p->toArray()['submitted_at'] ?? $p->toArray()['created_at'] ?? null,
+                'status' => 'Pending review',
+            ];
+        }
+
+        usort($rows, static fn ($a, $b) => strcmp((string) $b['submitted_at'], (string) $a['submitted_at']));
+        return array_slice($rows, 0, 8);
+    }
+
+    /**
+     * Average graded-attempt score per class the teacher is assigned to.
+     *
+     * @param TeacherAssignment[] $assignments
+     * @return array<int, array{class:string, average:float|null, attempts:int}>
+     */
+    private function classPerformance(array $assignments): array
+    {
+        $seen = [];
+        $out = [];
+        foreach ($assignments as $a) {
+            $class = $a->getSchoolClass();
+            $cid = $class->getId();
+            if (isset($seen[$cid])) {
+                continue;
+            }
+            $seen[$cid] = true;
+            $row = $this->em->createQueryBuilder()->select('AVG(at.percentage) AS avg', 'COUNT(at.id) AS c')
+                ->from(AssessmentAttempt::class, 'at')->join('at.student', 'st')
+                ->join(Enrollment::class, 'e', \Doctrine\ORM\Query\Expr\Join::WITH, 'e.student = st')
+                ->where('e.schoolClass = :cid')->andWhere('at.status = :g')
+                ->setParameter('cid', $cid)->setParameter('g', AssessmentAttempt::GRADED)
+                ->getQuery()->getSingleResult();
+            $out[] = [
+                'class' => $class->getLabel(),
+                'average' => $row['avg'] === null ? null : round((float) $row['avg'], 1),
+                'attempts' => (int) $row['c'],
+            ];
+        }
+        return $out;
+    }
+
+    /** @param int[] $subjectIds */
+    private function upcomingAssessments(array $subjectIds): int
+    {
+        if ($subjectIds === []) {
+            return 0;
+        }
+        return (int) $this->em->createQueryBuilder()->select('COUNT(a.id)')->from(Assessment::class, 'a')
+            ->where('a.approvalStatus = :pub')->andWhere('a.subject IN (:subs)')
+            ->setParameter('pub', Lifecycle::PUBLISHED)->setParameter('subs', $subjectIds)
+            ->getQuery()->getSingleScalarResult();
     }
 
     /** GET /dashboard/student — my progress + what's next. */

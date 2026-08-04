@@ -1,3 +1,38 @@
 :host {
   display: block;
 }
+
+.action-ic {
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+}
+
+.flow {
+  overflow-x: auto;
+}
+.flow-step {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  white-space: nowrap;
+  font-size: 0.82rem;
+  font-weight: 500;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--bs-border-color);
+  border-radius: 8px;
+  background: var(--bs-body-bg);
+}
+
+.dash-skel {
+  height: 84px;
+  background: linear-gradient(90deg, var(--bs-tertiary-bg) 25%, var(--bs-secondary-bg) 50%, var(--bs-tertiary-bg) 75%);
+  background-size: 200% 100%;
+  animation: dash-shimmer 1.3s infinite;
+  border-radius: 6px;
+}
+@keyframes dash-shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }

@@ -5,13 +5,13 @@ import {AuthService} from '../../../../../common/auth/auth.service';
 import {ApiService} from '../../../../../common/service/api.service';
 import {Icon} from '../../../../../common/icon/icon';
 import {
-  AttentionItem, AttentionList, KpiItem, KpiStrip, QuickAction, QuickActions, RailCard,
+  AttentionItem, AttentionList, KpiItem, KpiStrip, QuickAction, QuickActions, RailCard, BarList, BarItem,
 } from '../../../../../common/ui';
 
 @Component({
   selector: 'app-teacher-dashboard',
   standalone: true,
-  imports: [Icon, RouterLink, DatePipe, KpiStrip, RailCard, AttentionList, QuickActions],
+  imports: [Icon, RouterLink, DatePipe, KpiStrip, RailCard, AttentionList, QuickActions, BarList],
   templateUrl: './teacher-dashboard.html',
   styleUrl: './teacher-dashboard.css',
 })
@@ -30,11 +30,19 @@ export class TeacherDashboard {
     const s = d.stats;
     return [
       {label: 'My classes', value: s.my_classes, icon: 'meeting_room', tone: 'success', link: '/teacher/main/students'},
-      {label: 'My subjects', value: s.my_subjects, icon: 'subject', tone: 'warning', link: '/teacher/academics/topics'},
-      {label: 'My students', value: s.my_students, icon: 'group', tone: 'primary', link: '/teacher/main/students'},
+      {label: 'My learners', value: s.my_students, icon: 'group', tone: 'primary', link: '/teacher/main/students'},
+      {label: 'Pending reviews', value: s.pending_reviews ?? 0, icon: 'grading', tone: (s.pending_reviews ?? 0) > 0 ? 'warning' : 'secondary', link: '/teacher/academics/worksheets'},
+      {label: 'Upcoming assessments', value: s.upcoming_assessments ?? 0, icon: 'quiz', tone: 'info', link: '/teacher/academics/assessments'},
       {label: 'Upcoming live', value: s.upcoming_live, icon: 'video_camera_front', tone: 'danger', link: '/teacher/academics/live-classes'},
     ];
   });
+
+  readonly pendingSubmissions = computed<any[]>(() => this.data()?.pending_submissions ?? []);
+
+  readonly classPerformance = computed<BarItem[]>(() =>
+    (this.data()?.class_performance ?? [])
+      .filter((c: any) => c.average !== null)
+      .map((c: any) => ({label: c.class, value: c.average, tone: c.average >= 70 ? 'success' : c.average >= 50 ? 'warning' : 'danger'})));
 
   readonly attention = computed<AttentionItem[]>(() => {
     const d = this.data();
@@ -46,6 +54,8 @@ export class TeacherDashboard {
       {label: 'Interventions assigned to me', count: a.my_interventions, tone: a.my_interventions ? 'info' : 'secondary', icon: 'support', link: '/teacher/academics/interventions'},
     ];
   });
+
+  readonly upcomingLive = computed<any[]>(() => this.data()?.upcoming ?? []);
 
   readonly quickActions: QuickAction[] = [
     {label: 'Open Delivery Packs', sublabel: 'Teach from a pack', icon: 'assignment', link: '/teacher/academics/lesson-content'},
