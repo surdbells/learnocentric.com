@@ -2,22 +2,33 @@
   display: block;
 }
 
-.gauge {
-  max-width: 140px;
+/* Progress / completion bar */
+.cl-bar {
+  height: 8px;
+  border-radius: 5px;
+  background: var(--bs-tertiary-bg);
+  overflow: hidden;
 }
-.gauge-val {
-  font-size: 22px;
-  font-weight: 800;
-  fill: var(--bs-body-color, #15231c);
-}
-.gauge-sub {
-  font-size: 9px;
-  fill: var(--bs-secondary-color, #7b8a80);
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
+.cl-bar > span {
+  display: block;
+  height: 100%;
+  border-radius: 5px;
+  background: var(--brand-500, var(--bs-primary));
+  transition: width 0.3s ease;
 }
 
-.spark {
-  display: block;
-  overflow: visible;
+.cl-card {
+  background: linear-gradient(180deg, var(--brand-50, var(--bs-primary-bg-subtle)) 0%, var(--bs-body-bg) 55%);
 }
+.fb-card {
+  background: var(--bs-info-bg-subtle);
+}
+
+.dash-skel {
+  height: 84px;
+  background: linear-gradient(90deg, var(--bs-tertiary-bg) 25%, var(--bs-secondary-bg) 50%, var(--bs-tertiary-bg) 75%);
+  background-size: 200% 100%;
+  animation: dash-shimmer 1.3s infinite;
+  border-radius: 6px;
+}
+@keyframes dash-shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }

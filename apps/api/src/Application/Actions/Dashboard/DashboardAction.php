@@ -304,6 +304,16 @@ final class DashboardAction
         $unreadNotifs = (int) $this->em->createQueryBuilder()->select('COUNT(n.id)')->from(Notification::class, 'n')
             ->where('n.user = :me')->andWhere('n.read = false')->setParameter('me', $me)->getQuery()->getSingleScalarResult();
 
+        // Viewed-topic set for progress/continue-learning.
+        $viewed = [];
+        foreach ($this->em->getRepository(TopicProgress::class)->findBy(['student' => $me, 'lessonViewed' => true]) as $tp) {
+            $viewed[$tp->getTopic()->getId()] = true;
+        }
+        $subjects = $this->subjectProgress($topics, $viewed);
+        $portfolio = $this->portfolioProgress($me, $topics);
+        $worksheet = $this->worksheetProgress($me, $classIds);
+        $latest = $attempts[0] ?? null;
+
         return Json::write($response, [
             'stats' => [
                 'topics' => count($topics),
@@ -317,6 +327,23 @@ final class DashboardAction
                 'unread_notifications' => $unreadNotifs,
                 'upcoming_live' => count($this->upcomingLiveForStudent($me, $classIds)),
             ],
+            'continue_learning' => $this->continueLearning($subjects),
+            'progress' => [
+                'lessons' => ['done' => $lessonsViewed, 'total' => count($topics), 'pct' => count($topics) ? (int) round($lessonsViewed / count($topics) * 100) : 0],
+                'quiz_average' => $quizAvg,
+                'worksheet' => $worksheet,
+                'portfolio' => $portfolio,
+            ],
+            'mastery' => $this->masteryLabel($quizAvg),
+            'latest_quiz' => $latest === null ? null : [
+                'assessment' => $latest->getAssessment()->getTitle(),
+                'score' => $latest->getScore(), 'total_marks' => $latest->getTotalMarks(),
+                'percentage' => $latest->getPercentage(),
+            ],
+            'recent_subjects' => array_slice($subjects, 0, 4),
+            'weak_areas' => $this->weakAreas($topics),
+            'due_tasks' => $this->dueTasks($me, $classIds),
+            'latest_feedback' => $this->latestFeedback($me),
             'recent_quizzes' => array_map(static fn (AssessmentAttempt $a) => [
                 'assessment' => $a->getAssessment()->getTitle(),
                 'subject' => $a->getAssessment()->getSubject()->getName(),
@@ -328,6 +355,142 @@ final class DashboardAction
                 'scheduled_at' => $lc->getScheduledAt()->format(DATE_ATOM), 'status' => $lc->getStatus(),
             ], $this->upcomingLiveForStudent($me, $classIds)),
         ]);
+    }
+
+    /**
+     * Per-subject lesson progress from the published topics + the viewed set.
+     *
+     * @param Topic[] $topics
+     * @param array<int, bool> $viewed
+     * @return array<int, array{subject:string, total:int, viewed:int, progress_pct:int, last_topic:?string, next_topic:?string}>
+     */
+    private function subjectProgress(array $topics, array $viewed): array
+    {
+        $by = [];
+        foreach ($topics as $t) {
+            $sid = $t->getSubject()->getId();
+            $by[$sid] ??= ['subject' => $t->getSubject()->getName(), 'total' => 0, 'viewed' => 0, 'last_topic' => null, 'next_topic' => null];
+            $by[$sid]['total']++;
+            if (isset($viewed[$t->getId()])) {
+                $by[$sid]['viewed']++;
+                $by[$sid]['last_topic'] = $t->getTitle();
+            } elseif ($by[$sid]['next_topic'] === null) {
+                $by[$sid]['next_topic'] = $t->getTitle();
+            }
+        }
+        $out = array_map(static function (array $r) {
+            $r['progress_pct'] = $r['total'] ? (int) round($r['viewed'] / $r['total'] * 100) : 0;
+            return $r;
+        }, array_values($by));
+        usort($out, static fn ($a, $b) => $b['progress_pct'] <=> $a['progress_pct']);
+        return $out;
+    }
+
+    /** @param array<int, array<string,mixed>> $subjects */
+    private function continueLearning(array $subjects): ?array
+    {
+        // The subject with progress but not yet complete; else the first.
+        foreach ($subjects as $s) {
+            if ($s['progress_pct'] > 0 && $s['progress_pct'] < 100) {
+                return ['subject' => $s['subject'], 'topic' => $s['next_topic'] ?? $s['last_topic'], 'completion_pct' => $s['progress_pct']];
+            }
+        }
+        $first = $subjects[0] ?? null;
+        return $first === null ? null : ['subject' => $first['subject'], 'topic' => $first['next_topic'] ?? $first['last_topic'], 'completion_pct' => $first['progress_pct']];
+    }
+
+    /** @param Topic[] $topics @return array{done:int, total:int, pct:int} */
+    private function portfolioProgress(User $me, array $topics): array
+    {
+        $total = 0;
+        foreach ($topics as $t) {
+            if (!empty($t->toArray()['portfolio_evidence_expected'])) {
+                $total++;
+            }
+        }
+        $done = (int) $this->em->createQueryBuilder()->select('COUNT(p.id)')->from(PortfolioEntry::class, 'p')
+            ->where('p.student = :me')->andWhere('p.status = :rev')
+            ->setParameter('me', $me)->setParameter('rev', PortfolioEntry::REVIEWED)->getQuery()->getSingleScalarResult();
+        return ['done' => $done, 'total' => $total, 'pct' => $total ? (int) round(min($done, $total) / $total * 100) : 0];
+    }
+
+    /** @param int[] $classIds @return array{done:int, total:int, pct:int} */
+    private function worksheetProgress(User $me, array $classIds): array
+    {
+        $total = 0;
+        if ($classIds !== []) {
+            $total = (int) $this->em->createQueryBuilder()->select('COUNT(w.id)')->from(Worksheet::class, 'w')
+                ->where('w.schoolClass IN (:cids) OR w.schoolClass IS NULL')->setParameter('cids', $classIds)
+                ->getQuery()->getSingleScalarResult();
+        }
+        $done = (int) $this->em->createQueryBuilder()->select('COUNT(ws.id)')->from(WorksheetSubmission::class, 'ws')
+            ->where('ws.student = :me')->andWhere('ws.status = :g')
+            ->setParameter('me', $me)->setParameter('g', WorksheetSubmission::GRADED)->getQuery()->getSingleScalarResult();
+        return ['done' => $done, 'total' => $total, 'pct' => $total ? (int) round(min($done, $total) / $total * 100) : 0];
+    }
+
+    private function masteryLabel(?float $avg): string
+    {
+        if ($avg === null) {
+            return 'Not yet rated';
+        }
+        return $avg >= 80 ? 'Mastery' : ($avg >= 65 ? 'Proficient' : ($avg >= 50 ? 'Developing' : 'Emerging'));
+    }
+
+    /** @param Topic[] $topics @return string[] */
+    private function weakAreas(array $topics): array
+    {
+        $out = [];
+        foreach ($topics as $t) {
+            $m = $t->toArray()['misconceptions'];
+            if (is_array($m)) {
+                foreach ($m as $item) {
+                    $out[] = (string) $item;
+                }
+            }
+        }
+        return array_values(array_slice(array_unique($out), 0, 4));
+    }
+
+    /**
+     * Upcoming worksheet + portfolio tasks with their due dates.
+     *
+     * @param int[] $classIds
+     * @return array<int, array{title:string, type:string, due:?string}>
+     */
+    private function dueTasks(User $me, array $classIds): array
+    {
+        $tasks = [];
+        if ($classIds !== []) {
+            $submitted = [];
+            foreach ($this->em->getRepository(WorksheetSubmission::class)->findBy(['student' => $me]) as $ws) {
+                $submitted[$ws->getWorksheet()->getId()] = true;
+            }
+            $worksheets = $this->em->createQueryBuilder()->select('w')->from(Worksheet::class, 'w')
+                ->where('w.schoolClass IN (:cids) OR w.schoolClass IS NULL')->andWhere('w.approvalStatus = :pub')
+                ->setParameter('cids', $classIds)->setParameter('pub', Lifecycle::PUBLISHED)
+                ->orderBy('w.dueDate', 'ASC')->setMaxResults(10)->getQuery()->getResult();
+            foreach ($worksheets as $w) {
+                /** @var Worksheet $w */
+                if (isset($submitted[$w->getId()])) {
+                    continue;
+                }
+                $tasks[] = ['title' => $w->getTitle(), 'type' => 'Worksheet', 'due' => $w->getDueDate()?->format('Y-m-d')];
+            }
+        }
+        return array_slice($tasks, 0, 5);
+    }
+
+    private function latestFeedback(User $me): ?array
+    {
+        $f = $this->em->createQueryBuilder()->select('f')->from(FeedbackNote::class, 'f')
+            ->where('f.student = :me')->setParameter('me', $me)->orderBy('f.id', 'DESC')->setMaxResults(1)
+            ->getQuery()->getResult();
+        if ($f === []) {
+            return null;
+        }
+        $a = $f[0]->toArray();
+        return ['message' => $a['message'], 'author' => $a['author'], 'practice_needed' => $a['practice_needed']];
     }
 
     /** GET /dashboard/super-admin — platform overview. */

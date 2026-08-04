@@ -5,60 +5,134 @@
 
 @if (loading()) {
   <div class="row g-3">
-    @for (i of [1,2,3,4]; track i) { <div class="col-6 col-xl-3"><div class="card border-0 shadow-sm"><div class="card-body dash-skel"></div></div></div> }
+    @for (i of [1,2,3,4]; track i) { <div class="col-6 col-lg-3"><div class="card border-0 shadow-sm"><div class="card-body dash-skel"></div></div></div> }
   </div>
-} @else if (data(); as d) {
-  <app-kpi-strip class="d-block mb-4" [items]="kpis()" [cols]="4" />
-
-  <div class="row g-4">
-    <div class="col-lg-8">
-      <!-- My progress -->
-      <div class="card border-0 shadow-sm mb-4"><div class="card-body">
-        <h6 class="fw-semibold mb-3">My Progress</h6>
-        <div class="d-flex flex-wrap gap-4 justify-content-around text-center">
-          <div>
-            <app-stat-ring [value]="lessonPct()" caption="Lessons" tone="primary" />
-            <div class="small text-body-secondary mt-2">{{ d.stats.lessons_viewed }} of {{ d.stats.topics }} lessons</div>
-          </div>
-          <div>
-            <app-stat-ring [value]="quizAvg()" caption="Quiz avg" [tone]="quizAvg() >= 70 ? 'success' : quizAvg() >= 50 ? 'warning' : 'danger'" />
-            <div class="small text-body-secondary mt-2">{{ d.stats.quizzes_taken }} quizzes taken</div>
-          </div>
-        </div>
+} @else if (data()) {
+  <div class="row g-3">
+    <!-- Continue learning -->
+    <div class="col-lg-4 col-md-6">
+      <div class="card border-0 shadow-sm h-100 cl-card"><div class="card-body">
+        <h6 class="fw-semibold mb-3"><app-icon name="menu_book" [size]="16" class="text-primary me-1" /> Continue learning</h6>
+        @if (continueLearning(); as c) {
+          <div class="text-body-secondary small">Subject</div>
+          <div class="fw-semibold mb-2">{{ c.subject }}</div>
+          <div class="text-body-secondary small">Current topic</div>
+          <div class="fw-medium mb-2">{{ c.topic || '—' }}</div>
+          <div class="d-flex justify-content-between small mb-1"><span class="text-body-secondary">Lesson completion</span><b>{{ c.completion_pct }}%</b></div>
+          <div class="cl-bar mb-3"><span [style.width.%]="c.completion_pct"></span></div>
+          <a class="btn btn-primary btn-sm w-100" [routerLink]="['/student/academics/learn']"><app-icon name="play_arrow" [size]="16" /> Continue lesson</a>
+        } @else { <div class="text-body-secondary small">No lessons in progress yet.</div> }
       </div></div>
+    </div>
 
-      <!-- Recent quiz results -->
-      <div class="card border-0 shadow-sm"><div class="card-body">
+    <!-- Due tasks -->
+    <div class="col-lg-4 col-md-6">
+      <div class="card border-0 shadow-sm h-100"><div class="card-body">
         <div class="d-flex justify-content-between align-items-center mb-3">
-          <h6 class="fw-semibold mb-0">Recent Quiz Results</h6>
-          <a class="small text-decoration-none" [routerLink]="['/student/academics/assessments']">All quizzes →</a>
+          <h6 class="fw-semibold mb-0"><app-icon name="assignment" [size]="16" class="text-warning me-1" /> Due tasks</h6>
+          <a class="small text-decoration-none" [routerLink]="['/student/academics/worksheets']">All →</a>
         </div>
-        @if (!d.recent_quizzes?.length) {
-          <div class="text-body-secondary small py-4 text-center">No quiz results yet.</div>
-        } @else {
-          @for (r of d.recent_quizzes; track $index) {
-            <div class="d-flex align-items-center gap-3 py-2 border-bottom">
-              <span class="action-ic bg-info-subtle text-info"><app-icon name="quiz" /></span>
-              <div class="flex-grow-1">
-                <div class="fw-medium">{{ r.assessment }}</div>
-                <div class="small text-body-secondary">{{ r.subject }}</div>
-              </div>
-              <span class="badge" [class]="'bg-' + scoreColor(r.percentage) + '-subtle text-' + scoreColor(r.percentage)">{{ pct(r.percentage) }}</span>
-            </div>
-          }
-        }
+        @for (t of dueTasks(); track $index) {
+          <div class="d-flex justify-content-between align-items-center py-2 border-top">
+            <div><div class="fw-medium small">{{ t.title }}</div><div class="text-body-secondary small">{{ t.type }}</div></div>
+            @if (t.due) { <span class="badge bg-danger-subtle text-danger">Due {{ t.due }}</span> }
+          </div>
+        } @empty { <div class="text-success small py-2"><app-icon name="check_circle" [size]="15" /> No tasks due. Great job!</div> }
       </div></div>
     </div>
 
-    <!-- Right rail -->
+    <!-- Quiz results -->
     <div class="col-lg-4">
-      <app-rail-card class="d-block mb-4" title="Due Tasks" icon="assignment">
-        <app-attention-list [items]="dueTasks()" />
-      </app-rail-card>
-
-      <app-rail-card class="d-block" title="Quick Actions" icon="touch_app">
-        <app-quick-actions [actions]="quickActions" />
-      </app-rail-card>
+      <div class="card border-0 shadow-sm h-100"><div class="card-body">
+        <h6 class="fw-semibold mb-3"><app-icon name="workspace_premium" [size]="16" class="text-primary me-1" /> Quiz results</h6>
+        @if (latestQuiz(); as q) {
+          <div class="row">
+            <div class="col-6">
+              <div class="text-body-secondary small">Latest score</div>
+              <div class="fs-3 fw-bold">{{ q.score }}<span class="fs-6 text-body-secondary">/{{ q.total_marks }}</span></div>
+            </div>
+            <div class="col-6">
+              <div class="text-body-secondary small">Mastery level</div>
+              <div class="fw-semibold text-{{ masteryTone() }}">{{ mastery() }}</div>
+              <div class="cl-bar mt-1"><span class="bg-{{ masteryTone() }}" [style.width.%]="q.percentage"></span></div>
+            </div>
+          </div>
+        } @else { <div class="text-body-secondary small">No quizzes taken yet.</div> }
+      </div></div>
     </div>
   </div>
+
+  <!-- Row 2: weak areas · feedback · upcoming live -->
+  <div class="row g-3 mt-0">
+    <div class="col-lg-4 col-md-6">
+      <div class="card border-0 shadow-sm h-100"><div class="card-body">
+        <h6 class="fw-semibold mb-3"><app-icon name="tag" [size]="16" class="text-danger me-1" /> Weak areas to revise</h6>
+        @if (weakAreas().length) {
+          <div class="d-flex flex-wrap gap-2">
+            @for (w of weakAreas(); track $index) { <span class="badge bg-danger-subtle text-danger fw-normal">{{ w }}</span> }
+          </div>
+        } @else { <div class="text-body-secondary small">No weak areas flagged — keep it up!</div> }
+      </div></div>
+    </div>
+
+    <div class="col-lg-4 col-md-6">
+      <div class="card border-0 shadow-sm h-100 fb-card"><div class="card-body">
+        <h6 class="fw-semibold mb-2"><app-icon name="chat" [size]="16" class="text-info me-1" /> Feedback from tutor</h6>
+        @if (latestFeedback(); as f) {
+          <p class="small mb-1">{{ f.message }}</p>
+          @if (f.practice_needed) { <p class="small text-body-secondary mb-1">Practise: {{ f.practice_needed }}</p> }
+          @if (f.author) { <div class="small text-info text-end">— {{ f.author }}</div> }
+        } @else { <div class="text-body-secondary small">No feedback yet.</div> }
+      </div></div>
+    </div>
+
+    <div class="col-lg-4">
+      <div class="card border-0 shadow-sm h-100"><div class="card-body">
+        <h6 class="fw-semibold mb-3"><app-icon name="videocam" [size]="16" class="text-danger me-1" /> Upcoming live class</h6>
+        @if (upcomingLive().length) {
+          @for (lc of upcomingLive().slice(0, 1); track $index) {
+            <div class="fw-medium">{{ lc.title }}</div>
+            <div class="text-body-secondary small mb-2">{{ lc.subject }} · {{ lc.scheduled_at | date:'EEE, MMM d · h:mm a' }}</div>
+            <a class="btn btn-primary btn-sm w-100" [routerLink]="['/student/academics/live-classes']"><app-icon name="videocam" [size]="16" /> Join class</a>
+          }
+        } @else { <div class="text-body-secondary small">No live classes scheduled.</div> }
+      </div></div>
+    </div>
+  </div>
+
+  <!-- My progress -->
+  <div class="card border-0 shadow-sm mt-3"><div class="card-body">
+    <h6 class="fw-semibold mb-3"><app-icon name="insights" [size]="16" class="text-primary me-1" /> My progress</h6>
+    <div class="row g-3">
+      @for (t of progressTiles(); track t.label) {
+        <div class="col-md-3 col-6">
+          <div class="d-flex align-items-center gap-3">
+            <app-stat-ring [value]="t.pct" [tone]="$any(t.tone)" [size]="60" [stroke]="7" />
+            <div>
+              <div class="fw-bold">{{ t.value }}</div>
+              <div class="text-body-secondary small">{{ t.label }}</div>
+              <div class="small text-{{ t.tone }}">{{ t.sub }}</div>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  </div></div>
+
+  <!-- Recent subjects -->
+  <div class="card border-0 shadow-sm mt-3"><div class="card-body">
+    <h6 class="fw-semibold mb-3"><app-icon name="menu_book" [size]="16" class="text-primary me-1" /> Recent subjects</h6>
+    <div class="row g-3">
+      @for (s of recentSubjects(); track s.subject) {
+        <div class="col-md-4">
+          <div class="border rounded p-3 h-100">
+            <div class="fw-semibold">{{ s.subject }}</div>
+            <div class="text-body-secondary small mb-2">Last lesson: {{ s.last_topic || s.next_topic || '—' }}</div>
+            <div class="d-flex justify-content-between small mb-1"><span class="text-body-secondary">Progress</span><b>{{ s.progress_pct }}%</b></div>
+            <div class="cl-bar"><span [style.width.%]="s.progress_pct"></span></div>
+          </div>
+        </div>
+      } @empty { <div class="col-12 text-body-secondary small">No subjects yet.</div> }
+    </div>
+  </div></div>
 }

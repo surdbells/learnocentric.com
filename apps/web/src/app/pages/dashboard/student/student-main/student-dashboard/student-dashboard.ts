@@ -1,17 +1,17 @@
 import {Component, computed, inject, PLATFORM_ID, signal} from '@angular/core';
-import {isPlatformBrowser} from '@angular/common';
+import {DatePipe, isPlatformBrowser} from '@angular/common';
 import {RouterLink} from '@angular/router';
 import {AuthService} from '../../../../../common/auth/auth.service';
 import {ApiService} from '../../../../../common/service/api.service';
 import {Icon} from '../../../../../common/icon/icon';
-import {
-  AttentionItem, AttentionList, KpiItem, KpiStrip, QuickAction, QuickActions, RailCard, StatRing,
-} from '../../../../../common/ui';
+import {StatRing} from '../../../../../common/ui';
+
+interface ProgressTile { label: string; value: string; sub: string; pct: number; icon: string; tone: string; }
 
 @Component({
   selector: 'app-student-dashboard',
   standalone: true,
-  imports: [Icon, RouterLink, KpiStrip, RailCard, AttentionList, QuickActions, StatRing],
+  imports: [Icon, RouterLink, DatePipe, StatRing],
   templateUrl: './student-dashboard.html',
   styleUrl: './student-dashboard.css',
 })
@@ -24,43 +24,29 @@ export class StudentDashboard {
   data = signal<any | null>(null);
   firstName = signal('');
 
-  readonly lessonPct = computed<number>(() => {
-    const s = this.data()?.stats;
-    if (!s || !s.topics) return 0;
-    return Math.round((s.lessons_viewed / s.topics) * 100);
-  });
+  readonly continueLearning = computed<any>(() => this.data()?.continue_learning ?? null);
+  readonly latestQuiz = computed<any>(() => this.data()?.latest_quiz ?? null);
+  readonly mastery = computed<string>(() => this.data()?.mastery ?? '—');
+  readonly weakAreas = computed<string[]>(() => this.data()?.weak_areas ?? []);
+  readonly dueTasks = computed<any[]>(() => this.data()?.due_tasks ?? []);
+  readonly latestFeedback = computed<any>(() => this.data()?.latest_feedback ?? null);
+  readonly recentSubjects = computed<any[]>(() => this.data()?.recent_subjects ?? []);
+  readonly upcomingLive = computed<any[]>(() => this.data()?.upcoming ?? []);
+  readonly portfolio = computed<any>(() => this.data()?.progress?.portfolio ?? null);
 
-  readonly quizAvg = computed<number>(() => Number(this.data()?.stats?.quiz_average ?? 0));
-
-  readonly kpis = computed<KpiItem[]>(() => {
-    const d = this.data();
-    if (!d) return [];
-    const s = d.stats;
+  readonly progressTiles = computed<ProgressTile[]>(() => {
+    const p = this.data()?.progress;
+    if (!p) return [];
+    const q = p.quiz_average;
     return [
-      {label: 'Lessons viewed', value: `${s.lessons_viewed}/${s.topics}`, icon: 'menu_book', tone: 'primary', link: '/student/academics/learn'},
-      {label: 'Quizzes taken', value: s.quizzes_taken, icon: 'quiz', tone: 'info', link: '/student/academics/assessments'},
-      {label: 'Quiz average', value: this.pct(s.quiz_average), icon: 'workspace_premium', tone: 'success'},
-      {label: 'Upcoming live', value: d.action_items.upcoming_live, icon: 'video_camera_front', tone: 'danger', link: '/student/academics/live-classes'},
+      {label: 'Lessons completed', value: `${p.lessons.done} / ${p.lessons.total}`, sub: p.lessons.pct + '%', pct: p.lessons.pct, icon: 'menu_book', tone: 'primary'},
+      {label: 'Quiz average', value: q === null ? '—' : q + '%', sub: this.mastery(), pct: q ?? 0, icon: 'workspace_premium', tone: this.tone(q)},
+      {label: 'Worksheet completion', value: p.worksheet.pct + '%', sub: `${p.worksheet.done} / ${p.worksheet.total}`, pct: p.worksheet.pct, icon: 'assignment_turned_in', tone: 'success'},
+      {label: 'Portfolio completion', value: p.portfolio.pct + '%', sub: `${p.portfolio.done} / ${p.portfolio.total}`, pct: p.portfolio.pct, icon: 'folder_special', tone: 'warning'},
     ];
   });
 
-  readonly dueTasks = computed<AttentionItem[]>(() => {
-    const d = this.data();
-    if (!d) return [];
-    const a = d.action_items;
-    return [
-      {label: 'Pending worksheets', count: a.pending_worksheets, tone: a.pending_worksheets ? 'warning' : 'secondary', icon: 'assignment', link: '/student/academics/worksheets'},
-      {label: 'Unread feedback', count: a.unread_feedback, tone: a.unread_feedback ? 'primary' : 'secondary', icon: 'chat', link: '/student/academics/feedback'},
-      {label: 'New notifications', count: a.unread_notifications, tone: a.unread_notifications ? 'info' : 'secondary', icon: 'notifications', link: '/student/communication/announcements'},
-    ];
-  });
-
-  readonly quickActions: QuickAction[] = [
-    {label: 'Continue Learning', sublabel: 'Resume your lessons', icon: 'play_circle', link: '/student/academics/learn'},
-    {label: 'Take a Quiz', sublabel: 'Practise & assess', icon: 'quiz', link: '/student/academics/assessments'},
-    {label: 'My Worksheets', sublabel: 'Complete & submit', icon: 'assignment', link: '/student/academics/worksheets'},
-    {label: 'Live Classes', sublabel: 'Join a session', icon: 'video_camera_front', link: '/student/academics/live-classes'},
-  ];
+  readonly masteryTone = computed<string>(() => this.tone(this.data()?.progress?.quiz_average));
 
   constructor() {
     this.firstName.set(this.auth.getAuthSession()?.user?.firstName ?? 'there');
@@ -72,7 +58,7 @@ export class StudentDashboard {
     }
   }
 
-  scoreColor(p: number | null): string {
+  tone(p: number | null | undefined): string {
     if (p === null || p === undefined) return 'secondary';
     if (p >= 70) return 'success';
     if (p >= 50) return 'warning';
