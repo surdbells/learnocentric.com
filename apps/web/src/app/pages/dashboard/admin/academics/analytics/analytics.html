@@ -1,109 +1,116 @@
 <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
-  <app-page-header icon="monitoring" action="Analytics"></app-page-header>
-  <button type="button" class="btn btn-sm btn-outline-secondary" [disabled]="exporting()" (click)="exportCsv()">
-    <app-icon name="download" [size]="16" /> Export CSV
-  </button>
+  <app-page-header icon="monitoring" action="Reports & Analytics"></app-page-header>
+  <div class="d-flex gap-2">
+    <button type="button" class="btn btn-sm btn-outline-secondary" [disabled]="exporting()" (click)="exportCsv()">
+      <app-icon name="download" [size]="16" /> Export CSV
+    </button>
+  </div>
 </div>
 
 @if (loading()) {
-  <div class="text-body-secondary p-4">Loading…</div>
+  <div class="text-body-secondary p-4">Loading analytics…</div>
 } @else if (data(); as d) {
-  <!-- Headline counts -->
-  <div class="row g-3 mb-4">
-    <div class="col-6 col-md-4 col-xl-2">
-      <div class="card border-0 shadow-sm h-100"><div class="card-body py-3">
-        <div class="small text-body-secondary">Students</div>
-        <div class="fs-4 fw-bold">{{ d.counts.students }}</div>
+  <p class="text-body-secondary mb-3">Track learner performance, class trends, academic mastery and reporting outputs.</p>
+  <app-kpi-strip class="d-block mb-4" [items]="kpis()" [cols]="4" />
+
+  <!-- Row 1: performance trend · class-by-subject · mastery distribution -->
+  <div class="row g-3 mb-3">
+    <div class="col-xl-5">
+      <div class="card border-0 shadow-sm h-100"><div class="card-body">
+        <h6 class="fw-semibold mb-1">Performance trend</h6>
+        <p class="small text-body-secondary mb-2">Average score over time (monthly)</p>
+        @if (trendSeries().length) { <app-line-chart [points]="trendSeries()" [labels]="trendLabels()" tone="primary" /> }
+        @else { <div class="text-body-secondary small py-5 text-center">No trend data yet.</div> }
       </div></div>
     </div>
-    <div class="col-6 col-md-4 col-xl-2">
-      <div class="card border-0 shadow-sm h-100"><div class="card-body py-3">
-        <div class="small text-body-secondary">Teachers</div>
-        <div class="fs-4 fw-bold">{{ d.counts.teachers }}</div>
+
+    <div class="col-xl-4">
+      <div class="card border-0 shadow-sm h-100"><div class="card-body">
+        <h6 class="fw-semibold mb-1">Class performance by subject</h6>
+        <p class="small text-body-secondary mb-2">Average score (%)</p>
+        @if (subjectLabels().length) { <app-stacked-bar [labels]="subjectLabels()" [series]="subjectSeries()" /> }
+        @else { <div class="text-body-secondary small py-5 text-center">No graded quizzes yet.</div> }
       </div></div>
     </div>
-    <div class="col-6 col-md-4 col-xl-2">
-      <div class="card border-0 shadow-sm h-100"><div class="card-body py-3">
-        <div class="small text-body-secondary">Published topics</div>
-        <div class="fs-4 fw-bold">{{ d.counts.published_topics }}</div>
-      </div></div>
-    </div>
-    <div class="col-6 col-md-4 col-xl-2">
-      <div class="card border-0 shadow-sm h-100"><div class="card-body py-3">
-        <div class="small text-body-secondary">Assessments</div>
-        <div class="fs-4 fw-bold">{{ d.counts.published_assessments }}</div>
-      </div></div>
-    </div>
-    <div class="col-6 col-md-4 col-xl-2">
-      <div class="card border-0 shadow-sm h-100"><div class="card-body py-3">
-        <div class="small text-body-secondary">Worksheets</div>
-        <div class="fs-4 fw-bold">{{ d.counts.published_worksheets }}</div>
-      </div></div>
-    </div>
-    <div class="col-6 col-md-4 col-xl-2">
-      <div class="card border-0 shadow-sm h-100"><div class="card-body py-3">
-        <div class="small text-body-secondary">Live classes</div>
-        <div class="fs-4 fw-bold">{{ d.counts.live_classes }}</div>
+
+    <div class="col-xl-3">
+      <div class="card border-0 shadow-sm h-100"><div class="card-body">
+        <h6 class="fw-semibold mb-1">Mastery distribution</h6>
+        <p class="small text-body-secondary mb-2">Based on attempt scores</p>
+        @if (masteryDonut().length) { <app-donut-chart [segments]="masteryDonut()" caption="attempts" /> }
+        @else { <div class="text-body-secondary small">No attempts yet.</div> }
       </div></div>
     </div>
   </div>
 
-  <div class="row g-4">
-    <!-- Quiz performance per subject -->
-    <div class="col-lg-7">
+  <!-- Row 2: topic mastery analysis + learners needing attention -->
+  <div class="row g-3">
+    <div class="col-xl-8">
       <div class="card border-0 shadow-sm h-100">
-        <div class="card-body">
-          <h6 class="fw-semibold mb-1">Quiz performance by subject</h6>
-          <p class="small text-body-secondary mb-2">Academic track · average score and pass rate</p>
-          @if (d.quiz_by_subject?.length) {
-            <div #quizChart></div>
-          } @else {
-            <div class="text-body-secondary small py-5 text-center">No graded quiz attempts yet.</div>
-          }
+        <div class="card-body pb-2"><h6 class="fw-semibold mb-0">Topic mastery analysis</h6></div>
+        <div class="table-responsive">
+          <table class="table align-middle mb-0 small">
+            <thead class="table-light"><tr><th>Topic</th><th>Subject</th><th class="text-center">Average</th><th class="text-center">Attempts</th><th>Mastery</th></tr></thead>
+            <tbody>
+              @for (t of topicMastery(); track t.topic) {
+                <tr>
+                  <td class="fw-medium">{{ t.topic }}</td>
+                  <td class="text-body-secondary">{{ t.subject }}</td>
+                  <td class="text-center fw-semibold">{{ t.average }}%</td>
+                  <td class="text-center">{{ t.count }}</td>
+                  <td><app-status-badge [value]="t.mastery" [map]="masteryTones" /></td>
+                </tr>
+              } @empty {
+                <tr><td colspan="5" class="text-body-secondary small py-3 text-center">No topic-level results yet.</td></tr>
+              }
+            </tbody>
+          </table>
         </div>
       </div>
     </div>
 
-    <!-- Portfolio ratings -->
-    <div class="col-lg-5">
-      <div class="card border-0 shadow-sm h-100">
-        <div class="card-body">
-          <h6 class="fw-semibold mb-1">Competency ratings</h6>
-          <p class="small text-body-secondary mb-2">Portfolio evidence · {{ d.portfolio.pending }} awaiting review</p>
-          <div #portfolioChart></div>
-        </div>
-      </div>
+    <div class="col-xl-4">
+      <div class="card border-0 shadow-sm h-100"><div class="card-body">
+        <h6 class="fw-semibold mb-3">Learners needing attention</h6>
+        @for (l of learnersAttention(); track l.student) {
+          <div class="d-flex justify-content-between align-items-center py-2 border-top">
+            <div class="d-flex align-items-center gap-2">
+              <span class="ln-dot bg-{{ masteryTone(l.band) }}"></span>
+              <span class="small fw-medium">{{ l.student }}</span>
+            </div>
+            <div class="d-flex align-items-center gap-2">
+              <span class="badge bg-{{ masteryTone(l.band) }}-subtle text-{{ masteryTone(l.band) }}">{{ l.band }}</span>
+              <span class="fw-semibold small">{{ l.average }}%</span>
+            </div>
+          </div>
+        } @empty {
+          <div class="text-success small py-2"><app-icon name="check_circle" [size]="15" /> Every learner is at or above mastery.</div>
+        }
+      </div></div>
     </div>
+  </div>
 
-    <!-- Secondary stats -->
+  <!-- Secondary stats -->
+  <div class="row g-3 mt-0">
     <div class="col-md-4">
       <div class="card border-0 shadow-sm h-100"><div class="card-body">
         <h6 class="fw-semibold mb-2">Worksheets</h6>
-        <div class="fs-3 fw-bold">{{ pct(d.worksheets.average) }}</div>
-        <div class="small text-body-secondary">average score · {{ d.worksheets.graded }}/{{ d.worksheets.submissions }} graded</div>
-        <div class="progress mt-2" style="height:6px">
-          <div class="progress-bar bg-success" [style.width.%]="d.worksheets.submissions ? (d.worksheets.graded / d.worksheets.submissions * 100) : 0"></div>
-        </div>
+        <div class="fs-4 fw-bold">{{ pct(d.worksheets.average) }}</div>
+        <div class="small text-body-secondary">average · {{ d.worksheets.graded }}/{{ d.worksheets.submissions }} graded</div>
       </div></div>
     </div>
     <div class="col-md-4">
       <div class="card border-0 shadow-sm h-100"><div class="card-body">
         <h6 class="fw-semibold mb-2">Live attendance</h6>
-        <div class="fs-3 fw-bold">{{ pct(d.attendance.rate) }}</div>
-        <div class="small text-body-secondary">{{ d.attendance.joins }} join(s) across {{ d.attendance.classes_held }} class(es)</div>
-        <div class="progress mt-2" style="height:6px">
-          <div class="progress-bar bg-info" [style.width.%]="d.attendance.rate ?? 0"></div>
-        </div>
+        <div class="fs-4 fw-bold">{{ pct(d.attendance.rate) }}</div>
+        <div class="small text-body-secondary">{{ d.attendance.joins }} join(s) · {{ d.attendance.classes_held }} class(es)</div>
       </div></div>
     </div>
     <div class="col-md-4">
       <div class="card border-0 shadow-sm h-100"><div class="card-body">
         <h6 class="fw-semibold mb-2">Feedback loop</h6>
-        <div class="fs-3 fw-bold">{{ pct(d.feedback.ack_rate) }}</div>
-        <div class="small text-body-secondary">{{ d.feedback.acknowledged }}/{{ d.feedback.sent }} notes acknowledged</div>
-        <div class="progress mt-2" style="height:6px">
-          <div class="progress-bar" [style.width.%]="d.feedback.ack_rate ?? 0"></div>
-        </div>
+        <div class="fs-4 fw-bold">{{ pct(d.feedback.ack_rate) }}</div>
+        <div class="small text-body-secondary">{{ d.feedback.acknowledged }}/{{ d.feedback.sent }} acknowledged</div>
       </div></div>
     </div>
   </div>

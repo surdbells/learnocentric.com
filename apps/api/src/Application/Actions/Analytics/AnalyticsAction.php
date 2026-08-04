@@ -116,7 +116,126 @@ final class AnalyticsAction
                 'acknowledged' => $acknowledged,
                 'ack_rate' => $sent > 0 ? round($acknowledged / $sent * 100, 1) : null,
             ],
+            'performance_trend' => $this->performanceTrend($attempts),
+            'mastery_distribution' => $this->masteryDistribution($attempts),
+            'topic_mastery' => $this->topicMastery($attempts),
+            'learners_attention' => $this->learnersAttention($attempts),
         ]);
+    }
+
+    /**
+     * Average graded-attempt score per month (last 6) for the performance-trend line.
+     *
+     * @param AssessmentAttempt[] $attempts
+     * @return array<int, array{month:string, average:float|null}>
+     */
+    private function performanceTrend(array $attempts): array
+    {
+        $now = new \DateTimeImmutable();
+        $months = [];
+        $order = [];
+        for ($i = 5; $i >= 0; $i--) {
+            $key = $now->modify("first day of -$i month")->format('Y-m');
+            $order[] = $key;
+            $months[$key] = ['sum' => 0.0, 'n' => 0];
+        }
+        foreach ($attempts as $a) {
+            $when = $a->getSubmittedAt();
+            if ($when === null) {
+                continue;
+            }
+            $key = $when->format('Y-m');
+            if (isset($months[$key])) {
+                $months[$key]['sum'] += (float) $a->getPercentage();
+                $months[$key]['n']++;
+            }
+        }
+        return array_map(static fn (string $k) => [
+            'month' => $k,
+            'average' => $months[$k]['n'] > 0 ? round($months[$k]['sum'] / $months[$k]['n'], 1) : null,
+        ], $order);
+    }
+
+    /**
+     * Learner mastery bands from graded-attempt percentages.
+     *
+     * @param AssessmentAttempt[] $attempts
+     * @return array{strong:int, good:int, developing:int, weak:int}
+     */
+    private function masteryDistribution(array $attempts): array
+    {
+        $b = ['strong' => 0, 'good' => 0, 'developing' => 0, 'weak' => 0];
+        foreach ($attempts as $a) {
+            $p = (float) $a->getPercentage();
+            if ($p >= 80) {
+                $b['strong']++;
+            } elseif ($p >= 60) {
+                $b['good']++;
+            } elseif ($p >= 40) {
+                $b['developing']++;
+            } else {
+                $b['weak']++;
+            }
+        }
+        return $b;
+    }
+
+    /**
+     * Average score per topic (via the assessment's topic), with a mastery band.
+     *
+     * @param AssessmentAttempt[] $attempts
+     * @return array<int, array{topic:string, subject:string, average:float, mastery:string, count:int}>
+     */
+    private function topicMastery(array $attempts): array
+    {
+        $by = [];
+        foreach ($attempts as $a) {
+            $topic = $a->getAssessment()->getTopic();
+            if ($topic === null) {
+                continue;
+            }
+            $tid = $topic->getId();
+            $by[$tid] ??= ['topic' => $topic->getTitle(), 'subject' => $a->getAssessment()->getSubject()->getName(), 'sum' => 0.0, 'n' => 0];
+            $by[$tid]['sum'] += (float) $a->getPercentage();
+            $by[$tid]['n']++;
+        }
+        $out = array_map(function (array $r) {
+            $avg = round($r['sum'] / max(1, $r['n']), 1);
+            return ['topic' => $r['topic'], 'subject' => $r['subject'], 'average' => $avg, 'mastery' => $this->masteryBand($avg), 'count' => $r['n']];
+        }, array_values($by));
+        usort($out, static fn ($a, $b) => $b['average'] <=> $a['average']);
+        return $out;
+    }
+
+    /**
+     * Learners whose average is below mastery (< 60%), for the attention rail.
+     *
+     * @param AssessmentAttempt[] $attempts
+     * @return array<int, array{student:string, average:float, band:string}>
+     */
+    private function learnersAttention(array $attempts): array
+    {
+        $by = [];
+        foreach ($attempts as $a) {
+            $sid = $a->getStudent()->getId();
+            $by[$sid] ??= ['student' => $a->getStudent()->getFirstName() . ' ' . $a->getStudent()->getLastName(), 'sum' => 0.0, 'n' => 0];
+            $by[$sid]['sum'] += (float) $a->getPercentage();
+            $by[$sid]['n']++;
+        }
+        $out = [];
+        foreach ($by as $r) {
+            $avg = round($r['sum'] / max(1, $r['n']), 1);
+            if ($avg < 60) {
+                $out[] = ['student' => $r['student'], 'average' => $avg, 'band' => $this->masteryBand($avg)];
+            }
+        }
+        usort($out, static fn ($a, $b) => $a['average'] <=> $b['average']);
+        return array_slice($out, 0, 6);
+    }
+
+    private function masteryBand(float $avg): string
+    {
+        return $avg >= 80 ? 'Strong' : ($avg >= 60 ? 'Good' : ($avg >= 40 ? 'Developing' : 'Weak'));
     }
 
     /** GET /analytics/children — students linked to the current guardian. */
