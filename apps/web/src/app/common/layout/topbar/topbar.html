@@ -18,6 +18,38 @@
     <h1 class="tb-title">{{ pageTitle() }}</h1>
   </div>
 
+  <!-- Center: global search -->
+  <div class="tb-search">
+    <div class="tb-search-box">
+      <app-icon name="search" [size]="18" class="tb-search-ic" />
+      <input type="text" class="tb-search-input" placeholder="Search lessons, topics, assessments…"
+             [ngModel]="query()" (ngModelChange)="onSearch($event)" (focus)="focusSearch()" (blur)="blurSearch()"
+             autocomplete="off" aria-label="Search" />
+      @if (searching()) { <span class="tb-search-spin"></span> }
+    </div>
+
+    @if (showResults() && query().trim().length >= 2) {
+      <div class="tb-search-results">
+        @if (searching() && !results().length) {
+          <div class="tb-search-empty">Searching…</div>
+        } @else if (!results().length) {
+          <div class="tb-search-empty">No results for "{{ query() }}"</div>
+        } @else {
+          @for (r of results(); track $index) {
+            <button type="button" class="tb-search-item" (mousedown)="selectResult(r)">
+              <span class="tb-search-item-ic"><app-icon [name]="r.icon" [size]="16" /></span>
+              <span class="tb-search-item-body">
+                <span class="tb-search-item-title">{{ r.title }}</span>
+                <span class="tb-search-item-sub">{{ r.subtitle }}</span>
+              </span>
+              <span class="tb-search-item-type">{{ r.type }}</span>
+            </button>
+          }
+        }
+      </div>
+    }
+  </div>
+
   <!-- Right: preferences + user -->
   <div class="tb-right">
     <app-term-switcher class="d-none d-md-inline-flex me-1" />

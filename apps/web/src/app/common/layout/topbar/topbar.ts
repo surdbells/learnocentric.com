@@ -1,6 +1,11 @@
 import {Component, computed, inject, input, OnInit, output, PLATFORM_ID, signal} from '@angular/core';
 import {isPlatformBrowser, Location} from '@angular/common';
+import {FormsModule} from '@angular/forms';
 import {Router} from '@angular/router';
+import {Subject} from 'rxjs';
+import {debounceTime, distinctUntilChanged, switchMap} from 'rxjs/operators';
+import {of} from 'rxjs';
+import {catchError} from 'rxjs/operators';
 import {AuthService} from '../../auth/auth.service';
 import {AuthUser} from '../../auth/auth.models';
 import {ApiService} from '../../service/api.service';
@@ -13,7 +18,7 @@ import {TermSwitcher} from '../../ui/term-switcher';
 @Component({
   selector: 'app-topbar',
   standalone: true,
-  imports: [Icon, PreferenceSetting, NotificationBell, TermSwitcher],
+  imports: [Icon, FormsModule, PreferenceSetting, NotificationBell, TermSwitcher],
   templateUrl: './topbar.html',
   styleUrl: './topbar.css',
   host: { 'class': 'app-topbar' },
@@ -35,6 +40,13 @@ export class Topbar implements OnInit {
   /** Whether the currently-applied theme is dark (resolves 'system' against the OS). */
   isDark = signal(false);
 
+  // Global search
+  query = signal<string>('');
+  results = signal<any[]>([]);
+  searching = signal(false);
+  showResults = signal(false);
+  private readonly searchInput$ = new Subject<string>();
+
   /** Human-friendly title derived from the current route's last segment. */
   pageTitle = computed(() => {
     const segments = this.router.url.split('?')[0].split('/').filter(Boolean);
@@ -54,6 +66,41 @@ export class Topbar implements OnInit {
   constructor() {
     this.user.set(this.authService.getAuthSession().user);
     this.prefs.theme$.subscribe(pref => this.isDark.set(this.prefs.resolveTheme(pref) === 'dark'));
+
+    this.searchInput$.pipe(
+      debounceTime(250),
+      distinctUntilChanged(),
+      switchMap((q) => {
+        if (q.trim().length < 2) { this.searching.set(false); return of({data: []}); }
+        this.searching.set(true);
+        return this.apiSrv.get<any>('/backend/search?q=' + encodeURIComponent(q.trim())).pipe(catchError(() => of({data: []})));
+      }),
+    ).subscribe((res: any) => {
+      this.results.set(res?.data ?? []);
+      this.searching.set(false);
+    });
+  }
+
+  onSearch(term: string): void {
+    this.query.set(term);
+    this.showResults.set(true);
+    this.searchInput$.next(term);
+  }
+
+  focusSearch(): void {
+    if (this.query().trim().length >= 2) this.showResults.set(true);
+  }
+
+  /** Hide the dropdown shortly after blur so a result click still registers. */
+  blurSearch(): void {
+    setTimeout(() => this.showResults.set(false), 180);
+  }
+
+  selectResult(r: any): void {
+    this.showResults.set(false);
+    this.query.set('');
+    this.results.set([]);
+    if (r?.link) this.router.navigateByUrl(r.link);
   }
 
   /** One-click toggle between explicit light and dark. */

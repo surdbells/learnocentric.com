@@ -189,6 +189,8 @@ return static function (App $app): void {
             $auth->get('/dashboard/parent', DashboardAction::class . ':parent');
 
             // Analytics — school overview (staff) + student progress report (self/guardian/staff)
+            $auth->get('/search', \App\Application\Actions\Search\SearchAction::class);
+
             $auth->get('/analytics/overview', AnalyticsAction::class . ':overview');
             $auth->get('/analytics/school-report', AnalyticsAction::class . ':schoolReport');
             $auth->get('/analytics/report-card/{id:[0-9]+}', AnalyticsAction::class . ':reportCard');
