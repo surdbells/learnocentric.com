@@ -154,32 +154,32 @@ export class UserPreferenceMenu {
 
 
   super_admin: IMenu[] = [
-    { name: "Main", icon: "dashboard", link: "super-admin/main",
+    { name: "Main", icon: "dashboard", link: "/super-admin/main",
       children: [
         { name: "Dashboard", link: "/super-admin/main" },
       ]
     },
 
-    { name: "Analytics", icon: "insights", link: "super-admin/management/analytics",
+    { name: "Analytics", icon: "insights", link: "/super-admin/management/analytics",
       children: [
-        { name: "Platform Analytics", link: "management/analytics" },
-        { name: "Reports", link: "management/reports" },
-        { name: "Safeguarding", link: "management/safeguarding" },
+        { name: "Platform Analytics", link: "/super-admin/management/analytics" },
+        { name: "Reports", link: "/super-admin/management/reports" },
+        { name: "Safeguarding", link: "/super-admin/management/safeguarding" },
       ]
     },
 
-    { name: "Management", icon: "tenancy", link: "super-admin/management",
+    { name: "Management", icon: "tenancy", link: "/super-admin/management",
       children: [
-        { name: "Institutions", link: "management/institutions" },
-        { name: "Subjects", link: "management/subjects" },
-        { name: "Subscription Plans", link: "management/plans" },
-        { name: "Billing", link: "management/billing" },
-        { name: "Content Library", link: "management/content-library" },
-        { name: "Content Packages", link: "management/content-packages" },
-        { name: "Users & Roles", link: "management/users-roles" },
-        { name: "Support Centre", link: "management/support" },
-        { name: "Audit Logs", link: "management/audit-logs" },
-        { name: "System Settings", link: "management/system-settings" },
+        { name: "Institutions", link: "/super-admin/management/institutions" },
+        { name: "Subjects", link: "/super-admin/management/subjects" },
+        { name: "Subscription Plans", link: "/super-admin/management/plans" },
+        { name: "Billing", link: "/super-admin/management/billing" },
+        { name: "Content Library", link: "/super-admin/management/content-library" },
+        { name: "Content Packages", link: "/super-admin/management/content-packages" },
+        { name: "Users & Roles", link: "/super-admin/management/users-roles" },
+        { name: "Support Centre", link: "/super-admin/management/support" },
+        { name: "Audit Logs", link: "/super-admin/management/audit-logs" },
+        { name: "System Settings", link: "/super-admin/management/system-settings" },
       ]
     },
   ]

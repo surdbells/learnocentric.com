@@ -47,7 +47,7 @@ export class Sidenav implements OnInit {
   }
 
   get dashboardLink(): string {
-    return `/${this.router.url.split('/')[1]}/dashboard`;
+    return `/${this.router.url.split('/')[1]}/main`;
   }
 
   isChildActive(link: string): boolean {
