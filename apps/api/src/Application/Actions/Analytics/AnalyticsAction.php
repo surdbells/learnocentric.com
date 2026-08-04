@@ -390,6 +390,118 @@ final class AnalyticsAction
         ]);
     }
 
+    /**
+     * GET /analytics/report-card/{id} — a formal term report card for one learner:
+     * per-subject score + letter grade (from the school's grade bands) + remark,
+     * an overall grade, attendance and the latest teacher comment. Viewable by the
+     * learner, their guardian, or staff.
+     */
+    public function reportCard(Request $request, Response $response, array $args): Response
+    {
+        $viewer = $this->currentUser($request);
+        $student = $this->em->getRepository(User::class)->find((int) $args['id']);
+        if ($student === null || $student->getRole()->getCode() !== 'student') {
+            return Json::error($response, 'Student not found.', 404);
+        }
+        if (!$this->canViewStudent($viewer, $student)) {
+            return Json::error($response, 'You are not allowed to view this report card.', 403);
+        }
+
+        $institution = $student->getInstitution();
+        $bands = $this->gradeBands($institution);
+
+        $attempts = $this->em->getRepository(AssessmentAttempt::class)
+            ->findBy(['student' => $student, 'status' => AssessmentAttempt::GRADED]);
+        $academic = array_values(array_filter($attempts, static fn (AssessmentAttempt $a) => $a->getTrack() === 'academic'));
+
+        $subjects = array_map(function (array $s) use ($bands) {
+            $grade = $this->letterFor($s['quiz_average'], $bands);
+            return [
+                'subject' => $s['subject'],
+                'score' => $s['quiz_average'],
+                'grade' => $grade,
+                'remark' => $this->remarkFor($s['quiz_average']),
+            ];
+        }, $this->subjectProgressForStudent($academic));
+
+        $overallAvg = $academic !== []
+            ? round(array_sum(array_map(static fn (AssessmentAttempt $a) => (float) $a->getPercentage(), $academic)) / count($academic), 1)
+            : null;
+
+        // Attendance (live-class joins vs offered).
+        $joined = $this->em->getRepository(LiveClassAttendance::class)->count(['student' => $student]);
+        $classIds = [];
+        foreach ($this->em->getRepository(Enrollment::class)->findBy(['student' => $student]) as $e) {
+            $classIds[] = $e->getSchoolClass()->getId();
+        }
+        $offered = 0;
+        $classLabel = null;
+        if ($classIds !== []) {
+            $offered = (int) $this->em->createQueryBuilder()->select('COUNT(lc.id)')->from(LiveClass::class, 'lc')
+                ->where('lc.schoolClass IN (:cids)')->andWhere('lc.status != :c')
+                ->setParameter('cids', $classIds)->setParameter('c', LiveClass::CANCELLED)->getQuery()->getSingleScalarResult();
+            $enr = $this->em->getRepository(Enrollment::class)->findOneBy(['student' => $student]);
+            $classLabel = $enr?->getSchoolClass()->getLabel();
+        }
+
+        $latestNote = $this->em->createQueryBuilder()->select('f')->from(FeedbackNote::class, 'f')
+            ->where('f.student = :s')->setParameter('s', $student)->orderBy('f.id', 'DESC')->setMaxResults(1)
+            ->getQuery()->getResult();
+        $teacherComment = $latestNote !== [] ? $latestNote[0]->getMessage() : null;
+
+        return Json::write($response, [
+            'school' => $institution?->getName(),
+            'student' => ['id' => $student->getId(), 'name' => $student->getFirstName() . ' ' . $student->getLastName(), 'class' => $classLabel],
+            'subjects' => $subjects,
+            'overall' => [
+                'average' => $overallAvg,
+                'grade' => $overallAvg === null ? null : $this->letterFor($overallAvg, $bands),
+                'remark' => $overallAvg === null ? null : $this->remarkFor($overallAvg),
+            ],
+            'attendance' => ['joined' => $joined, 'offered' => $offered, 'rate' => $offered > 0 ? round($joined / $offered * 100, 1) : null],
+            'teacher_comment' => $teacherComment,
+            'generated_at' => (new \DateTimeImmutable())->format(DATE_ATOM),
+        ]);
+    }
+
+    /**
+     * The institution's grade bands (high→low), defaulting to a standard A–F scale.
+     *
+     * @return array<int, array{grade:string, min:int}>
+     */
+    private function gradeBands(?object $institution): array
+    {
+        $settings = method_exists($institution, 'getSettings') ? ($institution->getSettings() ?? []) : [];
+        $bands = is_array($settings['grading']['bands'] ?? null) ? $settings['grading']['bands'] : [];
+        $clean = [];
+        foreach ($bands as $b) {
+            if (!empty($b['grade'])) {
+                $clean[] = ['grade' => (string) $b['grade'], 'min' => max(0, min(100, (int) ($b['min'] ?? 0)))];
+            }
+        }
+        if ($clean === []) {
+            $clean = [['grade' => 'A', 'min' => 70], ['grade' => 'B', 'min' => 60], ['grade' => 'C', 'min' => 50], ['grade' => 'D', 'min' => 40], ['grade' => 'F', 'min' => 0]];
+        }
+        usort($clean, static fn ($a, $b) => $b['min'] <=> $a['min']);
+        return $clean;
+    }
+
+    /** @param array<int, array{grade:string, min:int}> $bands */
+    private function letterFor(float $score, array $bands): string
+    {
+        foreach ($bands as $b) {
+            if ($score >= $b['min']) {
+                return $b['grade'];
+            }
+        }
+        return $bands !== [] ? end($bands)['grade'] : '—';
+    }
+
+    private function remarkFor(float $score): string
+    {
+        return $score >= 80 ? 'Excellent' : ($score >= 65 ? 'Very good' : ($score >= 50 ? 'Good' : ($score >= 40 ? 'Fair' : 'Needs improvement')));
+    }
+
     /** GET /analytics/children — students linked to the current guardian. */
     public function children(Request $request, Response $response): Response
     {

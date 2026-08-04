@@ -1,0 +1,31 @@
+:host {
+  display: block;
+}
+
+.rc-badge {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--brand-50, var(--bs-primary-bg-subtle));
+  color: var(--brand-600, var(--bs-primary));
+  flex: 0 0 auto;
+}
+
+.rc-table th,
+.rc-table td {
+  padding: 0.5rem 0.75rem;
+}
+
+.rc-comment {
+  background: var(--bs-tertiary-bg);
+  border-left: 3px solid var(--brand-500, var(--bs-primary));
+}
+
+.rc-sign {
+  border-bottom: 1px dashed var(--bs-border-color);
+  height: 2.2rem;
+  margin-bottom: 0.25rem;
+}

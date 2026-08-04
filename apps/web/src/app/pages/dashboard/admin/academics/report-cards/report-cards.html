@@ -1,0 +1,93 @@
+<app-page-header icon="description" action="Report Cards"></app-page-header>
+
+<!-- Learner picker -->
+<div class="card border-0 shadow-sm mb-4"><div class="card-body">
+  <div class="row g-3 align-items-end">
+    <div class="col-md-6">
+      <label class="form-label" for="rc_learner">Choose a learner</label>
+      <select id="rc_learner" class="form-select" [ngModel]="selectedId()" (ngModelChange)="selectedId.set($event); load()">
+        <option [ngValue]="null" disabled>Select a learner</option>
+        @for (l of learners(); track l.id) { <option [ngValue]="l.id">{{ l.name }}</option> }
+      </select>
+    </div>
+    @if (card()) {
+      <div class="col-md-6 text-md-end">
+        <button type="button" class="btn btn-primary" [disabled]="downloading()" (click)="downloadPdf()">
+          <app-icon name="download" [size]="16" /> {{ downloading() ? 'Preparing…' : 'Download PDF' }}
+        </button>
+      </div>
+    }
+  </div>
+</div></div>
+
+@if (loading()) {
+  <div class="text-body-secondary p-4">Loading report card…</div>
+} @else if (!selectedId()) {
+  <div class="card border-0 shadow-sm p-5 text-center text-body-secondary">
+    Choose a learner to generate their term report card.
+  </div>
+} @else if (card(); as c) {
+  <div id="reportCardArea" class="card border-0 shadow-sm report-card"><div class="card-body p-4">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-start border-bottom pb-3 mb-3">
+      <div class="d-flex align-items-center gap-2">
+        <span class="rc-badge"><app-icon name="school" [size]="22" /></span>
+        <div>
+          <div class="fw-bold fs-5">{{ c.school || 'School' }}</div>
+          <div class="text-body-secondary small">Termly Report Card</div>
+        </div>
+      </div>
+      <div class="text-end small text-body-secondary">Generated {{ c.generated_at | date:'mediumDate' }}</div>
+    </div>
+
+    <!-- Student info -->
+    <div class="row g-2 mb-3">
+      <div class="col-sm-6"><span class="text-body-secondary small">Learner</span><div class="fw-semibold">{{ c.student.name }}</div></div>
+      <div class="col-sm-3"><span class="text-body-secondary small">Class</span><div class="fw-semibold">{{ c.student.class || '—' }}</div></div>
+      <div class="col-sm-3"><span class="text-body-secondary small">Attendance</span><div class="fw-semibold">{{ c.attendance.joined }}/{{ c.attendance.offered }} ({{ pct(c.attendance.rate) }})</div></div>
+    </div>
+
+    <!-- Subject grades -->
+    <div class="table-responsive mb-3">
+      <table class="table table-bordered align-middle mb-0 small rc-table">
+        <thead class="table-light">
+          <tr><th>Subject</th><th class="text-center">Score</th><th class="text-center">Grade</th><th>Remark</th></tr>
+        </thead>
+        <tbody>
+          @for (s of c.subjects; track s.subject) {
+            <tr>
+              <td class="fw-medium">{{ s.subject }}</td>
+              <td class="text-center">{{ s.score }}%</td>
+              <td class="text-center"><span class="badge bg-{{ gradeTone(s.grade) }}">{{ s.grade }}</span></td>
+              <td class="text-body-secondary">{{ s.remark }}</td>
+            </tr>
+          } @empty {
+            <tr><td colspan="4" class="text-center text-body-secondary py-3">No graded subjects yet.</td></tr>
+          }
+        </tbody>
+        @if (c.overall.average !== null) {
+          <tfoot class="table-light">
+            <tr class="fw-semibold">
+              <td>Overall</td>
+              <td class="text-center">{{ c.overall.average }}%</td>
+              <td class="text-center"><span class="badge bg-{{ gradeTone(c.overall.grade) }}">{{ c.overall.grade }}</span></td>
+              <td>{{ c.overall.remark }}</td>
+            </tr>
+          </tfoot>
+        }
+      </table>
+    </div>
+
+    <!-- Teacher comment -->
+    <div class="rc-comment p-3 rounded mb-2">
+      <div class="fw-semibold small mb-1">Teacher's comment</div>
+      <div class="small">{{ c.teacher_comment || 'No comment recorded for this term.' }}</div>
+    </div>
+
+    <!-- Signatures -->
+    <div class="row g-3 mt-3">
+      <div class="col-6"><div class="rc-sign"></div><div class="small text-body-secondary text-center">Class teacher</div></div>
+      <div class="col-6"><div class="rc-sign"></div><div class="small text-body-secondary text-center">Head teacher</div></div>
+    </div>
+  </div></div>
+}
