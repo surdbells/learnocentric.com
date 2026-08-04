@@ -7,14 +7,16 @@ import {AuthService} from '../../../../../common/auth/auth.service';
 import {PdfService} from '../../../../../common/service/pdf-service';
 import {Icon} from '../../../../../common/icon/icon';
 import {RichText} from '../../../../../common/rich-editor/rich-text';
-import {KpiItem, KpiStrip} from '../../../../../common/ui';
+import {KpiItem, KpiStrip, LineChart, BarList, BarItem, StatusBadge, StatRing} from '../../../../../common/ui';
+import {Tone} from '../../../../../common/ui/ui-types';
 
 const RATING_COLOR: Record<string, string> = {emerging: 'secondary', developing: 'info', proficient: 'primary', mastery: 'success'};
+const MASTERY_TONE: Record<string, Tone> = {Strong: 'success', Good: 'primary', Developing: 'warning', Weak: 'danger'};
 
 @Component({
   selector: 'app-progress-report',
   standalone: true,
-  imports: [RichText, Icon, PageHeader, DatePipe, KpiStrip],
+  imports: [RichText, Icon, PageHeader, DatePipe, KpiStrip, LineChart, BarList, StatusBadge, StatRing],
   templateUrl: './progress-report.html',
   styleUrl: './progress-report.css',
 })
@@ -31,18 +33,40 @@ export class ProgressReport {
   isParent = signal(false);
   downloading = signal(false);
 
+  readonly masteryTones = MASTERY_TONE;
+
   readonly headlineKpis = computed<KpiItem[]>(() => {
     const r = this.report();
     if (!r) return [];
     const acad = r.academic?.average, ws = r.worksheets?.average;
     const band = (v: number | null | undefined) => v == null ? 'secondary' : v >= 70 ? 'success' : v >= 50 ? 'warning' : 'danger';
+    const entries = r.competency?.entries ?? [];
+    const reviewed = entries.filter((e: any) => e.status === 'reviewed').length;
     return [
-      {label: 'Quiz average', value: this.pct(acad ?? null), icon: 'workspace_premium', tone: band(acad) as any},
-      {label: 'Worksheet average', value: this.pct(ws ?? null), icon: 'assignment_turned_in', tone: band(ws) as any},
-      {label: 'Portfolio entries', value: r.competency?.entries?.length ?? 0, icon: 'folder_special', tone: 'primary'},
-      {label: 'Live classes joined', value: `${r.attendance?.joined ?? 0}/${r.attendance?.offered ?? 0}`, icon: 'video_camera_front', tone: 'info'},
+      {label: 'Overall academic', value: this.pct(acad ?? null), icon: 'trending_up', tone: band(acad) as any},
+      {label: 'Average quiz score', value: this.pct(acad ?? null), icon: 'workspace_premium', tone: band(acad) as any},
+      {label: 'Worksheet completion', value: this.pct(ws ?? null), icon: 'assignment_turned_in', tone: band(ws) as any},
+      {label: 'Portfolio completion', value: entries.length ? Math.round(reviewed / entries.length * 100) + '%' : '—', sublabel: `${reviewed}/${entries.length} reviewed`, icon: 'folder_special', tone: 'primary'},
     ];
   });
+
+  // Performance overview (per-student monthly trend)
+  readonly trendSeries = computed<number[]>(() => (this.report()?.performance_trend ?? []).map((m: any) => m.average ?? 0));
+  readonly trendLabels = computed<string[]>(() => (this.report()?.performance_trend ?? []).map((m: any) => this.monthLabel(m.month)));
+
+  readonly subjectProgress = computed<any[]>(() => this.report()?.subject_progress ?? []);
+
+  readonly topicBars = computed<BarItem[]>(() =>
+    (this.report()?.topic_mastery ?? []).map((t: any) => ({label: t.topic, value: t.average, tone: MASTERY_TONE[t.mastery] ?? 'secondary'})));
+
+  readonly overallPct = computed<number>(() => Math.round(this.report()?.academic?.average ?? 0));
+
+  masteryTone(band: string): string { return MASTERY_TONE[band] ?? 'secondary'; }
+  monthLabel(ym: string): string {
+    const [y, m] = (ym ?? '').split('-').map(Number);
+    if (!y || !m) return ym;
+    return new Date(y, m - 1, 1).toLocaleString('en', {month: 'short'});
+  }
 
   constructor() {
     const user = this.auth.getAuthSession()?.user;

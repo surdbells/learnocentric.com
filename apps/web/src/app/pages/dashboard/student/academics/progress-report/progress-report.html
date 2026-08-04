@@ -40,6 +40,57 @@
   </div>
   <app-kpi-strip class="d-block mb-4" [items]="headlineKpis()" [cols]="4" />
 
+  <!-- Performance overview + progress snapshot -->
+  <div class="row g-3 mb-3">
+    <div class="col-lg-8">
+      <div class="card border-0 shadow-sm h-100"><div class="card-body">
+        <h6 class="fw-semibold mb-1">Performance overview</h6>
+        <p class="small text-body-secondary mb-2">Your academic performance over the past months</p>
+        @if (trendSeries().length) { <app-line-chart [points]="trendSeries()" [labels]="trendLabels()" tone="primary" /> }
+        @else { <div class="text-body-secondary small py-5 text-center">No performance data yet.</div> }
+      </div></div>
+    </div>
+    <div class="col-lg-4">
+      <div class="card border-0 shadow-sm h-100"><div class="card-body text-center d-flex flex-column justify-content-center">
+        <h6 class="fw-semibold mb-2">Your progress snapshot</h6>
+        <app-stat-ring class="mx-auto" [value]="overallPct()" caption="overall" [tone]="overallPct() >= 70 ? 'success' : overallPct() >= 50 ? 'warning' : 'danger'" [size]="120" [stroke]="11" />
+        <div class="small text-body-secondary mt-2">Great job! Keep working towards mastery.</div>
+      </div></div>
+    </div>
+  </div>
+
+  <!-- Subject progress + topic mastery -->
+  <div class="row g-3 mb-3">
+    <div class="col-lg-7">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-body pb-2"><h6 class="fw-semibold mb-0">Subject progress</h6></div>
+        <div class="table-responsive">
+          <table class="table align-middle mb-0 small">
+            <thead class="table-light"><tr><th>Subject</th><th>Recent topic</th><th class="text-center">Quiz score</th><th class="text-center">Attempts</th><th>Mastery</th></tr></thead>
+            <tbody>
+              @for (s of subjectProgress(); track s.subject) {
+                <tr>
+                  <td class="fw-medium">{{ s.subject }}</td>
+                  <td class="text-body-secondary">{{ s.last_topic || '—' }}</td>
+                  <td class="text-center fw-semibold">{{ s.quiz_average }}%</td>
+                  <td class="text-center">{{ s.attempts }}</td>
+                  <td><app-status-badge [value]="s.mastery" [map]="masteryTones" /></td>
+                </tr>
+              } @empty { <tr><td colspan="5" class="text-body-secondary small py-3 text-center">No graded quizzes yet.</td></tr> }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-5">
+      <div class="card border-0 shadow-sm h-100"><div class="card-body">
+        <h6 class="fw-semibold mb-3">Topic mastery</h6>
+        @if (topicBars().length) { <app-bar-list [items]="topicBars()" /> }
+        @else { <div class="text-body-secondary small">No topic results yet.</div> }
+      </div></div>
+    </div>
+  </div>
+
   <!-- Structured teacher summary for parents (spec §7.5, §18) -->
   @if (r.feedback.strengths || r.feedback.misconceptions?.length || r.feedback.practice_needed || r.feedback.teacher_comment || r.feedback.parent_support_suggestion) {
     <div class="card border-0 shadow-sm mb-4"><div class="card-body">

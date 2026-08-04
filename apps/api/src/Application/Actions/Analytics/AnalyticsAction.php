@@ -238,6 +238,29 @@ final class AnalyticsAction
         return $avg >= 80 ? 'Strong' : ($avg >= 60 ? 'Good' : ($avg >= 40 ? 'Developing' : 'Weak'));
     }
 
+    /**
+     * One learner's quiz average + mastery per subject, for the subject-progress table.
+     *
+     * @param AssessmentAttempt[] $attempts (the learner's academic attempts)
+     * @return array<int, array{subject:string, quiz_average:float, attempts:int, mastery:string, last_topic:?string}>
+     */
+    private function subjectProgressForStudent(array $attempts): array
+    {
+        $by = [];
+        foreach ($attempts as $a) {
+            $name = $a->getAssessment()->getSubject()->getName();
+            $by[$name] ??= ['subject' => $name, 'sum' => 0.0, 'n' => 0, 'last_topic' => $a->getAssessment()->getTopic()?->getTitle()];
+            $by[$name]['sum'] += (float) $a->getPercentage();
+            $by[$name]['n']++;
+        }
+        $out = array_map(function (array $r) {
+            $avg = round($r['sum'] / max(1, $r['n']), 1);
+            return ['subject' => $r['subject'], 'quiz_average' => $avg, 'attempts' => $r['n'], 'mastery' => $this->masteryBand($avg), 'last_topic' => $r['last_topic']];
+        }, array_values($by));
+        usort($out, static fn ($a, $b) => $b['quiz_average'] <=> $a['quiz_average']);
+        return $out;
+    }
+
     /** GET /analytics/children — students linked to the current guardian. */
     public function children(Request $request, Response $response): Response
     {
@@ -345,6 +368,9 @@ final class AnalyticsAction
                     'submitted_at' => $a->getSubmittedAt()?->format(DATE_ATOM),
                 ], $attempts),
             ],
+            'performance_trend' => $this->performanceTrend($academic),
+            'topic_mastery' => $this->topicMastery($academic),
+            'subject_progress' => $this->subjectProgressForStudent($academic),
             'worksheets' => [
                 'average' => $wsAvg,
                 'submissions' => array_map(static fn (WorksheetSubmission $s) => [
