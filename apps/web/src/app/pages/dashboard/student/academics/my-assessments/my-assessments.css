@@ -46,3 +46,16 @@
   border-color: var(--bs-primary);
   color: #fff;
 }
+
+/* --- Quizzes & Assessments list-view (design fidelity) --- */
+.qa-ic {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+}
+.qa-row:first-of-type { border-top: 0 !important; }
+.qa-tip { background: var(--bs-warning-bg-subtle); }

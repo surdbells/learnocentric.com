@@ -2,22 +2,29 @@ import {Component, computed, inject, OnDestroy, PLATFORM_ID, signal} from '@angu
 import {DatePipe, isPlatformBrowser} from '@angular/common';
 import {FormsModule} from '@angular/forms';
 import {ToastrService} from 'ngx-toastr';
+import {forkJoin, of} from 'rxjs';
+import {catchError} from 'rxjs/operators';
+import {AuthService} from '../../../../../common/auth/auth.service';
 import {PageHeader} from '../../../../../common/layout/page-header/page-header';
 import {ApiService} from '../../../../../common/service/api.service';
 import {Icon} from '../../../../../common/icon/icon';
-import {KpiItem, KpiStrip, TabBar, TabItem} from '../../../../../common/ui';
+import {KpiItem, KpiStrip, TabBar, TabItem, LineChart, BarList, BarItem, StatRing} from '../../../../../common/ui';
+import {Tone} from '../../../../../common/ui/ui-types';
 
 @Component({
   selector: 'app-my-assessments',
   standalone: true,
-  imports: [Icon, PageHeader, FormsModule, DatePipe, KpiStrip, TabBar],
+  imports: [Icon, PageHeader, FormsModule, DatePipe, KpiStrip, TabBar, LineChart, BarList, StatRing],
   templateUrl: './my-assessments.html',
   styleUrl: './my-assessments.css',
 })
 export class MyAssessments implements OnDestroy {
   private readonly api = inject(ApiService);
+  private readonly auth = inject(AuthService);
   private readonly toast = inject(ToastrService);
   private readonly platformId = inject(PLATFORM_ID);
+
+  analytics = signal<any | null>(null);
 
   mode = signal<'list' | 'take' | 'result'>('list');
   loading = signal(false);
@@ -33,18 +40,52 @@ export class MyAssessments implements OnDestroy {
   private timerId: any = null;
   private deadline = 0;          // epoch ms; 0 = untimed
 
+  readonly graded = computed<any[]>(() => this.available().filter(x => x.attempt?.status === 'graded' && x.attempt?.percentage != null));
+  readonly avgScore = computed<number | null>(() => {
+    const g = this.graded();
+    return g.length ? Math.round(g.reduce((s, x) => s + x.attempt.percentage, 0) / g.length) : null;
+  });
+
   readonly kpis = computed<KpiItem[]>(() => {
-    const a = this.available();
-    const graded = a.filter(x => x.attempt?.status === 'graded' && x.attempt?.percentage != null);
-    const avg = graded.length ? Math.round(graded.reduce((s, x) => s + x.attempt.percentage, 0) / graded.length) : null;
-    const best = graded.length ? Math.max(...graded.map(x => x.attempt.percentage)) : null;
+    const a = this.available(), g = this.graded();
+    const avg = this.avgScore();
+    const best = g.length ? Math.max(...g.map(x => x.attempt.percentage)) : null;
+    const quizzes = g.filter(x => x.type === 'quiz').length;
+    const assessments = g.filter(x => x.type !== 'quiz').length;
+    const areas = (this.analytics()?.topic_mastery ?? []).filter((t: any) => t.average < 60).length;
     return [
       {label: 'Overall average', value: avg === null ? '—' : avg + '%', icon: 'workspace_premium', tone: avg === null ? 'secondary' : avg >= 70 ? 'success' : avg >= 50 ? 'warning' : 'danger'},
-      {label: 'Taken', value: graded.length, icon: 'assignment_turned_in', tone: 'info'},
+      {label: 'Quizzes taken', value: quizzes, icon: 'quiz', tone: 'info'},
+      {label: 'Assessments taken', value: assessments, icon: 'assignment_turned_in', tone: 'primary'},
       {label: 'Best score', value: best === null ? '—' : best + '%', icon: 'star', tone: 'success'},
-      {label: 'Open now', value: a.length, icon: 'quiz', tone: 'primary'},
+      {label: 'Areas to improve', value: areas, sublabel: 'below mastery', icon: 'monitoring', tone: areas > 0 ? 'danger' : 'success'},
     ];
   });
+
+  /** Assessments not yet completed (upcoming/open). */
+  readonly upcoming = computed<any[]>(() => this.available().filter(x => x.attempt?.status !== 'graded'));
+
+  /** Graded attempts as recent results, newest first. */
+  readonly recentResults = computed<any[]>(() =>
+    this.graded()
+      .map(x => ({title: x.title, type: x.type, subject: x.subject, percentage: x.attempt.percentage,
+        score: x.attempt.score, total: x.attempt.total_marks, band: this.perfBand(x.attempt.percentage)}))
+      .slice(0, 6));
+
+  // Performance overview (per-student trend) + topic performance
+  readonly trendSeries = computed<number[]>(() => (this.analytics()?.performance_trend ?? []).map((m: any) => m.average ?? 0));
+  readonly trendLabels = computed<string[]>(() => (this.analytics()?.performance_trend ?? []).map((m: any) => this.monthLabel(m.month)));
+  readonly topicBars = computed<BarItem[]>(() =>
+    (this.analytics()?.topic_mastery ?? []).slice(0, 5).map((t: any) => ({label: t.topic, value: t.average,
+      tone: (t.average >= 70 ? 'success' : t.average >= 50 ? 'warning' : 'danger') as Tone})));
+
+  perfBand(p: number): string { return p >= 80 ? 'Excellent' : p >= 65 ? 'Good' : p >= 50 ? 'Fair' : 'Needs work'; }
+  perfTone(p: number): string { return p >= 80 ? 'success' : p >= 65 ? 'primary' : p >= 50 ? 'warning' : 'danger'; }
+  monthLabel(ym: string): string {
+    const [y, m] = (ym ?? '').split('-').map(Number);
+    if (!y || !m) return ym;
+    return new Date(y, m - 1, 1).toLocaleString('en', {month: 'short'});
+  }
 
   readonly tabs = computed<TabItem[]>(() => {
     const a = this.available();
@@ -68,8 +109,12 @@ export class MyAssessments implements OnDestroy {
 
   loadAvailable(): void {
     this.loading.set(true);
-    this.api.get<any>('/backend/assessment/attempts/available').subscribe({
-      next: (res) => { this.available.set(res?.data ?? []); this.loading.set(false); },
+    const myId = this.auth.getAuthSession()?.user?.id;
+    forkJoin({
+      available: this.api.get<any>('/backend/assessment/attempts/available'),
+      analytics: myId ? this.api.get<any>(`/backend/analytics/student/${myId}`).pipe(catchError(() => of(null))) : of(null),
+    }).subscribe({
+      next: (res) => { this.available.set(res.available?.data ?? []); this.analytics.set(res.analytics); this.loading.set(false); },
       error: () => { this.loading.set(false); this.toast.error('Could not load your assessments'); },
     });
   }
