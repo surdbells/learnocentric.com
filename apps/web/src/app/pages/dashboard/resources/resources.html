@@ -25,45 +25,105 @@
     <div class="card border-0 shadow-sm p-5 text-center text-body-secondary">This package has no available resources right now.</div>
   } @else {
     <app-kpi-strip class="d-block mb-4" [items]="kpis()" [cols]="4" />
-    <app-tab-bar class="d-block mb-3" [tabs]="tabs()" [active]="activeTab()" (activeChange)="activeTab.set($event)" />
-    @if (!filtered().length) {
-      <div class="card border-0 shadow-sm p-4 text-center text-body-secondary">No resources in this view.</div>
-    }
+
     <div class="row g-3">
-      @for (r of filtered(); track r.id) {
-        <div class="col-md-6 col-xl-4">
-          <div class="card border-0 shadow-sm h-100">
-            <div class="card-body d-flex flex-column">
-              <div class="d-flex align-items-start gap-3 mb-2">
-                <app-icon [name]="typeIcon(r.contentType)" class="text-{{ typeColor(r.contentType) }}" />
-                <div class="flex-grow-1">
-                  <h6 class="fw-semibold mb-0">{{ r.title }}</h6>
-                  <div class="small text-body-secondary text-capitalize">{{ r.contentType }}@if (r.subjectArea) { · {{ r.subjectArea }} }@if (r.gradeLevel) { · {{ r.gradeLevel }} }</div>
-                </div>
-                @if (r.is_premium) { <span class="badge bg-warning-subtle text-warning">Premium</span> }
-              </div>
-              @if (r.description) { <app-rich-text class="small text-body-secondary d-block mb-3" [value]="r.description" /> }
-              <div class="mt-auto d-flex justify-content-between align-items-center gap-2">
-                <div class="d-flex gap-2">
-                  @if (r.file_url && r.downloadable !== false) {
-                    <a class="btn btn-sm btn-outline-primary" [href]="r.file_url" target="_blank" rel="noopener">Open</a>
-                  } @else if (r.file_url) {
-                    <span class="small text-body-secondary fst-italic">View only</span>
-                  } @else {
-                    <span class="small text-body-secondary fst-italic">No file attached</span>
-                  }
-                  @if (isDownloadable(r)) {
-                    <a class="btn btn-sm btn-outline-secondary d-inline-flex align-items-center gap-1" [href]="r.file_url" [attr.download]="downloadName(r)" title="Save for offline use">
-                      <app-icon name="download" [size]="16" /> Download
-                    </a>
-                  }
-                </div>
-                <span class="small text-body-secondary text-uppercase">{{ r.licence }}</span>
-              </div>
-            </div>
+      <!-- Main column -->
+      <div class="col-xl-9">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2">
+          <app-tab-bar class="d-block" [tabs]="tabs()" [active]="activeTab()" (activeChange)="activeTab.set($event)" />
+          <div class="d-flex align-items-center gap-2">
+            <label class="small text-body-secondary" for="rsort">Sort by</label>
+            <select id="rsort" class="form-select form-select-sm w-auto" [ngModel]="sortKey()" (ngModelChange)="sortKey.set($event)">
+              <option value="recent">Most recent</option>
+              <option value="name">Name</option>
+              <option value="size">Size</option>
+            </select>
           </div>
         </div>
-      }
+
+        <!-- Featured -->
+        @if (featured().length) {
+          <h6 class="fw-semibold mb-2">Featured resources</h6>
+          <div class="row g-3 mb-4">
+            @for (r of featured(); track r.id) {
+              <div class="col-md-6 col-xl-3">
+                <div class="card border-0 shadow-sm h-100 feat-card">
+                  <div class="feat-thumb bg-{{ typeColor(r.contentType) }}-subtle text-{{ typeColor(r.contentType) }}">
+                    <app-icon [name]="typeIcon(r.contentType)" [size]="30" />
+                  </div>
+                  <div class="card-body">
+                    <span class="badge bg-{{ typeColor(r.contentType) }}-subtle text-{{ typeColor(r.contentType) }} text-capitalize mb-1">{{ r.contentType }}</span>
+                    <div class="fw-semibold small">{{ r.title }}</div>
+                    <div class="text-body-secondary small">{{ r.subjectArea || 'General' }}@if (r.file_size) { · {{ fileSizeLabel(r.file_size) }} }</div>
+                    @if (r.file_url) { <a class="btn btn-sm btn-outline-primary mt-2" [routerLink]="[viewerRoot(), 'academics', 'resource-viewer']">Open</a> }
+                  </div>
+                </div>
+              </div>
+            }
+          </div>
+        }
+
+        <!-- Recent table -->
+        <h6 class="fw-semibold mb-2">All resources</h6>
+        @if (!filtered().length) {
+          <div class="card border-0 shadow-sm p-4 text-center text-body-secondary">No resources in this view.</div>
+        } @else {
+          <div class="table-responsive card border-0 shadow-sm">
+            <table class="table align-middle mb-0 small">
+              <thead class="table-light"><tr><th>Name</th><th>Type</th><th>Subject</th><th>Added</th><th class="text-end">Size</th><th></th></tr></thead>
+              <tbody>
+                @for (r of filtered(); track r.id) {
+                  <tr>
+                    <td>
+                      <div class="d-flex align-items-center gap-2">
+                        <app-icon [name]="typeIcon(r.contentType)" [size]="18" class="text-{{ typeColor(r.contentType) }}" />
+                        <span class="fw-medium">{{ r.title }}</span>
+                        @if (r.is_premium) { <span class="badge bg-warning-subtle text-warning">Premium</span> }
+                      </div>
+                    </td>
+                    <td><span class="badge bg-{{ typeColor(r.contentType) }}-subtle text-{{ typeColor(r.contentType) }} text-capitalize">{{ r.contentType }}</span></td>
+                    <td class="text-body-secondary">{{ r.subjectArea || 'General' }}</td>
+                    <td class="text-body-secondary">{{ r.created_at | date:'mediumDate' }}</td>
+                    <td class="text-end text-body-secondary">{{ fileSizeLabel(r.file_size) }}</td>
+                    <td class="text-end">
+                      @if (r.file_url) { <a class="btn btn-sm btn-outline-secondary" [routerLink]="[viewerRoot(), 'academics', 'resource-viewer']">View</a> }
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+      </div>
+
+      <!-- Right rail -->
+      <div class="col-xl-3">
+        <div class="card border-0 shadow-sm mb-3"><div class="card-body">
+          <h6 class="fw-semibold mb-3">Quick access</h6>
+          <a class="d-flex align-items-center justify-content-between py-2 text-decoration-none text-body border-bottom" [routerLink]="[viewerRoot(), 'academics', 'resource-viewer']">
+            <span class="small"><app-icon name="play_circle" [size]="16" class="text-primary me-1" /> Resource viewer</span><app-icon name="chevron_right" [size]="16" class="text-body-secondary" />
+          </a>
+          <a class="d-flex align-items-center justify-content-between py-2 text-decoration-none text-body" [routerLink]="[viewerRoot(), 'academics', 'worksheets']">
+            <span class="small"><app-icon name="assignment" [size]="16" class="text-warning me-1" /> My worksheets</span><app-icon name="chevron_right" [size]="16" class="text-body-secondary" />
+          </a>
+        </div></div>
+
+        <div class="card border-0 shadow-sm mb-3"><div class="card-body">
+          <h6 class="fw-semibold mb-2">Library</h6>
+          <div class="d-flex align-items-baseline gap-2"><span class="fs-5 fw-bold">{{ librarySizeLabel() }}</span><span class="text-body-secondary small">total</span></div>
+          <div class="text-body-secondary small mb-2">{{ downloadablePct() }}% downloadable · {{ resources().length }} items</div>
+          <div class="lib-bar"><span [style.width.%]="downloadablePct()"></span></div>
+        </div></div>
+
+        <div class="card border-0 shadow-sm"><div class="card-body">
+          <h6 class="fw-semibold mb-2">Subjects</h6>
+          @for (s of bySubject(); track s.subject) {
+            <div class="d-flex justify-content-between align-items-center py-1 small">
+              <span>{{ s.subject }}</span><span class="text-body-secondary">{{ s.count }} resource{{ s.count === 1 ? '' : 's' }}</span>
+            </div>
+          }
+        </div></div>
+      </div>
     </div>
   }
 }

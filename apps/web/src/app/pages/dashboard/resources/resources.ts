@@ -1,7 +1,11 @@
 import {Component, computed, inject, signal} from '@angular/core';
+import {DatePipe} from '@angular/common';
+import {FormsModule} from '@angular/forms';
+import {RouterLink} from '@angular/router';
 import {ToastrService} from 'ngx-toastr';
 import {PageHeader} from '../../../common/layout/page-header/page-header';
 import {ApiService} from '../../../common/service/api.service';
+import {AuthService} from '../../../common/auth/auth.service';
 import {Icon} from '../../../common/icon/icon';
 import {RichText} from '../../../common/rich-editor/rich-text';
 import {KpiItem, KpiStrip, TabBar, TabItem} from '../../../common/ui';
@@ -13,12 +17,13 @@ import {KpiItem, KpiStrip, TabBar, TabItem} from '../../../common/ui';
 @Component({
   selector: 'app-resources',
   standalone: true,
-  imports: [RichText, Icon, PageHeader, KpiStrip, TabBar],
+  imports: [RichText, Icon, RouterLink, DatePipe, FormsModule, PageHeader, KpiStrip, TabBar],
   templateUrl: './resources.html',
   styleUrl: './resources.css',
 })
 export class Resources {
   private readonly api = inject(ApiService);
+  private readonly auth = inject(AuthService);
   private readonly toast = inject(ToastrService);
 
   loading = signal(true);
@@ -26,6 +31,8 @@ export class Resources {
   package = signal<any | null>(null);
   resources = signal<any[]>([]);
   activeTab = signal<string>('all');
+  sortKey = signal<'recent' | 'name' | 'size'>('recent');
+  viewerRoot = signal('/student');
 
   readonly kpis = computed<KpiItem[]>(() => {
     const r = this.resources();
@@ -48,13 +55,56 @@ export class Resources {
   });
 
   readonly filtered = computed<any[]>(() => {
-    const t = this.activeTab(), r = this.resources();
-    return t === 'all' ? r : r.filter(x => x.contentType === t);
+    const t = this.activeTab(), sort = this.sortKey();
+    let r = t === 'all' ? [...this.resources()] : this.resources().filter(x => x.contentType === t);
+    if (sort === 'name') r.sort((a, b) => (a.title || '').localeCompare(b.title || ''));
+    else if (sort === 'size') r.sort((a, b) => (b.file_size || 0) - (a.file_size || 0));
+    else r.sort((a, b) => (b.created_at || '').localeCompare(a.created_at || ''));
+    return r;
   });
+
+  /** Featured picks — up to 4, one per type where possible for variety. */
+  readonly featured = computed<any[]>(() => {
+    const r = this.resources();
+    const seen = new Set<string>();
+    const picks: any[] = [];
+    for (const x of r) { if (!seen.has(x.contentType)) { seen.add(x.contentType); picks.push(x); } if (picks.length === 4) break; }
+    for (const x of r) { if (picks.length === 4) break; if (!picks.includes(x)) picks.push(x); }
+    return picks;
+  });
+
+  /** Per-subject resource counts for the rail. */
+  readonly bySubject = computed<any[]>(() => {
+    const map = new Map<string, number>();
+    for (const x of this.resources()) {
+      const s = x.subjectArea || 'General';
+      map.set(s, (map.get(s) ?? 0) + 1);
+    }
+    return [...map.entries()].map(([subject, count]) => ({subject, count})).sort((a, b) => b.count - a.count);
+  });
+
+  /** Real total size of the resource library (sum of file sizes). */
+  readonly libraryBytes = computed<number>(() => this.resources().reduce((s, x) => s + (x.file_size || 0), 0));
+  readonly librarySizeLabel = computed<string>(() => this.fileSizeLabel(this.libraryBytes()));
+  readonly downloadablePct = computed<number>(() => {
+    const r = this.resources();
+    if (!r.length) return 0;
+    return Math.round(r.filter(x => this.isDownloadable(x)).length / r.length * 100);
+  });
+
+  fileSizeLabel(bytes: number): string {
+    if (!bytes) return '—';
+    if (bytes < 1024) return bytes + ' B';
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(0) + ' KB';
+    if (bytes < 1024 * 1024 * 1024) return (bytes / 1024 / 1024).toFixed(1) + ' MB';
+    return (bytes / 1024 / 1024 / 1024).toFixed(2) + ' GB';
+  }
 
   titleCase(s: string): string { return s ? s.charAt(0).toUpperCase() + s.slice(1) : ''; }
 
   constructor() {
+    const role = this.auth.getAuthSession()?.user?.role;
+    this.viewerRoot.set(role === 'teacher' ? '/teacher' : role === 'school_admin' ? '/admin' : role === 'tutor_admin' ? '/academy' : '/student');
     this.load();
   }
 

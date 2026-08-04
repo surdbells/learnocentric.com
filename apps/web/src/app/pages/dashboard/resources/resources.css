@@ -1,0 +1,31 @@
+:host {
+  display: block;
+}
+
+.feat-card {
+  overflow: hidden;
+  transition: box-shadow 0.15s ease;
+}
+.feat-card:hover {
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1) !important;
+}
+.feat-thumb {
+  height: 96px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.lib-bar {
+  height: 8px;
+  border-radius: 5px;
+  background: var(--bs-tertiary-bg);
+  overflow: hidden;
+}
+.lib-bar > span {
+  display: block;
+  height: 100%;
+  border-radius: 5px;
+  background: var(--brand-500, var(--bs-primary));
+  transition: width 0.3s ease;
+}
