@@ -155,3 +155,33 @@
 .stage-row:last-child {
   border-bottom: 0 !important;
 }
+
+/* --- My Lessons list-view (design fidelity) --- */
+.cl-bar {
+  height: 8px;
+  border-radius: 5px;
+  background: var(--bs-tertiary-bg);
+  overflow: hidden;
+}
+.cl-bar > span {
+  display: block;
+  height: 100%;
+  border-radius: 5px;
+  background: var(--brand-500, var(--bs-primary));
+  transition: width 0.3s ease;
+}
+
+.lesson-flow { overflow-x: auto; }
+.flow-step {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--brand-50, var(--bs-primary-bg-subtle));
+  color: var(--brand-600, var(--bs-primary));
+  flex: 0 0 auto;
+}
+
+.tn-card { background: var(--bs-info-bg-subtle); }

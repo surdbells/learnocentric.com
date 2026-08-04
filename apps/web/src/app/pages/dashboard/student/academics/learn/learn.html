@@ -14,41 +14,155 @@
   } @else if (!topics().length) {
     <div class="card border-0 shadow-sm p-5 text-center text-body-secondary">No lessons are published for you yet.</div>
   } @else {
-    <app-kpi-strip class="d-block mb-4" [items]="lessonKpis()" [cols]="4" />
-    <app-tab-bar class="d-block mb-3" [tabs]="listTabs()" [active]="listTab()" (activeChange)="listTab.set($event)" />
-    @if (!listFiltered().length) {
-      <div class="card border-0 shadow-sm p-4 text-center text-body-secondary">No lessons in this view.</div>
-    }
-    <div class="row g-3">
-      @for (t of listFiltered(); track t.id) {
-        <div class="col-md-6 col-xl-4">
-          <div class="card border-0 shadow-sm h-100">
-            <div class="card-body d-flex flex-column">
-              <div class="small text-body-secondary">Week {{ t.week_number || '—' }} · {{ t.subject }}</div>
-              <h6 class="fw-semibold mb-2">{{ t.title }}</h6>
+    <p class="text-body-secondary mb-3">Track your current, completed and upcoming lessons.</p>
 
-              <div class="d-flex justify-content-between align-items-center small mb-1">
-                <span class="text-body-secondary">{{ t.completed_stages }}/{{ t.total_stages }} stages</span>
-                <span class="fw-semibold">{{ t.progress }}%</span>
+    <!-- Top summary cards -->
+    <div class="row g-3 mb-3">
+      <!-- Current lesson -->
+      <div class="col-xl-4 col-md-6">
+        <div class="card border-0 shadow-sm h-100"><div class="card-body">
+          <h6 class="fw-semibold mb-3"><app-icon name="menu_book" [size]="16" class="text-primary me-1" /> Current lesson</h6>
+          @if (currentLesson(); as c) {
+            <div class="d-flex justify-content-between align-items-start gap-2">
+              <div>
+                <div class="text-body-secondary small">Subject</div>
+                <div class="fw-semibold mb-1">{{ c.subject }}</div>
+                <div class="text-body-secondary small">Topic</div>
+                <div class="fw-medium">{{ c.title }}</div>
               </div>
-              <div class="progress mb-3" style="height:6px">
-                <div class="progress-bar bg-{{ barColor(t.progress) }}" [style.width.%]="t.progress"></div>
-              </div>
-
-              <div class="d-flex gap-1 mb-3">
-                @for (s of t.stages; track s.key) {
-                  <app-icon [name]="stageIcon(s.key)" class="stage-pip" [class.done]="s.done" [class.avail]="s.available && !s.done" [class.na]="!s.available" [attr.title]="s.label + (s.available ? (s.done ? ' — done' : ' — to do') : ' — not available')" />
-                }
-              </div>
-
-              <button type="button" class="btn btn-sm mt-auto" [class.btn-primary]="!t.complete" [class.btn-outline-success]="t.complete"
-                      [disabled]="busy()" (click)="openLesson(t)">
-                {{ ctaLabel(t) }}
-              </button>
+              <app-stat-ring [value]="c.progress" caption="complete" tone="primary" [size]="72" [stroke]="8" />
             </div>
+            <div class="cl-bar my-2"><span [style.width.%]="c.progress"></span></div>
+            <button type="button" class="btn btn-primary btn-sm w-100" [disabled]="busy()" (click)="openLesson(c)"><app-icon name="play_arrow" [size]="16" /> Continue lesson</button>
+          } @else { <div class="text-body-secondary small">No lesson in progress. Start one below.</div> }
+        </div></div>
+      </div>
+
+      <!-- Next recommended -->
+      <div class="col-xl-4 col-md-6">
+        <div class="card border-0 shadow-sm h-100"><div class="card-body">
+          <h6 class="fw-semibold mb-3"><app-icon name="menu_book" [size]="16" class="text-success me-1" /> Next recommended lesson</h6>
+          @if (nextLesson(); as n) {
+            <div class="text-body-secondary small">Subject</div>
+            <div class="fw-semibold mb-1">{{ n.subject }}</div>
+            <div class="text-body-secondary small">Topic</div>
+            <div class="fw-medium mb-2">{{ n.title }}</div>
+            <span class="badge bg-info-subtle text-info mb-3">Up next</span>
+            <button type="button" class="btn btn-success btn-sm w-100" [disabled]="busy()" (click)="openLesson(n)"><app-icon name="play_arrow" [size]="16" /> Start lesson</button>
+          } @else { <div class="text-body-secondary small">You're all caught up — nothing new to start.</div> }
+        </div></div>
+      </div>
+
+      <!-- Lesson stats + flow -->
+      <div class="col-xl-4">
+        <div class="card border-0 shadow-sm h-100"><div class="card-body">
+          <h6 class="fw-semibold mb-2"><app-icon name="insights" [size]="16" class="text-primary me-1" /> Lesson stats</h6>
+          <div class="d-flex justify-content-between small py-1"><span class="text-body-secondary">Total lessons</span><b>{{ topics().length }}</b></div>
+          <div class="d-flex justify-content-between small py-1"><span class="text-success">Completed</span><b>{{ lessonKpis()[1].value }}</b></div>
+          <div class="d-flex justify-content-between small py-1"><span class="text-info">In progress</span><b>{{ lessonKpis()[2].value }}</b></div>
+          <div class="d-flex justify-content-between small py-1"><span class="text-warning">Upcoming</span><b>{{ lessonKpis()[3].value }}</b></div>
+          <div class="lesson-flow d-flex align-items-center flex-wrap gap-1 mt-2 pt-2 border-top">
+            @for (f of flow; track f.label; let last = $last) {
+              <span class="flow-step" [attr.title]="f.label"><app-icon [name]="f.icon" [size]="13" /></span>
+              @if (!last) { <app-icon name="chevron_right" [size]="12" class="text-body-secondary" /> }
+            }
           </div>
+        </div></div>
+      </div>
+    </div>
+
+    <div class="row g-3">
+      <!-- Main column: filters + table + recently completed -->
+      <div class="col-xl-9">
+        <!-- Filters -->
+        <div class="d-flex flex-wrap gap-2 align-items-center mb-2">
+          <div class="input-group input-group-sm" style="max-width:260px">
+            <span class="input-group-text"><app-icon name="search" [size]="15" /></span>
+            <input type="text" class="form-control" placeholder="Search lessons" [ngModel]="search()" (ngModelChange)="search.set($event)" />
+          </div>
+          <select class="form-select form-select-sm w-auto" [ngModel]="subjectFilter()" (ngModelChange)="subjectFilter.set($event)">
+            <option value="all">All subjects</option>
+            @for (s of subjects(); track s) { <option [value]="s">{{ s }}</option> }
+          </select>
         </div>
-      }
+        <app-tab-bar class="d-block mb-2" [tabs]="listTabs()" [active]="listTab()" (activeChange)="listTab.set($event)" />
+
+        @if (!listFiltered().length) {
+          <div class="card border-0 shadow-sm p-4 text-center text-body-secondary">No lessons in this view.</div>
+        } @else {
+          <div class="table-responsive card border-0 shadow-sm mb-3">
+            <table class="table align-middle mb-0 small">
+              <thead class="table-light">
+                <tr><th>Lesson</th><th>Subject</th><th class="text-center">Week</th><th class="text-center">Progress</th><th class="text-center">Quiz</th><th class="text-center">Worksheet</th><th class="text-center">Portfolio</th><th class="text-end">Action</th></tr>
+              </thead>
+              <tbody>
+                @for (t of listFiltered(); track t.id) {
+                  <tr>
+                    <td class="fw-medium">{{ t.title }}</td>
+                    <td class="text-body-secondary">{{ t.subject }}</td>
+                    <td class="text-center">{{ t.week_number || '—' }}</td>
+                    <td class="text-center">
+                      <span class="badge" [class.bg-success-subtle]="t.complete" [class.text-success]="t.complete"
+                            [class.bg-info-subtle]="!t.complete && t.progress>0" [class.text-info]="!t.complete && t.progress>0"
+                            [class.bg-warning-subtle]="!t.progress" [class.text-warning]="!t.progress">
+                        {{ t.complete ? 'Completed' : (t.progress>0 ? t.progress + '%' : 'Upcoming') }}
+                      </span>
+                    </td>
+                    <td class="text-center"><app-icon [name]="stageState(t,'quiz')==='done' ? 'check_circle' : stageState(t,'quiz')==='todo' ? 'schedule' : 'circle'" [size]="16" [class.text-success]="stageState(t,'quiz')==='done'" [class.text-warning]="stageState(t,'quiz')==='todo'" [class.text-body-secondary]="stageState(t,'quiz')==='na'" /></td>
+                    <td class="text-center"><app-icon [name]="stageState(t,'worksheet')==='done' ? 'check_circle' : stageState(t,'worksheet')==='todo' ? 'schedule' : 'circle'" [size]="16" [class.text-success]="stageState(t,'worksheet')==='done'" [class.text-warning]="stageState(t,'worksheet')==='todo'" [class.text-body-secondary]="stageState(t,'worksheet')==='na'" /></td>
+                    <td class="text-center"><app-icon [name]="stageState(t,'portfolio')==='done' ? 'check_circle' : stageState(t,'portfolio')==='todo' ? 'schedule' : 'circle'" [size]="16" [class.text-success]="stageState(t,'portfolio')==='done'" [class.text-warning]="stageState(t,'portfolio')==='todo'" [class.text-body-secondary]="stageState(t,'portfolio')==='na'" /></td>
+                    <td class="text-end"><button type="button" class="btn btn-sm btn-outline-primary" [disabled]="busy()" (click)="openLesson(t)">{{ ctaLabel(t) }}</button></td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+
+        <!-- Recently completed -->
+        @if (recentlyCompleted().length) {
+          <h6 class="fw-semibold mb-2">Recently completed lessons</h6>
+          <div class="row g-3">
+            @for (t of recentlyCompleted(); track t.id) {
+              <div class="col-md-4">
+                <div class="card border-0 shadow-sm h-100"><div class="card-body py-3">
+                  <div class="fw-semibold small">{{ t.title }}</div>
+                  <div class="text-body-secondary small mb-1">{{ t.subject }} · Week {{ t.week_number || '—' }}</div>
+                  <span class="badge bg-success-subtle text-success">Completed</span>
+                </div></div>
+              </div>
+            }
+          </div>
+        }
+      </div>
+
+      <!-- Right rail -->
+      <div class="col-xl-3">
+        <div class="card border-0 shadow-sm mb-3"><div class="card-body">
+          <h6 class="fw-semibold mb-3"><app-icon name="assignment" [size]="16" class="text-warning me-1" /> Pending lesson tasks</h6>
+          @for (p of pendingTasks(); track $index) {
+            <div class="d-flex align-items-center gap-2 py-2 border-top">
+              <app-icon [name]="stageIcon(p.stage)" [size]="16" class="text-body-secondary" />
+              <span class="small flex-grow-1">{{ p.title }}</span>
+            </div>
+          } @empty { <div class="text-success small"><app-icon name="check_circle" [size]="15" /> No pending tasks.</div> }
+        </div></div>
+
+        @if (weakArea()) {
+          <div class="card border-0 shadow-sm mb-3 border-danger-subtle"><div class="card-body">
+            <h6 class="fw-semibold mb-2"><app-icon name="cancel" [size]="16" class="text-danger me-1" /> Common mistake to watch</h6>
+            <div class="small">{{ weakArea() }}</div>
+          </div></div>
+        }
+
+        @if (tutorNote(); as n) {
+          <div class="card border-0 shadow-sm tn-card"><div class="card-body">
+            <h6 class="fw-semibold mb-2"><app-icon name="chat" [size]="16" class="text-info me-1" /> Tutor note</h6>
+            <div class="small">{{ n.message }}</div>
+            @if (n.author) { <div class="small text-info text-end mt-1">— {{ n.author }}</div> }
+          </div></div>
+        }
+      </div>
     </div>
   }
 }

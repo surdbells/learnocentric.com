@@ -9,14 +9,21 @@ import {MediaEmbed} from '../../../../../common/media-embed/media-embed';
 import {RichEditor} from '../../../../../common/rich-editor/rich-editor';
 import {RichText} from '../../../../../common/rich-editor/rich-text';
 import {FormsModule} from '@angular/forms';
-import {KpiItem, KpiStrip, TabBar, TabItem} from '../../../../../common/ui';
+import {forkJoin, of} from 'rxjs';
+import {catchError} from 'rxjs/operators';
+import {KpiItem, KpiStrip, TabBar, TabItem, StatRing} from '../../../../../common/ui';
 
 const STAGE_ICON: Record<string, string> = {lesson: 'menu_book', quiz: 'quiz', worksheet: 'assignment_turned_in', portfolio: 'folder_special'};
+/** Design "Lesson Flow" steps. */
+const LESSON_FLOW = [
+  {label: 'Learn', icon: 'menu_book'}, {label: 'Guided practice', icon: 'edit_square'}, {label: 'Quiz', icon: 'quiz'},
+  {label: 'Worksheet', icon: 'assignment_turned_in'}, {label: 'Apply it', icon: 'touch_app'}, {label: 'Feedback', icon: 'forum'},
+];
 
 @Component({
   selector: 'app-learn',
   standalone: true,
-  imports: [Icon, PageHeader, MediaEmbed, RichEditor, RichText, FormsModule, DatePipe, KpiStrip, TabBar],
+  imports: [Icon, PageHeader, MediaEmbed, RichEditor, RichText, FormsModule, DatePipe, KpiStrip, TabBar, StatRing],
   templateUrl: './learn.html',
   styleUrl: './learn.css',
 })
@@ -44,9 +51,48 @@ export class Learn {
 
   // List-view status filter (distinct from the in-lesson content tabs above)
   listTab = signal<string>('all');
+  search = signal<string>('');
+  subjectFilter = signal<string>('all');
+  extra = signal<any | null>(null); // /dashboard/student for tasks + tutor note
+
+  readonly flow = LESSON_FLOW;
 
   /** Bucket a topic by its learning progress. */
   lessonKey(t: any): string { return t.complete ? 'completed' : (t.progress > 0 ? 'in_progress' : 'not_started'); }
+
+  /** Lesson currently in progress (for the Current Lesson card). */
+  readonly currentLesson = computed<any>(() => this.topics().find(t => t.progress > 0 && !t.complete) ?? null);
+  /** First not-started lesson (Next Recommended). */
+  readonly nextLesson = computed<any>(() => this.topics().find(t => !t.progress) ?? null);
+
+  readonly subjects = computed<string[]>(() => [...new Set(this.topics().map(t => t.subject).filter(Boolean))] as string[]);
+
+  readonly recentlyCompleted = computed<any[]>(() => this.topics().filter(t => t.complete).slice(0, 4));
+
+  /** Lessons with an available-but-not-done quiz/worksheet/portfolio stage. */
+  readonly pendingTasks = computed<any[]>(() => {
+    const out: any[] = [];
+    for (const t of this.topics()) {
+      for (const s of (t.stages ?? [])) {
+        if (['quiz', 'worksheet', 'portfolio'].includes(s.key) && s.available && !s.done) {
+          out.push({title: `${this.stageLabel(s.key)}: ${t.title}`, stage: s.key, link: s.link});
+        }
+      }
+    }
+    return out.slice(0, 4);
+  });
+
+  readonly weakArea = computed<string | null>(() => (this.extra()?.weak_areas ?? [])[0] ?? null);
+  readonly tutorNote = computed<any>(() => this.extra()?.latest_feedback ?? null);
+
+  stageLabel(key: string): string {
+    return ({quiz: 'Quiz', worksheet: 'Worksheet', portfolio: 'Portfolio task'} as Record<string, string>)[key] ?? key;
+  }
+  stageState(t: any, key: string): 'done' | 'todo' | 'na' {
+    const s = (t.stages ?? []).find((x: any) => x.key === key);
+    if (!s || !s.available) return 'na';
+    return s.done ? 'done' : 'todo';
+  }
 
   readonly lessonKpis = computed<KpiItem[]>(() => {
     const t = this.topics();
@@ -70,8 +116,11 @@ export class Learn {
   });
 
   readonly listFiltered = computed<any[]>(() => {
-    const k = this.listTab(), t = this.topics();
-    return k === 'all' ? t : t.filter(x => this.lessonKey(x) === k);
+    const k = this.listTab(), subj = this.subjectFilter(), q = this.search().trim().toLowerCase();
+    return this.topics().filter(x =>
+      (k === 'all' || this.lessonKey(x) === k) &&
+      (subj === 'all' || x.subject === subj) &&
+      (!q || (x.title || '').toLowerCase().includes(q)));
   });
 
   constructor() {
@@ -126,8 +175,11 @@ export class Learn {
   load(): void {
     this.loading.set(true);
     this.loadError.set(null);
-    this.api.get<any>('/backend/learn/topics').subscribe({
-      next: (res) => { this.topics.set(res?.data ?? []); this.loading.set(false); },
+    forkJoin({
+      topics: this.api.get<any>('/backend/learn/topics'),
+      extra: this.api.get<any>('/backend/dashboard/student').pipe(catchError(() => of(null))),
+    }).subscribe({
+      next: (res) => { this.topics.set(res.topics?.data ?? []); this.extra.set(res.extra); this.loading.set(false); },
       error: () => { this.loading.set(false); this.loadError.set('We couldn\'t load your lessons. Please check your connection and try again.'); },
     });
   }
