@@ -121,6 +121,7 @@ return static function (App $app): void {
             // Assessment — question bank (answer-validation gate) + lifecycle
             $auth->map(['GET', 'POST', 'PUT', 'DELETE'], '/assessment/questions', QuestionsAction::class);
             $auth->post('/assessment/questions/bulk-delete', QuestionsAction::class . ':bulkDelete');
+            $auth->post('/assessment/questions/bulk', QuestionsAction::class . ':bulkCreate');
             $auth->post('/assessment/questions/{id:[0-9]+}/validate', QuestionsAction::class . ':validate');
             $auth->post('/assessment/questions/{id:[0-9]+}/transition', QuestionsAction::class . ':transition');
             $auth->get('/assessment/questions/{id:[0-9]+}/history', QuestionsAction::class . ':history');

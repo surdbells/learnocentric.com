@@ -1,6 +1,64 @@
 <app-page-header icon="quiz" action="Question Bank">
+  <button type="button" class="btn btn-outline-primary btn-sm d-inline-flex align-items-center gap-1 me-2" (click)="openBulk()">
+    <app-icon name="cloud_upload" [size]="16" /> Bulk Upload
+  </button>
   <app-learno-button text="Add Question" icon="add" data-bs-toggle="modal" data-bs-target="#add_question" (clicked)="onAdd()"/>
 </app-page-header>
+
+<!-- Bulk upload -->
+<app-learno-modal [modalId]="'bulk_upload'" [modalAction]="'Bulk upload questions'" [showBtn]="false">
+  <div modalForm>
+    <p class="text-body-secondary small">Import many questions from a CSV. Columns: <code>stem, type, option_a…d, correct, marks, difficulty, explanation</code> (optional <code>topic_id</code> per row).</p>
+
+    <div class="row g-3 mb-3">
+      <div class="col-md-6">
+        <label class="form-label" for="bulk_topic">Default topic</label>
+        <select id="bulk_topic" class="form-select" [ngModel]="bulkTopicId()" (ngModelChange)="bulkTopicId.set($event)">
+          <option [ngValue]="null" disabled>Choose a topic for rows without topic_id</option>
+          @for (t of topics(); track t.id) { <option [ngValue]="t.id">{{ t.title }} · {{ t.subject }}</option> }
+        </select>
+      </div>
+      <div class="col-md-6 d-flex align-items-end gap-2">
+        <label class="btn btn-outline-secondary mb-0">
+          <app-icon name="upload_file" [size]="16" /> Choose CSV
+          <input type="file" accept=".csv,text/csv" hidden (change)="onBulkFile($event)" />
+        </label>
+        <button type="button" class="btn btn-link text-decoration-none px-0" (click)="downloadTemplate()">
+          <app-icon name="download" [size]="16" /> Template
+        </button>
+      </div>
+    </div>
+
+    <label class="form-label" for="bulk_csv">Or paste CSV</label>
+    <textarea id="bulk_csv" class="form-control font-monospace small" rows="6" placeholder="stem,type,option_a,option_b,option_c,option_d,correct,marks,difficulty,explanation&#10;&quot;What is 12 ÷ 4?&quot;,mcq,2,3,4,6,c,1,moderate,"
+              [ngModel]="bulkText()" (ngModelChange)="bulkText.set($event); parseBulk()"></textarea>
+
+    @if (bulkParseError()) { <div class="text-danger small mt-2">{{ bulkParseError() }}</div> }
+
+    @if (bulkParsed().length) {
+      <div class="alert alert-success py-2 px-3 mt-3 mb-2 small">
+        <app-icon name="check_circle" [size]="15" /> {{ bulkParsed().length }} question(s) ready to import.
+      </div>
+      <div class="table-responsive bulk-preview">
+        <table class="table table-sm align-middle mb-0 small">
+          <thead class="table-light"><tr><th>#</th><th>Question</th><th>Type</th><th class="text-center">Marks</th></tr></thead>
+          <tbody>
+            @for (q of bulkParsed().slice(0, 8); track $index) {
+              <tr><td>{{ $index + 1 }}</td><td class="text-truncate" style="max-width:340px">{{ q.stem }}</td><td class="text-capitalize">{{ q.type }}</td><td class="text-center">{{ q.marks }}</td></tr>
+            }
+          </tbody>
+        </table>
+        @if (bulkParsed().length > 8) { <div class="text-body-secondary small p-2">…and {{ bulkParsed().length - 8 }} more.</div> }
+      </div>
+    }
+
+    <div class="d-flex justify-content-end gap-2 mt-3">
+      <button type="button" class="btn btn-primary" [disabled]="bulkBusy() || !bulkParsed().length" (click)="submitBulk()">
+        {{ bulkBusy() ? 'Importing…' : 'Import ' + bulkParsed().length + ' question(s)' }}
+      </button>
+    </div>
+  </div>
+</app-learno-modal>
 
 <!-- Create / edit -->
 <app-learno-modal [modalId]="'add_question'" [modalAction]="selectQuestion() ? 'Edit Question' : 'Add Question'" [showBtn]="false">

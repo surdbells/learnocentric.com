@@ -110,6 +110,60 @@ final class QuestionsAction
         return Json::write($response, $this->row($q), 201);
     }
 
+    /**
+     * POST /assessment/questions/bulk — import many questions at once. Body:
+     * { topic_id?: int, questions: [{ stem, type, options?, correct_answer?,
+     * marks?, difficulty?, explanation?, misconception_tag?, topic_id? }, ...] }.
+     * Each row is created as a draft; malformed rows are reported, not fatal.
+     */
+    public function bulkCreate(Request $request, Response $response): Response
+    {
+        $body = (array) $request->getParsedBody();
+        $defaultTopicId = (int) ($body['topic_id'] ?? 0);
+        $items = $body['questions'] ?? null;
+        if (!is_array($items) || $items === []) {
+            return Json::error($response, 'Provide a non-empty "questions" array.', 422);
+        }
+        if (count($items) > 500) {
+            return Json::error($response, 'You can import at most 500 questions at a time.', 422);
+        }
+
+        $created = 0;
+        $errors = [];
+        $topicCache = [];
+        foreach (array_values($items) as $i => $item) {
+            if (!is_array($item)) {
+                $errors[] = ['row' => $i + 1, 'error' => 'Not an object.'];
+                continue;
+            }
+            $stem = trim((string) ($item['stem'] ?? ''));
+            $topicId = (int) ($item['topic_id'] ?? $defaultTopicId);
+            if ($stem === '') {
+                $errors[] = ['row' => $i + 1, 'error' => 'Missing question stem.'];
+                continue;
+            }
+            if (!isset($topicCache[$topicId])) {
+                $topicCache[$topicId] = $topicId > 0 ? $this->em->getRepository(Topic::class)->find($topicId) : null;
+            }
+            $topic = $topicCache[$topicId];
+            if ($topic === null) {
+                $errors[] = ['row' => $i + 1, 'error' => 'Unknown topic_id ' . $topicId . '.'];
+                continue;
+            }
+            $q = new Question($topic, $stem);
+            $q->setApprovalStatus(Lifecycle::DRAFT);
+            $this->applyFields($q, $item);
+            $this->em->persist($q);
+            $created++;
+        }
+        if ($created > 0) {
+            $this->em->flush();
+            $this->audit->log('question.bulk_create', $request->getAttribute('user'), 'Question', 'bulk', null, ['created' => $created, 'errors' => count($errors)]);
+        }
+
+        return Json::write($response, ['created' => $created, 'total' => count($items), 'errors' => $errors], 201);
+    }
+
     private function update(Request $request, Response $response): Response
     {
         $body = (array) $request->getParsedBody();
