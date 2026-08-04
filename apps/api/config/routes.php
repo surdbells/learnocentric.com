@@ -190,6 +190,7 @@ return static function (App $app): void {
 
             // Analytics — school overview (staff) + student progress report (self/guardian/staff)
             $auth->get('/analytics/overview', AnalyticsAction::class . ':overview');
+            $auth->get('/analytics/school-report', AnalyticsAction::class . ':schoolReport');
             $auth->get('/analytics/children', AnalyticsAction::class . ':children');
             $auth->get('/analytics/student/{id:[0-9]+}', AnalyticsAction::class . ':student');
 

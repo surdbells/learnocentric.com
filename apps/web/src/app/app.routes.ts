@@ -18,6 +18,7 @@ import {DeliveryPackDetail} from "./pages/dashboard/admin/academics/delivery-pac
 import {SchemeOfWork} from "./pages/dashboard/admin/academics/scheme-of-work/scheme-of-work";
 import {SchemeDetail} from "./pages/dashboard/admin/academics/scheme-detail/scheme-detail";
 import {CurriculumMap} from "./pages/dashboard/admin/academics/curriculum-map/curriculum-map";
+import {SchoolReport} from "./pages/dashboard/admin/academics/school-report/school-report";
 import {ApprovalQueue} from "./pages/dashboard/admin/academics/approval-queue/approval-queue";
 import {QuestionBank} from "./pages/dashboard/admin/academics/question-bank/question-bank";
 import {Assessments} from "./pages/dashboard/admin/academics/assessments/assessments";
@@ -125,6 +126,7 @@ export const routes: Routes = [
           { path: "scheme-coverage", component: SchemeDetail, data: { user: "admin" } },
           { path: "curriculum-map", component: CurriculumMap, data: { user: "admin" } },
           { path: "approval-queue", component: ApprovalQueue, data: { user: "admin" } },
+          { path: "school-report", component: SchoolReport, data: { user: "admin" } },
           { path: "question-bank", component: QuestionBank, canActivate: [moduleGuard('assessments')], data: { user: "admin" } },
           { path: "assessments", component: Assessments, canActivate: [moduleGuard('assessments')], data: { user: "admin" } },
           { path: "worksheets", component: Worksheets, canActivate: [moduleGuard('worksheets')], data: { user: "admin" } },
@@ -193,6 +195,7 @@ export const routes: Routes = [
           { path: "scheme-coverage", component: SchemeDetail },
           { path: "curriculum-map", component: CurriculumMap },
           { path: "approval-queue", component: ApprovalQueue },
+          { path: "school-report", component: SchoolReport },
           { path: "question-bank", component: QuestionBank, canActivate: [moduleGuard('assessments')] },
           { path: "assessments", component: Assessments, canActivate: [moduleGuard('assessments')] },
           { path: "worksheets", component: Worksheets, canActivate: [moduleGuard('worksheets')] },
@@ -252,6 +255,7 @@ export const routes: Routes = [
           { path: "scheme-coverage", component: SchemeDetail },
           { path: "curriculum-map", component: CurriculumMap },
           { path: "approval-queue", component: ApprovalQueue },
+          { path: "school-report", component: SchoolReport },
           { path: "question-bank", component: QuestionBank, canActivate: [moduleGuard('assessments')] },
           { path: "assessments", component: Assessments, canActivate: [moduleGuard('assessments')] },
           { path: "worksheets", component: Worksheets, canActivate: [moduleGuard('worksheets')] },

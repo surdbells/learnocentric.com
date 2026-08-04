@@ -11,6 +11,7 @@ use App\Domain\Entity\AssessmentAttempt;
 use App\Domain\Entity\Enrollment;
 use App\Domain\Entity\FeedbackNote;
 use App\Domain\Entity\GuardianLink;
+use App\Domain\Entity\Intervention;
 use App\Domain\Entity\LiveClass;
 use App\Domain\Entity\LiveClassAttendance;
 use App\Domain\Entity\PortfolioEntry;
@@ -259,6 +260,134 @@ final class AnalyticsAction
         }, array_values($by));
         usort($out, static fn ($a, $b) => $b['quiz_average'] <=> $a['quiz_average']);
         return $out;
+    }
+
+    /**
+     * GET /analytics/school-report — school-wide performance report: headline
+     * figures, class × subject performance, a subject summary (school average +
+     * highest/lowest class + pass rate + status) and priority attention areas.
+     * All computed from graded attempts; nothing synthesised.
+     */
+    public function schoolReport(Request $request, Response $response): Response
+    {
+        $user = $this->currentUser($request);
+        if (!in_array($user->getRole()->getCode(), self::STAFF, true)) {
+            return Json::error($response, 'Only teachers and administrators can view reports.', 403);
+        }
+        $institution = $this->resolveInstitution($request, $this->em);
+
+        // Class × subject averages.
+        $qb = $this->em->createQueryBuilder()
+            ->select('sc.id AS cid', 'sc.level AS level', 'sc.arm AS arm', 's.name AS subject', 'AVG(at.percentage) AS avg', 'COUNT(at.id) AS n',
+                'SUM(CASE WHEN at.passed = true THEN 1 ELSE 0 END) AS passed')
+            ->from(AssessmentAttempt::class, 'at')->join('at.assessment', 'a')->join('a.subject', 's')
+            ->join('at.student', 'st')->join(Enrollment::class, 'e', \Doctrine\ORM\Query\Expr\Join::WITH, 'e.student = st')
+            ->join('e.schoolClass', 'sc')
+            ->where('at.status = :g')->setParameter('g', AssessmentAttempt::GRADED)
+            ->groupBy('sc.id')->addGroupBy('sc.level')->addGroupBy('sc.arm')->addGroupBy('s.name');
+        if ($institution !== null) {
+            $qb->andWhere('s.institution = :inst')->setParameter('inst', $institution);
+        }
+        $rows = $qb->getQuery()->getArrayResult();
+
+        $bySubject = [];
+        $byClass = [];
+        $classSet = [];
+        $allSum = 0.0;
+        $allN = 0;
+        foreach ($rows as $r) {
+            $avg = round((float) $r['avg'], 1);
+            $subject = (string) $r['subject'];
+            $class = trim($r['level'] . ' ' . ($r['arm'] ?? ''));
+            $classSet[$class] = true;
+            $allSum += (float) $r['avg'] * (int) $r['n'];
+            $allN += (int) $r['n'];
+
+            $bySubject[$subject] ??= ['subject' => $subject, 'classes' => [], 'sum' => 0.0, 'n' => 0, 'passed' => 0, 'high' => null, 'low' => null];
+            $bySubject[$subject]['classes'][] = ['class' => $class, 'average' => $avg];
+            $bySubject[$subject]['sum'] += (float) $r['avg'] * (int) $r['n'];
+            $bySubject[$subject]['n'] += (int) $r['n'];
+            $bySubject[$subject]['passed'] += (int) $r['passed'];
+            if ($bySubject[$subject]['high'] === null || $avg > $bySubject[$subject]['high']['average']) {
+                $bySubject[$subject]['high'] = ['class' => $class, 'average' => $avg];
+            }
+            if ($bySubject[$subject]['low'] === null || $avg < $bySubject[$subject]['low']['average']) {
+                $bySubject[$subject]['low'] = ['class' => $class, 'average' => $avg];
+            }
+
+            $byClass[$class] ??= ['class' => $class, 'sum' => 0.0, 'n' => 0];
+            $byClass[$class]['sum'] += (float) $r['avg'] * (int) $r['n'];
+            $byClass[$class]['n'] += (int) $r['n'];
+        }
+
+        $schoolAvg = $allN > 0 ? round($allSum / $allN, 1) : null;
+        $status = static fn (float $a) => $a >= 75 ? 'Good' : ($a >= 60 ? 'Monitor' : 'Needs attention');
+        $subjectSummary = array_map(static function (array $s) use ($status) {
+            $avg = $s['n'] > 0 ? round($s['sum'] / $s['n'], 1) : 0.0;
+            return [
+                'subject' => $s['subject'],
+                'school_average' => $avg,
+                'highest_class' => $s['high'],
+                'lowest_class' => $s['low'],
+                'pass_rate' => $s['n'] > 0 ? round($s['passed'] / $s['n'] * 100, 1) : 0.0,
+                'status' => $status($avg),
+            ];
+        }, array_values($bySubject));
+        usort($subjectSummary, static fn ($a, $b) => $b['school_average'] <=> $a['school_average']);
+
+        // Class × subject for the grouped bars: subjects with per-class averages.
+        $classList = array_keys($classSet);
+        sort($classList);
+        $classBySubject = array_map(static function (array $s) use ($classList) {
+            $map = [];
+            foreach ($s['classes'] as $c) {
+                $map[$c['class']] = $c['average'];
+            }
+            return ['subject' => $s['subject'], 'values' => array_map(static fn ($c) => $map[$c] ?? 0, $classList)];
+        }, array_values($bySubject));
+
+        // Top class by average.
+        $topClass = null;
+        foreach ($byClass as $c) {
+            $avg = $c['n'] > 0 ? round($c['sum'] / $c['n'], 1) : 0.0;
+            if ($topClass === null || $avg > $topClass['average']) {
+                $topClass = ['class' => $c['class'], 'average' => $avg];
+            }
+        }
+
+        // Priority attention areas: subjects/classes below mastery.
+        $priorities = [];
+        foreach ($subjectSummary as $s) {
+            if ($s['school_average'] < 60) {
+                $priorities[] = 'Low ' . $s['subject'] . ' average (' . $s['school_average'] . '%)';
+            }
+        }
+        if ($subjectSummary !== [] && ($low = end($subjectSummary)) && $low['lowest_class']) {
+            $priorities[] = 'Weakest class: ' . $low['lowest_class']['class'] . ' in ' . $low['subject'];
+        }
+
+        [$held, $joins, $seats] = $this->attendanceStats($institution);
+        [$sent, $ack] = $this->feedbackStats($institution);
+        $openInterventions = (int) $this->em->createQueryBuilder()->select('COUNT(i.id)')->from(Intervention::class, 'i')->join('i.student', 'st')
+            ->where('i.status = :res')->setParameter('res', Intervention::RESOLVED)
+            ->getQuery()->getSingleScalarResult();
+
+        return Json::write($response, [
+            'kpis' => [
+                'school_average' => $schoolAvg,
+                'total_learners' => $this->countByRole('student', $institution),
+                'classes_analysed' => count($classList),
+                'subjects_analysed' => count($bySubject),
+                'attendance_average' => $seats > 0 ? round($joins / $seats * 100, 1) : null,
+                'report_completion' => $sent > 0 ? round($ack / $sent * 100, 1) : null,
+            ],
+            'class_list' => $classList,
+            'class_by_subject' => $classBySubject,
+            'subject_summary' => $subjectSummary,
+            'top_class' => $topClass,
+            'interventions_resolved' => $openInterventions,
+            'priority_areas' => array_slice($priorities, 0, 5),
+        ]);
     }
 
     /** GET /analytics/children — students linked to the current guardian. */

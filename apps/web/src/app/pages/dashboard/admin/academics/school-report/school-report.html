@@ -1,0 +1,123 @@
+<div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+  <app-page-header icon="insights" action="School Performance Report"></app-page-header>
+  <button type="button" class="btn btn-sm btn-outline-secondary" [disabled]="exporting()" (click)="exportCsv()">
+    <app-icon name="download" [size]="16" /> Export report
+  </button>
+</div>
+
+@if (loading()) {
+  <div class="text-body-secondary p-4">Loading report…</div>
+} @else if (!report()) {
+  <div class="card border-0 shadow-sm p-5 text-center text-body-secondary">No report data yet.</div>
+} @else {
+  <p class="text-body-secondary mb-3">School-wide academic performance, trends, completion and intervention signals.</p>
+  <app-kpi-strip class="d-block mb-4" [items]="kpis()" [cols]="6" />
+
+  <div class="row g-3">
+    <!-- Main column -->
+    <div class="col-xl-9">
+      <!-- Trend + class-by-subject -->
+      <div class="row g-3 mb-3">
+        <div class="col-lg-6">
+          <div class="card border-0 shadow-sm h-100"><div class="card-body">
+            <h6 class="fw-semibold mb-1">School performance trend</h6>
+            <p class="small text-body-secondary mb-2">Average score over time</p>
+            @if (trendSeries().length) { <app-line-chart [points]="trendSeries()" [labels]="trendLabels()" tone="primary" /> }
+            @else { <div class="text-body-secondary small py-5 text-center">No trend data yet.</div> }
+          </div></div>
+        </div>
+        <div class="col-lg-6">
+          <div class="card border-0 shadow-sm h-100"><div class="card-body">
+            <h6 class="fw-semibold mb-1">Class performance by subject</h6>
+            <p class="small text-body-secondary mb-2">School average per subject (%)</p>
+            @if (subjectLabels().length) { <app-stacked-bar [labels]="subjectLabels()" [series]="subjectSeries()" /> }
+            @else { <div class="text-body-secondary small py-5 text-center">No graded results yet.</div> }
+          </div></div>
+        </div>
+      </div>
+
+      <!-- Subject performance summary -->
+      <div class="card border-0 shadow-sm mb-3">
+        <div class="card-body pb-2"><h6 class="fw-semibold mb-0">Subject performance summary</h6></div>
+        <div class="table-responsive">
+          <table class="table align-middle mb-0 small">
+            <thead class="table-light">
+              <tr><th>Subject</th><th class="text-center">School avg</th><th>Highest class</th><th>Lowest class</th><th class="text-center">Pass rate</th><th>Status</th></tr>
+            </thead>
+            <tbody>
+              @for (s of subjectSummary(); track s.subject) {
+                <tr>
+                  <td class="fw-medium">{{ s.subject }}</td>
+                  <td class="text-center fw-semibold">{{ s.school_average }}%</td>
+                  <td class="text-body-secondary">{{ s.highest_class?.class }} <span class="text-success">({{ s.highest_class?.average }}%)</span></td>
+                  <td class="text-body-secondary">{{ s.lowest_class?.class }} <span class="text-danger">({{ s.lowest_class?.average }}%)</span></td>
+                  <td class="text-center">{{ s.pass_rate }}%</td>
+                  <td><app-status-badge [value]="s.status" [map]="statusTones" /></td>
+                </tr>
+              } @empty {
+                <tr><td colspan="6" class="text-body-secondary small py-3 text-center">No graded results yet.</td></tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Highlight cards -->
+      <div class="row g-3">
+        <div class="col-md-6">
+          <div class="card border-0 shadow-sm h-100"><div class="card-body d-flex align-items-center gap-3">
+            <span class="hl-ic bg-success-subtle text-success"><app-icon name="workspace_premium" [size]="20" /></span>
+            <div>
+              <div class="text-body-secondary small">Top performing class</div>
+              <div class="fs-5 fw-bold">{{ topClass()?.class || '—' }}</div>
+              <div class="small text-success">{{ topClass()?.average }}% average</div>
+            </div>
+          </div></div>
+        </div>
+        <div class="col-md-6">
+          <div class="card border-0 shadow-sm h-100"><div class="card-body d-flex align-items-center gap-3">
+            <span class="hl-ic bg-info-subtle text-info"><app-icon name="support" [size]="20" /></span>
+            <div>
+              <div class="text-body-secondary small">Interventions resolved</div>
+              <div class="fs-5 fw-bold">{{ interventionsResolved() }}</div>
+              <div class="small text-body-secondary">learners supported to date</div>
+            </div>
+          </div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right rail -->
+    <div class="col-xl-3">
+      <div class="card border-0 shadow-sm mb-3"><div class="card-body">
+        <h6 class="fw-semibold mb-3">School report summary</h6>
+        <div class="d-flex justify-content-between small py-1"><span class="text-body-secondary">Total learners</span><b>{{ report().kpis.total_learners }}</b></div>
+        <div class="d-flex justify-content-between small py-1"><span class="text-body-secondary">Classes analysed</span><b>{{ report().kpis.classes_analysed }}</b></div>
+        <div class="d-flex justify-content-between small py-1"><span class="text-body-secondary">Subjects analysed</span><b>{{ report().kpis.subjects_analysed }}</b></div>
+        <div class="d-flex justify-content-between small py-1"><span class="text-body-secondary">Report completion</span><b>{{ report().kpis.report_completion ?? '—' }}%</b></div>
+      </div></div>
+
+      <div class="card border-0 shadow-sm mb-3 border-danger-subtle"><div class="card-body">
+        <h6 class="fw-semibold mb-3"><app-icon name="cancel" [size]="16" class="text-danger me-1" /> Priority attention areas</h6>
+        @for (p of priorityAreas(); track $index) {
+          <div class="d-flex align-items-start gap-2 py-2 border-top">
+            <span class="pa-num">{{ $index + 1 }}</span>
+            <span class="small">{{ p }}</span>
+          </div>
+        } @empty { <div class="text-success small"><app-icon name="check_circle" [size]="15" /> No priority areas — performance is on track.</div> }
+      </div></div>
+
+      <div class="card border-0 shadow-sm"><div class="card-body">
+        <h6 class="fw-semibold mb-3">Quick actions</h6>
+        <button type="button" class="btn btn-outline-primary btn-sm w-100 mb-2" [disabled]="exporting()" (click)="exportCsv()">
+          <app-icon name="download" [size]="16" /> Export school report
+        </button>
+        <a class="btn btn-outline-secondary btn-sm w-100" [routerLink]="[root(), 'academics', 'gradebook']"><app-icon name="insights" [size]="16" /> View gradebook</a>
+      </div></div>
+    </div>
+  </div>
+
+  <div class="text-body-secondary small mt-3">
+    <app-icon name="verified" [size]="14" /> Generated from verified gradebooks, lesson completion and tutor comments.
+  </div>
+}
