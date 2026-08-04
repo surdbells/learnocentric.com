@@ -1,8 +1,10 @@
 <app-page-header icon="quiz" action="Question Bank">
-  <button type="button" class="btn btn-outline-primary btn-sm d-inline-flex align-items-center gap-1 me-2" (click)="openBulk()">
-    <app-icon name="cloud_upload" [size]="16" /> Bulk Upload
-  </button>
-  <app-learno-button text="Add Question" icon="add" data-bs-toggle="modal" data-bs-target="#add_question" (clicked)="onAdd()"/>
+  <div class="d-flex align-items-center justify-content-end gap-2 flex-wrap">
+    <button type="button" class="btn btn-outline-success d-inline-flex align-items-center gap-1" (click)="openBulk()">
+      <app-icon name="cloud_upload" [size]="18" /> Bulk Upload
+    </button>
+    <app-learno-button text="Add Question" icon="add" data-bs-toggle="modal" data-bs-target="#add_question" (clicked)="onAdd()"/>
+  </div>
 </app-page-header>
 
 <!-- Bulk upload -->

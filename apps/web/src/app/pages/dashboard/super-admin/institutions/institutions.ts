@@ -189,7 +189,7 @@ export class SuperAdminInstitutions implements OnInit {
   }
 
   goToOnboard() {
-    this.router.navigate(['/super-admin/onboard']);
+    this.router.navigate(['/super-admin/management/onboard']);
   }
 
   handleSuccessSubmit($event: { success: boolean }) {

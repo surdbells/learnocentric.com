@@ -210,6 +210,8 @@ export class UserPreferenceMenu {
         { name: "Gradebook", link: "/teacher/academics/gradebook", module: "assessments" },
         { name: "Insights", link: "/teacher/academics/insights" },
         { name: "Analytics", link: "/teacher/academics/analytics", module: "analytics" },
+        { name: "Reports & Report Cards", link: "/teacher/academics/school-report", module: "analytics" },
+        { name: "Report Cards", link: "/teacher/academics/report-cards", module: "analytics" },
         { name: "Interventions", link: "/teacher/academics/interventions", module: "interventions" },
         { name: "Safeguarding", link: "/teacher/academics/safeguarding", module: "safeguarding" },
         { name: "Resources", link: "/teacher/academics/resources" },

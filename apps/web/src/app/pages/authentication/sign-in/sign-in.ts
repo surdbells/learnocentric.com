@@ -87,7 +87,7 @@ export class SignIn {
                   break;
 
                 default:
-                  this.router.navigate(["authentication"]);
+                  this.toast.error("Your account has no dashboard assigned. Please contact your administrator.");
               }
 
           },
