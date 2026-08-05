@@ -1,0 +1,182 @@
+<app-page-header icon="settings" action="Settings" />
+<p class="text-body-secondary mb-4">Manage your profile, notifications, grading preferences, and account security.</p>
+
+@if (loading()) {
+  <div class="text-center text-body-secondary py-5">Loading your settings…</div>
+} @else {
+  <div class="row g-4">
+    <!-- Main column: numbered sections -->
+    <div class="col-lg-8">
+      <div class="row g-4">
+        <!-- 1. Profile Settings -->
+        <div class="col-md-6">
+          <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+              <div class="sec-head"><span class="sec-num">1</span><app-icon name="account_circle" [size]="18" /> Profile Settings</div>
+              <div class="small mt-3">
+                <div class="pref-line"><span class="text-body-secondary">Full Name</span><span class="fw-medium">{{ profile()?.fullName }}</span></div>
+                <div class="pref-line"><span class="text-body-secondary">Email</span><span class="fw-medium">{{ profile()?.email }}</span></div>
+                <div class="pref-line"><span class="text-body-secondary">Phone</span><span class="fw-medium">{{ profile()?.phone || '—' }}</span></div>
+                <div class="pref-line"><span class="text-body-secondary">Staff ID</span><span class="fw-medium">{{ profile()?.staffId }}</span></div>
+              </div>
+              <a class="btn btn-outline-success btn-sm w-100 mt-3" routerLink="/teacher/management/profile">
+                <app-icon name="edit" [size]="15" /> Edit Profile
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2. Notification Preferences -->
+        <div class="col-md-6">
+          <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+              <div class="sec-head"><span class="sec-num">2</span><app-icon name="notifications" [size]="18" /> Notification Preferences</div>
+              <div class="mt-2">
+                <div class="setting-row"><span>Assignment Alerts</span><label class="switch"><input type="checkbox" [checked]="pref('notifications','assignment_alerts')" (change)="toggle('notifications','assignment_alerts')" /><span></span></label></div>
+                <div class="setting-row"><span>Submission Reviews</span><label class="switch"><input type="checkbox" [checked]="pref('notifications','submission_reviews')" (change)="toggle('notifications','submission_reviews')" /><span></span></label></div>
+                <div class="setting-row"><span>Live Class Reminders</span><label class="switch"><input type="checkbox" [checked]="pref('notifications','live_class_reminders')" (change)="toggle('notifications','live_class_reminders')" /><span></span></label></div>
+                <div class="setting-row"><span>Message Notifications</span><label class="switch"><input type="checkbox" [checked]="pref('notifications','message_notifications')" (change)="toggle('notifications','message_notifications')" /><span></span></label></div>
+                <div class="setting-row"><span>Report Generation Alerts</span><label class="switch"><input type="checkbox" [checked]="pref('notifications','report_generation_alerts')" (change)="toggle('notifications','report_generation_alerts')" /><span></span></label></div>
+                <div class="setting-row border-0"><span>Parent Communication</span><label class="switch"><input type="checkbox" [checked]="pref('notifications','parent_communication')" (change)="toggle('notifications','parent_communication')" /><span></span></label></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3. Grading & Review Preferences -->
+        <div class="col-md-6">
+          <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+              <div class="sec-head"><span class="sec-num">3</span><app-icon name="grading" [size]="18" /> Grading &amp; Review Preferences</div>
+              <div class="mt-3">
+                <label class="form-label small mb-1">Default Grading Scale</label>
+                <select class="form-select form-select-sm mb-3" [ngModel]="pref('grading','default_scale')" (ngModelChange)="set('grading','default_scale',$event)">
+                  <option value="percentage">Percentage (%)</option>
+                  <option value="letter">Letter (A–F)</option>
+                  <option value="points">Points</option>
+                </select>
+                <div class="setting-row"><span>Auto-sync quiz scores to gradebook</span><label class="switch"><input type="checkbox" [checked]="pref('grading','auto_sync')" (change)="toggle('grading','auto_sync')" /><span></span></label></div>
+                <div class="setting-row"><span>Require confirmation before score edits</span><label class="switch"><input type="checkbox" [checked]="pref('grading','require_confirm')" (change)="toggle('grading','require_confirm')" /><span></span></label></div>
+                <div class="setting-row"><span>Show audit trail for score changes</span><label class="switch"><input type="checkbox" [checked]="pref('grading','show_audit')" (change)="toggle('grading','show_audit')" /><span></span></label></div>
+                <label class="form-label small mb-1 mt-3">Rubric Preference</label>
+                <select class="form-select form-select-sm mb-3" [ngModel]="pref('grading','rubric_pref')" (ngModelChange)="set('grading','rubric_pref',$event)">
+                  <option value="use_rubrics">Use Rubrics (Recommended)</option>
+                  <option value="optional">Optional</option>
+                  <option value="off">Don't use rubrics</option>
+                </select>
+                <label class="form-label small mb-1">Late-submission Handling</label>
+                <select class="form-select form-select-sm" [ngModel]="pref('grading','late_handling')" (ngModelChange)="set('grading','late_handling',$event)">
+                  <option value="deduct_auto">Deduct points automatically</option>
+                  <option value="flag">Flag for manual review</option>
+                  <option value="accept">Accept without penalty</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 4. Account Security -->
+        <div class="col-md-6">
+          <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+              <div class="sec-head"><span class="sec-num">4</span><app-icon name="shield" [size]="18" /> Account Security</div>
+              <div class="mt-3">
+                <div class="setting-row"><span>Two-Factor Authentication</span><label class="switch"><input type="checkbox" [checked]="pref('privacy','two_factor')" (change)="toggle('privacy','two_factor')" /><span></span></label></div>
+                <div class="pref-line small"><span class="text-body-secondary">Last Login</span><span class="fw-medium">{{ security()?.last_login ? (security()?.last_login | date:'medium') : '—' }}</span></div>
+                <div class="pref-line small"><span class="text-body-secondary">Active Session</span><span class="fw-medium">{{ security()?.active_session }}</span></div>
+              </div>
+              <hr class="my-3" />
+              <div class="fw-medium small mb-2">Change Password</div>
+              <input type="password" class="form-control form-control-sm mb-2" placeholder="Current password" [ngModel]="pwCurrent()" (ngModelChange)="pwCurrent.set($event)" autocomplete="current-password" />
+              <input type="password" class="form-control form-control-sm mb-2" placeholder="New password" [ngModel]="pwNew()" (ngModelChange)="pwNew.set($event)" autocomplete="new-password" />
+              <input type="password" class="form-control form-control-sm mb-2" placeholder="Confirm new password" [ngModel]="pwConfirm()" (ngModelChange)="pwConfirm.set($event)" autocomplete="new-password" />
+              <button type="button" class="btn btn-outline-success btn-sm w-100" [disabled]="pwBusy()" (click)="updatePassword()">{{ pwBusy() ? 'Updating…' : 'Update Password' }}</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 5. Class & Communication Preferences -->
+        <div class="col-md-6">
+          <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+              <div class="sec-head"><span class="sec-num">5</span><app-icon name="forum" [size]="18" /> Class &amp; Communication Preferences</div>
+              <div class="mt-3">
+                <label class="form-label small mb-1">Default Class Landing Page</label>
+                <select class="form-select form-select-sm mb-3" [ngModel]="pref('communication','default_landing')" (ngModelChange)="set('communication','default_landing',$event)">
+                  <option value="class_dashboard">Class Dashboard</option>
+                  <option value="gradebook">Gradebook</option>
+                  <option value="learners">Learners</option>
+                </select>
+                <label class="form-label small mb-1">Announcement Visibility</label>
+                <select class="form-select form-select-sm mb-3" [ngModel]="pref('communication','announcement_visibility')" (ngModelChange)="set('communication','announcement_visibility',$event)">
+                  <option value="all_classes">Visible to All Classes</option>
+                  <option value="selected">Selected Classes</option>
+                </select>
+                <label class="form-label small mb-1">Parent-Copy Default</label>
+                <select class="form-select form-select-sm mb-3" [ngModel]="pref('communication','parent_copy')" (ngModelChange)="set('communication','parent_copy',$event)">
+                  <option value="include">Include by Default</option>
+                  <option value="exclude">Exclude by Default</option>
+                </select>
+                <label class="form-label small mb-1">Message Signature</label>
+                <textarea class="form-control form-control-sm" rows="3" [ngModel]="pref('communication','signature')" (ngModelChange)="set('communication','signature',$event)" placeholder="Best regards, …"></textarea>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 6. Support & Help -->
+        <div class="col-md-6">
+          <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+              <div class="sec-head"><span class="sec-num">6</span><app-icon name="help" [size]="18" /> Support &amp; Help</div>
+              <div class="mt-2">
+                <a class="help-row" routerLink="/teacher/academics/resources"><app-icon name="menu_book" [size]="18" /> <span>Teacher Guide<small class="d-block text-body-secondary">Guides and best practices</small></span><app-icon name="chevron_right" [size]="16" class="ms-auto text-body-secondary" /></a>
+                <a class="help-row" routerLink="/teacher/communication/messages"><app-icon name="chat" [size]="18" /> <span>Contact Support<small class="d-block text-body-secondary">Get help from our team</small></span><app-icon name="chevron_right" [size]="16" class="ms-auto text-body-secondary" /></a>
+                <a class="help-row" routerLink="/teacher/academics/safeguarding"><app-icon name="flag" [size]="18" /> <span>Report an Issue<small class="d-block text-body-secondary">Submit a bug or request</small></span><app-icon name="chevron_right" [size]="16" class="ms-auto text-body-secondary" /></a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right rail -->
+    <div class="col-lg-4">
+      <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body">
+          <div class="fw-semibold mb-2"><app-icon name="lightbulb" [size]="18" class="text-warning" /> Settings Tips</div>
+          <ul class="tip-list small mb-0">
+            <li>Keep your profile up to date for accurate communication.</li>
+            <li>Enable notifications to stay informed about important activities.</li>
+            <li>Use grading preferences to maintain consistency across classes.</li>
+            <li>Review your security settings regularly to protect your account.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body">
+          <div class="fw-semibold mb-2"><app-icon name="schedule" [size]="18" /> Account Snapshot</div>
+          <div class="pref-line small"><span class="text-body-secondary">Last Login</span><span class="fw-medium">{{ security()?.last_login ? (security()?.last_login | date:'MMM d, h:mm a') : '—' }}</span></div>
+          <div class="pref-line small"><span class="text-body-secondary">Active Session</span><span class="fw-medium">{{ security()?.active_session }}</span></div>
+          <div class="pref-line small border-0"><span class="text-body-secondary">Two-Factor</span><span class="fw-medium">{{ pref('privacy','two_factor') ? 'Enabled' : 'Off' }}</span></div>
+        </div>
+      </div>
+
+      <div class="card border-0 shadow-sm rail-sticky">
+        <div class="card-body">
+          <div class="fw-semibold mb-3"><app-icon name="bolt" [size]="18" class="text-success" /> Quick Actions</div>
+          <button type="button" class="btn btn-success w-100 mb-2" [disabled]="!dirty() || saving()" (click)="save()">
+            <app-icon name="save" [size]="16" /> {{ saving() ? 'Saving…' : (dirty() ? 'Save Changes' : 'All Saved') }}
+          </button>
+          <button type="button" class="btn btn-outline-secondary w-100 mb-2" [disabled]="!dirty()" (click)="reset()">
+            <app-icon name="restart_alt" [size]="16" /> Reset
+          </button>
+          <a class="btn btn-outline-secondary w-100" routerLink="/teacher/management/profile">
+            <app-icon name="account_circle" [size]="16" /> Edit Profile
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+}

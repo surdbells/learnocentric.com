@@ -51,6 +51,7 @@ import {StudentManagement} from './pages/dashboard/student/management/management
 import {StudentProfile} from './pages/dashboard/student/management/student-profile/student-profile';
 import {ReportConcern} from './pages/dashboard/student/report-concern/report-concern';
 import {StudentSettings} from './pages/dashboard/student/settings/settings';
+import {TeacherSettings} from './pages/dashboard/teacher/settings/settings';
 import {authGuard} from './common/auth/auth-guard';
 import {moduleGuard} from './common/auth/module-guard';
 import {ParentMain} from './pages/dashboard/parent/parent-main/parent-main';
@@ -282,6 +283,7 @@ export const routes: Routes = [
           { path: "profile", component: TeacherProfile },
         ]
       },
+      { path: "settings", component: TeacherSettings },
       {
         path: "communication",
         children: [
