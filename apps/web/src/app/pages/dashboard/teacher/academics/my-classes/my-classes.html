@@ -1,0 +1,157 @@
+<app-page-header icon="groups" action="My Classes">
+  <div class="d-flex align-items-center justify-content-end gap-2 flex-wrap">
+    <a class="btn btn-outline-success d-inline-flex align-items-center gap-1" routerLink="/teacher/academics/live-classes">
+      <app-icon name="event" [size]="18" /> Class Calendar
+    </a>
+    <a class="btn btn-success d-inline-flex align-items-center gap-1" routerLink="/teacher/academics/live-classes">
+      <app-icon name="add" [size]="18" /> Schedule Class
+    </a>
+  </div>
+</app-page-header>
+<p class="text-body-secondary mb-4">Manage your classes, track performance, and access class-level teaching activities.</p>
+
+@if (loading()) {
+  <div class="text-center text-body-secondary py-5">Loading your classes…</div>
+} @else {
+  <app-kpi-strip [items]="kpis()" [cols]="5" class="d-block mb-4" />
+
+  <div class="row g-4">
+    <!-- Main -->
+    <div class="col-lg-8">
+      <!-- Filters -->
+      <div class="card border-0 shadow-sm mb-4"><div class="card-body py-3">
+        <div class="row g-2 align-items-end">
+          <div class="col-sm-4">
+            <label class="form-label small mb-1">Subject</label>
+            <select class="form-select form-select-sm" [ngModel]="subjectFilter()" (ngModelChange)="subjectFilter.set($event)">
+              <option value="all">All subjects</option>
+              @for (s of subjects(); track s) { <option [value]="s">{{ s }}</option> }
+            </select>
+          </div>
+          <div class="col-sm-3">
+            <label class="form-label small mb-1">Status</label>
+            <select class="form-select form-select-sm" [ngModel]="statusFilter()" (ngModelChange)="statusFilter.set($event)">
+              <option value="all">All status</option>
+              <option value="active">Active</option>
+            </select>
+          </div>
+          <div class="col-sm-5">
+            <label class="form-label small mb-1">Search</label>
+            <input class="form-control form-control-sm" placeholder="Search classes…" [ngModel]="search()" (ngModelChange)="search.set($event)" />
+          </div>
+        </div>
+      </div></div>
+
+      <!-- Classes table -->
+      <div class="card border-0 shadow-sm"><div class="card-body">
+        <h6 class="fw-semibold mb-3">Your Classes</h6>
+        @if (filtered().length) {
+          <div class="table-responsive">
+            <table class="table align-middle mb-0">
+              <thead class="small text-body-secondary text-uppercase">
+                <tr><th>Class</th><th>Subject</th><th class="text-center">Learners</th><th class="text-center">Class Average</th><th class="text-center">Assessments</th><th>Last Activity</th><th>Status</th><th></th></tr>
+              </thead>
+              <tbody>
+                @for (c of filtered(); track c.id) {
+                  <tr>
+                    <td><span class="badge class-chip">{{ c.label }}</span></td>
+                    <td>{{ c.subject }}</td>
+                    <td class="text-center">{{ c.learners }}</td>
+                    <td class="text-center fw-semibold" [class]="avgTone(c.average)">{{ c.average == null ? '—' : c.average + '%' }}</td>
+                    <td class="text-center">{{ c.attempts }}</td>
+                    <td class="small text-body-secondary">{{ c.last_activity ? (c.last_activity | date:'MMM d, h:mm a') : 'No activity' }}</td>
+                    <td><span class="badge bg-success-subtle text-success text-capitalize">{{ c.status }}</span></td>
+                    <td class="text-end">
+                      <a class="btn btn-sm btn-outline-secondary" routerLink="/teacher/academics/gradebook" title="Open gradebook"><app-icon name="visibility" [size]="16" /></a>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        } @else {
+          <div class="text-body-secondary small py-4 text-center">No classes match your filters.</div>
+        }
+      </div></div>
+
+      <!-- Bottom panels -->
+      <div class="row g-4 mt-0">
+        <div class="col-md-6">
+          <div class="card border-0 shadow-sm h-100"><div class="card-body">
+            <h6 class="fw-semibold mb-3">Pending Review</h6>
+            <div class="pending-line"><span class="pend-num text-danger">{{ actionItems().worksheets_to_grade ?? 0 }}</span>
+              <div><div class="fw-medium">Worksheets</div><div class="small text-body-secondary">Awaiting your review</div></div></div>
+            <div class="pending-line"><span class="pend-num text-warning">{{ actionItems().portfolio_to_review ?? 0 }}</span>
+              <div><div class="fw-medium">Portfolio Tasks</div><div class="small text-body-secondary">Awaiting rubric assessment</div></div></div>
+            <div class="pending-line border-0"><span class="pend-num text-info">{{ actionItems().my_interventions ?? 0 }}</span>
+              <div><div class="fw-medium">Interventions</div><div class="small text-body-secondary">Assigned to you</div></div></div>
+            <a class="btn btn-sm btn-outline-secondary w-100 mt-2" routerLink="/teacher/academics/gradebook">Go to Gradebook</a>
+          </div></div>
+        </div>
+        <div class="col-md-6">
+          <div class="card border-0 shadow-sm h-100"><div class="card-body">
+            <h6 class="fw-semibold mb-3">Learners Awaiting Review</h6>
+            @if (attentionLearners().length) {
+              @for (p of attentionLearners(); track $index) {
+                <div class="attn-line">
+                  <span class="avatar-sm">{{ (p.learner || '?')[0] }}</span>
+                  <div class="flex-grow-1">
+                    <div class="fw-medium lh-sm">{{ p.learner }}</div>
+                    <div class="small text-body-secondary lh-sm">{{ p.type }} · {{ p.topic }}</div>
+                  </div>
+                  <span class="badge bg-warning-subtle text-warning">{{ p.status }}</span>
+                </div>
+              }
+            } @else {
+              <div class="text-body-secondary small py-3 text-center">Nothing awaiting review. 🎉</div>
+            }
+          </div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right rail -->
+    <div class="col-lg-4">
+      <!-- Today's schedule -->
+      <div class="card border-0 shadow-sm mb-4"><div class="card-body">
+        <div class="d-flex align-items-center justify-content-between mb-3">
+          <div class="fw-semibold">Today's Schedule</div>
+          <a class="small link-success text-decoration-none" routerLink="/teacher/academics/live-classes">View all</a>
+        </div>
+        @if (data()?.today_schedule?.length) {
+          @for (s of data().today_schedule; track s.id) {
+            <div class="sched-line">
+              <span class="badge bg-{{ scheduleTone(s.status) }}-subtle text-{{ scheduleTone(s.status) }} text-uppercase">{{ s.status }}</span>
+              <div class="flex-grow-1">
+                <div class="fw-medium lh-sm">{{ s.class || s.subject }} — {{ s.subject }}</div>
+                <div class="small text-body-secondary lh-sm">{{ s.topic || s.title }}</div>
+                <div class="small text-body-secondary">{{ s.scheduled_at | date:'h:mm a' }} · {{ s.duration_minutes }} min</div>
+              </div>
+            </div>
+          }
+        } @else {
+          <div class="text-body-secondary small py-3 text-center">No live classes scheduled today.</div>
+        }
+      </div></div>
+
+      <!-- Performance overview -->
+      <div class="card border-0 shadow-sm mb-4"><div class="card-body">
+        <div class="fw-semibold mb-3">Class Performance Overview</div>
+        @if (hasDonut()) {
+          <app-donut-chart [segments]="donut()" caption="learners" />
+        } @else {
+          <div class="text-body-secondary small py-3 text-center">No graded assessments yet.</div>
+        }
+      </div></div>
+
+      <!-- Quick actions -->
+      <div class="card border-0 shadow-sm rail-sticky"><div class="card-body">
+        <div class="fw-semibold mb-3"><app-icon name="bolt" [size]="18" class="text-success" /> Quick Actions</div>
+        <a class="qa-row" routerLink="/teacher/academics/assessments"><app-icon name="assignment" [size]="18" /> <span>Create Assessment</span><app-icon name="chevron_right" [size]="16" class="ms-auto text-body-secondary" /></a>
+        <a class="qa-row" routerLink="/teacher/academics/live-classes"><app-icon name="videocam" [size]="18" /> <span>Schedule Live Class</span><app-icon name="chevron_right" [size]="16" class="ms-auto text-body-secondary" /></a>
+        <a class="qa-row" routerLink="/teacher/academics/question-bank"><app-icon name="quiz" [size]="18" /> <span>Question Bank</span><app-icon name="chevron_right" [size]="16" class="ms-auto text-body-secondary" /></a>
+        <a class="qa-row" routerLink="/teacher/communication/announcements"><app-icon name="campaign" [size]="18" /> <span>Send Announcement</span><app-icon name="chevron_right" [size]="16" class="ms-auto text-body-secondary" /></a>
+      </div></div>
+    </div>
+  </div>
+}

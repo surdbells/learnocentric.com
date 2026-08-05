@@ -48,6 +48,7 @@ use App\Application\Actions\School\TermsAction;
 use App\Application\Actions\School\SubjectsAction;
 use App\Application\Actions\School\TeachersAction;
 use App\Application\Actions\School\TeacherStudentsAction;
+use App\Application\Actions\Teacher\TeacherClassesAction;
 use App\Application\Actions\Storage\UploadAction;
 use App\Application\Actions\Support\SupportAction;
 use App\Application\Actions\Audit\AuditLogsAction;
@@ -82,6 +83,7 @@ return static function (App $app): void {
             $auth->map(['GET', 'DELETE'], '/school/students', StudentsAction::class);
             $auth->post('/school/students/bulk-delete', StudentsAction::class . ':bulkDelete');
             $auth->get('/teacher/students/{id:[0-9]+}', TeacherStudentsAction::class);
+            $auth->get('/teacher/classes', TeacherClassesAction::class);
             $auth->map(['GET', 'DELETE'], '/school/teachers', TeachersAction::class);
             $auth->post('/school/teachers/bulk-delete', TeachersAction::class . ':bulkDelete');
             $auth->get('/school/subjects/available', SubjectsAction::class . ':available');

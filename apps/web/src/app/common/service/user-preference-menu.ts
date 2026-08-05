@@ -193,6 +193,8 @@ export class UserPreferenceMenu {
       ]
     },
 
+    { name: "My Classes", icon: "groups", link: "/teacher/classes" },
+
     { name: "Academics", icon: "school", link: "/teacher/academics",
       children: [
         { name: "Topics", link: "/teacher/academics/topics" },
