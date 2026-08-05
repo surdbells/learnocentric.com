@@ -1,74 +1,254 @@
-<app-page-header icon="settings" action="School Settings"></app-page-header>
+<app-page-header icon="settings" action="Settings & Permissions" />
+<p class="text-body-secondary mb-4">Manage school configuration, policies, privacy, and system controls.</p>
 
 @if (loading()) {
   <div class="text-body-secondary p-4">Loading…</div>
 } @else {
   <div class="row g-4">
-    <!-- Grading policy -->
-    <div class="col-lg-6">
-      <div class="card border-0 shadow-sm h-100">
-        <div class="card-body">
-          <h5 class="fw-semibold mb-1">Grading policy</h5>
-          <p class="text-body-secondary mb-4">The pass mark and grade bands used across reports.</p>
+    <!-- Main column -->
+    <div class="col-lg-8 col-xxl-9">
+      <!-- KPI strip (real school-config metrics) -->
+      <div class="row g-3 mb-4">
+        <div class="col-6 col-md-3">
+          <div class="kpi-card"><div class="kpi-ico bg-success-subtle text-success"><app-icon name="task_alt" [size]="20" /></div>
+            <div><div class="kpi-val">{{ completionPct() }}%</div><div class="kpi-lbl">Setup Complete</div></div></div>
+        </div>
+        <div class="col-6 col-md-3">
+          <div class="kpi-card"><div class="kpi-ico bg-primary-subtle text-primary"><app-icon name="groups" [size]="20" /></div>
+            <div><div class="kpi-val">{{ counts().students }}</div><div class="kpi-lbl">Learners</div></div></div>
+        </div>
+        <div class="col-6 col-md-3">
+          <div class="kpi-card"><div class="kpi-ico bg-info-subtle text-info"><app-icon name="supervisor_account" [size]="20" /></div>
+            <div><div class="kpi-val">{{ counts().teachers }}</div><div class="kpi-lbl">Staff</div></div></div>
+        </div>
+        <div class="col-6 col-md-3">
+          <div class="kpi-card"><div class="kpi-ico bg-warning-subtle text-warning"><app-icon name="grading" [size]="20" /></div>
+            <div><div class="kpi-val">{{ bands().length }}</div><div class="kpi-lbl">Grade Bands</div></div></div>
+        </div>
+      </div>
 
-          <div class="mb-4" style="max-width: 220px;">
-            <label class="form-label" for="pass">Pass mark (%)</label>
-            <input id="pass" type="number" min="0" max="100" class="form-control"
-                   [ngModel]="passMark()" (ngModelChange)="passMark.set(+$event)"/>
+      <!-- Tabs -->
+      <ul class="nav nav-tabs settings-tabs mb-4">
+        <li class="nav-item"><button class="nav-link" [class.active]="tab() === 'general'" (click)="tab.set('general')"><app-icon name="settings" [size]="16" /> General Settings</button></li>
+        <li class="nav-item"><button class="nav-link" [class.active]="tab() === 'academic'" (click)="tab.set('academic')"><app-icon name="school" [size]="16" /> Academic Policies</button></li>
+        <li class="nav-item"><button class="nav-link" [class.active]="tab() === 'privacy'" (click)="tab.set('privacy')"><app-icon name="shield" [size]="16" /> Privacy & Security</button></li>
+      </ul>
+
+      <!-- GENERAL SETTINGS -->
+      @if (tab() === 'general') {
+        <div class="row g-4">
+          <!-- School Profile -->
+          <div class="col-md-6">
+            <div class="card border-0 shadow-sm h-100"><div class="card-body">
+              <div class="fw-semibold mb-3"><app-icon name="apartment" [size]="18" class="text-success" /> School Profile</div>
+              <div class="row g-2">
+                <div class="col-12"><label class="form-label small mb-1">School Name</label>
+                  <input class="form-control form-control-sm" [ngModel]="prof('name')" (ngModelChange)="setProf('name',$event)" /></div>
+                <div class="col-6"><label class="form-label small mb-1">Email</label>
+                  <input class="form-control form-control-sm" [ngModel]="contact('email')" (ngModelChange)="setContact('email',$event)" /></div>
+                <div class="col-6"><label class="form-label small mb-1">Phone</label>
+                  <input class="form-control form-control-sm" [ngModel]="contact('phone')" (ngModelChange)="setContact('phone',$event)" /></div>
+                <div class="col-12"><label class="form-label small mb-1">Address</label>
+                  <input class="form-control form-control-sm" [ngModel]="prof('address')" (ngModelChange)="setProf('address',$event)" /></div>
+                <div class="col-12"><label class="form-label small mb-1">Logo URL</label>
+                  <input class="form-control form-control-sm" [ngModel]="prof('logo_url')" (ngModelChange)="setProf('logo_url',$event)" placeholder="https://…" /></div>
+              </div>
+            </div></div>
           </div>
 
+          <!-- Academic Defaults -->
+          <div class="col-md-6">
+            <div class="card border-0 shadow-sm h-100"><div class="card-body">
+              <div class="fw-semibold mb-3"><app-icon name="menu_book" [size]="18" class="text-success" /> Academic Defaults</div>
+              <label class="form-label small mb-1">Naming Convention</label>
+              <select class="form-select form-select-sm mb-3" [ngModel]="sec('academic','naming_convention')" (ngModelChange)="setSec('academic','naming_convention',$event)">
+                <option value="first_last">First Last (e.g. John Smith)</option>
+                <option value="last_first">Last, First (e.g. Smith, John)</option>
+              </select>
+              <label class="form-label small mb-1">Class Structure</label>
+              <select class="form-select form-select-sm mb-3" [ngModel]="sec('academic','class_structure')" (ngModelChange)="setSec('academic','class_structure',$event)">
+                <option value="grade_based">Grade-based (e.g. Grade 1, Grade 2)</option>
+                <option value="form_based">Form-based (e.g. JSS 1, SSS 2)</option>
+                <option value="year_based">Year-based (e.g. Year 7)</option>
+              </select>
+              <div class="small text-body-secondary">Grading scale is configured under <a role="button" class="link-success" (click)="tab.set('academic')">Academic Policies</a>.</div>
+            </div></div>
+          </div>
+
+          <!-- Localization -->
+          <div class="col-md-6">
+            <div class="card border-0 shadow-sm h-100"><div class="card-body">
+              <div class="fw-semibold mb-3"><app-icon name="language" [size]="18" class="text-success" /> Localization</div>
+              <label class="form-label small mb-1">Time Zone</label>
+              <select class="form-select form-select-sm mb-3" [ngModel]="sec('localization','timezone')" (ngModelChange)="setSec('localization','timezone',$event)">
+                <option value="Africa/Lagos">(UTC+01:00) West Africa Time</option>
+                <option value="UTC">(UTC) Coordinated Universal Time</option>
+                <option value="Europe/London">(UTC+00:00) London</option>
+                <option value="America/New_York">(UTC−05:00) Eastern Time</option>
+              </select>
+              <label class="form-label small mb-1">Date Format</label>
+              <select class="form-select form-select-sm mb-3" [ngModel]="sec('localization','date_format')" (ngModelChange)="setSec('localization','date_format',$event)">
+                <option value="DD MMM YYYY">DD MMM YYYY</option>
+                <option value="MM/DD/YYYY">MM/DD/YYYY</option>
+                <option value="DD/MM/YYYY">DD/MM/YYYY</option>
+              </select>
+              <label class="form-label small mb-1">Language</label>
+              <select class="form-select form-select-sm" [ngModel]="sec('localization','language')" (ngModelChange)="setSec('localization','language',$event)">
+                <option value="en">English (US)</option>
+                <option value="fr">French</option>
+                <option value="ar">Arabic</option>
+              </select>
+            </div></div>
+          </div>
+
+          <!-- Branding -->
+          <div class="col-md-6">
+            <div class="card border-0 shadow-sm h-100"><div class="card-body">
+              <div class="fw-semibold mb-3"><app-icon name="palette" [size]="18" class="text-success" /> Branding</div>
+              <label class="form-label small mb-1">Primary Color</label>
+              <div class="d-flex align-items-center gap-2 mb-3">
+                <input type="color" class="form-control form-control-color form-control-sm" [ngModel]="prof('brand_color') || '#16a34a'" (ngModelChange)="setProf('brand_color',$event)" />
+                <input class="form-control form-control-sm" [ngModel]="prof('brand_color')" (ngModelChange)="setProf('brand_color',$event)" placeholder="#16a34a" />
+              </div>
+              <label class="form-label small mb-1">Portal Name</label>
+              <input class="form-control form-control-sm" [ngModel]="sec('branding','portal_name')" (ngModelChange)="setSec('branding','portal_name',$event)" placeholder="Learno School Portal" />
+            </div></div>
+          </div>
+
+          <!-- Notification Defaults -->
+          <div class="col-md-6">
+            <div class="card border-0 shadow-sm h-100"><div class="card-body">
+              <div class="fw-semibold mb-3"><app-icon name="notifications" [size]="18" class="text-success" /> Notification Defaults</div>
+              <div class="setting-row"><div><div class="fw-medium">Email Alerts</div><div class="small text-body-secondary">System and security alerts via email</div></div>
+                <label class="switch"><input type="checkbox" [checked]="sec('notifications','email_alerts')" (change)="toggleSec('notifications','email_alerts')" /><span></span></label></div>
+              <div class="setting-row"><div><div class="fw-medium">Report Notifications</div><div class="small text-body-secondary">When reports are generated</div></div>
+                <label class="switch"><input type="checkbox" [checked]="sec('notifications','report_notifications')" (change)="toggleSec('notifications','report_notifications')" /><span></span></label></div>
+              <div class="setting-row border-0"><div><div class="fw-medium">Parent Communication</div><div class="small text-body-secondary">Default notifications for parents/guardians</div></div>
+                <label class="switch"><input type="checkbox" [checked]="sec('notifications','parent_communication')" (change)="toggleSec('notifications','parent_communication')" /><span></span></label></div>
+            </div></div>
+          </div>
+
+          <!-- Data & System Preferences -->
+          <div class="col-md-6">
+            <div class="card border-0 shadow-sm h-100"><div class="card-body">
+              <div class="fw-semibold mb-3"><app-icon name="database" [size]="18" class="text-success" /> Data & System Preferences</div>
+              <label class="form-label small mb-1">Auto-save</label>
+              <select class="form-select form-select-sm mb-3" [ngModel]="sec('data','auto_save')" (ngModelChange)="setSec('data','auto_save',$event === 'true' || $event === true)">
+                <option [ngValue]="true">Save changes automatically</option>
+                <option [ngValue]="false">Ask before saving</option>
+              </select>
+              <label class="form-label small mb-1">Archive Policy</label>
+              <select class="form-select form-select-sm mb-3" [ngModel]="sec('data','archive_policy')" (ngModelChange)="setSec('data','archive_policy',$event)">
+                <option value="never">Never archive</option>
+                <option value="after_1_year">Archive after 1 academic year</option>
+                <option value="after_3_years">Archive after 3 academic years</option>
+              </select>
+              <label class="form-label small mb-1">Default Approval Workflow</label>
+              <select class="form-select form-select-sm" [ngModel]="sec('data','approval_workflow')" (ngModelChange)="setSec('data','approval_workflow',$event)">
+                <option value="admin_final">Admin Approval → Final Approval</option>
+                <option value="single">Single Approval</option>
+                <option value="none">No Approval Required</option>
+              </select>
+            </div></div>
+          </div>
+        </div>
+      }
+
+      <!-- ACADEMIC POLICIES (grading) -->
+      @if (tab() === 'academic') {
+        <div class="card border-0 shadow-sm"><div class="card-body">
+          <h5 class="fw-semibold mb-1">Grading policy</h5>
+          <p class="text-body-secondary mb-4">The pass mark and grade bands used across reports.</p>
+          <div class="mb-4" style="max-width: 220px;">
+            <label class="form-label" for="pass">Pass mark (%)</label>
+            <input id="pass" type="number" min="0" max="100" class="form-control" [ngModel]="passMark()" (ngModelChange)="passMark.set(+$event)" />
+          </div>
           <label class="form-label">Grade bands</label>
           <div class="d-flex flex-column gap-2">
             @for (b of bands(); track $index) {
               <div class="d-flex gap-2 align-items-center">
-                <input class="form-control" style="max-width: 120px;" placeholder="Grade"
-                       [ngModel]="b.grade" (ngModelChange)="setBand($index, {grade: $event})"/>
+                <input class="form-control" style="max-width: 120px;" placeholder="Grade" [ngModel]="b.grade" (ngModelChange)="setBand($index, {grade: $event})" />
                 <span class="text-body-secondary small">from</span>
-                <input type="number" min="0" max="100" class="form-control" style="max-width: 110px;"
-                       [ngModel]="b.min" (ngModelChange)="setBand($index, {min: +$event})"/>
+                <input type="number" min="0" max="100" class="form-control" style="max-width: 110px;" [ngModel]="b.min" (ngModelChange)="setBand($index, {min: +$event})" />
                 <span class="text-body-secondary small">%+</span>
-                <button type="button" class="btn btn-sm btn-outline-danger" (click)="removeBand($index)" title="Remove">
-                  <app-icon name="close" [size]="16" />
-                </button>
+                <button type="button" class="btn btn-sm btn-outline-danger" (click)="removeBand($index)" title="Remove"><app-icon name="close" [size]="16" /></button>
               </div>
             }
           </div>
           <button type="button" class="btn btn-sm btn-outline-secondary mt-3" (click)="addBand()">+ Add band</button>
-        </div>
-      </div>
-    </div>
+        </div></div>
+      }
 
-    <!-- Safeguarding config -->
-    <div class="col-lg-6">
-      <div class="card border-0 shadow-sm h-100">
-        <div class="card-body">
+      <!-- PRIVACY & SECURITY (safeguarding) -->
+      @if (tab() === 'privacy') {
+        <div class="card border-0 shadow-sm"><div class="card-body">
           <h5 class="fw-semibold mb-1">Safeguarding</h5>
           <p class="text-body-secondary mb-4">The designated safeguarding lead and your policy note.</p>
-
           <div class="mb-3">
             <label class="form-label" for="dsl_name">Designated lead</label>
-            <input id="dsl_name" class="form-control" [ngModel]="safeguarding().lead_name" (ngModelChange)="setSafe({lead_name: $event})"/>
+            <input id="dsl_name" class="form-control" [ngModel]="safeguarding().lead_name" (ngModelChange)="setSafe({lead_name: $event})" />
           </div>
           <div class="row">
             <div class="col-md-6 mb-3">
               <label class="form-label" for="dsl_email">Lead email</label>
-              <input id="dsl_email" type="email" class="form-control" [ngModel]="safeguarding().lead_email" (ngModelChange)="setSafe({lead_email: $event})"/>
+              <input id="dsl_email" type="email" class="form-control" [ngModel]="safeguarding().lead_email" (ngModelChange)="setSafe({lead_email: $event})" />
             </div>
             <div class="col-md-6 mb-3">
               <label class="form-label" for="dsl_phone">Lead phone</label>
-              <input id="dsl_phone" class="form-control" [ngModel]="safeguarding().lead_phone" (ngModelChange)="setSafe({lead_phone: $event})"/>
+              <input id="dsl_phone" class="form-control" [ngModel]="safeguarding().lead_phone" (ngModelChange)="setSafe({lead_phone: $event})" />
             </div>
           </div>
           <div class="mb-0">
             <label class="form-label" for="dsl_note">Policy note</label>
             <app-rich-editor [ngModel]="safeguarding().policy_note" (ngModelChange)="setSafe({policy_note: $event})" placeholder="How concerns are handled at your school…" />
           </div>
+        </div></div>
+      }
+    </div>
+
+    <!-- Right rail -->
+    <div class="col-lg-4 col-xxl-3">
+      <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body">
+          <div class="fw-semibold mb-3"><app-icon name="fact_check" [size]="18" class="text-success" /> Settings Summary</div>
+          @for (s of summary(); track s.label) {
+            <div class="pref-line small">
+              <span class="d-flex align-items-center gap-2">
+                <app-icon [name]="s.done ? 'check_circle' : 'radio_button_unchecked'" [size]="15" [class]="s.done ? 'text-success' : 'text-body-secondary'" />
+                {{ s.label }}
+              </span>
+              <span class="fw-medium" [class.text-success]="s.done" [class.text-warning]="!s.done">{{ s.done ? (s.configured ? 'Configured' : 'Complete') : 'Pending' }}</span>
+            </div>
+          }
+        </div>
+      </div>
+
+      @if (attention().length) {
+        <div class="card border-0 shadow-sm mb-4">
+          <div class="card-body">
+            <div class="fw-semibold mb-3"><app-icon name="warning" [size]="18" class="text-warning" /> Attention Needed</div>
+            @for (a of attention(); track a.label) {
+              <div class="pref-line small">
+                <span class="d-flex align-items-center gap-2"><app-icon name="error" [size]="15" class="text-warning" /> {{ a.label }}</span>
+                <span class="badge" [class.bg-danger-subtle]="a.level === 'Required'" [class.text-danger]="a.level === 'Required'"
+                      [class.bg-warning-subtle]="a.level === 'Review'" [class.text-warning]="a.level === 'Review'"
+                      [class.bg-secondary-subtle]="a.level === 'Optional'" [class.text-secondary]="a.level === 'Optional'">{{ a.level }}</span>
+              </div>
+            }
+          </div>
+        </div>
+      }
+
+      <div class="card border-0 shadow-sm rail-sticky">
+        <div class="card-body">
+          <div class="fw-semibold mb-3"><app-icon name="bolt" [size]="18" class="text-success" /> Quick Actions</div>
+          <button type="button" class="btn btn-success w-100 mb-2" [disabled]="saving()" (click)="save()">
+            <app-icon name="save" [size]="16" /> {{ saving() ? 'Saving…' : 'Save Changes' }}
+          </button>
+          <a class="btn btn-outline-secondary w-100 mb-2" routerLink="/admin/management/safeguarding"><app-icon name="shield" [size]="16" /> Safeguarding Cases</a>
+          <a class="btn btn-outline-secondary w-100" routerLink="/admin/setup"><app-icon name="checklist" [size]="16" /> School Setup</a>
         </div>
       </div>
     </div>
-  </div>
-
-  <div class="d-flex justify-content-end mt-4">
-    <button type="button" class="btn btn-primary" [disabled]="saving()" (click)="save()">{{ saving() ? 'Saving…' : 'Save settings' }}</button>
   </div>
 }

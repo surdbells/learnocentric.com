@@ -42,7 +42,33 @@ final class SchoolSettingsAction
             'lead_phone' => '',
             'policy_note' => '',
         ],
+        // Institution-level configuration surfaced by the School-Admin Settings hub.
+        'academic' => [
+            'naming_convention' => 'first_last',   // first_last | last_first
+            'class_structure' => 'grade_based',    // grade_based | form_based | year_based
+        ],
+        'localization' => [
+            'timezone' => 'Africa/Lagos',
+            'date_format' => 'DD MMM YYYY',
+            'language' => 'en',
+        ],
+        'branding' => [
+            'portal_name' => '',
+        ],
+        'notifications' => [
+            'email_alerts' => true,
+            'report_notifications' => true,
+            'parent_communication' => true,
+        ],
+        'data' => [
+            'auto_save' => true,
+            'archive_policy' => 'after_3_years',   // never | after_1_year | after_3_years
+            'approval_workflow' => 'admin_final',   // admin_final | single | none
+        ],
     ];
+
+    /** Flat scalar sections editable by a straight typed whitelist merge. */
+    private const FLAT_SECTIONS = ['academic', 'localization', 'branding', 'notifications', 'data'];
 
     public function __construct(
         private readonly EntityManagerInterface $em,
@@ -113,6 +139,26 @@ final class SchoolSettingsAction
             }
         }
 
+        // Flat scalar sections — merge each supplied key, cast to the default's type.
+        foreach (self::FLAT_SECTIONS as $section) {
+            if (!is_array($body[$section] ?? null)) {
+                continue;
+            }
+            foreach (self::DEFAULTS[$section] as $key => $default) {
+                if (!array_key_exists($key, $body[$section])) {
+                    continue;
+                }
+                $value = $body[$section][$key];
+                if (is_bool($default)) {
+                    $current[$section][$key] = filter_var($value, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE) ?? $default;
+                } elseif (is_int($default)) {
+                    $current[$section][$key] = is_numeric($value) ? (int) $value : $default;
+                } else {
+                    $current[$section][$key] = mb_substr(trim((string) $value), 0, 200);
+                }
+            }
+        }
+
         $institution->setSettings($current);
         $this->em->flush();
         $this->audit->log('institution.settings', $user, 'Institution', (string) $institution->getId(), $before, $current);
@@ -124,10 +170,14 @@ final class SchoolSettingsAction
     private function merged(Institution $institution): array
     {
         $stored = $institution->getSettings() ?? [];
-        return [
+        $out = [
             'grading' => array_merge(self::DEFAULTS['grading'], $stored['grading'] ?? []),
             'safeguarding' => array_merge(self::DEFAULTS['safeguarding'], $stored['safeguarding'] ?? []),
         ];
+        foreach (self::FLAT_SECTIONS as $section) {
+            $out[$section] = array_merge(self::DEFAULTS[$section], is_array($stored[$section] ?? null) ? $stored[$section] : []);
+        }
+        return $out;
     }
 
     private function institution(Request $request): ?Institution
