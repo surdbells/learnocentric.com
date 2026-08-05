@@ -267,6 +267,8 @@ export class UserPreferenceMenu {
         { name: "Profile", link: "/student/management/profile" },
       ]
     },
+
+    { name: "Settings", icon: "settings", link: "/student/settings" },
   ]
 
   parent = [

@@ -50,6 +50,10 @@ class User
     #[ORM\Column(length: 30, options: ['default' => 'active'])]
     private string $status = 'active';
 
+    /** Per-user settings blob (notifications, appearance, privacy, role prefs). Never holds secrets. */
+    #[ORM\Column(type: Types::JSON, nullable: true)]
+    private ?array $preferences = null;
+
     #[ORM\Column(name: 'last_login', type: Types::DATETIME_IMMUTABLE, nullable: true)]
     private ?DateTimeImmutable $lastLogin = null;
 
@@ -96,6 +100,9 @@ class User
     public function setProfileImageUrl(?string $v): void { $this->profileImageUrl = $v; }
     public function getStatus(): string { return $this->status; }
     public function setStatus(string $v): void { $this->status = $v; }
+    public function getPreferences(): ?array { return $this->preferences; }
+    public function setPreferences(?array $v): void { $this->preferences = $v; }
+    public function getLastLogin(): ?DateTimeImmutable { return $this->lastLogin; }
     public function markLoggedIn(): void { $this->lastLogin = new DateTimeImmutable(); }
 
     /** Public shape consumed by the Angular frontend (AuthUser). */

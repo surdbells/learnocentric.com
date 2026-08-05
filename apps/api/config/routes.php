@@ -2,9 +2,11 @@
 
 declare(strict_types=1);
 
+use App\Application\Actions\Auth\ChangePasswordAction;
 use App\Application\Actions\Auth\LoginAction;
 use App\Application\Actions\Auth\MeAction;
 use App\Application\Actions\Auth\ProfileAction;
+use App\Application\Actions\Auth\UserSettingsAction;
 use App\Application\Actions\Auth\RegisterAction;
 use App\Application\Actions\Analytics\AnalyticsAction;
 use App\Application\Actions\Dashboard\DashboardAction;
@@ -68,6 +70,8 @@ return static function (App $app): void {
         $group->group('', function (RouteCollectorProxy $auth): void {
             $auth->get('/auth/me', MeAction::class);
             $auth->map(['GET', 'PUT'], '/auth/profile', ProfileAction::class);
+            $auth->map(['GET', 'PUT'], '/auth/settings', UserSettingsAction::class);
+            $auth->post('/auth/password', ChangePasswordAction::class);
             $auth->map(['GET', 'PUT', 'DELETE'], '/auth/user-profile/{id:[0-9]+}', UserProfileAction::class);
 
             $auth->get('/admin/institutions', ListInstitutionsAction::class);

@@ -1,0 +1,263 @@
+<app-page-header icon="settings" action="Settings" />
+<p class="text-body-secondary mb-4">Manage your account, learning preferences and app settings.</p>
+
+<div class="row g-4">
+  <!-- Settings menu -->
+  <div class="col-lg-3">
+    <div class="card border-0 shadow-sm settings-menu">
+      <div class="card-body p-2">
+        <div class="px-2 py-2 fw-semibold">Settings Menu</div>
+        @for (m of menu; track m.key) {
+          <button type="button" class="menu-item w-100 text-start" [class.active]="activeSection() === m.key" (click)="select(m.key)">
+            <span class="menu-ico"><app-icon [name]="m.icon" [size]="18" /></span>
+            <span class="flex-grow-1">
+              <span class="d-block fw-medium lh-sm">{{ m.label }}</span>
+              <span class="d-block small text-body-secondary lh-sm">{{ m.sub }}</span>
+            </span>
+            <app-icon name="chevron_right" [size]="16" class="text-body-secondary" />
+          </button>
+        }
+      </div>
+    </div>
+  </div>
+
+  <!-- Main -->
+  <div class="col-lg-9">
+    @if (loading()) {
+      <div class="text-center text-body-secondary py-5">Loading your settings…</div>
+    } @else {
+      <!-- Account Settings -->
+      <div id="sec-account" class="card border-0 shadow-sm mb-4">
+        <div class="card-body">
+          <h5 class="fw-semibold mb-1">Account Settings</h5>
+          <p class="text-body-secondary small mb-4">Update your personal information and account details.</p>
+
+          <div class="row g-4">
+            <!-- Profile info -->
+            <div class="col-md-6">
+              <div class="border rounded-3 p-3 h-100">
+                <div class="fw-semibold mb-3">Profile Information</div>
+                <div class="d-flex align-items-start gap-3 mb-3">
+                  <div class="settings-avatar">
+                    @if (profile()?.profileImageUrl) {
+                      <img [src]="profile()!.profileImageUrl" alt="" />
+                    } @else {
+                      <span>{{ (profile()?.firstName || '?')[0] }}{{ (profile()?.lastName || '')[0] }}</span>
+                    }
+                  </div>
+                  <div class="small">
+                    <div class="text-body-secondary">Full Name</div>
+                    <div class="fw-medium mb-2">{{ profile()?.fullName }}</div>
+                    <div class="text-body-secondary">Email Address</div>
+                    <div class="fw-medium mb-2">{{ profile()?.email }}</div>
+                    <div class="text-body-secondary">Phone Number</div>
+                    <div class="fw-medium">{{ profile()?.phone || '—' }}</div>
+                  </div>
+                </div>
+                <a class="btn btn-outline-success btn-sm" routerLink="/student/management/profile">Edit Profile</a>
+              </div>
+            </div>
+
+            <!-- Change password -->
+            <div class="col-md-6">
+              <div class="border rounded-3 p-3 h-100">
+                <div class="fw-semibold mb-1">Change Password</div>
+                <p class="text-body-secondary small mb-3">Ensure your account is using a strong password.</p>
+                <div class="mb-2">
+                  <label class="form-label small mb-1">Current Password</label>
+                  <input [type]="pwShow() ? 'text' : 'password'" class="form-control form-control-sm" placeholder="Enter your current password"
+                         [ngModel]="pwCurrent()" (ngModelChange)="pwCurrent.set($event)" autocomplete="current-password" />
+                </div>
+                <div class="mb-2">
+                  <label class="form-label small mb-1">New Password</label>
+                  <input [type]="pwShow() ? 'text' : 'password'" class="form-control form-control-sm" placeholder="Enter new password"
+                         [ngModel]="pwNew()" (ngModelChange)="pwNew.set($event)" autocomplete="new-password" />
+                </div>
+                <div class="mb-2">
+                  <label class="form-label small mb-1">Confirm New Password</label>
+                  <input [type]="pwShow() ? 'text' : 'password'" class="form-control form-control-sm" placeholder="Confirm new password"
+                         [ngModel]="pwConfirm()" (ngModelChange)="pwConfirm.set($event)" autocomplete="new-password" />
+                </div>
+                <div class="form-check small mb-3">
+                  <input class="form-check-input" type="checkbox" id="pwShow" [ngModel]="pwShow()" (ngModelChange)="pwShow.set($event)" />
+                  <label class="form-check-label" for="pwShow">Show passwords</label>
+                </div>
+                <button type="button" class="btn btn-success btn-sm" [disabled]="pwBusy()" (click)="updatePassword()">
+                  {{ pwBusy() ? 'Updating…' : 'Update Password' }}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section cards grid -->
+      <div class="row g-4">
+        <!-- Learning Preferences -->
+        <div class="col-md-6 col-xl-4">
+          <div id="sec-learning" class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+              <div class="fw-semibold mb-1">Learning Preferences</div>
+              <p class="text-body-secondary small mb-3">Manage your learning experience.</p>
+              <div class="setting-row">
+                <div>
+                  <div class="fw-medium">Daily Study Reminder</div>
+                  <div class="small text-body-secondary">A nudge to keep your streak</div>
+                </div>
+                <label class="switch"><input type="checkbox" [checked]="pref('learning','daily_reminder')" (change)="toggle('learning','daily_reminder')" /><span></span></label>
+              </div>
+              @if (pref('learning','daily_reminder')) {
+                <div class="setting-row">
+                  <div class="fw-medium">Reminder time</div>
+                  <input type="time" class="form-control form-control-sm w-auto" [ngModel]="pref('learning','daily_reminder_time')" (ngModelChange)="setValue('learning','daily_reminder_time',$event)" />
+                </div>
+              }
+              <div class="setting-row border-0">
+                <div>
+                  <div class="fw-medium">Weekly Progress Summary</div>
+                  <div class="small text-body-secondary">Every Monday at 8:00 AM</div>
+                </div>
+                <label class="switch"><input type="checkbox" [checked]="pref('learning','weekly_summary')" (change)="toggle('learning','weekly_summary')" /><span></span></label>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Notifications -->
+        <div class="col-md-6 col-xl-4">
+          <div id="sec-notifications" class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+              <div class="fw-semibold mb-1">Notifications</div>
+              <p class="text-body-secondary small mb-3">Choose how you want to be notified.</p>
+              <div class="setting-row">
+                <div><div class="fw-medium">Push Notifications</div><div class="small text-body-secondary">Lessons, quizzes and updates</div></div>
+                <label class="switch"><input type="checkbox" [checked]="pref('notifications','push')" (change)="toggle('notifications','push')" /><span></span></label>
+              </div>
+              <div class="setting-row">
+                <div><div class="fw-medium">Email Notifications</div><div class="small text-body-secondary">Announcements and summaries</div></div>
+                <label class="switch"><input type="checkbox" [checked]="pref('notifications','email')" (change)="toggle('notifications','email')" /><span></span></label>
+              </div>
+              <div class="setting-row">
+                <div><div class="fw-medium">SMS Notifications</div><div class="small text-body-secondary">Important alerts only</div></div>
+                <label class="switch"><input type="checkbox" [checked]="pref('notifications','sms')" (change)="toggle('notifications','sms')" /><span></span></label>
+              </div>
+              <div class="setting-row border-0">
+                <div><div class="fw-medium">Live Class Reminders</div><div class="small text-body-secondary">15 minutes before class starts</div></div>
+                <label class="switch"><input type="checkbox" [checked]="pref('notifications','live_class_reminders')" (change)="toggle('notifications','live_class_reminders')" /><span></span></label>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Privacy & Security -->
+        <div class="col-md-6 col-xl-4">
+          <div id="sec-privacy" class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+              <div class="fw-semibold mb-1">Privacy & Security</div>
+              <p class="text-body-secondary small mb-3">Manage your privacy and keep your account secure.</p>
+              <div class="setting-row">
+                <div><div class="fw-medium">Profile Visibility</div><div class="small text-body-secondary">Who can see your profile</div></div>
+                <select class="form-select form-select-sm w-auto" [ngModel]="pref('privacy','profile_visibility')" (ngModelChange)="setValue('privacy','profile_visibility',$event)">
+                  <option value="tutors_only">Tutors only</option>
+                  <option value="everyone">Everyone</option>
+                  <option value="private">Private</option>
+                </select>
+              </div>
+              <div class="setting-row">
+                <div><div class="fw-medium">Data Usage</div><div class="small text-body-secondary">Wi-Fi only for video streaming</div></div>
+                <label class="switch"><input type="checkbox" [checked]="pref('privacy','data_usage_wifi_only')" (change)="toggle('privacy','data_usage_wifi_only')" /><span></span></label>
+              </div>
+              <div class="setting-row border-0">
+                <div><div class="fw-medium">Two-Factor Authentication</div><div class="small text-body-secondary">Add extra security to your account</div></div>
+                <label class="switch"><input type="checkbox" [checked]="pref('privacy','two_factor')" (change)="toggle('privacy','two_factor')" /><span></span></label>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Appearance -->
+        <div class="col-md-6 col-xl-4">
+          <div id="sec-appearance" class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+              <div class="fw-semibold mb-1">Appearance</div>
+              <p class="text-body-secondary small mb-3">Customise how the app looks.</p>
+              <div class="mb-3">
+                <div class="small text-body-secondary mb-1">Theme</div>
+                <div class="seg">
+                  @for (t of ['light','dark','system']; track t) {
+                    <button type="button" class="seg-btn text-capitalize" [class.active]="pref('appearance','theme') === t" (click)="setTheme(t)">{{ t }}</button>
+                  }
+                </div>
+              </div>
+              <div>
+                <div class="small text-body-secondary mb-1">Text Size</div>
+                <div class="seg">
+                  <button type="button" class="seg-btn" [class.active]="pref('appearance','text_size') === 'small'" (click)="setTextSize('small')">A-</button>
+                  <button type="button" class="seg-btn" [class.active]="pref('appearance','text_size') === 'medium'" (click)="setTextSize('medium')">Medium</button>
+                  <button type="button" class="seg-btn" [class.active]="pref('appearance','text_size') === 'large'" (click)="setTextSize('large')">A+</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Download & Storage -->
+        <div class="col-md-6 col-xl-4">
+          <div id="sec-storage" class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+              <div class="fw-semibold mb-1">Download & Storage</div>
+              <p class="text-body-secondary small mb-3">On-device app data (browser cache).</p>
+              <div class="d-flex justify-content-between small mb-1">
+                <span class="text-body-secondary">Storage Used</span>
+                <span class="fw-medium">{{ storageLabel() }} of 5 MB</span>
+              </div>
+              <div class="progress mb-2" style="height:8px">
+                <div class="progress-bar bg-success" [style.width.%]="storagePct()"></div>
+              </div>
+              <div class="small text-body-secondary">{{ storagePct() | number:'1.0-0' }}% of local cache used by saved notes and progress.</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Language -->
+        <div class="col-md-6 col-xl-4">
+          <div id="sec-language" class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+              <div class="fw-semibold mb-1">Language</div>
+              <p class="text-body-secondary small mb-3">Choose your preferred language.</p>
+              <label class="form-label small mb-1">App Language</label>
+              <select class="form-select form-select-sm mb-3" [ngModel]="pref('language','app')" (ngModelChange)="setLanguage('app',$event)">
+                <option value="en">English (English)</option>
+                <option value="fr">French (Français)</option>
+                <option value="ar">Arabic (العربية)</option>
+              </select>
+              <label class="form-label small mb-1">Content Language</label>
+              <select class="form-select form-select-sm" [ngModel]="pref('language','content')" (ngModelChange)="setLanguage('content',$event)">
+                <option value="en">English (English)</option>
+                <option value="fr">French (Français)</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Help & Support -->
+        <div class="col-md-6 col-xl-4">
+          <div id="sec-help" class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+              <div class="fw-semibold mb-1">Help & Support</div>
+              <p class="text-body-secondary small mb-3">Get help when you need it.</p>
+              <a class="help-row" routerLink="/student/academics/resources"><app-icon name="help" [size]="18" /> <span>Visit Help Centre</span><app-icon name="chevron_right" [size]="16" class="ms-auto text-body-secondary" /></a>
+              <a class="help-row" routerLink="/student/communication/messages"><app-icon name="chat" [size]="18" /> <span>Chat with Support</span><app-icon name="chevron_right" [size]="16" class="ms-auto text-body-secondary" /></a>
+              <a class="help-row" routerLink="/student/report-concern"><app-icon name="flag" [size]="18" /> <span>Report an Issue</span><app-icon name="chevron_right" [size]="16" class="ms-auto text-body-secondary" /></a>
+              <a class="help-row" routerLink="/student/academics/feedback"><app-icon name="rate_review" [size]="18" /> <span>Give Feedback</span><app-icon name="chevron_right" [size]="16" class="ms-auto text-body-secondary" /></a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="text-center text-body-secondary small mt-4">
+        <app-icon name="lock" [size]="14" /> Your information is private and secure. We will never share your data.
+      </div>
+    }
+  </div>
+</div>
