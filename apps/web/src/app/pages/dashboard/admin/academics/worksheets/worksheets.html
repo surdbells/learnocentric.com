@@ -50,26 +50,74 @@
                 </div>
                 <span class="small text-body-secondary">{{ sub.submitted_at | date:'medium' }}</span>
               </div>
-              @if (sub.response_text) { <app-rich-text class="small d-block mb-2" [value]="sub.response_text" /> }
-              @if (sub.attachment_url) { <a class="small" [href]="sub.attachment_url" target="_blank" rel="noopener">View attachment</a> }
-
-              <div class="row g-2 align-items-end mt-1">
-                <div class="col-auto" style="width:7rem">
-                  <label class="form-label small mb-1">Score / {{ w.total_marks }}</label>
-                  <input type="number" class="form-control form-control-sm" [ngModel]="gradeDraft()[sub.id]?.score"
-                         (ngModelChange)="setScore(sub.id, $event)" [ngModelOptions]="{standalone: true}" min="0" [max]="w.total_marks"/>
-                </div>
-                <div class="col">
-                  <label class="form-label small mb-1">Feedback</label>
-                  <input type="text" class="form-control form-control-sm" [ngModel]="gradeDraft()[sub.id]?.feedback"
-                         (ngModelChange)="setFeedback(sub.id, $event)" [ngModelOptions]="{standalone: true}" placeholder="Optional feedback"/>
-                </div>
-                <div class="col-auto">
-                  <button type="button" class="btn btn-sm btn-primary" [disabled]="busy()" (click)="grade(sub)">
-                    {{ sub.status === 'graded' ? 'Update' : 'Grade' }}
+              @if (wsQuestionCount() > 0) {
+                <!-- Structured worksheet: per-question marking -->
+                <div class="d-flex align-items-center justify-content-between gap-2">
+                  <span class="small text-body-secondary">Score <b>{{ sub.score ?? '—' }}/{{ w.total_marks }}</b></span>
+                  <button type="button" class="btn btn-sm btn-outline-primary" (click)="openMark(sub)">
+                    <app-icon name="checklist" [size]="15" /> {{ markSubId() === sub.id ? 'Close' : 'Mark questions' }}
                   </button>
                 </div>
-              </div>
+
+                @if (markSubId() === sub.id) {
+                  @if (!markDetail()) {
+                    <div class="text-body-secondary small py-3">Loading answers…</div>
+                  } @else {
+                    <div class="mark-panel mt-3">
+                      @for (q of markDetail().questions; track q.question_id) {
+                        <div class="mark-q">
+                          <div class="small fw-medium">{{ q.prompt }} <span class="text-body-secondary">({{ q.marks }} {{ q.marks === 1 ? 'mark' : 'marks' }})</span></div>
+                          <div class="small text-body-secondary mb-1">Answer: {{ q.answer || '— (blank)' }}</div>
+                          @if (q.auto) {
+                            <span class="badge" [class.bg-success-subtle]="q.correct" [class.text-success]="q.correct" [class.bg-danger-subtle]="!q.correct" [class.text-danger]="!q.correct">
+                              <app-icon [name]="q.correct ? 'check_circle' : 'cancel'" [size]="13" /> Auto {{ q.awarded_marks ?? 0 }}/{{ q.marks }}
+                            </span>
+                          } @else {
+                            <div class="d-flex align-items-center gap-2">
+                              <label class="small text-body-secondary">Award</label>
+                              <input type="number" class="form-control form-control-sm" style="width:5rem" min="0" [max]="q.marks"
+                                     [ngModel]="markDraft()[q.question_id]" (ngModelChange)="setMark(q.question_id, $event)" [ngModelOptions]="{standalone: true}" />
+                              <span class="small text-body-secondary">/ {{ q.marks }}</span>
+                            </div>
+                          }
+                        </div>
+                      }
+                      <div class="mt-2">
+                        <label class="form-label small mb-1">Feedback</label>
+                        <input type="text" class="form-control form-control-sm" [ngModel]="markFeedback()" (ngModelChange)="markFeedback.set($event)" [ngModelOptions]="{standalone: true}" placeholder="Optional overall feedback" />
+                      </div>
+                      <div class="d-flex align-items-center justify-content-between mt-3">
+                        <span class="small">Total <b>{{ markTotal() }}/{{ w.total_marks }}</b></span>
+                        <button type="button" class="btn btn-sm btn-primary" [disabled]="markBusy()" (click)="saveMarks()">
+                          {{ markBusy() ? 'Saving…' : 'Save marks & finalize' }}
+                        </button>
+                      </div>
+                    </div>
+                  }
+                }
+              } @else {
+                <!-- Free-form worksheet: overall grade -->
+                @if (sub.response_text) { <app-rich-text class="small d-block mb-2" [value]="sub.response_text" /> }
+                @if (sub.attachment_url) { <a class="small" [href]="sub.attachment_url" target="_blank" rel="noopener">View attachment</a> }
+
+                <div class="row g-2 align-items-end mt-1">
+                  <div class="col-auto" style="width:7rem">
+                    <label class="form-label small mb-1">Score / {{ w.total_marks }}</label>
+                    <input type="number" class="form-control form-control-sm" [ngModel]="gradeDraft()[sub.id]?.score"
+                           (ngModelChange)="setScore(sub.id, $event)" [ngModelOptions]="{standalone: true}" min="0" [max]="w.total_marks"/>
+                  </div>
+                  <div class="col">
+                    <label class="form-label small mb-1">Feedback</label>
+                    <input type="text" class="form-control form-control-sm" [ngModel]="gradeDraft()[sub.id]?.feedback"
+                           (ngModelChange)="setFeedback(sub.id, $event)" [ngModelOptions]="{standalone: true}" placeholder="Optional feedback"/>
+                  </div>
+                  <div class="col-auto">
+                    <button type="button" class="btn btn-sm btn-primary" [disabled]="busy()" (click)="grade(sub)">
+                      {{ sub.status === 'graded' ? 'Update' : 'Grade' }}
+                    </button>
+                  </div>
+                </div>
+              }
             </div>
           }
         </div>

@@ -255,9 +255,10 @@ final class WorksheetSubmissionsAction
         }
         $subs = $this->em->getRepository(WorksheetSubmission::class)->findBy(['worksheet' => $worksheet], ['submittedAt' => 'DESC']);
         $graded = count(array_filter($subs, static fn (WorksheetSubmission $s) => $s->getStatus() === WorksheetSubmission::GRADED));
+        $qCount = (int) $this->em->getRepository(WorksheetQuestion::class)->count(['worksheet' => $worksheet]);
 
         return Json::write($response, [
-            'worksheet' => $worksheet->toArray(),
+            'worksheet' => $worksheet->toArray() + ['question_count' => $qCount],
             'summary' => ['submissions' => count($subs), 'graded' => $graded, 'ungraded' => count($subs) - $graded],
             'data' => array_map(static fn (WorksheetSubmission $s) => $s->toArray(), $subs),
         ]);
@@ -297,6 +298,131 @@ final class WorksheetSubmissionsAction
         $this->audit->log('worksheet.grade', $request->getAttribute('user'), 'WorksheetSubmission', (string) $submission->getId(), null, ['score' => $score]);
 
         return Json::write($response, $submission->toArray());
+    }
+
+    /** GET /assessment/worksheet-submissions/{id}/detail — staff per-question view for marking. */
+    public function submissionDetail(Request $request, Response $response, array $args): Response
+    {
+        if (($guard = $this->staffGuard($request, $response)) !== null) {
+            return $guard;
+        }
+        $submission = $this->em->getRepository(WorksheetSubmission::class)->find((int) $args['id']);
+        if ($submission === null || !$this->canActWithin($request, $submission->getStudent()->getInstitution())) {
+            return Json::error($response, 'Submission not found.', 404);
+        }
+        $worksheet = $submission->getWorksheet();
+        $questions = $this->em->getRepository(WorksheetQuestion::class)
+            ->findBy(['worksheet' => $worksheet], ['sectionPosition' => 'ASC', 'position' => 'ASC']);
+        $respMap = [];
+        foreach ($this->responsesFor($submission) as $r) {
+            $respMap[$r->getQuestion()->getId()] = $r;
+        }
+
+        $rows = [];
+        $freeResponse = 0;
+        foreach ($questions as $q) {
+            $auto = in_array($q->getType(), WorksheetQuestion::AUTO_TYPES, true);
+            if (!$auto) {
+                $freeResponse++;
+            }
+            $r = $respMap[$q->getId()] ?? null;
+            $rows[] = [
+                'question_id' => $q->getId(),
+                'section_label' => $q->getSectionLabel(),
+                'prompt' => $q->getPrompt(),
+                'type' => $q->getType(),
+                'marks' => $q->getMarks(),
+                'auto' => $auto,
+                'correct_answer' => $q->getCorrectAnswer(),
+                'answer' => $r?->getAnswer(),
+                'awarded_marks' => $r?->getAwardedMarks(),
+                'correct' => $r?->getCorrect(),
+            ];
+        }
+
+        return Json::write($response, [
+            'submission' => [
+                'id' => $submission->getId(),
+                'student' => $submission->getStudent()->getFirstName() . ' ' . $submission->getStudent()->getLastName(),
+                'status' => $submission->getStatus(),
+                'score' => $submission->getScore(),
+                'feedback' => $submission->getFeedback(),
+                'submitted_at' => $submission->getSubmittedAt()?->format(DATE_ATOM),
+            ],
+            'worksheet' => ['title' => $worksheet->getTitle(), 'total_marks' => $worksheet->getTotalMarks()],
+            'questions' => $rows,
+            'free_response_count' => $freeResponse,
+        ]);
+    }
+
+    /** POST /assessment/worksheet-submissions/{id}/grade-questions — staff award per-question marks + finalize. */
+    public function gradeQuestions(Request $request, Response $response, array $args): Response
+    {
+        if (($guard = $this->staffGuard($request, $response)) !== null) {
+            return $guard;
+        }
+        $submission = $this->em->getRepository(WorksheetSubmission::class)->find((int) $args['id']);
+        if ($submission === null || !$this->canActWithin($request, $submission->getStudent()->getInstitution())) {
+            return Json::error($response, 'Submission not found.', 404);
+        }
+        $worksheet = $submission->getWorksheet();
+        $questions = [];
+        foreach ($this->em->getRepository(WorksheetQuestion::class)->findBy(['worksheet' => $worksheet]) as $q) {
+            $questions[$q->getId()] = $q;
+        }
+        if ($questions === []) {
+            return Json::error($response, 'This worksheet has no questions to mark.', 422);
+        }
+        $respMap = [];
+        foreach ($this->responsesFor($submission) as $r) {
+            $respMap[$r->getQuestion()->getId()] = $r;
+        }
+
+        $body = (array) $request->getParsedBody();
+        foreach ((array) ($body['marks'] ?? []) as $item) {
+            if (!is_array($item)) {
+                continue;
+            }
+            $qid = (int) ($item['question_id'] ?? 0);
+            $q = $questions[$qid] ?? null;
+            if ($q === null || !array_key_exists('awarded_marks', $item)) {
+                continue;
+            }
+            $awarded = max(0, min($q->getMarks(), (int) $item['awarded_marks']));
+            $resp = $respMap[$qid] ?? null;
+            if ($resp === null) {
+                $resp = new WorksheetResponse($submission, $q);
+                $this->em->persist($resp);
+                $respMap[$qid] = $resp;
+            }
+            $resp->setAwardedMarks($awarded);
+            // For objective questions keep the auto-correctness flag; free-response has none.
+        }
+
+        // Recompute the total from every response's awarded marks.
+        $total = 0;
+        foreach ($respMap as $r) {
+            $total += (int) ($r->getAwardedMarks() ?? 0);
+        }
+        $submission->setScore($total);
+        $submission->setStatus(WorksheetSubmission::GRADED);
+        $submission->setGradedAt(new DateTimeImmutable());
+        if (array_key_exists('feedback', $body)) {
+            $submission->setFeedback($body['feedback'] !== '' ? (string) $body['feedback'] : null);
+        }
+        $this->em->flush();
+
+        $max = $worksheet->getTotalMarks();
+        $this->notify->notify(
+            $submission->getStudent(),
+            'grade',
+            'Worksheet graded: ' . $worksheet->getTitle(),
+            'You scored ' . $total . '/' . $max . '.' . ($submission->getFeedback() ? ' ' . $submission->getFeedback() : ''),
+            '/student/academics/worksheets',
+        );
+        $this->audit->log('worksheet.grade_questions', $request->getAttribute('user'), 'WorksheetSubmission', (string) $submission->getId(), null, ['score' => $total]);
+
+        return Json::write($response, $this->solvePayload($worksheet, $submission));
     }
 
     // --- solver helpers ---

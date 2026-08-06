@@ -173,6 +173,8 @@ return static function (App $app): void {
             $auth->get('/assessment/worksheets/{id:[0-9]+}/submission', WorksheetSubmissionsAction::class . ':mine');
             $auth->get('/assessment/worksheets/{id:[0-9]+}/submissions', WorksheetSubmissionsAction::class . ':submissions');
             $auth->post('/assessment/worksheet-submissions/{id:[0-9]+}/grade', WorksheetSubmissionsAction::class . ':grade');
+            $auth->get('/assessment/worksheet-submissions/{id:[0-9]+}/detail', WorksheetSubmissionsAction::class . ':submissionDetail');
+            $auth->post('/assessment/worksheet-submissions/{id:[0-9]+}/grade-questions', WorksheetSubmissionsAction::class . ':gradeQuestions');
 
             // Portfolio — competency-track evidence (student submit, staff review)
             $auth->map(['GET', 'POST', 'PUT', 'DELETE'], '/assessment/portfolio', PortfolioAction::class);

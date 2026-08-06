@@ -10,6 +10,7 @@ import {WorksheetForm} from '../../../../../components/forms/worksheet-form/work
 import {ApiService} from '../../../../../common/service/api.service';
 import {AuthService} from '../../../../../common/auth/auth.service';
 import {RichText} from '../../../../../common/rich-editor/rich-text';
+import {Icon} from '../../../../../common/icon/icon';
 
 declare const bootstrap: any;
 
@@ -20,7 +21,7 @@ const APPROVER_ROLES = ['academic_lead', 'school_admin', 'tutor_admin', 'super_a
 @Component({
   selector: 'app-worksheets',
   standalone: true,
-  imports: [RichText, PageHeader, LearnoModal, LearnoButton, DataGrid, WorksheetForm, FormsModule, DatePipe],
+  imports: [RichText, PageHeader, LearnoModal, LearnoButton, DataGrid, WorksheetForm, FormsModule, DatePipe, Icon],
   templateUrl: './worksheets.html',
   styleUrl: './worksheets.css',
 })
@@ -39,6 +40,14 @@ export class Worksheets {
   gradeDraft = signal<Record<number, { score: any; feedback: string }>>({});
   busy = signal(false);
   topics = signal<any[]>([]);
+
+  // Per-question marking (structured worksheets)
+  wsQuestionCount = signal(0);
+  markSubId = signal<number | null>(null);
+  markDetail = signal<any | null>(null);
+  markDraft = signal<Record<number, number>>({});
+  markFeedback = signal('');
+  markBusy = signal(false);
 
   readonly isApprover = computed(() => APPROVER_ROLES.includes(this.auth.getAuthSession()?.user?.role ?? ''));
 
@@ -100,6 +109,7 @@ export class Worksheets {
       next: (res) => {
         this.submissions.set(res?.data ?? []);
         this.summary.set(res?.summary ?? null);
+        this.wsQuestionCount.set(res?.worksheet?.question_count ?? 0);
         const draft: Record<number, { score: any; feedback: string }> = {};
         (res?.data ?? []).forEach((s: any) => draft[s.id] = {score: s.score, feedback: s.feedback ?? ''});
         this.gradeDraft.set(draft);
@@ -120,6 +130,51 @@ export class Worksheets {
     this.api.post<any>(`/backend/assessment/worksheet-submissions/${sub.id}/grade`, {score: Number(draft.score), feedback: draft.feedback}).subscribe({
       next: () => { this.toast.success('Graded'); this.loadSubmissions(this.manage().id); this.busy.set(false); },
       error: (e) => { this.toast.error(e?.error?.error || 'Grading failed'); this.busy.set(false); },
+    });
+  }
+
+  // --- Per-question marking ---
+
+  openMark(sub: any): void {
+    if (this.markSubId() === sub.id) { this.markSubId.set(null); return; } // toggle closed
+    this.markSubId.set(sub.id);
+    this.markDetail.set(null);
+    this.api.get<any>(`/backend/assessment/worksheet-submissions/${sub.id}/detail`).subscribe({
+      next: (d) => {
+        this.markDetail.set(d);
+        const draft: Record<number, number> = {};
+        (d?.questions ?? []).forEach((q: any) => draft[q.question_id] = q.awarded_marks ?? 0);
+        this.markDraft.set(draft);
+        this.markFeedback.set(d?.submission?.feedback ?? '');
+      },
+      error: () => this.toast.error('Could not load the submission'),
+    });
+  }
+
+  setMark(qid: number, val: any): void {
+    this.markDraft.set({...this.markDraft(), [qid]: val === '' || val == null ? 0 : Number(val)});
+  }
+
+  markTotal(): number {
+    return Object.values(this.markDraft()).reduce((s, v) => s + (Number(v) || 0), 0);
+  }
+
+  saveMarks(): void {
+    const subId = this.markSubId();
+    const d = this.markDetail();
+    if (!subId || !d) return;
+    const marks = (d.questions ?? [])
+      .filter((q: any) => !q.auto) // only free-response is teacher-marked; objective stays auto
+      .map((q: any) => ({question_id: q.question_id, awarded_marks: this.markDraft()[q.question_id] ?? 0}));
+    this.markBusy.set(true);
+    this.api.post<any>(`/backend/assessment/worksheet-submissions/${subId}/grade-questions`, {marks, feedback: this.markFeedback()}).subscribe({
+      next: () => {
+        this.toast.success('Marks saved');
+        this.markBusy.set(false);
+        this.markSubId.set(null);
+        this.loadSubmissions(this.manage().id);
+      },
+      error: (e) => { this.toast.error(e?.error?.error || 'Could not save marks'); this.markBusy.set(false); },
     });
   }
 
