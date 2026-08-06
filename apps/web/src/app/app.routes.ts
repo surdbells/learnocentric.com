@@ -81,6 +81,7 @@ import {Resources} from './pages/dashboard/resources/resources';
 import {ResourceViewer} from './pages/dashboard/resources/resource-viewer/resource-viewer';
 import {Messages} from './pages/dashboard/messages/messages';
 import {Announcements} from './pages/dashboard/announcements/announcements';
+import {AnnouncementCompose} from './pages/dashboard/announcements/announcement-compose/announcement-compose';
 
 export const routes: Routes = [
   {
@@ -161,6 +162,7 @@ export const routes: Routes = [
         children: [
           { path: "messages", component: Messages },
           { path: "announcements", component: Announcements },
+          { path: "announcements/new", component: AnnouncementCompose },
         ]
       }
     ]
@@ -233,6 +235,7 @@ export const routes: Routes = [
         children: [
           { path: "messages", component: Messages },
           { path: "announcements", component: Announcements },
+          { path: "announcements/new", component: AnnouncementCompose },
         ]
       }
     ]
@@ -293,6 +296,7 @@ export const routes: Routes = [
         children: [
           { path: "messages", component: Messages },
           { path: "announcements", component: Announcements },
+          { path: "announcements/new", component: AnnouncementCompose },
         ]
       }
     ]
@@ -339,6 +343,7 @@ export const routes: Routes = [
         children: [
           { path: "messages", component: Messages },
           { path: "announcements", component: Announcements },
+          { path: "announcements/new", component: AnnouncementCompose },
         ]
       }
     ]
@@ -410,6 +415,7 @@ export const routes: Routes = [
         children: [
           { path: "messages", component: Messages },
           { path: "announcements", component: Announcements },
+          { path: "announcements/new", component: AnnouncementCompose },
         ]
       }
     ]

@@ -1,0 +1,15 @@
+:host { display: block; }
+
+table thead th { font-size: .72rem; letter-spacing: .02em; font-weight: 600; }
+.ann-row { cursor: pointer; }
+.ann-row:hover { background: var(--bs-tertiary-bg); }
+.ann-detail > td { background: var(--bs-tertiary-bg); border-top: 0; }
+
+.pref-line {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 1rem; padding: .45rem 0;
+  border-bottom: 1px solid var(--bs-border-color);
+}
+.pref-line:last-child, .pref-line.border-0 { border-bottom: 0; }
+
+.rail-sticky { position: sticky; top: 1rem; }

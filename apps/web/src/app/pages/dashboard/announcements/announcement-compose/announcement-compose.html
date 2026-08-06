@@ -1,0 +1,159 @@
+<app-page-header icon="campaign" action="Create Announcement">
+  <div class="d-flex align-items-center justify-content-end gap-2 flex-wrap">
+    <button type="button" class="btn btn-outline-secondary" (click)="cancel()">Cancel</button>
+    <button type="button" class="btn btn-outline-success" [disabled]="busy()" (click)="submit('draft')"><app-icon name="save" [size]="16" /> Save Draft</button>
+    <button type="button" class="btn btn-success" [disabled]="busy()" (click)="submit('send')"><app-icon name="send" [size]="16" /> {{ busy() ? 'Sending…' : 'Send Announcement' }}</button>
+  </div>
+</app-page-header>
+<p class="text-body-secondary mb-4">Draft and send announcements to learners, parents, or classes.</p>
+
+<div class="row g-4">
+  <!-- Form -->
+  <div class="col-lg-8">
+    <!-- 1. Details -->
+    <div class="card border-0 shadow-sm mb-4"><div class="card-body">
+      <div class="sec-head"><span class="sec-num">1</span> Announcement Details</div>
+      <div class="row g-3 mt-1">
+        <div class="col-md-6">
+          <label class="form-label small mb-1">Announcement Title <span class="text-danger">*</span></label>
+          <input class="form-control" [ngModel]="title()" (ngModelChange)="title.set($event)" placeholder="e.g. Mid-Term Assessment Notice" />
+        </div>
+        <div class="col-md-3">
+          <label class="form-label small mb-1">Audience <span class="text-danger">*</span></label>
+          <select class="form-select" [ngModel]="audience()" (ngModelChange)="audience.set($event)">
+            @for (a of audiences(); track a.v) { <option [value]="a.v">{{ a.l }}</option> }
+          </select>
+        </div>
+        <div class="col-md-3">
+          <label class="form-label small mb-1">Priority</label>
+          <select class="form-select" [ngModel]="priority()" (ngModelChange)="priority.set($event)">
+            <option value="low">Low</option><option value="medium">Medium</option><option value="high">High</option>
+          </select>
+        </div>
+        @if (audience() === 'class') {
+          <div class="col-md-6">
+            <label class="form-label small mb-1">Class <span class="text-danger">*</span></label>
+            <select class="form-select" [ngModel]="classId()" (ngModelChange)="classId.set($event)">
+              <option [ngValue]="null" disabled>Choose a class…</option>
+              @for (c of classes(); track c.id) { <option [ngValue]="c.id">{{ c.label }}</option> }
+            </select>
+          </div>
+        }
+        <div class="col-md-3">
+          <label class="form-label small mb-1">Category</label>
+          <select class="form-select" [ngModel]="category()" (ngModelChange)="category.set($event)">
+            <option value="general">General</option><option value="academics">Academics</option><option value="events">Events</option>
+            <option value="internal">Internal</option><option value="attendance">Attendance</option><option value="reminder">Reminder</option>
+          </select>
+        </div>
+        <div class="col-md-3">
+          <label class="form-label small mb-1">Subject (optional)</label>
+          @if (subjects().length) {
+            <select class="form-select" [ngModel]="subject()" (ngModelChange)="subject.set($event)">
+              <option value="">—</option>
+              @for (s of subjects(); track s) { <option [value]="s">{{ s }}</option> }
+            </select>
+          } @else {
+            <input class="form-control" [ngModel]="subject()" (ngModelChange)="subject.set($event)" placeholder="Optional" />
+          }
+        </div>
+      </div>
+    </div></div>
+
+    <!-- 2. Message content -->
+    <div class="card border-0 shadow-sm mb-4"><div class="card-body">
+      <div class="sec-head"><span class="sec-num">2</span> Message Content</div>
+      <div class="mt-3">
+        <app-rich-editor [ngModel]="body()" (ngModelChange)="body.set($event)" placeholder="Write your announcement…" />
+      </div>
+    </div></div>
+
+    <!-- 3. Delivery options -->
+    <div class="card border-0 shadow-sm mb-4"><div class="card-body">
+      <div class="sec-head"><span class="sec-num">3</span> Delivery Options</div>
+      <div class="row g-2 mt-1">
+        <div class="col-md-4">
+          <label class="deliver-opt" [class.on]="channels().in_app">
+            <input type="checkbox" [ngModel]="channels().in_app" (ngModelChange)="setChannel('in_app', $event)" />
+            <app-icon name="notifications" [size]="18" /> <span><b>In-app Notification</b><small class="d-block text-body-secondary">Send within Learno</small></span>
+          </label>
+        </div>
+        <div class="col-md-4">
+          <label class="deliver-opt" [class.on]="channels().email">
+            <input type="checkbox" [ngModel]="channels().email" (ngModelChange)="setChannel('email', $event)" />
+            <app-icon name="mail" [size]="18" /> <span><b>Email</b><small class="d-block text-body-secondary">Queued to recipients</small></span>
+          </label>
+        </div>
+        <div class="col-md-4">
+          <label class="deliver-opt" [class.on]="channels().parent_copy">
+            <input type="checkbox" [ngModel]="channels().parent_copy" (ngModelChange)="setChannel('parent_copy', $event)" />
+            <app-icon name="family_restroom" [size]="18" /> <span><b>Parent Copy</b><small class="d-block text-body-secondary">Copy to parents/guardians</small></span>
+          </label>
+        </div>
+      </div>
+      <label class="deliver-opt mt-2" [class.on]="scheduleOn()">
+        <input type="checkbox" [ngModel]="scheduleOn()" (ngModelChange)="scheduleOn.set($event)" />
+        <app-icon name="schedule" [size]="18" /> <span><b>Schedule for Later</b><small class="d-block text-body-secondary">Choose a future date and time to send</small></span>
+      </label>
+      @if (scheduleOn()) {
+        <div class="row g-2 mt-1">
+          <div class="col-md-4"><label class="form-label small mb-1">Send Date</label><input type="date" class="form-control" [ngModel]="scheduledDate()" (ngModelChange)="scheduledDate.set($event)" /></div>
+          <div class="col-md-4"><label class="form-label small mb-1">Send Time</label><input type="time" class="form-control" [ngModel]="scheduledTime()" (ngModelChange)="scheduledTime.set($event)" /></div>
+        </div>
+      }
+    </div></div>
+
+    <!-- 4. Attachment -->
+    <div class="card border-0 shadow-sm"><div class="card-body">
+      <div class="sec-head"><span class="sec-num">4</span> Attachment <span class="text-body-secondary small fw-normal">(optional)</span></div>
+      <div class="mt-3">
+        <app-file-upload [value]="attachmentUrl() || null" label="Drag & drop or click to upload" (uploaded)="onAttachment($event)" (cleared)="clearAttachment()" />
+      </div>
+    </div></div>
+  </div>
+
+  <!-- Right rail -->
+  <div class="col-lg-4">
+    <!-- Preview -->
+    <div class="card border-0 shadow-sm mb-4"><div class="card-body">
+      <div class="fw-semibold mb-1"><app-icon name="visibility" [size]="18" class="text-success" /> Preview</div>
+      <div class="small text-body-secondary mb-3">How your announcement will appear.</div>
+      <div class="preview">
+        <div class="d-flex align-items-start justify-content-between gap-2">
+          <span class="prev-ico"><app-icon name="campaign" [size]="18" /></span>
+          <span class="badge bg-{{ priority() === 'high' ? 'danger' : priority() === 'low' ? 'secondary' : 'warning' }}-subtle text-{{ priority() === 'high' ? 'danger' : priority() === 'low' ? 'secondary' : 'warning' }} text-capitalize">{{ priority() }} Priority</span>
+        </div>
+        <div class="fw-semibold mt-2">{{ title() || 'Announcement title' }}</div>
+        <div class="small text-body-secondary text-capitalize">{{ category() }}@if (subject()) { · {{ subject() }} }</div>
+        <div class="small mt-2 prev-body">{{ body() || 'Your message will appear here…' }}</div>
+        @if (attachmentName()) { <div class="small mt-2 text-body-secondary"><app-icon name="attach_file" [size]="14" /> {{ attachmentName() }}</div> }
+      </div>
+    </div></div>
+
+    <!-- Recipient summary -->
+    <div class="card border-0 shadow-sm mb-4"><div class="card-body">
+      <div class="fw-semibold mb-2"><app-icon name="groups" [size]="18" class="text-success" /> Recipient Summary</div>
+      <div class="pref-line small"><span class="text-body-secondary">Audience</span><span class="fw-medium text-capitalize">{{ recipientEstimate() }}</span></div>
+      <div class="pref-line small border-0"><span class="text-body-secondary">Channels</span><span class="fw-medium">{{ (channels().in_app ? 'In-app ' : '') + (channels().email ? 'Email ' : '') + (channels().parent_copy ? 'Parent' : '') || '—' }}</span></div>
+    </div></div>
+
+    <!-- Templates -->
+    <div class="card border-0 shadow-sm mb-4"><div class="card-body">
+      <div class="fw-semibold mb-2"><app-icon name="bolt" [size]="18" class="text-success" /> Quick Templates</div>
+      @for (t of templateNames; track t) {
+        <button type="button" class="tmpl-row" (click)="applyTemplate(t)"><app-icon name="description" [size]="16" /> {{ t }}</button>
+      }
+    </div></div>
+
+    <!-- Guidelines -->
+    <div class="card border-0 shadow-sm"><div class="card-body">
+      <div class="fw-semibold mb-2"><app-icon name="verified" [size]="18" class="text-success" /> Guidelines</div>
+      <ul class="small text-body-secondary mb-0 ps-3">
+        <li>Be clear, concise, and respectful.</li>
+        <li>Include all relevant dates and instructions.</li>
+        <li>Avoid all caps and excessive emojis.</li>
+        <li>Ensure attachments are relevant and accessible.</li>
+      </ul>
+    </div></div>
+  </div>
+</div>

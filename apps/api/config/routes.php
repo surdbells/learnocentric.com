@@ -276,7 +276,10 @@ return static function (App $app): void {
             $auth->get('/messaging/conversations/{id:[0-9]+}', MessagingAction::class . ':thread');
             $auth->post('/messaging/messages', MessagingAction::class . ':send');
             $auth->get('/messaging/announcements', MessagingAction::class . ':announcements');
+            $auth->get('/messaging/announcements/stats', MessagingAction::class . ':announcementStats');
             $auth->post('/messaging/announcements', MessagingAction::class . ':postAnnouncement');
+            $auth->put('/messaging/announcements/{id:[0-9]+}', MessagingAction::class . ':updateAnnouncement');
+            $auth->delete('/messaging/announcements/{id:[0-9]+}', MessagingAction::class . ':deleteAnnouncement');
 
             // Notifications (in-app inbox)
             $auth->get('/notifications', NotificationsAction::class . ':mine');
