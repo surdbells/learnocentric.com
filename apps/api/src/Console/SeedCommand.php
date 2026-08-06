@@ -45,6 +45,8 @@ use App\Domain\Entity\TopicDeliveryPack;
 use App\Domain\Entity\TopicProgress;
 use App\Domain\Entity\User;
 use App\Domain\Entity\Worksheet;
+use App\Domain\Entity\WorksheetQuestion;
+use App\Domain\Entity\WorksheetResponse;
 use App\Domain\Entity\WorksheetSubmission;
 use App\Domain\Lifecycle;
 use App\Service\AnswerGrader;
@@ -951,27 +953,63 @@ class SeedCommand extends Command
             return;
         }
 
-        // [student index, type, topic?, message, acknowledged]
+        // Structured feedback breakdowns (design: Feedback_LD) — teacher-authored.
         $notes = [
-            [0, 'correction', $topic, 'You mixed up place value in Q3 — remember the hundreds column. Redo questions 3 and 7.', false],
-            [1, 'praise', null, 'Excellent improvement this week — your working is much clearer. Keep it up!', true],
+            [
+                'student' => 0, 'type' => 'correction', 'topic' => $topic, 'ack' => false,
+                'source_type' => 'worksheet', 'source_title' => 'Operations on Whole Numbers Worksheet',
+                'subject' => 'Mathematics', 'score' => 72,
+                'message' => 'Good work! You understand the basics well. Focus on aligning numbers by place value.',
+                'strengths' => 'You added and subtracted whole numbers accurately, and showed good understanding of place value in most questions.',
+                'practice_needed' => 'Check your place value alignment in subtraction, and show your working clearly for multi-step problems.',
+                'common_error' => 'Place value confusion in subtraction — some answers were off by tens or hundreds due to incorrect borrowing.',
+                'next_step' => 'Revise place value and subtraction with borrowing; redo questions 4–6 and attempt the follow-up quiz.',
+                'focus' => [['Accuracy', 76], ['Showing Working', 64], ['Question Interpretation', 58], ['Problem Solving', 72]],
+            ],
+            [
+                'student' => 0, 'type' => 'praise', 'topic' => null, 'ack' => true,
+                'source_type' => 'quiz', 'source_title' => 'Estimation Quiz', 'subject' => 'Mathematics', 'score' => 85,
+                'message' => 'Nice work! Your estimation skills are strong — keep practising to stay sharp.',
+                'strengths' => 'Strong number sense and quick, accurate rounding.',
+                'practice_needed' => null, 'common_error' => null, 'next_step' => 'Try the harder estimation set next.',
+                'focus' => [['Accuracy', 88], ['Problem Solving', 80]],
+            ],
+            [
+                'student' => 1, 'type' => 'praise', 'topic' => null, 'ack' => true,
+                'source_type' => 'worksheet', 'source_title' => 'Whole Numbers — Practice Worksheet',
+                'subject' => 'Mathematics', 'score' => 80,
+                'message' => 'Excellent improvement this week — your working is much clearer. Keep it up!',
+                'strengths' => 'Clear, well-ordered working and accurate addition.',
+                'practice_needed' => 'Watch the ordering of 6-digit numbers.',
+                'common_error' => null, 'next_step' => 'Revise Greater Than / Less Than before the next class.',
+                'focus' => [['Accuracy', 82], ['Showing Working', 85]],
+            ],
         ];
-        foreach ($notes as [$idx, $type, $noteTopic, $message, $ack]) {
-            if (!isset($students[$idx])) {
+        foreach ($notes as $n) {
+            if (!isset($students[$n['student']])) {
                 continue;
             }
-            $note = new FeedbackNote($students[$idx], $message);
+            $note = new FeedbackNote($students[$n['student']], $n['message']);
             $note->setAuthor($teacher);
-            $note->setType($type);
-            $note->setTopic($noteTopic);
-            if ($ack) {
+            $note->setType($n['type']);
+            $note->setTopic($n['topic']);
+            $note->setSourceType($n['source_type']);
+            $note->setSourceTitle($n['source_title']);
+            $note->setSubjectName($n['subject']);
+            $note->setScore($n['score']);
+            $note->setStrengths($n['strengths']);
+            $note->setPracticeNeeded($n['practice_needed']);
+            $note->setCommonError($n['common_error']);
+            $note->setNextStep($n['next_step']);
+            $note->setFocusAreas(array_map(static fn ($f) => ['label' => $f[0], 'score' => $f[1]], $n['focus']));
+            if ($n['ack']) {
                 $note->setAcknowledged(true);
                 $note->setAcknowledgedAt(new DateTimeImmutable('-6 hours'));
             }
             $this->em->persist($note);
         }
         $this->em->flush();
-        $output->writeln('  + 2 feedback notes');
+        $output->writeln('  + ' . count($notes) . ' feedback notes');
     }
 
     /** Seed portfolio evidence — one reviewed, one pending — for the competency track. */
@@ -1031,11 +1069,39 @@ class SeedCommand extends Command
         }
         $worksheet = new Worksheet($topic, 'Whole Numbers — Practice Worksheet');
         $worksheet->setTrack('academic');
-        $worksheet->setInstructions('Complete all 10 questions in your exercise book, then upload a photo or type your answers.');
-        $worksheet->setTotalMarks(10);
+        $worksheet->setInstructions('Attempt all questions. Show your working where necessary. You can save your progress and return later.');
         $worksheet->setDueDate(new DateTimeImmutable('+7 days'));
         $worksheet->setApprovalStatus(Lifecycle::PUBLISHED);
         $this->em->persist($worksheet);
+        $this->em->flush();
+
+        // Structured questions across three sections (4 objective + 1 free-response).
+        // [section, prompt, type, options|null, correctAnswer|null, marks]
+        $spec = [
+            ['Section A: Addition', '345 + 278 =', 'numeric', null, '623', 1],
+            ['Section A: Addition', '6,789 + 2,345 =', 'numeric', null, '9134', 1],
+            ['Section B: Concepts', 'Which of these is an even number?', 'mcq', ['7', '12', '19', '5'], '12', 1],
+            ['Section B: Concepts', '12 is a prime number.', 'true_false', null, 'false', 1],
+            ['Section C: Word Problems', 'A shopkeeper had 2,450 pencils and bought another 3,275. Show your working and give the total.', 'free_response', null, null, 2],
+        ];
+        $questions = [];
+        $sectionPos = [];
+        $total = 0;
+        foreach ($spec as $i => [$section, $prompt, $type, $options, $correct, $marks]) {
+            $q = new WorksheetQuestion($worksheet, $prompt);
+            $sectionPos[$section] ??= count($sectionPos);
+            $q->setSectionLabel($section);
+            $q->setSectionPosition($sectionPos[$section]);
+            $q->setPosition($i);
+            $q->setType($type);
+            $q->setOptions($options);
+            $q->setCorrectAnswer($correct);
+            $q->setMarks($marks);
+            $this->em->persist($q);
+            $questions[] = $q;
+            $total += $marks;
+        }
+        $worksheet->setTotalMarks($total);
         $this->em->flush();
 
         $version = new ContentVersion('Worksheet', (int) $worksheet->getId(), 1, Lifecycle::PUBLISHED, 'seed');
@@ -1049,22 +1115,44 @@ class SeedCommand extends Command
             ->setParameter('s', 'student')->setParameter('i', $topic->getSubject()->getInstitution())
             ->setMaxResults(2)->getQuery()->getResult();
 
+        // Per-student answers: [answer, awardedMarks|null, correct|null] aligned to $questions.
+        // Student 0 — fully graded 6/6 (free-response teacher-marked).
+        // Student 1 — submitted, auto-marked 3/6 (Q2 wrong), free-response still awaiting the teacher.
+        $answerSets = [
+            [['623', 1, true], ['9134', 1, true], ['12', 1, true], ['false', 1, true], ['2,450 + 3,275 = 5,725 pencils altogether.', 2, null]],
+            [['623', 1, true], ['9999', 0, false], ['12', 1, true], ['false', 1, true], ['2450 add 3275 is 5725', null, null]],
+        ];
         foreach ($students as $i => $student) {
+            $set = $answerSets[$i] ?? $answerSets[0];
             $submission = new WorksheetSubmission($worksheet, $student);
-            $submission->setResponseText('My worked answers for questions 1 to 10.');
             $submission->setSubmittedAt(new DateTimeImmutable('-1 day'));
+            $this->em->persist($submission);
+            $this->em->flush(); // id for responses
+
+            $auto = 0;
+            foreach ($questions as $qi => $q) {
+                [$answer, $awarded, $correct] = $set[$qi];
+                $resp = new WorksheetResponse($submission, $q);
+                $resp->setAnswer($answer);
+                $resp->setAwardedMarks($awarded);
+                $resp->setCorrect($correct);
+                $this->em->persist($resp);
+                $auto += (int) ($awarded ?? 0);
+            }
+
             if ($i === 0) {
-                $submission->setScore(8);
-                $submission->setFeedback('Good work — revisit place value in Q3 and Q7.');
+                $submission->setScore($auto);
+                $submission->setFeedback('Great working shown — correct total. Keep aligning your subtraction by place value.');
                 $submission->setStatus(WorksheetSubmission::GRADED);
                 $submission->setGradedAt(new DateTimeImmutable('-12 hours'));
             } else {
+                $submission->setScore($auto); // auto-marked so far; free-response pending
                 $submission->setStatus(WorksheetSubmission::SUBMITTED);
             }
             $this->em->persist($submission);
         }
         $this->em->flush();
-        $output->writeln('  + 1 worksheet (' . count($students) . ' submissions)');
+        $output->writeln('  + 1 worksheet (' . count($questions) . ' questions, ' . count($students) . ' submissions)');
     }
 
     /** Seed graded attempts (pass, borderline, fail) so the gradebook has data. */
