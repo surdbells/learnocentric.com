@@ -847,11 +847,51 @@ class SeedCommand extends Command
             $this->em->persist(new Message($institution, $student, $teacher, 'Okay sir, I will submit it today.'));
         }
 
-        $this->em->persist(new Announcement($institution, $admin, 'Mid-term break', 'School closes for mid-term on Friday and resumes the following Monday.', 'all'));
-        $this->em->persist(new Announcement($institution, $admin, 'Staff briefing', 'All teachers, please meet in the staff room at 8am tomorrow.', 'staff'));
+        // Recipient counts per audience (real, from the seeded institution).
+        $countFor = function (string $audience) use ($institution): int {
+            $roles = Announcement::rolesForAudience($audience);
+            return (int) $this->em->createQueryBuilder()->select('COUNT(u.id)')->from(User::class, 'u')->join('u.role', 'r')
+                ->where('u.institution = :i')->andWhere('r.code IN (:roles)')
+                ->setParameter('i', $institution)->setParameter('roles', $roles)
+                ->getQuery()->getSingleScalarResult();
+        };
+        $firstClass = $this->em->getRepository(SchoolClass::class)->findOneBy(['institution' => $institution]);
+
+        // [title, body, audience, category, priority, status, priorityDaysAgo|scheduleInDays, channels]
+        $specs = [
+            ['Mid-Year Holiday Notice', 'The school will close for the mid-year holiday on Friday and resume the following Monday. Please travel safely.', 'all', 'general', 'medium', 'sent', 6, ['in_app' => true, 'email' => true, 'parent_copy' => false]],
+            ['Third-Term Assessment Reminder', 'Third-term assessments begin next week. Please revise all topics covered so far and bring the required materials.', 'students', 'academics', 'high', 'sent', 4, ['in_app' => true, 'email' => true, 'parent_copy' => false]],
+            ['PTA Meeting — Saturday 10am', 'Dear parents, the termly PTA meeting holds this Saturday at 10am in the main hall. Your attendance is important.', 'parents', 'events', 'medium', 'sent', 3, ['in_app' => true, 'email' => true, 'parent_copy' => true]],
+            ['Teacher Briefing — Third-Term Plan', 'All teaching staff: please meet in the staff room at 8am tomorrow to review the third-term instructional plan.', 'staff', 'internal', 'medium', 'sent', 2, ['in_app' => true, 'email' => false, 'parent_copy' => false]],
+            ['School Assembly — Friday 8am', 'A whole-school assembly holds this Friday at 8am. All students and staff should be seated by 7:50am.', 'all', 'general', 'low', 'sent', 1, ['in_app' => true, 'email' => false, 'parent_copy' => false]],
+            ['Attendance Follow-up — Term 3 Week 4', '', 'parents', 'attendance', 'medium', 'draft', 0, ['in_app' => true, 'email' => true, 'parent_copy' => true]],
+            ['Class Assembly Reminder', 'A reminder that your class assembly holds next week. Please be prompt and in full uniform.', 'class', 'reminder', 'medium', 'scheduled', 5, ['in_app' => true, 'email' => false, 'parent_copy' => false]],
+        ];
+        $author = $teacher ?? $admin;
+        foreach ($specs as [$title, $text, $audience, $category, $priority, $status, $days, $channels]) {
+            $a = new Announcement($institution, $audience === 'staff' || $audience === 'all' ? $admin : $author, $title, $text, $audience);
+            $a->setCategory($category);
+            $a->setPriority($priority);
+            $a->setChannels($channels);
+            if ($audience === 'class' && $firstClass !== null) {
+                $a->setSchoolClass($firstClass);
+                $a->setSubjectName('Mathematics');
+            }
+            if ($status === 'sent') {
+                $a->setStatus(Announcement::SENT);
+                $a->setSentAt(new DateTimeImmutable("-{$days} days"));
+                $a->setRecipientCount($audience === 'class' ? 3 : $countFor($audience));
+            } elseif ($status === 'scheduled') {
+                $a->setStatus(Announcement::SCHEDULED);
+                $a->setScheduledAt(new DateTimeImmutable("+{$days} days"));
+            } else {
+                $a->setStatus(Announcement::DRAFT);
+            }
+            $this->em->persist($a);
+        }
         $this->em->flush();
 
-        $output->writeln('  + 2 messages, 2 announcements');
+        $output->writeln('  + 2 messages, ' . count($specs) . ' announcements (sent/scheduled/draft)');
     }
 
     /** Link the seeded parent account to a student so the parent report works. */
