@@ -73,7 +73,7 @@ class Enrollment
             'first_name' => $s->getFirstName(),
             'last_name' => $s->getLastName(),
             'phone' => $s->getPhone(),
-            'profile_image_url' => $s->getProfileImageUrl(),
+            'profile_image_url' => \App\Service\Storage\FilePath::toUrl($s->getProfileImageUrl()),
             'is_active' => $s->getStatus() === 'active',
             'class_id' => $this->schoolClass->getId(),
             'class_label' => $this->schoolClass->getLabel(),

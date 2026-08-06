@@ -52,10 +52,11 @@ final class UploadAction
 
         $path = date('Y/m') . '/' . bin2hex(random_bytes(10)) . '.' . $ext;
 
-        $url = $this->storage->writeStream($path, $file->getStream()->detach());
+        $this->storage->writeStream($path, $file->getStream()->detach());
 
+        // Path-only contract: the client stores the path and loads the file via
+        // /backend/files/{path}; no absolute file URL is issued.
         return Json::write($response, [
-            'url' => $url,
             'path' => $path,
             'name' => $file->getClientFilename(),
             'size' => $file->getSize(),

@@ -76,7 +76,7 @@ class Institution
     public function getAddress(): ?string { return $this->address; }
     public function setAddress(?string $address): void { $this->address = $address; }
     public function getLogoUrl(): ?string { return $this->logoUrl; }
-    public function setLogoUrl(?string $logoUrl): void { $this->logoUrl = $logoUrl; }
+    public function setLogoUrl(?string $logoUrl): void { $this->logoUrl = \App\Service\Storage\FilePath::toPath($logoUrl); }
     public function getBranding(): ?array { return $this->branding; }
     public function setBranding(?array $branding): void { $this->branding = $branding; }
     public function getAdminContact(): ?array { return $this->adminContact; }
@@ -95,7 +95,7 @@ class Institution
             'name' => $this->name,
             'type' => $this->type,
             'address' => $this->address,
-            'logo_url' => $this->logoUrl,
+            'logo_url' => \App\Service\Storage\FilePath::toUrl($this->logoUrl),
             'branding' => $this->branding,
             'admin_contact' => $this->adminContact,
             'settings' => $this->settings,

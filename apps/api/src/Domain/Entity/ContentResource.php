@@ -120,7 +120,7 @@ class ContentResource
     public function setIsPremium(bool $v): void { $this->isPremium = $v; }
     public function setFile(?string $url, ?string $name, ?int $size): void
     {
-        $this->fileUrl = $url;
+        $this->fileUrl = \App\Service\Storage\FilePath::toPath($url);
         $this->fileName = $name;
         $this->fileSize = $size;
     }
@@ -161,7 +161,7 @@ class ContentResource
             'difficultyLevel' => $this->difficultyLevel,
             'tags' => $this->tags ?? [],
             'is_premium' => $this->isPremium,
-            'file_url' => $this->fileUrl,
+            'file_url' => \App\Service\Storage\FilePath::toUrl($this->fileUrl),
             'file_name' => $this->fileName,
             'file_size' => $this->fileSize,
             'source' => $this->source,

@@ -68,7 +68,7 @@ class WorksheetSubmission
     public function getResponseText(): ?string { return $this->responseText; }
     public function setResponseText(?string $v): void { $this->responseText = $v; }
     public function getAttachmentUrl(): ?string { return $this->attachmentUrl; }
-    public function setAttachmentUrl(?string $v): void { $this->attachmentUrl = $v; }
+    public function setAttachmentUrl(?string $v): void { $this->attachmentUrl = \App\Service\Storage\FilePath::toPath($v); }
     public function getStatus(): string { return $this->status; }
     public function setStatus(string $v): void { $this->status = $v; }
     public function getScore(): ?int { return $this->score; }
@@ -90,7 +90,7 @@ class WorksheetSubmission
             'student_id' => $this->student->getId(),
             'student' => $this->student->getFirstName() . ' ' . $this->student->getLastName(),
             'response_text' => $this->responseText,
-            'attachment_url' => $this->attachmentUrl,
+            'attachment_url' => \App\Service\Storage\FilePath::toUrl($this->attachmentUrl),
             'status' => $this->status,
             'score' => $this->score,
             'feedback' => $this->feedback,

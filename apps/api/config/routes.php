@@ -49,6 +49,7 @@ use App\Application\Actions\School\SubjectsAction;
 use App\Application\Actions\School\TeachersAction;
 use App\Application\Actions\School\TeacherStudentsAction;
 use App\Application\Actions\Teacher\TeacherClassesAction;
+use App\Application\Actions\Storage\FileServeAction;
 use App\Application\Actions\Storage\UploadAction;
 use App\Application\Actions\Support\SupportAction;
 use App\Application\Actions\Audit\AuditLogsAction;
@@ -66,6 +67,10 @@ return static function (App $app): void {
         // --- Public ---
         $group->post('/auth/login', LoginAction::class);
         $group->post('/auth/register', RegisterAction::class);
+        // Public file serving (unguessable paths). Uses ?p= so the request URL
+        // has no static-file extension in its path (the PHP dev server would
+        // otherwise intercept e.g. .png before the app runs); works in prod too.
+        $group->get('/files', FileServeAction::class);
 
         // --- Authenticated ---
         $group->group('', function (RouteCollectorProxy $auth): void {

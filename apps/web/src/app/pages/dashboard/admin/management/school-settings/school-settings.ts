@@ -7,6 +7,7 @@ import {PageHeader} from '../../../../../common/layout/page-header/page-header';
 import {ApiService} from '../../../../../common/service/api.service';
 import {Icon} from '../../../../../common/icon/icon';
 import {RichEditor} from '../../../../../common/rich-editor/rich-editor';
+import {FileUpload, UploadedFile} from '../../../../../common/file-upload/file-upload';
 
 interface Band { grade: string; min: number; }
 
@@ -20,7 +21,7 @@ interface Band { grade: string; min: number; }
 @Component({
   selector: 'app-school-settings',
   standalone: true,
-  imports: [RichEditor, Icon, PageHeader, FormsModule, RouterLink],
+  imports: [RichEditor, Icon, PageHeader, FormsModule, RouterLink, FileUpload],
   templateUrl: './school-settings.html',
   styleUrl: './school-settings.css',
 })
@@ -85,6 +86,9 @@ export class SchoolSettings {
   // ---- profile helpers ----
   prof(key: string): any { return this.profile()?.[key]; }
   setProf(key: string, value: any): void { this.profile.set({...(this.profile() ?? {}), [key]: value}); }
+  onLogoUploaded(f: UploadedFile): void { this.setProf('logo_url', f.url); }
+  onLogoCleared(): void { this.setProf('logo_url', ''); }
+
   contact(key: string): any { return this.profile()?.admin_contact?.[key]; }
   setContact(key: string, value: any): void {
     const c = {...(this.profile()?.admin_contact ?? {}), [key]: value};

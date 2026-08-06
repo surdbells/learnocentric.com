@@ -22,19 +22,25 @@ class StorageService
         $this->fs = new Filesystem(new LocalFilesystemAdapter($this->rootPath));
     }
 
-    /** @param resource $stream */
+    /**
+     * Store the stream and return the bare storage PATH (not a URL). Files are
+     * referenced by path and served through the backend (see FileServeAction).
+     *
+     * @param resource $stream
+     */
     public function writeStream(string $path, $stream): string
     {
         $this->fs->writeStream($path, $stream);
 
-        return $this->url($path);
+        return $path;
     }
 
+    /** Store contents and return the bare storage path. */
     public function write(string $path, string $contents): string
     {
         $this->fs->write($path, $contents);
 
-        return $this->url($path);
+        return $path;
     }
 
     public function delete(string $path): void
@@ -44,8 +50,32 @@ class StorageService
         }
     }
 
-    public function url(string $path): string
+    public function fileExists(string $path): bool
     {
-        return $this->publicUrl . '/' . ltrim($path, '/');
+        return $this->fs->fileExists($path);
+    }
+
+    /** @return resource */
+    public function readStream(string $path)
+    {
+        return $this->fs->readStream($path);
+    }
+
+    public function mimeType(string $path): string
+    {
+        try {
+            return $this->fs->mimeType($path) ?: 'application/octet-stream';
+        } catch (\Throwable) {
+            return 'application/octet-stream';
+        }
+    }
+
+    public function fileSize(string $path): int
+    {
+        try {
+            return (int) $this->fs->fileSize($path);
+        } catch (\Throwable) {
+            return 0;
+        }
     }
 }

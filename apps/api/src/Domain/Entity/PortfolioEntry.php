@@ -85,7 +85,7 @@ class PortfolioEntry
     public function getDescription(): string { return $this->description; }
     public function setDescription(string $v): void { $this->description = $v; }
     public function getEvidenceUrl(): ?string { return $this->evidenceUrl; }
-    public function setEvidenceUrl(?string $v): void { $this->evidenceUrl = $v; }
+    public function setEvidenceUrl(?string $v): void { $this->evidenceUrl = \App\Service\Storage\FilePath::toPath($v); }
     public function getStatus(): string { return $this->status; }
     public function setStatus(string $v): void { $this->status = $v; }
     public function getCompetencyRating(): ?string { return $this->competencyRating; }
@@ -110,7 +110,7 @@ class PortfolioEntry
             'student' => $this->student->getFirstName() . ' ' . $this->student->getLastName(),
             'title' => $this->title,
             'description' => $this->description,
-            'evidence_url' => $this->evidenceUrl,
+            'evidence_url' => \App\Service\Storage\FilePath::toUrl($this->evidenceUrl),
             'status' => $this->status,
             'competency_rating' => $this->competencyRating,
             'reviewer_feedback' => $this->reviewerFeedback,

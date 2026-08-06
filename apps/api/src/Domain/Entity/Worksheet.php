@@ -74,7 +74,7 @@ class Worksheet implements LifecycleAware
     public function getTrack(): string { return $this->track; }
     public function setTrack(string $v): void { $this->track = in_array($v, self::TRACKS, true) ? $v : 'academic'; }
     public function setInstructions(?string $v): void { $this->instructions = $v; }
-    public function setAttachmentUrl(?string $v): void { $this->attachmentUrl = $v; }
+    public function setAttachmentUrl(?string $v): void { $this->attachmentUrl = \App\Service\Storage\FilePath::toPath($v); }
     public function getTotalMarks(): int { return $this->totalMarks; }
     public function setTotalMarks(int $v): void { $this->totalMarks = max(1, $v); }
     public function getDueDate(): ?\DateTimeImmutable { return $this->dueDate; }
@@ -101,7 +101,7 @@ class Worksheet implements LifecycleAware
             'title' => $this->title,
             'track' => $this->track,
             'instructions' => $this->instructions,
-            'attachment_url' => $this->attachmentUrl,
+            'attachment_url' => \App\Service\Storage\FilePath::toUrl($this->attachmentUrl),
             'total_marks' => $this->totalMarks,
             'due_date' => $this->dueDate?->format('Y-m-d'),
             'approval_status' => $this->approvalStatus,

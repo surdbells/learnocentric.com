@@ -4,11 +4,17 @@ import {ToastrService} from 'ngx-toastr';
 import {Icon} from '../icon/icon';
 
 export interface UploadedFile {
+  /** Backend-served reference (/backend/files?p=…) — never a raw file URL. */
   url: string;
+  /** Bare Flysystem path stored server-side. */
+  path?: string;
   name: string;
   size: number;
   type: string;
 }
+
+/** Server response from POST /backend/upload — path-only (no URL issued). */
+interface UploadResponse { path: string; name: string; size: number; type: string; }
 
 /**
  * Reusable file uploader with real progress. Uploads to /backend/upload
@@ -65,15 +71,24 @@ export class FileUpload {
     this.error.set(null);
     this.progress.set(0);
 
-    this.http.post<UploadedFile>('/backend/upload', form, {reportProgress: true, observe: 'events'}).subscribe({
+    this.http.post<UploadResponse>('/backend/upload', form, {reportProgress: true, observe: 'events'}).subscribe({
       next: (event) => {
         if (event.type === HttpEventType.UploadProgress && event.total) {
           this.progress.set(Math.round((event.loaded / event.total) * 100));
         } else if (event.type === HttpEventType.Response && event.body) {
-          this.current.set(event.body);
+          const body = event.body;
+          // Path-only contract: build the backend-served reference from the path.
+          const uploaded: UploadedFile = {
+            url: body.path ? '/backend/files?p=' + body.path : '',
+            path: body.path,
+            name: body.name,
+            size: body.size,
+            type: body.type,
+          };
+          this.current.set(uploaded);
           this.progress.set(null);
           this.pendingFile = null;
-          this.uploaded.emit(event.body);
+          this.uploaded.emit(uploaded);
           this.toast.success('File uploaded');
         }
       },

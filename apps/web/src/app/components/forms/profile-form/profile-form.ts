@@ -137,12 +137,13 @@ export class ProfileForm implements OnInit{
     this.apiSrv.post('/backend/upload', fd)
       .subscribe({
         next: (res: any) => {
-          const uploadUrl = res?.url ?? res?.fileUrl ?? res?.data?.url ?? res?.location ?? res?.path ?? '';
+          // Path-only contract: build the backend-served reference from the path.
+          const uploadUrl = res?.path ? '/backend/files?p=' + res.path : (res?.url ?? '');
           if (uploadUrl) {
             this.form.get('profileImageUrl')?.setValue(uploadUrl as any);
             this.toastService.success('Passport uploaded');
           } else {
-            this.toastService.warning('Uploaded, but URL not returned');
+            this.toastService.warning('Uploaded, but no file reference returned');
           }
           this.imageUploading.set(false);
         },
@@ -179,12 +180,13 @@ export class ProfileForm implements OnInit{
     this.apiSrv.post('/backend/upload', fd)
       .subscribe({
         next: (res: any) => {
-          const uploadUrl = res?.url ?? res?.fileUrl ?? res?.data?.url ?? res?.location ?? res?.path ?? '';
+          // Path-only contract: build the backend-served reference from the path.
+          const uploadUrl = res?.path ? '/backend/files?p=' + res.path : (res?.url ?? '');
           if (uploadUrl) {
             this.form.get('profileImageUrl')?.setValue(uploadUrl as any);
             this.toastService.success('Passport uploaded');
           } else {
-            this.toastService.warning('Uploaded, but URL not returned');
+            this.toastService.warning('Uploaded, but no file reference returned');
           }
           this.imageUploading.set(false);
         },

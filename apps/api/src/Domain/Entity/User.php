@@ -97,7 +97,7 @@ class User
     public function getInstitution(): ?Institution { return $this->institution; }
     public function setInstitution(?Institution $i): void { $this->institution = $i; }
     public function getProfileImageUrl(): ?string { return $this->profileImageUrl; }
-    public function setProfileImageUrl(?string $v): void { $this->profileImageUrl = $v; }
+    public function setProfileImageUrl(?string $v): void { $this->profileImageUrl = \App\Service\Storage\FilePath::toPath($v); }
     public function getStatus(): string { return $this->status; }
     public function setStatus(string $v): void { $this->status = $v; }
     public function getPreferences(): ?array { return $this->preferences; }
@@ -117,7 +117,7 @@ class User
             'dateOfBirth' => $this->dateOfBirth?->format('Y-m-d'),
             'role' => $this->role->getCode(),
             'institutionId' => $this->institution?->getId(),
-            'profileImageUrl' => $this->profileImageUrl,
+            'profileImageUrl' => \App\Service\Storage\FilePath::toUrl($this->profileImageUrl),
             'status' => $this->status,
         ];
     }
