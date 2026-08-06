@@ -17,6 +17,7 @@ class WorksheetSubmission
 {
     use TimestampsTrait;
 
+    public const DRAFT = 'draft';
     public const SUBMITTED = 'submitted';
     public const GRADED = 'graded';
     public const RETURNED = 'returned';

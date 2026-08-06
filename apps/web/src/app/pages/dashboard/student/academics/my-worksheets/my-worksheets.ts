@@ -9,11 +9,12 @@ import {RichEditor} from '../../../../../common/rich-editor/rich-editor';
 import {RichText} from '../../../../../common/rich-editor/rich-text';
 import {Icon} from '../../../../../common/icon/icon';
 import {KpiItem, KpiStrip, TabBar, TabItem} from '../../../../../common/ui';
+import {WorksheetSolver} from './worksheet-solver/worksheet-solver';
 
 @Component({
   selector: 'app-my-worksheets',
   standalone: true,
-  imports: [RichText, RichEditor, PageHeader, FormsModule, DatePipe, FileUpload, Icon, KpiStrip, TabBar],
+  imports: [RichText, RichEditor, PageHeader, FormsModule, DatePipe, FileUpload, Icon, KpiStrip, TabBar, WorksheetSolver],
   templateUrl: './my-worksheets.html',
   styleUrl: './my-worksheets.css',
 })
@@ -82,10 +83,13 @@ export class MyWorksheets {
     });
   }
 
-  /** Filename for a download link, derived from the file URL. */
+  /** Filename for a download link, derived from a served file reference (/backend/files?p=<path>). */
   downloadName(url: string | undefined | null): string {
-    const u = (url || '').split('?')[0].split('#')[0];
-    return u.split('/').pop() || 'download';
+    const raw = url || '';
+    // Prefer the stored path carried in the ?p= query param; fall back to the URL itself.
+    const m = raw.match(/[?&]p=([^&]+)/);
+    const path = m ? decodeURIComponent(m[1]) : raw.split('?')[0];
+    return path.split('#')[0].split('/').pop() || 'download';
   }
 
   openDo(w: any): void {

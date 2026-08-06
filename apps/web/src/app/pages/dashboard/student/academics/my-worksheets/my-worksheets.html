@@ -55,6 +55,9 @@
 
 <!-- DO -->
 @if (mode() === 'do' && current(); as w) {
+  @if (w.question_count > 0) {
+    <app-worksheet-solver [worksheetId]="w.id" (done)="backToList()" />
+  } @else {
   <div class="card border-0 shadow-sm">
     <div class="card-body">
       <h5 class="fw-semibold mb-1">{{ w.title }}</h5>
@@ -103,4 +106,5 @@
       }
     </div>
   </div>
+  }
 }
