@@ -1,0 +1,89 @@
+<app-page-header icon="rate_review" action="Give Feedback" />
+<p class="text-body-secondary mb-4">Write structured feedback a learner sees as a full breakdown — strengths, improvements, and next steps.</p>
+
+<div class="row g-4">
+  <div class="col-lg-8">
+    <div class="card border-0 shadow-sm"><div class="card-body">
+      <!-- Who + what -->
+      <div class="row g-3 mb-3">
+        <div class="col-md-6">
+          <label class="form-label small mb-1">Learner</label>
+          <select class="form-select" [ngModel]="studentId()" (ngModelChange)="studentId.set($event)">
+            <option [ngValue]="null" disabled>Choose a learner…</option>
+            @for (s of students(); track s.id) { <option [ngValue]="s.id">{{ s.name }}</option> }
+          </select>
+        </div>
+        <div class="col-md-3">
+          <label class="form-label small mb-1">Feedback on</label>
+          <select class="form-select" [ngModel]="sourceType()" (ngModelChange)="sourceType.set($event)">
+            <option value="quiz">Quiz</option>
+            <option value="worksheet">Worksheet</option>
+            <option value="portfolio">Portfolio</option>
+            <option value="general">General</option>
+          </select>
+        </div>
+        <div class="col-md-3">
+          <label class="form-label small mb-1">Score (%)</label>
+          <input type="number" min="0" max="100" class="form-control" [ngModel]="score()" (ngModelChange)="score.set($event === '' ? null : +$event)" placeholder="—" />
+        </div>
+        <div class="col-md-8">
+          <label class="form-label small mb-1">Title</label>
+          <input class="form-control" [ngModel]="sourceTitle()" (ngModelChange)="sourceTitle.set($event)" placeholder="e.g. Operations on Whole Numbers Worksheet" />
+        </div>
+        <div class="col-md-4">
+          <label class="form-label small mb-1">Subject</label>
+          <input class="form-control" [ngModel]="subject()" (ngModelChange)="subject.set($event)" placeholder="e.g. Mathematics" />
+        </div>
+      </div>
+
+      <!-- Breakdown fields -->
+      <div class="mb-3">
+        <label class="form-label small mb-1 text-success"><app-icon name="thumb_up" [size]="15" /> What You Did Well</label>
+        <textarea class="form-control" rows="2" [ngModel]="strengths()" (ngModelChange)="strengths.set($event)" placeholder="What the learner did well…"></textarea>
+      </div>
+      <div class="mb-3">
+        <label class="form-label small mb-1 text-warning"><app-icon name="trending_up" [size]="15" /> What To Improve</label>
+        <textarea class="form-control" rows="2" [ngModel]="practiceNeeded()" (ngModelChange)="practiceNeeded.set($event)" placeholder="What to work on next…"></textarea>
+      </div>
+      <div class="mb-3">
+        <label class="form-label small mb-1 text-danger"><app-icon name="error" [size]="15" /> Common Error Identified</label>
+        <textarea class="form-control" rows="2" [ngModel]="commonError()" (ngModelChange)="commonError.set($event)" placeholder="A recurring mistake to watch…"></textarea>
+      </div>
+      <div class="mb-3">
+        <label class="form-label small mb-1 text-primary"><app-icon name="chat" [size]="15" /> Tutor Comment <span class="text-danger">*</span></label>
+        <textarea class="form-control" rows="2" [ngModel]="message()" (ngModelChange)="message.set($event)" placeholder="Your overall comment to the learner…"></textarea>
+      </div>
+      <div class="mb-0">
+        <label class="form-label small mb-1 text-info"><app-icon name="flag" [size]="15" /> Next Step</label>
+        <textarea class="form-control" rows="2" [ngModel]="nextStep()" (ngModelChange)="nextStep.set($event)" placeholder="What the learner should do next…"></textarea>
+      </div>
+    </div></div>
+  </div>
+
+  <!-- Focus areas + submit -->
+  <div class="col-lg-4">
+    <div class="card border-0 shadow-sm mb-4"><div class="card-body">
+      <div class="fw-semibold mb-1"><app-icon name="track_changes" [size]="18" class="text-success" /> Focus Areas</div>
+      <div class="small text-body-secondary mb-3">Rate each area (0–100). These drive the learner's focus bars.</div>
+      @for (fa of focus(); track fa.label; let i = $index) {
+        <div class="mb-3">
+          <div class="d-flex align-items-center justify-content-between mb-1">
+            <label class="small d-flex align-items-center gap-2">
+              <input type="checkbox" class="form-check-input mt-0" [ngModel]="fa.on" (ngModelChange)="setFocus(i, {on: $event})" /> {{ fa.label }}
+            </label>
+            <span class="fw-semibold small">{{ fa.score }}%</span>
+          </div>
+          <input type="range" min="0" max="100" step="5" class="form-range" [disabled]="!fa.on"
+                 [ngModel]="fa.score" (ngModelChange)="setFocus(i, {score: +$event})" />
+        </div>
+      }
+    </div></div>
+
+    <div class="card border-0 shadow-sm rail-sticky"><div class="card-body">
+      <button type="button" class="btn btn-success w-100" [disabled]="busy()" (click)="submit()">
+        <app-icon name="send" [size]="16" /> {{ busy() ? 'Sending…' : 'Send Feedback' }}
+      </button>
+      <div class="small text-body-secondary mt-2 text-center">The learner is notified and sees the full breakdown.</div>
+    </div></div>
+  </div>
+</div>

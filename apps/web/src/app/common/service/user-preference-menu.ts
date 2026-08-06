@@ -195,6 +195,8 @@ export class UserPreferenceMenu {
 
     { name: "My Classes", icon: "groups", link: "/teacher/classes" },
 
+    { name: "Give Feedback", icon: "rate_review", link: "/teacher/feedback" },
+
     { name: "Academics", icon: "school", link: "/teacher/academics",
       children: [
         { name: "Topics", link: "/teacher/academics/topics" },

@@ -1,0 +1,3 @@
+:host { display: block; }
+.rail-sticky { position: sticky; top: 1rem; }
+.form-range { accent-color: var(--bs-success); }

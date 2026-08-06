@@ -1,44 +1,141 @@
-<app-page-header icon="forum" action="My Feedback"></app-page-header>
+<app-page-header icon="reviews" action="Feedback" />
+<p class="text-body-secondary mb-4">See what your tutor said, what you did well, and what to improve next.</p>
 
 @if (loading()) {
   <div class="text-body-secondary p-4">Loading…</div>
 } @else if (!notes().length) {
-  <div class="card border-0 shadow-sm p-5 text-center text-body-secondary">No feedback yet. Your teachers' notes will appear here.</div>
+  <div class="card border-0 shadow-sm p-5 text-center text-body-secondary">No feedback yet. Your tutor's notes will appear here.</div>
 } @else {
-  <app-kpi-strip class="d-block mb-4" [items]="kpis()" [cols]="3" />
-
+  <app-kpi-strip class="d-block mb-4" [items]="kpis()" [cols]="4" />
   <app-tab-bar class="d-block mb-3" [tabs]="tabs()" [active]="activeTab()" (activeChange)="activeTab.set($event)" />
 
-  @if (!filtered().length) {
-    <div class="card border-0 shadow-sm p-4 text-center text-body-secondary">No feedback in this view.</div>
-  } @else {
-    <div class="d-flex flex-column gap-3">
-      @for (n of filtered(); track n.id) {
-        <div class="card border-0 shadow-sm">
-          <div class="card-body d-flex gap-3">
-            <app-icon [name]="typeIcon(n.type)" [size]="28" class="text-{{ typeColor(n.type) }}" />
-            <div class="flex-grow-1">
-              <div class="d-flex justify-content-between align-items-center gap-2 mb-1 flex-wrap">
-                <div>
-                  <span class="badge bg-{{ typeColor(n.type) }}-subtle text-{{ typeColor(n.type) }} text-capitalize">{{ n.type }}</span>
-                  @if (n.topic) { <span class="small text-body-secondary ms-2">{{ n.topic }}</span> }
-                  @if (!n.acknowledged) { <span class="badge bg-primary ms-2">New</span> }
-                </div>
-                <span class="small text-body-secondary">{{ n.created_at | date:'medium' }}</span>
-              </div>
-              <app-rich-text class="d-block mb-2" [value]="n.message" />
-              <div class="d-flex justify-content-between align-items-center">
-                <span class="small text-body-secondary">{{ n.author ? 'From ' + n.author : '' }}</span>
-                @if (!n.acknowledged) {
-                  <button type="button" class="btn btn-sm btn-outline-primary" (click)="acknowledge(n)">Mark as read</button>
-                } @else {
-                  <span class="small text-success"><app-icon name="done_all" [size]="16" /> Read</span>
-                }
+  <div class="row g-4">
+    <!-- Recent feedback list -->
+    <div class="col-lg-4">
+      <div class="card border-0 shadow-sm"><div class="card-body">
+        <div class="fw-semibold mb-3">Recent Feedback</div>
+        @if (!filtered().length) {
+          <div class="text-body-secondary small py-3 text-center">No feedback in this view.</div>
+        }
+        @for (n of filtered(); track n.id) {
+          <button type="button" class="fb-item w-100 text-start" [class.active]="selected()?.id === n.id" (click)="select(n)">
+            <span class="fb-ico"><app-icon [name]="sourceIcon(n.source_type)" [size]="18" /></span>
+            <span class="flex-grow-1 min-w-0">
+              <span class="d-flex justify-content-between gap-2">
+                <span class="fw-medium text-truncate">{{ n.source_title || n.topic || 'Feedback' }}</span>
+                <span class="small text-body-secondary flex-shrink-0">{{ n.created_at | date:'d MMM' }}</span>
+              </span>
+              <span class="d-block small text-body-secondary">{{ n.subject || (n.type | titlecase) }}</span>
+              <span class="d-flex align-items-center justify-content-between gap-2 mt-1">
+                <span class="small text-body-secondary text-truncate">{{ n.message }}</span>
+                @if (!n.acknowledged) { <span class="badge bg-warning-subtle text-warning flex-shrink-0">Needs Action</span> }
+                @else { <span class="badge bg-success-subtle text-success flex-shrink-0">Reviewed</span> }
+              </span>
+            </span>
+          </button>
+        }
+      </div></div>
+    </div>
+
+    <!-- Detail breakdown -->
+    <div class="col-lg-5">
+      @if (selected(); as f) {
+        <div class="card border-0 shadow-sm"><div class="card-body">
+          <div class="d-flex align-items-start justify-content-between gap-2 mb-3">
+            <div>
+              <h6 class="fw-semibold mb-1">{{ f.source_title || f.topic || 'Feedback' }}</h6>
+              <div class="small text-body-secondary">
+                <app-icon name="person" [size]="14" /> {{ f.author || 'Your tutor' }}@if (f.subject) { · {{ f.subject }} Tutor }
               </div>
             </div>
+            <div class="text-end flex-shrink-0">
+              <div class="small text-body-secondary">{{ f.created_at | date:'d MMM y' }}</div>
+              @if (f.score != null) {
+                <span class="badge bg-{{ scoreTone(f.score) }}-subtle text-{{ scoreTone(f.score) }} fs-6 mt-1">{{ f.score }}%</span>
+              }
+            </div>
           </div>
-        </div>
+
+          @if (f.strengths) {
+            <div class="fb-block block-well">
+              <div class="fb-head text-success"><app-icon name="thumb_up" [size]="16" /> What You Did Well</div>
+              <div class="small">{{ f.strengths }}</div>
+            </div>
+          }
+          @if (f.practice_needed) {
+            <div class="fb-block block-improve">
+              <div class="fb-head text-warning"><app-icon name="trending_up" [size]="16" /> What To Improve</div>
+              <div class="small">{{ f.practice_needed }}</div>
+            </div>
+          }
+          @if (f.common_error) {
+            <div class="fb-block block-error">
+              <div class="fb-head text-danger"><app-icon name="error" [size]="16" /> Common Error Identified</div>
+              <div class="small">{{ f.common_error }}</div>
+            </div>
+          }
+          @if (f.message) {
+            <div class="fb-block block-comment">
+              <div class="fb-head text-primary"><app-icon name="chat" [size]="16" /> Tutor Comment</div>
+              <div class="small">{{ f.message }}</div>
+            </div>
+          }
+          @if (f.next_step) {
+            <div class="fb-block block-next">
+              <div class="fb-head text-info"><app-icon name="flag" [size]="16" /> Next Step</div>
+              <div class="small">{{ f.next_step }}</div>
+            </div>
+          }
+
+          @if (f.attachment_url) {
+            <a class="d-inline-flex align-items-center gap-2 small mt-2" [href]="f.attachment_url" target="_blank" rel="noopener">
+              <app-icon name="attach_file" [size]="16" /> View marked work
+            </a>
+          }
+        </div></div>
+      } @else {
+        <div class="card border-0 shadow-sm p-5 text-center text-body-secondary">Select a feedback item to see the details.</div>
       }
     </div>
-  }
+
+    <!-- Right rail -->
+    <div class="col-lg-3">
+      <!-- Summary -->
+      <div class="card border-0 shadow-sm mb-4"><div class="card-body text-center">
+        <div class="fw-semibold mb-2 text-start">Feedback Summary</div>
+        <svg viewBox="0 0 120 120" class="ring">
+          <circle cx="60" cy="60" r="52" class="ring-bg" />
+          <circle cx="60" cy="60" r="52" class="ring-fg" [style.stroke-dasharray]="326.7" [style.stroke-dashoffset]="326.7 - (326.7 * reviewedPct() / 100)" />
+          <text x="60" y="56" class="ring-pct">{{ reviewedPct() }}%</text>
+          <text x="60" y="74" class="ring-sub">Reviewed</text>
+        </svg>
+        <div class="small text-start mt-2">
+          <div class="d-flex justify-content-between py-1"><span><i class="leg bg-success"></i> Reviewed</span><span class="fw-semibold">{{ reviewedCount() }}</span></div>
+          <div class="d-flex justify-content-between py-1"><span><i class="leg bg-secondary"></i> Needs Review</span><span class="fw-semibold">{{ needsReview() }}</span></div>
+        </div>
+      </div></div>
+
+      <!-- Focus areas -->
+      @if (focusAreas().length) {
+        <div class="card border-0 shadow-sm mb-4"><div class="card-body">
+          <div class="fw-semibold mb-1"><app-icon name="track_changes" [size]="18" class="text-success" /> Focus Areas</div>
+          <div class="small text-body-secondary mb-3">Areas to improve based on feedback</div>
+          @for (fa of focusAreas(); track fa.label) {
+            <div class="mb-2">
+              <div class="d-flex justify-content-between small mb-1"><span>{{ fa.label }}</span><span class="fw-semibold">{{ fa.score }}%</span></div>
+              <div class="progress" style="height:6px"><div class="progress-bar bg-{{ barTone(fa.score) }}" [style.width.%]="fa.score"></div></div>
+            </div>
+          }
+        </div></div>
+      }
+
+      <!-- Quick actions -->
+      <div class="card border-0 shadow-sm"><div class="card-body">
+        <div class="fw-semibold mb-3"><app-icon name="bolt" [size]="18" class="text-success" /> Quick Actions</div>
+        <a class="qa-row" routerLink="/student/academics/learn"><app-icon name="replay" [size]="18" /> <span>Redo Practice<small class="d-block text-body-secondary">Practise similar questions</small></span></a>
+        <a class="qa-row" routerLink="/student/academics/assessments"><app-icon name="quiz" [size]="18" /> <span>Take Follow-up Quiz<small class="d-block text-body-secondary">Check your understanding</small></span></a>
+        <a class="qa-row" routerLink="/student/communication/messages"><app-icon name="chat" [size]="18" /> <span>Ask Tutor<small class="d-block text-body-secondary">Get more help</small></span></a>
+      </div></div>
+    </div>
+  </div>
 }

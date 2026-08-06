@@ -55,6 +55,36 @@ class FeedbackNote
     #[ORM\Column(name: 'parent_support_suggestion', type: Types::TEXT, nullable: true)]
     private ?string $parentSupportSuggestion = null;
 
+    // --- Structured breakdown (design: Feedback_LD) — all optional ---
+
+    /** Percentage score this feedback relates to. */
+    #[ORM\Column(type: Types::SMALLINT, nullable: true)]
+    private ?int $score = null;
+
+    #[ORM\Column(name: 'common_error', type: Types::TEXT, nullable: true)]
+    private ?string $commonError = null;
+
+    #[ORM\Column(name: 'next_step', type: Types::TEXT, nullable: true)]
+    private ?string $nextStep = null;
+
+    /** Teacher-rated focus areas: [{label, score}] (0–100). */
+    #[ORM\Column(name: 'focus_areas', type: Types::JSON, nullable: true)]
+    private ?array $focusAreas = null;
+
+    /** What this feedback is about: quiz | worksheet | portfolio | general. */
+    #[ORM\Column(name: 'source_type', length: 20, nullable: true)]
+    private ?string $sourceType = null;
+
+    #[ORM\Column(name: 'source_title', length: 200, nullable: true)]
+    private ?string $sourceTitle = null;
+
+    #[ORM\Column(name: 'subject_name', length: 120, nullable: true)]
+    private ?string $subjectName = null;
+
+    /** Optional marked-work file (stored path, served via /backend/files). */
+    #[ORM\Column(name: 'attachment_url', length: 500, nullable: true)]
+    private ?string $attachmentUrl = null;
+
     #[ORM\Column(type: Types::BOOLEAN, options: ['default' => false])]
     private bool $acknowledged = false;
 
@@ -84,6 +114,22 @@ class FeedbackNote
     public function setPracticeNeeded(?string $v): void { $this->practiceNeeded = ($v === null || trim($v) === '') ? null : $v; }
     public function getParentSupportSuggestion(): ?string { return $this->parentSupportSuggestion; }
     public function setParentSupportSuggestion(?string $v): void { $this->parentSupportSuggestion = ($v === null || trim($v) === '') ? null : $v; }
+    public function getScore(): ?int { return $this->score; }
+    public function setScore(?int $v): void { $this->score = $v === null ? null : max(0, min(100, $v)); }
+    public function getCommonError(): ?string { return $this->commonError; }
+    public function setCommonError(?string $v): void { $this->commonError = ($v === null || trim($v) === '') ? null : $v; }
+    public function getNextStep(): ?string { return $this->nextStep; }
+    public function setNextStep(?string $v): void { $this->nextStep = ($v === null || trim($v) === '') ? null : $v; }
+    public function getFocusAreas(): ?array { return $this->focusAreas; }
+    public function setFocusAreas(?array $v): void { $this->focusAreas = ($v === null || $v === []) ? null : $v; }
+    public function getSourceType(): ?string { return $this->sourceType; }
+    public function setSourceType(?string $v): void { $this->sourceType = ($v === null || trim($v) === '') ? null : $v; }
+    public function getSourceTitle(): ?string { return $this->sourceTitle; }
+    public function setSourceTitle(?string $v): void { $this->sourceTitle = ($v === null || trim($v) === '') ? null : $v; }
+    public function getSubjectName(): ?string { return $this->subjectName; }
+    public function setSubjectName(?string $v): void { $this->subjectName = ($v === null || trim($v) === '') ? null : $v; }
+    public function getAttachmentUrl(): ?string { return $this->attachmentUrl; }
+    public function setAttachmentUrl(?string $v): void { $this->attachmentUrl = \App\Service\Storage\FilePath::toPath($v); }
     public function isAcknowledged(): bool { return $this->acknowledged; }
     public function setAcknowledged(bool $v): void { $this->acknowledged = $v; }
     public function setAcknowledgedAt(?\DateTimeImmutable $v): void { $this->acknowledgedAt = $v; }
@@ -102,6 +148,14 @@ class FeedbackNote
             'strengths' => $this->strengths,
             'practice_needed' => $this->practiceNeeded,
             'parent_support_suggestion' => $this->parentSupportSuggestion,
+            'score' => $this->score,
+            'common_error' => $this->commonError,
+            'next_step' => $this->nextStep,
+            'focus_areas' => $this->focusAreas,
+            'source_type' => $this->sourceType,
+            'source_title' => $this->sourceTitle,
+            'subject' => $this->subjectName,
+            'attachment_url' => \App\Service\Storage\FilePath::toUrl($this->attachmentUrl),
             'acknowledged' => $this->acknowledged,
             'acknowledged_at' => $this->acknowledgedAt?->format(DATE_ATOM),
             'created_at' => $this->getCreatedAt()?->format(DATE_ATOM),

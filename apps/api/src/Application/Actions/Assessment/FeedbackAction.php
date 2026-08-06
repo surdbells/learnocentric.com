@@ -111,6 +111,39 @@ final class FeedbackAction
         if (array_key_exists('parent_support_suggestion', $body)) {
             $note->setParentSupportSuggestion(trim((string) $body['parent_support_suggestion']));
         }
+        // Structured breakdown (design: Feedback_LD).
+        if (isset($body['score']) && is_numeric($body['score'])) {
+            $note->setScore((int) $body['score']);
+        }
+        if (array_key_exists('common_error', $body)) {
+            $note->setCommonError(trim((string) $body['common_error']));
+        }
+        if (array_key_exists('next_step', $body)) {
+            $note->setNextStep(trim((string) $body['next_step']));
+        }
+        if (array_key_exists('source_type', $body)) {
+            $note->setSourceType(trim((string) $body['source_type']));
+        }
+        if (array_key_exists('source_title', $body)) {
+            $note->setSourceTitle(trim((string) $body['source_title']));
+        }
+        if (array_key_exists('subject', $body)) {
+            $note->setSubjectName(trim((string) $body['subject']));
+        }
+        if (array_key_exists('attachment_url', $body)) {
+            $note->setAttachmentUrl(trim((string) $body['attachment_url']) ?: null);
+        }
+        if (is_array($body['focus_areas'] ?? null)) {
+            $areas = [];
+            foreach ($body['focus_areas'] as $fa) {
+                $label = trim((string) ($fa['label'] ?? ''));
+                if ($label === '') {
+                    continue;
+                }
+                $areas[] = ['label' => $label, 'score' => max(0, min(100, (int) ($fa['score'] ?? 0)))];
+            }
+            $note->setFocusAreas($areas);
+        }
         $this->em->persist($note);
         $this->notify->notify(
             $student,
@@ -125,16 +158,46 @@ final class FeedbackAction
         return Json::write($response, $note->toArray(), 201);
     }
 
-    /** GET /assessment/feedback/mine — the current student's feedback inbox. */
+    /** GET /assessment/feedback/mine — the current student's feedback inbox + summary. */
     public function mine(Request $request, Response $response): Response
     {
         $student = $this->currentUser($request);
         $notes = $this->em->getRepository(FeedbackNote::class)->findBy(['student' => $student], ['createdAt' => 'DESC']);
         $unread = count(array_filter($notes, static fn (FeedbackNote $n) => !$n->isAcknowledged()));
+        $reviewed = count($notes) - $unread;
+
+        // Average performance from scored feedback.
+        $scores = array_values(array_filter(array_map(static fn (FeedbackNote $n) => $n->getScore(), $notes), static fn ($s) => $s !== null));
+        $avgPerformance = $scores === [] ? null : (int) round(array_sum($scores) / count($scores));
+
+        // Aggregate teacher-rated focus areas across all feedback.
+        $sum = [];
+        $cnt = [];
+        foreach ($notes as $n) {
+            foreach ($n->getFocusAreas() ?? [] as $fa) {
+                $label = (string) ($fa['label'] ?? '');
+                if ($label === '') {
+                    continue;
+                }
+                $sum[$label] = ($sum[$label] ?? 0) + (int) ($fa['score'] ?? 0);
+                $cnt[$label] = ($cnt[$label] ?? 0) + 1;
+            }
+        }
+        $focusAreas = [];
+        foreach ($sum as $label => $total) {
+            $focusAreas[] = ['label' => $label, 'score' => (int) round($total / $cnt[$label])];
+        }
 
         return Json::write($response, [
             'data' => array_map(static fn (FeedbackNote $n) => $n->toArray(), $notes),
-            'meta' => ['total' => count($notes), 'unread' => $unread],
+            'meta' => [
+                'total' => count($notes),
+                'unread' => $unread,
+                'reviewed' => $reviewed,
+                'reviewed_pct' => count($notes) ? (int) round($reviewed / count($notes) * 100) : 0,
+                'avg_performance' => $avgPerformance,
+                'focus_areas' => $focusAreas,
+            ],
         ]);
     }
 

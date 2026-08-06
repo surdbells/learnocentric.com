@@ -53,6 +53,7 @@ import {ReportConcern} from './pages/dashboard/student/report-concern/report-con
 import {StudentSettings} from './pages/dashboard/student/settings/settings';
 import {TeacherSettings} from './pages/dashboard/teacher/settings/settings';
 import {MyClasses} from './pages/dashboard/teacher/academics/my-classes/my-classes';
+import {FeedbackCompose} from './pages/dashboard/teacher/feedback-compose/feedback-compose';
 import {authGuard} from './common/auth/auth-guard';
 import {moduleGuard} from './common/auth/module-guard';
 import {ParentMain} from './pages/dashboard/parent/parent-main/parent-main';
@@ -251,6 +252,7 @@ export const routes: Routes = [
         ]
       },
       { path: "classes", component: MyClasses },
+      { path: "feedback", component: FeedbackCompose },
       {
         path: "academics",
         component: Academics,
