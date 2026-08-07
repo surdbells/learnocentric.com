@@ -33,6 +33,16 @@ class User
     #[ORM\Column(length: 30, nullable: true)]
     private ?string $phone = null;
 
+    #[ORM\Column(length: 20, nullable: true)]
+    private ?string $gender = null;
+
+    #[ORM\Column(name: 'admission_number', length: 60, nullable: true)]
+    private ?string $admissionNumber = null;
+
+    /** Onboarding blob captured on creation: guardian, support notes, consent, placement extras. */
+    #[ORM\Column(type: Types::JSON, nullable: true)]
+    private ?array $onboarding = null;
+
     #[ORM\Column(name: 'date_of_birth', type: Types::DATE_IMMUTABLE, nullable: true)]
     private ?\DateTimeInterface $dateOfBirth = null;
 
@@ -90,6 +100,12 @@ class User
     public function setLastName(string $v): void { $this->lastName = $v; }
     public function getPhone(): ?string { return $this->phone; }
     public function setPhone(?string $v): void { $this->phone = $v; }
+    public function getGender(): ?string { return $this->gender; }
+    public function setGender(?string $v): void { $this->gender = ($v === null || trim($v) === '') ? null : $v; }
+    public function getAdmissionNumber(): ?string { return $this->admissionNumber; }
+    public function setAdmissionNumber(?string $v): void { $this->admissionNumber = ($v === null || trim($v) === '') ? null : $v; }
+    public function getOnboarding(): ?array { return $this->onboarding; }
+    public function setOnboarding(?array $v): void { $this->onboarding = $v; }
     public function getDateOfBirth(): ?\DateTimeInterface { return $this->dateOfBirth; }
     public function setDateOfBirth(?\DateTimeInterface $v): void { $this->dateOfBirth = $v; }
     public function getRole(): Role { return $this->role; }
@@ -114,6 +130,8 @@ class User
             'firstName' => $this->firstName,
             'lastName' => $this->lastName,
             'phone' => $this->phone,
+            'gender' => $this->gender,
+            'admissionNumber' => $this->admissionNumber,
             'dateOfBirth' => $this->dateOfBirth?->format('Y-m-d'),
             'role' => $this->role->getCode(),
             'institutionId' => $this->institution?->getId(),

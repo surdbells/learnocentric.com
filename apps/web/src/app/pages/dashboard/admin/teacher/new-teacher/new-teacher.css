@@ -1,0 +1,26 @@
+:host { display: block; }
+
+.sec-head { display: flex; align-items: center; gap: .55rem; font-weight: 600; margin-bottom: 1rem; }
+.sec-num {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 26px; height: 26px; border-radius: 50%; flex: 0 0 auto;
+  background: color-mix(in srgb, var(--bs-success) 16%, transparent);
+  color: var(--bs-success); font-size: .82rem; font-weight: 700;
+}
+.form-label { font-size: .82rem; margin-bottom: .25rem; }
+
+.rail-sticky { position: sticky; top: 1rem; }
+.ov-line {
+  display: flex; align-items: center; justify-content: space-between; gap: .5rem;
+  padding: .4rem 0; border-bottom: 1px solid var(--bs-border-color);
+}
+.ov-line.border-0 { border-bottom: 0; }
+
+.chk-line {
+  display: flex; align-items: center; gap: .55rem;
+  padding: .4rem 0; border-bottom: 1px solid var(--bs-border-color); font-size: .9rem;
+}
+.chk-line:last-child { border-bottom: 0; }
+
+.tips { background: var(--bs-warning-bg-subtle); }
+.tips li { margin-bottom: .25rem; }

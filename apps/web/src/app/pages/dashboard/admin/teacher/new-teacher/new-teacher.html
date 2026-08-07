@@ -1,10 +1,115 @@
-<app-page-header icon="person_add" action="New {{ user()?.role == 'school_admin' ? 'Teacher' : 'Tutor' }}" >
-    <!-- Action -->
-<!--    <app-learno-button text="Add Student" />-->
+<app-page-header icon="person_add" action="Add {{ staffNoun }}">
+  <div class="d-flex align-items-center justify-content-end gap-2 flex-wrap">
+    <a class="btn btn-outline-secondary" [routerLink]="backLink">Cancel</a>
+    <button type="button" class="btn btn-outline-success" (click)="saveDraft()"><app-icon name="save" [size]="16" /> Save Draft</button>
+    <button type="button" class="btn btn-success" [disabled]="saving()" (click)="submit()"><app-icon name="add" [size]="16" /> Create {{ staffNoun }}</button>
+  </div>
 </app-page-header>
-<!-- Page content -->
-<div class="row">
-    <div class="col">
-        <app-teacher-form />
+<p class="text-body-secondary mb-4">Create a staff record, set their role and employment details, and assign classes.</p>
+
+<form [formGroup]="form">
+  <div class="row g-4">
+    <div class="col-lg-8">
+      <!-- 1. Staff Profile -->
+      <div class="card border-0 shadow-sm mb-4"><div class="card-body">
+        <div class="sec-head"><span class="sec-num">1</span> Staff Profile</div>
+        <div class="row g-3">
+          <div class="col-md-3 text-center">
+            <app-file-upload label="Upload photo" hint="JPG, PNG (max 2MB)" accept="image/*" (uploaded)="onPhoto($event)" />
+          </div>
+          <div class="col-md-9"><div class="row g-3">
+            <div class="col-md-6"><label class="form-label">First Name *</label><input class="form-control" formControlName="firstName" placeholder="Enter first name" /></div>
+            <div class="col-md-6"><label class="form-label">Last Name *</label><input class="form-control" formControlName="lastName" placeholder="Enter last name" /></div>
+            <div class="col-md-6"><label class="form-label">Gender</label>
+              <select class="form-select" formControlName="gender"><option value="">Select gender</option><option value="male">Male</option><option value="female">Female</option><option value="other">Other</option></select>
+            </div>
+            <div class="col-md-6"><label class="form-label">Phone</label><input class="form-control" formControlName="phone" placeholder="080..." /></div>
+          </div></div>
+        </div>
+      </div></div>
+
+      <!-- 2. Role & Employment -->
+      <div class="card border-0 shadow-sm mb-4"><div class="card-body">
+        <div class="sec-head"><span class="sec-num">2</span> Role &amp; Employment</div>
+        <div class="row g-3">
+          <div class="col-md-4"><label class="form-label">Role</label>
+            <select class="form-select" formControlName="role"><option value="teacher">Teacher</option><option value="academic_lead">Academic Lead</option></select>
+          </div>
+          <div class="col-md-4"><label class="form-label">Staff ID</label><input class="form-control" formControlName="staff_id" placeholder="e.g. STF/2026/012" /></div>
+          <div class="col-md-4"><label class="form-label">Department</label><input class="form-control" formControlName="department" placeholder="e.g. Sciences" /></div>
+          <div class="col-md-4"><label class="form-label">Employment Type</label>
+            <select class="form-select" formControlName="employment_type"><option value="">Select</option><option>Full-time</option><option>Part-time</option><option>Contract</option></select>
+          </div>
+          <div class="col-md-4"><label class="form-label">Qualification</label><input class="form-control" formControlName="qualification" placeholder="e.g. B.Ed Mathematics" /></div>
+          <div class="col-md-4"><label class="form-label">Start Date</label><input type="date" class="form-control" formControlName="start_date" /></div>
+        </div>
+      </div></div>
+
+      <!-- 3. Teaching Assignment -->
+      <div class="card border-0 shadow-sm mb-4"><div class="card-body">
+        <div class="sec-head"><span class="sec-num">3</span> Teaching Assignment</div>
+        <div class="row g-3">
+          <div class="col-md-6"><label class="form-label">Class</label>
+            <select class="form-select" formControlName="class_id"><option [ngValue]="null">Select class</option>@for (c of classes(); track c.id) { <option [ngValue]="c.id">{{ c.label }}</option> }</select>
+          </div>
+          <div class="col-md-6"><label class="form-label">Subject</label>
+            <select class="form-select" formControlName="subject_id"><option [ngValue]="null">Select subject</option>@for (s of subjects(); track s.id) { <option [ngValue]="s.id">{{ s.name }}</option> }</select>
+          </div>
+        </div>
+        <div class="form-text">Optional — assign one class + subject now; more can be added later.</div>
+      </div></div>
+
+      <!-- 4. Login & Account -->
+      <div class="card border-0 shadow-sm mb-4"><div class="card-body">
+        <div class="sec-head"><span class="sec-num">4</span> Login &amp; Account Access</div>
+        <div class="row g-3">
+          <div class="col-md-6"><label class="form-label">Email *</label><input class="form-control" formControlName="email" placeholder="Enter email" /></div>
+          <div class="col-md-6"><label class="form-label">Temporary Password *</label><input type="text" class="form-control" formControlName="password" placeholder="At least 6 characters" /></div>
+        </div>
+      </div></div>
+
+      <!-- 5. Compliance -->
+      <div class="card border-0 shadow-sm"><div class="card-body" formGroupName="consent">
+        <div class="sec-head"><span class="sec-num">5</span> Compliance</div>
+        <div class="row g-3">
+          <div class="col-md-4"><div class="form-check"><input class="form-check-input" type="checkbox" id="s_data" formControlName="data_privacy" /><label class="form-check-label" for="s_data">Data privacy acknowledged</label></div></div>
+          <div class="col-md-4"><div class="form-check"><input class="form-check-input" type="checkbox" id="s_conduct" formControlName="code_of_conduct" /><label class="form-check-label" for="s_conduct">Code of conduct signed</label></div></div>
+          <div class="col-md-4"><div class="form-check"><input class="form-check-input" type="checkbox" id="s_safe" formControlName="safeguarding_trained" /><label class="form-check-label" for="s_safe">Safeguarding trained</label></div></div>
+        </div>
+      </div></div>
     </div>
-</div>
+
+    <!-- Rail -->
+    <div class="col-lg-4">
+      <div class="card border-0 shadow-sm mb-4 rail-sticky"><div class="card-body">
+        <div class="fw-semibold mb-3"><app-icon name="badge" [size]="18" class="text-success" /> {{ staffNoun }} Summary</div>
+        <div class="ov-line"><span class="text-body-secondary">School</span><span class="fw-medium text-end">{{ schoolName() }}</span></div>
+        <div class="ov-line"><span class="text-body-secondary">Role</span><span class="badge bg-info-subtle text-info text-capitalize">{{ form.get('role')?.value }}</span></div>
+        <div class="ov-line"><span class="text-body-secondary">Assignment</span><span class="fw-medium text-end">{{ selectedClass()?.label || 'Not set' }}</span></div>
+        <div class="ov-line border-0"><span class="text-body-secondary">Account</span><span class="badge bg-success-subtle text-success">Will be active</span></div>
+      </div></div>
+
+      <div class="card border-0 shadow-sm mb-4"><div class="card-body">
+        <div class="d-flex align-items-center justify-content-between mb-3">
+          <div class="fw-semibold"><app-icon name="checklist" [size]="18" class="text-success" /> Progress Checklist</div>
+          <span class="small text-body-secondary">{{ completeCount() }}/5</span>
+        </div>
+        @for (c of checklist(); track c.label) {
+          <div class="chk-line">
+            <app-icon [name]="c.done ? 'check_circle' : 'radio_button_unchecked'" [size]="18" [class]="c.done ? 'text-success' : 'text-body-secondary'" />
+            <span [class.text-body-secondary]="!c.done">{{ c.label }}</span>
+            <span class="ms-auto small" [class]="c.done ? 'text-success' : 'text-body-secondary'">{{ c.done ? 'Complete' : 'Incomplete' }}</span>
+          </div>
+        }
+      </div></div>
+
+      <div class="card border-0 shadow-sm tips"><div class="card-body">
+        <div class="fw-semibold mb-2"><app-icon name="lightbulb" [size]="18" class="text-warning" /> Tips</div>
+        <ul class="small text-body-secondary mb-0 ps-3">
+          <li>Fields marked * are required before creating a record.</li>
+          <li>Assign at least one class + subject so the staff member appears on class rosters.</li>
+        </ul>
+      </div></div>
+    </div>
+  </div>
+</form>

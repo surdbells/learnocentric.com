@@ -1,11 +1,136 @@
-<app-page-header icon="person_add" action="New Student" >
-    <!-- Action -->
-<!--    <app-learno-button text="Add Student" />-->
+<app-page-header icon="person_add" action="Add Learner">
+  <div class="d-flex align-items-center justify-content-end gap-2 flex-wrap">
+    <a class="btn btn-outline-secondary" [routerLink]="backLink">Cancel</a>
+    <button type="button" class="btn btn-outline-success" (click)="saveDraft()"><app-icon name="save" [size]="16" /> Save Draft</button>
+    <button type="button" class="btn btn-success" [disabled]="saving()" (click)="submit()"><app-icon name="add" [size]="16" /> Create Learner</button>
+  </div>
 </app-page-header>
+<p class="text-body-secondary mb-4">Create a learner record, assign class details, and link guardian information.</p>
 
-<!-- Page content -->
-<div class="row">
-    <div class="col">
-        <app-student-form  />
+<form [formGroup]="form">
+  <div class="row g-4">
+    <div class="col-lg-8">
+      <!-- 1. Learner Profile -->
+      <div class="card border-0 shadow-sm mb-4"><div class="card-body">
+        <div class="sec-head"><span class="sec-num">1</span> Learner Profile</div>
+        <div class="row g-3">
+          <div class="col-md-3 text-center">
+            <app-file-upload label="Upload photo" hint="JPG, PNG (max 2MB)" accept="image/*" (uploaded)="onPhoto($event)" />
+          </div>
+          <div class="col-md-9">
+            <div class="row g-3">
+              <div class="col-md-6"><label class="form-label">First Name *</label><input class="form-control" formControlName="firstName" placeholder="Enter first name" /></div>
+              <div class="col-md-6"><label class="form-label">Last Name *</label><input class="form-control" formControlName="lastName" placeholder="Enter last name" /></div>
+              <div class="col-md-4"><label class="form-label">Gender</label>
+                <select class="form-select" formControlName="gender"><option value="">Select gender</option><option value="male">Male</option><option value="female">Female</option><option value="other">Other</option></select>
+              </div>
+              <div class="col-md-4"><label class="form-label">Date of Birth</label><input type="date" class="form-control" formControlName="date_of_birth" /></div>
+              <div class="col-md-4"><label class="form-label">Admission Number</label><input class="form-control" formControlName="admission_number" placeholder="e.g. ADM/2026/0001" /></div>
+            </div>
+          </div>
+        </div>
+      </div></div>
+
+      <!-- 2. Academic Placement -->
+      <div class="card border-0 shadow-sm mb-4"><div class="card-body">
+        <div class="sec-head"><span class="sec-num">2</span> Academic Placement</div>
+        <div class="row g-3">
+          <div class="col-md-4"><label class="form-label">Class</label>
+            <select class="form-select" formControlName="class_id"><option [ngValue]="null">Select class</option>@for (c of classes(); track c.id) { <option [ngValue]="c.id">{{ c.label }}</option> }</select>
+          </div>
+          <div class="col-md-4"><label class="form-label">Arm / Section</label><input class="form-control" formControlName="arm" placeholder="e.g. A" /></div>
+          <div class="col-md-4"><label class="form-label">Admission Date</label><input type="date" class="form-control" formControlName="admission_date" /></div>
+          <div class="col-md-4"><label class="form-label">Enrollment Status</label>
+            <select class="form-select" formControlName="enrollment_status"><option value="pending">Pending</option><option value="active">Active</option><option value="waitlisted">Waitlisted</option></select>
+          </div>
+          <div class="col-md-8"><label class="form-label">Previous School (optional)</label><input class="form-control" formControlName="previous_school" placeholder="Enter previous school name" /></div>
+        </div>
+      </div></div>
+
+      <!-- 3. Login & Account -->
+      <div class="card border-0 shadow-sm mb-4"><div class="card-body">
+        <div class="sec-head"><span class="sec-num">3</span> Login &amp; Account Access</div>
+        <div class="row g-3">
+          <div class="col-md-6"><label class="form-label">Email / Username *</label><input class="form-control" formControlName="email" placeholder="Enter email" /></div>
+          <div class="col-md-6"><label class="form-label">Temporary Password *</label><input type="text" class="form-control" formControlName="password" placeholder="At least 6 characters" /></div>
+        </div>
+      </div></div>
+
+      <!-- 4. Guardian -->
+      <div class="card border-0 shadow-sm mb-4"><div class="card-body" formGroupName="guardian">
+        <div class="sec-head"><span class="sec-num">4</span> Parent / Guardian Information</div>
+        <div class="row g-3">
+          <div class="col-md-6"><label class="form-label">Full Name</label><input class="form-control" formControlName="name" placeholder="Enter full name" /></div>
+          <div class="col-md-3"><label class="form-label">Relationship</label>
+            <select class="form-select" formControlName="relationship"><option value="">Select</option><option>Mother</option><option>Father</option><option>Guardian</option><option>Other</option></select>
+          </div>
+          <div class="col-md-3"><label class="form-label">Phone Number</label><input class="form-control" formControlName="phone" placeholder="080..." /></div>
+          <div class="col-md-6"><label class="form-label">Email Address</label><input class="form-control" formControlName="email" placeholder="Guardian email" /></div>
+          <div class="col-md-6"><label class="form-label">Home Address</label><input class="form-control" formControlName="address" placeholder="Home address" /></div>
+          <div class="col-md-6"><label class="form-label">Emergency Contact (name & phone)</label><input class="form-control" formControlName="emergency" placeholder="Name and phone" /></div>
+          <div class="col-md-6 d-flex align-items-end"><div class="form-check form-switch"><input class="form-check-input" type="checkbox" id="g_acct" formControlName="has_account" /><label class="form-check-label" for="g_acct">Create a guardian account</label></div></div>
+        </div>
+      </div></div>
+
+      <!-- 5. Support -->
+      <div class="card border-0 shadow-sm mb-4"><div class="card-body" formGroupName="support">
+        <div class="sec-head"><span class="sec-num">5</span> Learning &amp; Support Notes</div>
+        <div class="row g-3">
+          <div class="col-md-6"><label class="form-label">Medical / Allergy Note</label><input class="form-control" formControlName="medical" placeholder="e.g. Asthma, peanut allergy" /></div>
+          <div class="col-md-6"><label class="form-label">Special Support Needs</label><input class="form-control" formControlName="special_needs" placeholder="e.g. Dyslexia" /></div>
+          <div class="col-md-4"><label class="form-label">Transport / Day Student</label>
+            <select class="form-select" formControlName="transport"><option value="">Select</option><option>Day student</option><option>School bus</option><option>Boarding</option></select>
+          </div>
+          <div class="col-md-8"><label class="form-label">Remarks</label><input class="form-control" formControlName="remarks" placeholder="Additional notes about the learner" /></div>
+        </div>
+      </div></div>
+
+      <!-- 6. Consent -->
+      <div class="card border-0 shadow-sm"><div class="card-body" formGroupName="consent">
+        <div class="sec-head"><span class="sec-num">6</span> Consent &amp; Safeguarding</div>
+        <div class="row g-3">
+          <div class="col-md-4"><div class="form-check"><input class="form-check-input" type="checkbox" id="c_parent" formControlName="parent" /><label class="form-check-label" for="c_parent">Parent consent confirmed</label></div></div>
+          <div class="col-md-4"><div class="form-check"><input class="form-check-input" type="checkbox" id="c_media" formControlName="media" /><label class="form-check-label" for="c_media">Media consent</label></div></div>
+          <div class="col-md-4"><div class="form-check"><input class="form-check-input" type="checkbox" id="c_data" formControlName="data_privacy" /><label class="form-check-label" for="c_data">Data privacy acknowledged</label></div></div>
+          <div class="col-md-6"><label class="form-label">Communication Preference</label>
+            <select class="form-select" formControlName="comms_preference"><option value="">Select preference</option><option>Email</option><option>SMS</option><option>WhatsApp</option><option>In-app</option></select>
+          </div>
+        </div>
+      </div></div>
     </div>
-</div>
+
+    <!-- Rail -->
+    <div class="col-lg-4">
+      <div class="card border-0 shadow-sm mb-4 rail-sticky"><div class="card-body">
+        <div class="fw-semibold mb-3"><app-icon name="assignment" [size]="18" class="text-success" /> Enrolment Summary</div>
+        <div class="ov-line"><span class="text-body-secondary">School</span><span class="fw-medium text-end">{{ schoolName() }}</span></div>
+        <div class="ov-line"><span class="text-body-secondary">Class</span><span class="fw-medium text-end">{{ selectedClass()?.label || 'Not selected' }}</span></div>
+        <div class="ov-line"><span class="text-body-secondary">Enrolment Status</span><span class="badge bg-warning-subtle text-warning text-capitalize">{{ form.get('enrollment_status')?.value }}</span></div>
+        <div class="ov-line border-0"><span class="text-body-secondary">Account</span><span class="badge bg-success-subtle text-success">Will be active</span></div>
+      </div></div>
+
+      <div class="card border-0 shadow-sm mb-4"><div class="card-body">
+        <div class="d-flex align-items-center justify-content-between mb-3">
+          <div class="fw-semibold"><app-icon name="checklist" [size]="18" class="text-success" /> Progress Checklist</div>
+          <span class="small text-body-secondary">{{ completeCount() }}/6</span>
+        </div>
+        @for (c of checklist(); track c.label) {
+          <div class="chk-line">
+            <app-icon [name]="c.done ? 'check_circle' : 'radio_button_unchecked'" [size]="18" [class]="c.done ? 'text-success' : 'text-body-secondary'" />
+            <span [class.text-body-secondary]="!c.done">{{ c.label }}</span>
+            <span class="ms-auto small" [class]="c.done ? 'text-success' : 'text-body-secondary'">{{ c.done ? 'Complete' : 'Incomplete' }}</span>
+          </div>
+        }
+      </div></div>
+
+      <div class="card border-0 shadow-sm tips"><div class="card-body">
+        <div class="fw-semibold mb-2"><app-icon name="lightbulb" [size]="18" class="text-warning" /> Tips</div>
+        <ul class="small text-body-secondary mb-0 ps-3">
+          <li>Fields marked * are required before creating a learner.</li>
+          <li>Use a clear passport photo for easy identification.</li>
+          <li>Verify guardian contact details for effective communication.</li>
+        </ul>
+      </div></div>
+    </div>
+  </div>
+</form>
