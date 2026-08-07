@@ -43,6 +43,8 @@ use App\Domain\Entity\Term;
 use App\Domain\Entity\Topic;
 use App\Domain\Entity\TopicDeliveryPack;
 use App\Domain\Entity\TopicProgress;
+use App\Domain\Entity\TutorQuestion;
+use App\Domain\Entity\TutorRating;
 use App\Domain\Entity\User;
 use App\Domain\Entity\Worksheet;
 use App\Domain\Entity\WorksheetQuestion;
@@ -98,6 +100,7 @@ class SeedCommand extends Command
         $this->seedContent($output);
         $this->seedSupport($output);
         $this->seedMessaging($output);
+        $this->seedAskTutor($output);
         $this->seedNotifications($output);
         $this->seedTopicProgress($output);
         $this->seedInterventions($output);
@@ -892,6 +895,39 @@ class SeedCommand extends Command
         $this->em->flush();
 
         $output->writeln('  + 2 messages, ' . count($specs) . ' announcements (sent/scheduled/draft)');
+    }
+
+    /** Seed Ask Tutor — one answered question, one open, and a tutor rating. */
+    private function seedAskTutor(OutputInterface $output): void
+    {
+        if ($this->em->getRepository(TutorQuestion::class)->count([]) > 0) {
+            return;
+        }
+        $repo = $this->em->getRepository(User::class);
+        $student = $repo->findOneBy(['email' => 'student@gmail.com']);
+        $teacher = $repo->findOneBy(['email' => 'teacher@gmail.com']);
+        $maths = $this->em->getRepository(Subject::class)->findOneBy(['name' => 'Mathematics']);
+        if ($student === null || $teacher === null) {
+            return;
+        }
+
+        $answered = new TutorQuestion($student, 'How do I find the LCM of 4 and 6? I keep getting confused with the multiples.');
+        $answered->setTutor($teacher);
+        $answered->setSubject($maths);
+        $answered->answer('List the multiples of each: 4 → 4, 8, 12… and 6 → 6, 12… The first common one is 12, so LCM(4,6) = 12. Try it with 3 and 5 next!', $teacher);
+        $this->em->persist($answered);
+
+        $open = new TutorQuestion($student, 'For place value, how do I know which digit is in the hundreds column?');
+        $open->setTutor($teacher);
+        $open->setSubject($maths);
+        $this->em->persist($open);
+
+        $rating = new TutorRating($student, $teacher, 5);
+        $rating->setComment('Explains things really clearly and patiently.');
+        $this->em->persist($rating);
+
+        $this->em->flush();
+        $output->writeln('  + Ask Tutor: 2 questions (1 answered) + 1 rating');
     }
 
     /** Link the seeded parent account to a student so the parent report works. */

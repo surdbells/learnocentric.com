@@ -197,6 +197,8 @@ export class UserPreferenceMenu {
 
     { name: "Give Feedback", icon: "rate_review", link: "/teacher/feedback" },
 
+    { name: "Tutor Questions", icon: "support_agent", link: "/teacher/ask-tutor" },
+
     { name: "Academics", icon: "school", link: "/teacher/academics",
       children: [
         { name: "Topics", link: "/teacher/academics/topics" },
@@ -254,6 +256,7 @@ export class UserPreferenceMenu {
         { name: "Worksheets", link: "/student/academics/worksheets", module: "worksheets" },
         { name: "Portfolio", link: "/student/academics/portfolio", module: "portfolio" },
         { name: "Feedback", link: "/student/academics/feedback" },
+        { name: "Ask Tutor", link: "/student/academics/ask-tutor" },
         { name: "Live Classes", link: "/student/academics/live-classes", module: "live_classes" },
         { name: "Resources", link: "/student/academics/resources" },
         { name: "Resource Viewer", link: "/student/academics/resource-viewer" },

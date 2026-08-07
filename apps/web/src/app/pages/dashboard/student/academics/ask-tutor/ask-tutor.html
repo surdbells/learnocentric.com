@@ -1,0 +1,120 @@
+<app-page-header icon="support_agent" action="Ask Tutor"></app-page-header>
+<p class="text-body-secondary mb-4">Get help from your tutors — ask a question, browse answers, and rate your tutors.</p>
+
+@if (loading()) {
+  <div class="text-body-secondary p-4">Loading…</div>
+} @else {
+  <div class="row g-4">
+    <!-- Main -->
+    <div class="col-lg-8">
+      <!-- Tutor directory -->
+      <h6 class="fw-semibold mb-3">Your Tutors</h6>
+      @if (tutors().length) {
+        <div class="row g-3 mb-4">
+          @for (t of tutors(); track t.id) {
+            <div class="col-md-6">
+              <div class="card border-0 shadow-sm h-100"><div class="card-body">
+                <div class="d-flex align-items-center gap-2 mb-2">
+                  <span class="tutor-avatar">{{ (t.name || '?')[0] }}</span>
+                  <div class="flex-grow-1">
+                    <div class="fw-semibold lh-sm">{{ t.name }}</div>
+                    <div class="small text-body-secondary lh-sm">{{ t.subjects.join(', ') }}</div>
+                  </div>
+                </div>
+                <div class="d-flex align-items-center gap-1 mb-2">
+                  @for (s of stars; track s) {
+                    <app-icon name="star" [size]="16" [class]="(t.rating && s <= t.rating) ? 'text-warning' : 'text-body-secondary opacity-25'" />
+                  }
+                  <span class="small text-body-secondary ms-1">{{ t.rating ? t.rating : '—' }}@if (t.rating_count) { ({{ t.rating_count }}) }</span>
+                </div>
+                <div class="d-flex flex-wrap gap-2">
+                  <button type="button" class="btn btn-sm btn-success" (click)="askTutor(t)"><app-icon name="help" [size]="15" /> Ask</button>
+                  <button type="button" class="btn btn-sm btn-outline-secondary" (click)="message()"><app-icon name="chat" [size]="15" /> Message</button>
+                </div>
+                <div class="rate-row mt-2">
+                  <span class="small text-body-secondary me-1">Rate:</span>
+                  @for (s of stars; track s) {
+                    <button type="button" class="star-btn" (click)="rate(t, s)" [attr.aria-label]="s + ' stars'">
+                      <app-icon name="star" [size]="18" [class]="(t.my_rating && s <= t.my_rating) ? 'text-warning' : 'text-body-secondary opacity-50'" />
+                    </button>
+                  }
+                </div>
+              </div></div>
+            </div>
+          }
+        </div>
+      } @else {
+        <div class="card border-0 shadow-sm p-4 text-center text-body-secondary mb-4">No tutors are assigned to your classes yet.</div>
+      }
+
+      <!-- Ask a question -->
+      <div id="ask-form" class="card border-0 shadow-sm mb-4"><div class="card-body">
+        <h6 class="fw-semibold mb-3">Ask a Question</h6>
+        <div class="row g-2 mb-2">
+          <div class="col-sm-6">
+            <label class="form-label small mb-1">Subject</label>
+            <select class="form-select form-select-sm" [ngModel]="qSubject()" (ngModelChange)="qSubject.set($event)">
+              <option value="">Any subject</option>
+              @for (s of subjects(); track s.id) { <option [value]="s.id">{{ s.name }}</option> }
+            </select>
+          </div>
+          <div class="col-sm-6">
+            <label class="form-label small mb-1">Tutor</label>
+            <select class="form-select form-select-sm" [ngModel]="qTutor()" (ngModelChange)="qTutor.set($event)">
+              <option value="">Any tutor</option>
+              @for (t of tutors(); track t.id) { <option [value]="t.id">{{ t.name }}</option> }
+            </select>
+          </div>
+        </div>
+        <textarea class="form-control mb-2" rows="3" placeholder="Type your question…" [ngModel]="qText()" (ngModelChange)="qText.set($event)"></textarea>
+        <div class="d-flex justify-content-end">
+          <button type="button" class="btn btn-primary" [disabled]="busy() || !qText().trim()" (click)="submitQuestion()">
+            <app-icon name="send" [size]="16" /> Send question
+          </button>
+        </div>
+      </div></div>
+
+      <!-- My questions -->
+      <div class="card border-0 shadow-sm"><div class="card-body">
+        <h6 class="fw-semibold mb-3">My Questions</h6>
+        @if (myQuestions().length) {
+          @for (q of myQuestions(); track q.id) {
+            <div class="qa-item">
+              <div class="d-flex align-items-start justify-content-between gap-2">
+                <div class="fw-medium">{{ q.question }}</div>
+                <span class="badge bg-{{ q.status === 'answered' ? 'success' : 'warning' }}-subtle text-{{ q.status === 'answered' ? 'success' : 'warning' }} text-capitalize">{{ q.status }}</span>
+              </div>
+              <div class="small text-body-secondary">{{ q.subject || 'General' }}@if (q.tutor) { · {{ q.tutor }} } · {{ q.created_at | date:'MMM d' }}</div>
+              @if (q.answer) {
+                <div class="answer mt-2">
+                  <div class="small fw-semibold text-success"><app-icon name="verified" [size]="14" /> {{ q.answered_by || 'Tutor' }} answered</div>
+                  <div class="small">{{ q.answer }}</div>
+                </div>
+              }
+            </div>
+          }
+        } @else {
+          <div class="text-body-secondary small py-3 text-center">You haven't asked any questions yet.</div>
+        }
+      </div></div>
+    </div>
+
+    <!-- Right rail: answered feed -->
+    <div class="col-lg-4">
+      <div class="card border-0 shadow-sm rail-sticky"><div class="card-body">
+        <div class="fw-semibold mb-3"><app-icon name="quiz" [size]="18" class="text-success" /> Recently Answered</div>
+        @if (answered().length) {
+          @for (q of answered(); track q.id) {
+            <div class="qa-item">
+              <div class="fw-medium small">{{ q.question }}</div>
+              <div class="small text-body-secondary answer-clip">{{ q.answer }}</div>
+              <div class="small text-body-secondary mt-1">{{ q.subject || 'General' }}@if (q.answered_by) { · {{ q.answered_by }} }</div>
+            </div>
+          }
+        } @else {
+          <div class="text-body-secondary small py-3 text-center">No answered questions yet.</div>
+        }
+      </div></div>
+    </div>
+  </div>
+}

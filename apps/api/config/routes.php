@@ -31,6 +31,7 @@ use App\Application\Actions\Curriculum\ReviewQueueAction;
 use App\Application\Actions\Curriculum\TopicsAction;
 use App\Application\Actions\HealthAction;
 use App\Application\Actions\Institution\GetInstitutionAction;
+use App\Application\Actions\Learn\AskTutorAction;
 use App\Application\Actions\Learn\LearnAction;
 use App\Application\Actions\Messaging\MessagingAction;
 use App\Application\Actions\Live\LiveClassesAction;
@@ -273,6 +274,12 @@ return static function (App $app): void {
             // Learn — student topic journey (lesson + stage progress)
             $auth->get('/learn/subjects', LearnAction::class . ':subjects');
             $auth->get('/learn/topics', LearnAction::class . ':topics');
+            // Ask Tutor — tutor directory, questions (Q&A) + ratings
+            $auth->get('/ask-tutor/board', AskTutorAction::class . ':board');
+            $auth->post('/ask-tutor/questions', AskTutorAction::class . ':ask');
+            $auth->post('/ask-tutor/questions/{id:[0-9]+}/answer', AskTutorAction::class . ':answerQuestion');
+            $auth->post('/ask-tutor/ratings', AskTutorAction::class . ':rate');
+            $auth->get('/ask-tutor/inbox', AskTutorAction::class . ':inbox');
             $auth->get('/learn/topics/{id:[0-9]+}', LearnAction::class . ':lesson');
             $auth->post('/learn/topics/{id:[0-9]+}/complete-lesson', LearnAction::class . ':completeLesson');
             $auth->map(['GET', 'PUT'], '/learn/topics/{id:[0-9]+}/note', LearnAction::class . ':note');

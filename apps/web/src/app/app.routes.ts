@@ -47,6 +47,8 @@ import {MyFeedback} from './pages/dashboard/student/academics/my-feedback/my-fee
 import {MyLiveClasses} from './pages/dashboard/student/academics/my-live-classes/my-live-classes';
 import {Learn} from './pages/dashboard/student/academics/learn/learn';
 import {MySubjects} from './pages/dashboard/student/academics/my-subjects/my-subjects';
+import {AskTutor} from './pages/dashboard/student/academics/ask-tutor/ask-tutor';
+import {TutorInbox} from './pages/dashboard/teacher/tutor-inbox/tutor-inbox';
 import {ProgressReport} from './pages/dashboard/student/academics/progress-report/progress-report';
 import {StudentManagement} from './pages/dashboard/student/management/management';
 import {StudentProfile} from './pages/dashboard/student/management/student-profile/student-profile';
@@ -257,6 +259,7 @@ export const routes: Routes = [
       },
       { path: "classes", component: MyClasses },
       { path: "feedback", component: FeedbackCompose },
+      { path: "ask-tutor", component: TutorInbox },
       {
         path: "academics",
         component: Academics,
@@ -321,6 +324,7 @@ export const routes: Routes = [
         children: [
           { path: "learn", component: Learn },
           { path: "my-subjects", component: MySubjects },
+          { path: "ask-tutor", component: AskTutor },
           { path: "assessments", component: MyAssessments, canActivate: [moduleGuard('assessments')] },
           { path: "worksheets", component: MyWorksheets, canActivate: [moduleGuard('worksheets')] },
           { path: "portfolio", component: MyPortfolio, canActivate: [moduleGuard('portfolio')] },

@@ -1,0 +1,51 @@
+<app-page-header icon="support_agent" action="Tutor Questions"></app-page-header>
+<p class="text-body-secondary mb-4">Questions your learners have asked. Answer them to close the loop and notify the learner.</p>
+
+@if (loading()) {
+  <div class="text-body-secondary p-4">Loading…</div>
+} @else {
+  <div class="d-flex align-items-center gap-2 mb-3">
+    <span class="badge bg-warning-subtle text-warning">{{ openCount() }} open</span>
+    <div class="btn-group btn-group-sm ms-auto">
+      <button class="btn" [class.btn-success]="filter() === 'open'" [class.btn-outline-secondary]="filter() !== 'open'" (click)="filter.set('open')">Open</button>
+      <button class="btn" [class.btn-success]="filter() === 'answered'" [class.btn-outline-secondary]="filter() !== 'answered'" (click)="filter.set('answered')">Answered</button>
+      <button class="btn" [class.btn-success]="filter() === 'all'" [class.btn-outline-secondary]="filter() !== 'all'" (click)="filter.set('all')">All</button>
+    </div>
+  </div>
+
+  @if (filtered().length) {
+    <div class="d-flex flex-column gap-3">
+      @for (q of filtered(); track q.id) {
+        <div class="card border-0 shadow-sm"><div class="card-body">
+          <div class="d-flex align-items-start justify-content-between gap-2 mb-1">
+            <div>
+              <span class="fw-semibold">{{ q.student }}</span>
+              <span class="small text-body-secondary">· {{ q.subject || 'General' }} · {{ q.created_at | date:'MMM d, h:mm a' }}</span>
+            </div>
+            <span class="badge bg-{{ q.status === 'answered' ? 'success' : 'warning' }}-subtle text-{{ q.status === 'answered' ? 'success' : 'warning' }} text-capitalize">{{ q.status }}</span>
+          </div>
+          <div class="mb-2">{{ q.question }}</div>
+
+          @if (q.status === 'answered') {
+            <div class="answer">
+              <div class="small fw-semibold text-success mb-1"><app-icon name="verified" [size]="14" /> Your answer</div>
+              <div class="small">{{ q.answer }}</div>
+            </div>
+          } @else {
+            <textarea class="form-control mb-2" rows="3" placeholder="Type your answer…"
+                      [ngModel]="drafts()[q.id] || ''" (ngModelChange)="setDraft(q.id, $event)"></textarea>
+            <div class="d-flex justify-content-end">
+              <button type="button" class="btn btn-sm btn-primary" [disabled]="busy() === q.id" (click)="answer(q)">
+                <app-icon name="send" [size]="15" /> Send answer
+              </button>
+            </div>
+          }
+        </div></div>
+      }
+    </div>
+  } @else {
+    <div class="card border-0 shadow-sm p-5 text-center text-body-secondary">
+      No {{ filter() === 'all' ? '' : filter() }} questions right now.
+    </div>
+  }
+}

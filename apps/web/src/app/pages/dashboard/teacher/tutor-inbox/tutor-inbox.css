@@ -1,0 +1,6 @@
+:host { display: block; }
+
+.answer {
+  background: var(--bs-success-bg-subtle);
+  border-radius: .5rem; padding: .6rem .85rem;
+}
