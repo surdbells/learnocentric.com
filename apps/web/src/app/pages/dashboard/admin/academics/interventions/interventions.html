@@ -1,25 +1,124 @@
 <app-page-header icon="support" action="Interventions">
-  <app-learno-button text="New Intervention" icon="add" data-bs-toggle="modal" data-bs-target="#add_intervention" (clicked)="onAdd()"/>
+  <app-learno-button text="Create Intervention" icon="add" data-bs-toggle="modal" data-bs-target="#add_intervention" (clicked)="onAdd()"/>
 </app-page-header>
+<p class="text-body-secondary mb-4">Track learner support plans, follow-up actions, remediation cases and intervention outcomes across the school.</p>
 
-<app-learno-modal [modalId]="'add_intervention'" [modalAction]="selectIntervention() ? 'Edit Intervention' : 'New Intervention'" [showBtn]="false">
-  <app-intervention-form
-    modalForm
-    [select]="selectIntervention()"
-    [students]="students()"
-    [subjects]="subjects()"
-    [topics]="topics()"
-    [teachers]="teachers()"
-    (submitted)="handleSuccessSubmit($event)"
-  />
+<!-- Create / edit -->
+<app-learno-modal [modalId]="'add_intervention'" [modalAction]="selectIntervention() ? 'Edit Intervention' : 'Create Intervention'" [showBtn]="false">
+  <app-intervention-form modalForm [select]="selectIntervention()" [students]="students()" [subjects]="subjects()" [topics]="topics()" [teachers]="teachers()" (submitted)="handleSuccessSubmit($event)"/>
 </app-learno-modal>
 
-<app-data-grid
-  endpoint="/backend/school/interventions"
-  [columns]="columns"
-  [filters]="filterDefs()"
-  [actions]="['edit', 'delete']"
-  searchPlaceholder="Search concerns…"
-  emptyMessage="No interventions yet. Flag a struggling student to start."
-  (edit)="onEdit($event)"
-/>
+@if (loading()) {
+  <div class="text-body-secondary p-4">Loading…</div>
+} @else {
+  <app-kpi-strip class="d-block mb-4" [items]="kpis()" [cols]="5" />
+
+  <div class="row g-4">
+    <!-- Main -->
+    <div class="col-lg-8">
+      <!-- Tabs + search -->
+      <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
+        <ul class="nav nav-tabs iv-tabs">
+          @for (t of tabs(); track t.key) {
+            <li class="nav-item"><button class="nav-link" [class.active]="activeTab() === t.key" (click)="activeTab.set(t.key)">{{ t.label }} <span class="badge bg-secondary-subtle text-secondary ms-1">{{ t.count }}</span></button></li>
+          }
+        </ul>
+        <input class="form-control form-control-sm search-box" placeholder="Search interventions…" [ngModel]="search()" (ngModelChange)="search.set($event)" />
+      </div>
+
+      <div class="card border-0 shadow-sm"><div class="card-body">
+        @if (filtered().length) {
+          <div class="table-responsive">
+            <table class="table align-middle mb-0">
+              <thead class="small text-body-secondary text-uppercase">
+                <tr><th>Learner</th><th>Concern</th><th>Type</th><th>Assigned</th><th>Status</th><th>Priority</th><th>Next review</th><th style="min-width:8rem">Progress</th><th></th></tr>
+              </thead>
+              <tbody>
+                @for (i of filtered(); track i.id) {
+                  <tr>
+                    <td>
+                      <div class="fw-medium">{{ i.student }}</div>
+                      @if (i.class_label) { <div class="small text-body-secondary">{{ i.class_label }}</div> }
+                    </td>
+                    <td class="small" style="max-width:14rem">{{ i.reason }}</td>
+                    <td class="small">{{ i.type || '—' }}</td>
+                    <td class="small">{{ i.assigned_to || 'Unassigned' }}</td>
+                    <td><span class="badge bg-{{ statusColor(i.status) }}-subtle text-{{ statusColor(i.status) }}">{{ statusLabel(i.status) }}</span></td>
+                    <td><span class="badge bg-{{ priorityTone(i.priority) }}-subtle text-{{ priorityTone(i.priority) }} text-capitalize">{{ i.priority }}</span></td>
+                    <td class="small" [class.text-danger]="i.overdue">{{ i.due_date ? (i.due_date | date:'MMM d') : '—' }}@if (i.overdue) { <div class="small text-danger">Overdue</div> }</td>
+                    <td>
+                      <div class="progress iv-progress" role="progressbar" [attr.aria-valuenow]="i.progress"><div class="progress-bar bg-{{ statusColor(i.status) }}" [style.width.%]="i.progress"></div></div>
+                      <div class="small text-body-secondary text-end">{{ i.progress }}%</div>
+                    </td>
+                    <td class="text-end text-nowrap">
+                      <button type="button" class="btn btn-sm btn-outline-secondary" (click)="onEdit(i)" title="Edit"><app-icon name="edit" [size]="15" /></button>
+                      @if (i.status !== 'resolved') {
+                        <button type="button" class="btn btn-sm btn-outline-success ms-1" (click)="resolve(i)" title="Mark resolved"><app-icon name="check" [size]="15" /></button>
+                      }
+                      <button type="button" class="btn btn-sm btn-outline-danger ms-1" (click)="remove(i)" title="Delete"><app-icon name="delete" [size]="15" /></button>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        } @else {
+          <div class="text-body-secondary small py-4 text-center">No interventions in this view.</div>
+        }
+      </div></div>
+
+      <!-- Distributions -->
+      <div class="row g-4 mt-0">
+        <div class="col-md-6">
+          <div class="card border-0 shadow-sm h-100"><div class="card-body">
+            <h6 class="fw-semibold mb-3">Intervention Types</h6>
+            @if (hasDonut()) { <app-donut-chart [segments]="donut()" caption="cases" /> }
+            @else { <div class="text-body-secondary small py-3 text-center">No typed interventions yet.</div> }
+          </div></div>
+        </div>
+        <div class="col-md-6">
+          <div class="card border-0 shadow-sm h-100"><div class="card-body">
+            <h6 class="fw-semibold mb-3">Classes Needing Support</h6>
+            @if (classBars().length) { <app-bar-list [items]="classBars()" /> }
+            @else { <div class="text-body-secondary small py-3 text-center">No class data yet.</div> }
+          </div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right rail -->
+    <div class="col-lg-4">
+      <div class="card border-0 shadow-sm mb-4"><div class="card-body">
+        <div class="fw-semibold mb-3">Intervention Summary</div>
+        <div class="sum-line"><app-icon name="priority_high" [size]="18" class="text-danger" /><span>High-priority cases</span><span class="ms-auto fw-semibold">{{ board()?.summary?.high_priority ?? 0 }}</span></div>
+        <div class="sum-line"><app-icon name="healing" [size]="18" class="text-primary" /><span>Remediation plans</span><span class="ms-auto fw-semibold">{{ board()?.summary?.remediation_plans ?? 0 }}</span></div>
+        <div class="sum-line"><app-icon name="pending_actions" [size]="18" class="text-warning" /><span>Follow-ups pending</span><span class="ms-auto fw-semibold">{{ board()?.summary?.followup_pending ?? 0 }}</span></div>
+        <div class="sum-line border-0"><app-icon name="task_alt" [size]="18" class="text-success" /><span>Completed</span><span class="ms-auto fw-semibold">{{ board()?.summary?.completed ?? 0 }}</span></div>
+      </div></div>
+
+      <div class="card border-0 shadow-sm mb-4"><div class="card-body">
+        <div class="fw-semibold mb-3"><app-icon name="warning" [size]="18" class="text-danger" /> Attention Needed</div>
+        @if ((board()?.kpis?.overdue_followups ?? 0) > 0) {
+          <button type="button" class="attn-line w-100" (click)="activeTab.set('overdue')">
+            <span class="attn-num bg-danger-subtle text-danger">{{ board()?.kpis?.overdue_followups }}</span>
+            <div class="text-start"><div class="fw-medium lh-sm">Overdue follow-ups</div><div class="small text-body-secondary lh-sm">Review meetings past due</div></div>
+          </button>
+        }
+        @if ((board()?.summary?.followup_pending ?? 0) > 0) {
+          <div class="attn-line">
+            <span class="attn-num bg-warning-subtle text-warning">{{ board()?.summary?.followup_pending }}</span>
+            <div><div class="fw-medium lh-sm">Teacher follow-up pending</div><div class="small text-body-secondary lh-sm">Assigned but not started</div></div>
+          </div>
+        }
+        @if ((board()?.kpis?.overdue_followups ?? 0) === 0 && (board()?.summary?.followup_pending ?? 0) === 0) {
+          <div class="text-body-secondary small py-2 text-center">Nothing needs attention. 🎉</div>
+        }
+      </div></div>
+
+      <div class="card border-0 shadow-sm"><div class="card-body">
+        <div class="fw-semibold mb-3"><app-icon name="bolt" [size]="18" class="text-success" /> Quick Actions</div>
+        <button type="button" class="qa-row w-100" data-bs-toggle="modal" data-bs-target="#add_intervention" (click)="onAdd()"><app-icon name="add" [size]="18" /> <span>Create intervention plan</span><app-icon name="chevron_right" [size]="16" class="ms-auto text-body-secondary" /></button>
+      </div></div>
+    </div>
+  </div>
+}

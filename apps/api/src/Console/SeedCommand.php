@@ -531,20 +531,56 @@ class SeedCommand extends Command
         $one->setRaisedBy($lead);
         $one->setAssignedTo($teacher);
         $one->setStatus(Intervention::IN_PROGRESS);
+        $one->setPriority('high');
+        $one->setType('Small Group Remediation');
+        $one->setProgress(60);
         $one->setDueDate(new DateTimeImmutable('+5 days'));
         $this->em->persist($one);
 
+        $count = 1;
         if ($chiamaka !== null) {
             $two = new Intervention($chiamaka, 'Borderline pass (50%) — monitor and revisit fractions.');
             $two->setSubject($subject);
             $two->setRaisedBy($teacher);
             $two->setAssignedTo($teacher);
-            $two->setStatus(Intervention::OPEN);
-            $two->setDueDate(new DateTimeImmutable('+10 days'));
+            $two->setStatus(Intervention::IN_PROGRESS);
+            $two->setPriority('medium');
+            $two->setType('Targeted Quiz Support');
+            $two->setProgress(40);
+            $two->setDueDate(new DateTimeImmutable('-2 days')); // overdue follow-up
             $this->em->persist($two);
+            $count++;
+
+            // An overdue attendance case (high priority) + a resolved case, for the tabs/KPIs.
+            $three = new Intervention($chiamaka, 'Missing several homework submissions this term.');
+            $three->setSubject($subject);
+            $three->setRaisedBy($lead);
+            $three->setAssignedTo($teacher);
+            $three->setStatus(Intervention::OPEN);
+            $three->setPriority('high');
+            $three->setType('Attendance Support Plan');
+            $three->setProgress(15);
+            $three->setDueDate(new DateTimeImmutable('-1 day'));
+            $this->em->persist($three);
+            $count++;
         }
+
+        $four = new Intervention($tunde, 'Reading fluency below expected level — phonics support.');
+        $four->setSubject($subject);
+        $four->setRaisedBy($teacher);
+        $four->setAssignedTo($teacher);
+        $four->setStatus(Intervention::RESOLVED);
+        $four->setPriority('medium');
+        $four->setType('Reading Intervention');
+        $four->setProgress(100);
+        $four->setOutcome('Reading level improved to age-appropriate after six weeks of support.');
+        $four->setResolvedAt(new DateTimeImmutable('-3 days'));
+        $four->setDueDate(new DateTimeImmutable('-7 days'));
+        $this->em->persist($four);
+        $count++;
+
         $this->em->flush();
-        $output->writeln('  + 2 interventions');
+        $output->writeln("  + {$count} interventions");
     }
 
     /** Seed lesson-viewed progress so a student is mid-journey. */
@@ -613,7 +649,7 @@ class SeedCommand extends Command
                 ['worksheets']],
             ['standard', 'Standard', 3500000, 'termly', 600, 60,
                 ['Everything in Starter', 'Live classes', 'Portfolio & analytics'],
-                ['assessments', 'worksheets', 'portfolio', 'live_classes', 'analytics']],
+                ['assessments', 'worksheets', 'portfolio', 'live_classes', 'analytics', 'interventions']],
             ['premium', 'Premium', 6000000, 'termly', null, null,
                 ['Everything in Standard', 'Unlimited seats', 'Priority support'],
                 SubscriptionPlan::MODULES],

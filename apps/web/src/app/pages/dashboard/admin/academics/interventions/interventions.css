@@ -1,3 +1,39 @@
-:host {
-  display: block;
+:host { display: block; }
+
+table thead th { font-size: .72rem; letter-spacing: .02em; font-weight: 600; }
+
+.iv-tabs { border-bottom: 2px solid var(--bs-border-color); gap: .35rem; }
+.iv-tabs .nav-link {
+  border: 0; background: none; color: var(--bs-secondary-color);
+  font-weight: 500; padding: .45rem .6rem; margin-bottom: -2px;
+  border-bottom: 2px solid transparent;
 }
+.iv-tabs .nav-link.active { color: var(--bs-success); border-bottom-color: var(--bs-success); background: none; }
+.search-box { max-width: 15rem; }
+
+.iv-progress { height: 7px; border-radius: 4px; }
+
+/* Summary rail */
+.sum-line {
+  display: flex; align-items: center; gap: .6rem;
+  padding: .55rem 0; border-bottom: 1px solid var(--bs-border-color);
+}
+.sum-line.border-0 { border-bottom: 0; }
+
+/* Attention rows */
+.attn-line {
+  display: flex; align-items: center; gap: .7rem;
+  padding: .5rem 0; border: 0; background: none; width: 100%; text-align: left;
+  border-bottom: 1px solid var(--bs-border-color);
+}
+.attn-line:last-child { border-bottom: 0; }
+.attn-num {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 34px; height: 34px; flex: 0 0 auto; border-radius: .5rem; font-weight: 700;
+}
+
+.qa-row {
+  display: flex; align-items: center; gap: .6rem;
+  padding: .55rem 0; border: 0; background: none; color: inherit; text-align: left;
+}
+.qa-row:hover { color: var(--bs-success); }

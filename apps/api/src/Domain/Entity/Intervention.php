@@ -24,6 +24,7 @@ class Intervention
     public const IN_PROGRESS = 'in_progress';
     public const RESOLVED = 'resolved';
     public const STATUSES = [self::OPEN, self::IN_PROGRESS, self::RESOLVED];
+    public const PRIORITIES = ['low', 'medium', 'high'];
 
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -56,6 +57,16 @@ class Intervention
     #[ORM\Column(length: 20)]
     private string $status = self::OPEN;
 
+    #[ORM\Column(length: 10, options: ['default' => 'medium'])]
+    private string $priority = 'medium';
+
+    /** Free-text intervention type, e.g. "Small Group Remediation". */
+    #[ORM\Column(length: 120, nullable: true)]
+    private ?string $type = null;
+
+    #[ORM\Column(type: Types::SMALLINT, options: ['default' => 0])]
+    private int $progress = 0;
+
     #[ORM\Column(name: 'due_date', type: Types::DATE_IMMUTABLE, nullable: true)]
     private ?\DateTimeImmutable $dueDate = null;
 
@@ -74,6 +85,7 @@ class Intervention
 
     public function getId(): ?int { return $this->id; }
     public function getStudent(): User { return $this->student; }
+    public function getSubject(): ?Subject { return $this->subject; }
     public function setSubject(?Subject $v): void { $this->subject = $v; }
     public function getTopic(): ?Topic { return $this->topic; }
     public function setTopic(?Topic $v): void { $this->topic = $v; }
@@ -84,6 +96,13 @@ class Intervention
     public function setReason(string $v): void { $this->reason = $v; }
     public function getStatus(): string { return $this->status; }
     public function setStatus(string $v): void { $this->status = in_array($v, self::STATUSES, true) ? $v : self::OPEN; }
+    public function getPriority(): string { return $this->priority; }
+    public function setPriority(string $v): void { $this->priority = in_array($v, self::PRIORITIES, true) ? $v : 'medium'; }
+    public function getType(): ?string { return $this->type; }
+    public function setType(?string $v): void { $this->type = ($v === null || trim($v) === '') ? null : $v; }
+    public function getProgress(): int { return $this->progress; }
+    public function setProgress(int $v): void { $this->progress = max(0, min(100, $v)); }
+    public function getDueDate(): ?\DateTimeImmutable { return $this->dueDate; }
     public function setDueDate(?\DateTimeImmutable $v): void { $this->dueDate = $v; }
     public function setOutcome(?string $v): void { $this->outcome = $v; }
     public function getResolvedAt(): ?\DateTimeImmutable { return $this->resolvedAt; }
@@ -104,6 +123,9 @@ class Intervention
             'assigned_to' => $this->assignedTo ? $this->assignedTo->getFirstName() . ' ' . $this->assignedTo->getLastName() : null,
             'reason' => $this->reason,
             'status' => $this->status,
+            'priority' => $this->priority,
+            'type' => $this->type,
+            'progress' => $this->progress,
             'due_date' => $this->dueDate?->format('Y-m-d'),
             'outcome' => $this->outcome,
             'resolved_at' => $this->resolvedAt?->format(DATE_ATOM),

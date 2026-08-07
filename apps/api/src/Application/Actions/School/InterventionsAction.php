@@ -201,6 +201,109 @@ final class InterventionsAction
         if (array_key_exists('due_date', $body)) {
             $intervention->setDueDate(!empty($body['due_date']) ? new DateTimeImmutable((string) $body['due_date']) : null);
         }
+        if (array_key_exists('priority', $body)) {
+            $intervention->setPriority((string) $body['priority']);
+        }
+        if (array_key_exists('type', $body)) {
+            $intervention->setType($body['type'] !== '' ? (string) $body['type'] : null);
+        }
+        if (array_key_exists('progress', $body)) {
+            $intervention->setProgress((int) $body['progress']);
+        }
+    }
+
+    /** GET /school/interventions/board — the Interventions workspace: KPIs, list, rail, distributions. */
+    public function board(Request $request, Response $response): Response
+    {
+        if (($guard = $this->staffGuard($request, $response)) !== null) {
+            return $guard;
+        }
+        $institution = $this->resolveInstitution($request, $this->em);
+        $qb = $this->em->createQueryBuilder()->select('i')->from(Intervention::class, 'i')->join('i.student', 'st')
+            ->orderBy('i.createdAt', 'DESC');
+        if ($institution !== null) {
+            $qb->andWhere('st.institution = :inst')->setParameter('inst', $institution);
+        }
+        /** @var Intervention[] $all */
+        $all = $qb->getQuery()->getResult();
+
+        $today = new DateTimeImmutable('today');
+        $students = [];
+        $active = $overdue = $resolved = $highPriority = $followupPending = 0;
+        $byType = $bySubject = $byClass = [];
+        $rows = [];
+
+        foreach ($all as $i) {
+            $students[$i->getStudent()->getId()] = true;
+            $isResolved = $i->getStatus() === Intervention::RESOLVED;
+            $isOverdue = !$isResolved && $i->getDueDate() !== null && $i->getDueDate() < $today;
+            if ($isResolved) {
+                $resolved++;
+            } else {
+                $active++;
+            }
+            if ($isOverdue) {
+                $overdue++;
+            }
+            if (!$isResolved && $i->getPriority() === 'high') {
+                $highPriority++;
+            }
+            if ($i->getStatus() === Intervention::OPEN && $i->getAssignedTo() !== null) {
+                $followupPending++;
+            }
+            if ($i->getType() !== null) {
+                $byType[$i->getType()] = ($byType[$i->getType()] ?? 0) + 1;
+            }
+            if ($i->getSubject() !== null) {
+                $bySubject[$i->getSubject()->getName()] = ($bySubject[$i->getSubject()->getName()] ?? 0) + 1;
+            }
+            $classLabel = $this->studentClass($i->getStudent());
+            if ($classLabel !== null) {
+                $byClass[$classLabel] = ($byClass[$classLabel] ?? 0) + 1;
+            }
+            $rows[] = $i->toArray() + ['class_label' => $classLabel, 'overdue' => $isOverdue];
+        }
+
+        $total = count($all);
+
+        return Json::write($response, [
+            'kpis' => [
+                'learners_flagged' => count($students),
+                'active' => $active,
+                'overdue_followups' => $overdue,
+                'resolved' => $resolved,
+                'success_rate' => $total > 0 ? (int) round($resolved / $total * 100) : null,
+            ],
+            'interventions' => $rows,
+            'summary' => [
+                'high_priority' => $highPriority,
+                'remediation_plans' => count(array_filter($all, static fn (Intervention $i) => $i->getType() !== null && stripos($i->getType(), 'remediat') !== false)),
+                'followup_pending' => $followupPending,
+                'completed' => $resolved,
+            ],
+            'distributions' => [
+                'by_type' => $this->topCounts($byType),
+                'by_subject' => $this->topCounts($bySubject),
+                'by_class' => $this->topCounts($byClass),
+            ],
+        ]);
+    }
+
+    private function studentClass(User $student): ?string
+    {
+        $enr = $this->em->getRepository(\App\Domain\Entity\Enrollment::class)->findOneBy(['student' => $student]);
+        return $enr?->getSchoolClass()->getLabel();
+    }
+
+    /** @param array<string,int> $counts @return array<int,array{label:string,value:int}> */
+    private function topCounts(array $counts): array
+    {
+        arsort($counts);
+        $out = [];
+        foreach (array_slice($counts, 0, 6, true) as $label => $value) {
+            $out[] = ['label' => $label, 'value' => $value];
+        }
+        return $out;
     }
 
     private function notifyAssignee(Intervention $intervention, string $title): void

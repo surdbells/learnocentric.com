@@ -121,6 +121,7 @@ return static function (App $app): void {
             $auth->get('/school/calendar', \App\Application\Actions\School\CalendarAction::class);
             $auth->map(['GET', 'PUT'], '/school/profile', SchoolProfileAction::class);
             $auth->map(['GET', 'PUT'], '/school/settings', SchoolSettingsAction::class);
+            $auth->get('/school/interventions/board', InterventionsAction::class . ':board');
             $auth->map(['GET', 'POST', 'PUT', 'DELETE'], '/school/interventions', InterventionsAction::class);
             $auth->post('/school/interventions/bulk-delete', InterventionsAction::class . ':bulkDelete');
             $auth->map(['GET', 'POST', 'PUT'], '/safeguarding/cases', SafeguardingAction::class);

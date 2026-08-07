@@ -48,8 +48,34 @@
         <textarea id="iv_reason" class="form-control" rows="3" formControlName="reason" placeholder="What needs attention and why?"></textarea>
       </div>
 
+      <div class="col-lg-6 mb-3">
+        <label class="form-label" for="iv_type">Intervention type</label>
+        <input id="iv_type" class="form-control" formControlName="type" list="iv_type_list" placeholder="e.g. Small Group Remediation" />
+        <datalist id="iv_type_list">
+          <option value="Small Group Remediation"></option>
+          <option value="Targeted Quiz Support"></option>
+          <option value="Attendance Support Plan"></option>
+          <option value="Reading Intervention"></option>
+          <option value="Behaviour Support Plan"></option>
+          <option value="Individual Tutoring"></option>
+          <option value="Portfolio Completion Plan"></option>
+        </datalist>
+      </div>
+      <div class="col-lg-6 mb-3">
+        <label class="form-label" for="iv_priority">Priority</label>
+        <select id="iv_priority" class="form-select" formControlName="priority">
+          <option value="low">Low</option>
+          <option value="medium">Medium</option>
+          <option value="high">High</option>
+        </select>
+      </div>
+
       <div class="col-lg-6">
         <div learnoInput class="mb-3" [label]="'Due date'" [inputType]="'date'" [id]="'iv_due'" [formControlName]="'dueDate'"></div>
+      </div>
+      <div class="col-lg-6 mb-3">
+        <label class="form-label" for="iv_progress">Progress ({{ form.get('progress')?.value }}%)</label>
+        <input id="iv_progress" type="range" class="form-range mt-2" min="0" max="100" step="5" formControlName="progress" />
       </div>
       <div class="col-lg-6 mb-3">
         <label class="form-label" for="iv_status">Status</label>
