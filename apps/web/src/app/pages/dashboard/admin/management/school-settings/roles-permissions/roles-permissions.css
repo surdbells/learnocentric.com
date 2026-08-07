@@ -1,0 +1,11 @@
+:host { display: block; }
+
+.stat-ico {
+  width: 44px; height: 44px; border-radius: .7rem; flex: 0 0 auto;
+  display: inline-flex; align-items: center; justify-content: center;
+}
+
+table thead th { font-size: .72rem; letter-spacing: .02em; font-weight: 600; }
+
+.matrix-wrap { max-height: 340px; overflow: auto; border: 1px solid var(--bs-border-color); border-radius: .5rem; }
+.matrix-wrap thead th { position: sticky; top: 0; background: var(--bs-body-bg); z-index: 1; }

@@ -8,6 +8,7 @@ import {ApiService} from '../../../../../common/service/api.service';
 import {Icon} from '../../../../../common/icon/icon';
 import {RichEditor} from '../../../../../common/rich-editor/rich-editor';
 import {FileUpload, UploadedFile} from '../../../../../common/file-upload/file-upload';
+import {RolesPermissions} from './roles-permissions/roles-permissions';
 
 interface Band { grade: string; min: number; }
 
@@ -21,7 +22,7 @@ interface Band { grade: string; min: number; }
 @Component({
   selector: 'app-school-settings',
   standalone: true,
-  imports: [RichEditor, Icon, PageHeader, FormsModule, RouterLink, FileUpload],
+  imports: [RichEditor, Icon, PageHeader, FormsModule, RouterLink, FileUpload, RolesPermissions],
   templateUrl: './school-settings.html',
   styleUrl: './school-settings.css',
 })
@@ -31,7 +32,7 @@ export class SchoolSettings {
 
   loading = signal(true);
   saving = signal(false);
-  tab = signal<'general' | 'academic' | 'privacy'>('general');
+  tab = signal<'general' | 'roles' | 'academic' | 'privacy'>('general');
 
   // institution profile
   profile = signal<any>({});

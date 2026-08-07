@@ -42,6 +42,14 @@ class Role
     #[ORM\Column(name: 'is_system', type: Types::BOOLEAN, options: ['default' => false])]
     private bool $isSystem = false;
 
+    /** Set for institution-scoped custom roles; null for global system roles. */
+    #[ORM\ManyToOne(targetEntity: Institution::class)]
+    #[ORM\JoinColumn(name: 'institution_id', referencedColumnName: 'id', nullable: true, onDelete: 'CASCADE')]
+    private ?Institution $institution = null;
+
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    private ?string $description = null;
+
     #[ORM\Column(name: 'created_at', type: Types::DATETIME_IMMUTABLE)]
     private DateTimeImmutable $createdAt;
 
@@ -57,8 +65,14 @@ class Role
     public function getId(): ?int { return $this->id; }
     public function getCode(): string { return $this->code; }
     public function getName(): string { return $this->name; }
+    public function setName(string $v): void { $this->name = $v; }
     public function getScope(): string { return $this->scope; }
+    public function setScope(string $v): void { $this->scope = $v; }
     public function isSystem(): bool { return $this->isSystem; }
+    public function getInstitution(): ?Institution { return $this->institution; }
+    public function setInstitution(?Institution $v): void { $this->institution = $v; }
+    public function getDescription(): ?string { return $this->description; }
+    public function setDescription(?string $v): void { $this->description = $v; }
 
     public function toArray(): array
     {
@@ -67,6 +81,9 @@ class Role
             'code' => $this->code,
             'name' => $this->name,
             'scope' => $this->scope,
+            'is_system' => $this->isSystem,
+            'institution_id' => $this->institution?->getId(),
+            'description' => $this->description,
         ];
     }
 }

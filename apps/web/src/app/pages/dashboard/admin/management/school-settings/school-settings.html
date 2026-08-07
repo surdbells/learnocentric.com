@@ -30,9 +30,14 @@
       <!-- Tabs -->
       <ul class="nav nav-tabs settings-tabs mb-4">
         <li class="nav-item"><button class="nav-link" [class.active]="tab() === 'general'" (click)="tab.set('general')"><app-icon name="settings" [size]="16" /> General Settings</button></li>
+        <li class="nav-item"><button class="nav-link" [class.active]="tab() === 'roles'" (click)="tab.set('roles')"><app-icon name="admin_panel_settings" [size]="16" /> Roles &amp; Permissions</button></li>
         <li class="nav-item"><button class="nav-link" [class.active]="tab() === 'academic'" (click)="tab.set('academic')"><app-icon name="school" [size]="16" /> Academic Policies</button></li>
         <li class="nav-item"><button class="nav-link" [class.active]="tab() === 'privacy'" (click)="tab.set('privacy')"><app-icon name="shield" [size]="16" /> Privacy & Security</button></li>
       </ul>
+
+      @if (tab() === 'roles') {
+        <app-roles-permissions />
+      }
 
       <!-- GENERAL SETTINGS -->
       @if (tab() === 'general') {

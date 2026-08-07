@@ -100,6 +100,7 @@ class SeedCommand extends Command
         $this->seedContent($output);
         $this->seedSupport($output);
         $this->seedMessaging($output);
+        $this->seedCustomRole($output);
         $this->seedAskTutor($output);
         $this->seedNotifications($output);
         $this->seedTopicProgress($output);
@@ -895,6 +896,33 @@ class SeedCommand extends Command
         $this->em->flush();
 
         $output->writeln('  + 2 messages, ' . count($specs) . ' announcements (sent/scheduled/draft)');
+    }
+
+    /** Seed one institution-scoped custom role so Roles & Permissions demos a custom row. */
+    private function seedCustomRole(OutputInterface $output): void
+    {
+        $school = $this->em->getRepository(Institution::class)->findOneBy(['name' => 'GOF College'])
+            ?? $this->em->getRepository(Institution::class)->findOneBy([]);
+        if ($school === null || $this->em->getRepository(Role::class)->findOneBy(['institution' => $school]) !== null) {
+            return;
+        }
+        $role = new Role('c' . $school->getId() . '_vice_principal_academics', 'Vice Principal Academics', 'school', false);
+        $role->setInstitution($school);
+        $role->setDescription('Academic leadership — oversees assessments, gradebook and reports.');
+        $this->em->persist($role);
+
+        $grants = [
+            'assessment' => ['view' => true, 'create' => true, 'edit' => true, 'approve' => true],
+            'worksheet' => ['view' => true, 'create' => true, 'edit' => true],
+            'gradebook' => ['view' => true, 'edit' => true, 'export' => true],
+            'report' => ['view' => true, 'export' => true],
+            'delivery_pack' => ['view' => true, 'approve' => true],
+        ];
+        foreach ($grants as $code => $actions) {
+            $this->em->persist(new RolePermission($role, $code, $actions, 'school'));
+        }
+        $this->em->flush();
+        $output->writeln('  + 1 custom role (Vice Principal Academics)');
     }
 
     /** Seed Ask Tutor — one answered question, one open, and a tutor rating. */

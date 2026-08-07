@@ -45,6 +45,7 @@ use App\Application\Actions\School\SafeguardingAction;
 use App\Application\Actions\School\SchemeOfWorkAction;
 use App\Application\Actions\School\SchoolProfileAction;
 use App\Application\Actions\School\SchoolSettingsAction;
+use App\Application\Actions\School\RolesAction;
 use App\Application\Actions\School\StudentsAction;
 use App\Application\Actions\School\TermsAction;
 use App\Application\Actions\School\SubjectsAction;
@@ -85,6 +86,14 @@ return static function (App $app): void {
             $auth->get('/admin/institutions', ListInstitutionsAction::class);
             $auth->get('/admin/institutions/{id:[0-9]+}', GetInstitutionAction::class);
             $auth->post('/admin/onboard', OnboardInstitutionAction::class);
+
+            // Roles & permissions (school admin: custom roles + grants)
+            $auth->get('/school/roles/assignable-users', RolesAction::class . ':assignableUsers');
+            $auth->post('/school/roles/assign', RolesAction::class . ':assign');
+            $auth->get('/school/roles', RolesAction::class . ':list');
+            $auth->post('/school/roles', RolesAction::class . ':create');
+            $auth->put('/school/roles/{id:[0-9]+}', RolesAction::class . ':update');
+            $auth->delete('/school/roles', RolesAction::class . ':delete');
 
             // Academic spine
             $auth->map(['GET', 'DELETE'], '/school/students', StudentsAction::class);
