@@ -39,6 +39,7 @@ use App\Application\Actions\Notification\NotificationsAction;
 use App\Application\Actions\Institution\ListInstitutionsAction;
 use App\Application\Actions\Institution\OnboardInstitutionAction;
 use App\Application\Actions\School\ClassesAction;
+use App\Application\Actions\School\ClassesLearnersAction;
 use App\Application\Actions\School\EnrollmentsAction;
 use App\Application\Actions\School\InterventionsAction;
 use App\Application\Actions\School\SafeguardingAction;
@@ -109,6 +110,8 @@ return static function (App $app): void {
 
             // Platform subject catalogue (super-admin owned; read by all for selection)
             $auth->map(['GET', 'POST', 'PUT', 'DELETE'], '/catalog/subjects', CatalogSubjectsAction::class);
+            $auth->get('/school/classes-learners', ClassesLearnersAction::class . ':hub');
+            $auth->get('/school/classes/{id:[0-9]+}/roster', ClassesLearnersAction::class . ':roster');
             $auth->map(['GET', 'POST', 'PUT', 'DELETE'], '/school/classes', ClassesAction::class);
             $auth->post('/school/classes/bulk-delete', ClassesAction::class . ':bulkDelete');
             $auth->map(['GET', 'POST', 'PUT', 'DELETE'], '/school/enrollments', EnrollmentsAction::class);

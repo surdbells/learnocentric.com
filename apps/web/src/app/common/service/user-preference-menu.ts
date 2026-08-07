@@ -39,6 +39,7 @@ export class UserPreferenceMenu {
 
     { name: "Academics", icon: "school", link: "/admin/academics",
       children: [
+        { name: "Classes & Learners", link: "/admin/academics/classes-learners" },
         { name: "Class", link: "/admin/academics/classes" },
         { name: "Subjects", link: "/admin/academics/subjects" },
         { name: "Topics", link: "/admin/academics/topics" },
@@ -108,6 +109,7 @@ export class UserPreferenceMenu {
 
     { name: "Academics", icon: "school", link: "/academy/academics",
       children: [
+        { name: "Classes & Learners", link: "/academy/academics/classes-learners" },
         { name: "Class", link: "/academy/academics/classes" },
         { name: "Subjects", link: "/academy/academics/subjects" },
         { name: "Topics", link: "/academy/academics/topics" },

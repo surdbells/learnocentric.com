@@ -11,6 +11,7 @@ import {Billing} from "./pages/dashboard/admin/management/billing/billing";
 import {Safeguarding} from "./pages/dashboard/admin/management/safeguarding/safeguarding";
 import {SchoolSettings} from "./pages/dashboard/admin/management/school-settings/school-settings";
 import {SchoolClasses} from "./pages/dashboard/admin/academics/school-classes/school-classes";
+import {ClassesLearners} from "./pages/dashboard/admin/academics/classes-learners/classes-learners";
 import {Subjects} from "./pages/dashboard/admin/academics/subjects/subjects";
 import {Topics} from "./pages/dashboard/admin/academics/topics/topics";
 import {LessonContent} from "./pages/dashboard/admin/academics/lesson-content/lesson-content";
@@ -127,6 +128,7 @@ export const routes: Routes = [
         component: Academics,
         children: [
           { path: "classes", component: SchoolClasses, data: { user: "admin" } },
+          { path: "classes-learners", component: ClassesLearners, data: { user: "admin" } },
           { path: "subjects", component: Subjects, data: { user: "admin" } },
           { path: "topics", component: Topics, data: { user: "admin" } },
           { path: "lesson-content", component: LessonContent, data: { user: "admin" } },
@@ -198,6 +200,7 @@ export const routes: Routes = [
         data: { user: "tutor_admin" },
         children: [
           { path: "classes", component: SchoolClasses },
+          { path: "classes-learners", component: ClassesLearners },
           { path: "subjects", component: Subjects },
           { path: "topics", component: Topics },
           { path: "lesson-content", component: LessonContent },
