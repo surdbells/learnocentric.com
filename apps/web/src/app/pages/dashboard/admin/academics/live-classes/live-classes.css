@@ -1,3 +1,35 @@
-ul.list-unstyled li:last-child {
-  border-bottom: 0 !important;
+:host { display: block; }
+
+ul.list-unstyled li:last-child { border-bottom: 0 !important; }
+
+table thead th { font-size: .72rem; letter-spacing: .02em; font-weight: 600; }
+
+.class-chip {
+  background: color-mix(in srgb, var(--bs-success) 14%, transparent);
+  color: var(--bs-success);
+  font-weight: 600; font-size: .82rem; padding: .3rem .55rem;
 }
+
+/* Today's schedule rail */
+.sched-line {
+  display: flex; align-items: flex-start; gap: .6rem;
+  padding: .7rem 0; border-bottom: 1px solid var(--bs-border-color);
+}
+.sched-line:last-child { border-bottom: 0; }
+.sched-bar { width: 4px; align-self: stretch; border-radius: 2px; flex: 0 0 auto; min-height: 2.6rem; }
+
+/* Quick action row */
+.qa-row {
+  display: flex; align-items: center; gap: .6rem;
+  padding: .55rem 0; border: 0; background: none; color: inherit; text-align: left;
+}
+.qa-row:hover { color: var(--bs-success); }
+
+/* Live indicator */
+.live-dot {
+  display: inline-block; width: 7px; height: 7px; border-radius: 50%;
+  background: currentColor; margin-right: 4px;
+  animation: pulse 1.4s ease-in-out infinite;
+}
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+@media (prefers-reduced-motion: reduce) { .live-dot { animation: none; } }

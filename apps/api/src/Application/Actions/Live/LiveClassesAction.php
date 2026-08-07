@@ -278,6 +278,99 @@ final class LiveClassesAction
         ]);
     }
 
+    /** GET /live-classes/staff-board — teacher/admin Live Classes page (KPIs, attendance, today). */
+    public function staffBoard(Request $request, Response $response): Response
+    {
+        if (($guard = $this->staffGuard($request, $response)) !== null) {
+            return $guard;
+        }
+        $institution = $this->resolveInstitution($request, $this->em);
+
+        $qb = $this->em->createQueryBuilder()->select('lc')->from(LiveClass::class, 'lc')->join('lc.subject', 's')
+            ->orderBy('lc.scheduledAt', 'DESC');
+        if ($institution !== null) {
+            $qb->andWhere('s.institution = :inst')->setParameter('inst', $institution);
+        }
+        $all = $qb->getQuery()->getResult();
+
+        $weekStart = (new DateTimeImmutable('monday this week'))->setTime(0, 0);
+        $weekEnd = $weekStart->modify('+7 days');
+        $todayStart = new DateTimeImmutable('today 00:00');
+        $todayEnd = $todayStart->modify('+1 day');
+
+        $enrolledCache = [];
+        $enrolledFor = function (LiveClass $lc) use (&$enrolledCache): ?int {
+            $class = $lc->getSchoolClass();
+            if ($class === null) {
+                return null;
+            }
+            $cid = $class->getId();
+            return $enrolledCache[$cid] ??= (int) $this->em->getRepository(Enrollment::class)->count(['schoolClass' => $cid]);
+        };
+
+        $rows = [];
+        $today = [];
+        $present = 0;
+        $absent = 0;
+        $sessions = 0;
+        $attSum = 0.0;
+        $attCount = 0;
+        $thisWeek = 0;
+        $completedWeek = 0;
+        $upcomingToday = 0;
+
+        foreach ($all as $lc) {
+            /** @var LiveClass $lc */
+            $attended = (int) $this->em->getRepository(LiveClassAttendance::class)->count(['liveClass' => $lc]);
+            $enrolled = $enrolledFor($lc);
+            $pct = ($enrolled !== null && $enrolled > 0) ? (int) round($attended / $enrolled * 100) : null;
+            $row = $lc->toArray() + ['attended' => $attended, 'enrolled' => $enrolled, 'attendance_pct' => $pct];
+            $rows[] = $row;
+
+            $sched = $lc->getScheduledAt();
+            $inWeek = $sched >= $weekStart && $sched < $weekEnd;
+            if ($inWeek) {
+                $thisWeek++;
+            }
+            if ($lc->getStatus() === LiveClass::ENDED) {
+                if ($inWeek) {
+                    $completedWeek++;
+                }
+                if ($enrolled !== null && $enrolled > 0) {
+                    $present += $attended;
+                    $absent += max(0, $enrolled - $attended);
+                    $sessions++;
+                    if ($pct !== null) {
+                        $attSum += $pct;
+                        $attCount++;
+                    }
+                }
+            }
+            if ($sched >= $todayStart && $sched < $todayEnd) {
+                $today[] = $row;
+                if (in_array($lc->getStatus(), [LiveClass::SCHEDULED, LiveClass::LIVE], true)) {
+                    $upcomingToday++;
+                }
+            }
+        }
+
+        // Today's rail reads best in time order.
+        usort($today, static fn ($a, $b) => strcmp((string) $a['scheduled_at'], (string) $b['scheduled_at']));
+
+        return Json::write($response, [
+            'kpis' => [
+                'total' => count($all),
+                'this_week' => $thisWeek,
+                'upcoming_today' => $upcomingToday,
+                'completed_this_week' => $completedWeek,
+                'attendance_rate' => $attCount > 0 ? (int) round($attSum / $attCount) : null,
+            ],
+            'classes' => array_slice($rows, 0, 20),
+            'today' => $today,
+            'snapshot' => ['present' => $present, 'absent' => $absent, 'total_sessions' => $sessions],
+        ]);
+    }
+
     private function attended(LiveClass $lc, User $student): bool
     {
         return $this->em->getRepository(LiveClassAttendance::class)->findOneBy(['liveClass' => $lc, 'student' => $student]) !== null;

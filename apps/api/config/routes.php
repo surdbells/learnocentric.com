@@ -194,6 +194,7 @@ return static function (App $app): void {
             $auth->post('/live-classes/bulk-delete', LiveClassesAction::class . ':bulkDelete');
             $auth->get('/live-classes/upcoming', LiveClassesAction::class . ':upcoming');
             $auth->get('/live-classes/board', LiveClassesAction::class . ':board');
+            $auth->get('/live-classes/staff-board', LiveClassesAction::class . ':staffBoard');
             $auth->post('/live-classes/{id:[0-9]+}/start', LiveClassesAction::class . ':start');
             $auth->post('/live-classes/{id:[0-9]+}/end', LiveClassesAction::class . ':end');
             $auth->post('/live-classes/{id:[0-9]+}/join', LiveClassesAction::class . ':join');

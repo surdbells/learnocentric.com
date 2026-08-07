@@ -1,6 +1,7 @@
 <app-page-header icon="video_camera_front" action="Live Classes">
   <app-learno-button text="Schedule Class" icon="add" data-bs-toggle="modal" data-bs-target="#add_live_class" (clicked)="onAdd()"/>
 </app-page-header>
+<p class="text-body-secondary mb-4">Schedule, manage and review your live classes. Track attendance and run sessions in real time.</p>
 
 @if (room(); as r) {
   <app-live-room [roomUrl]="r.roomUrl" [token]="r.token" [title]="r.title" (closed)="leaveRoom()" />
@@ -17,7 +18,7 @@
     @if (manage(); as lc) {
       <div class="d-flex align-items-start justify-content-between flex-wrap gap-2 mb-1">
         <h5 class="fw-semibold mb-0">{{ lc.title }}</h5>
-        <span class="badge bg-{{ statusColor(lc.status) }}-subtle text-{{ statusColor(lc.status) }} text-capitalize px-3 py-2">{{ lc.status }}</span>
+        <span class="badge bg-{{ statusColor(lc.status) }}-subtle text-{{ statusColor(lc.status) }} text-capitalize px-3 py-2">{{ statusLabel(lc.status) }}</span>
       </div>
       <p class="text-body-secondary small mb-4">
         {{ lc.subject }}{{ lc.class_label ? ' · ' + lc.class_label : '' }} · {{ lc.scheduled_at | date:'medium' }} · {{ lc.duration_minutes }} min
@@ -62,13 +63,132 @@
   </div>
 </app-learno-modal>
 
-<app-data-grid
-  endpoint="/backend/live-classes"
-  [columns]="columns"
-  [filters]="filterDefs()"
-  [actions]="['view', 'edit', 'delete']"
-  searchPlaceholder="Search classes…"
-  emptyMessage="No live classes yet. Click “Schedule Class” to create one."
-  (view)="onView($event)"
-  (edit)="onEdit($event)"
-/>
+@if (loading()) {
+  <div class="text-body-secondary p-4">Loading…</div>
+} @else {
+  <app-kpi-strip class="d-block mb-4" [items]="kpis()" [cols]="5" />
+
+  <div class="row g-4">
+    <!-- Main -->
+    <div class="col-lg-8">
+      <!-- Filters -->
+      <div class="card border-0 shadow-sm mb-4"><div class="card-body py-3">
+        <div class="row g-2 align-items-end">
+          <div class="col-sm-3">
+            <label class="form-label small mb-1">Status</label>
+            <select class="form-select form-select-sm" [ngModel]="statusFilter()" (ngModelChange)="statusFilter.set($event)">
+              <option value="all">All status</option>
+              <option value="scheduled">Upcoming</option>
+              <option value="live">Live Now</option>
+              <option value="ended">Completed</option>
+            </select>
+          </div>
+          <div class="col-sm-4">
+            <label class="form-label small mb-1">Subject</label>
+            <select class="form-select form-select-sm" [ngModel]="subjectFilter()" (ngModelChange)="subjectFilter.set($event)">
+              <option value="all">All subjects</option>
+              @for (s of subjectOptions(); track s) { <option [value]="s">{{ s }}</option> }
+            </select>
+          </div>
+          <div class="col-sm-5">
+            <label class="form-label small mb-1">Search</label>
+            <input class="form-control form-control-sm" placeholder="Search live classes…" [ngModel]="search()" (ngModelChange)="search.set($event)" />
+          </div>
+        </div>
+      </div></div>
+
+      <!-- Scheduled classes -->
+      <div class="card border-0 shadow-sm mb-4"><div class="card-body">
+        <h6 class="fw-semibold mb-3">Scheduled Live Classes</h6>
+        @if (filtered().length) {
+          <div class="table-responsive">
+            <table class="table align-middle mb-0">
+              <thead class="small text-body-secondary text-uppercase">
+                <tr><th>Class</th><th>Subject</th><th>Topic</th><th>Date &amp; time</th><th class="text-center">Attendance</th><th>Status</th><th></th></tr>
+              </thead>
+              <tbody>
+                @for (c of filtered(); track c.id) {
+                  <tr>
+                    <td>@if (c.class_label) { <span class="badge class-chip">{{ c.class_label }}</span> } @else { <span class="text-body-secondary">—</span> }</td>
+                    <td>{{ c.subject }}</td>
+                    <td class="small">{{ c.topic || c.title }}</td>
+                    <td class="small text-body-secondary">{{ c.scheduled_at | date:'MMM d, h:mm a' }}</td>
+                    <td class="text-center">
+                      @if ((c.status === 'live' || c.status === 'ended') && c.enrolled !== null) {
+                        <div class="fw-medium">{{ c.attended }} / {{ c.enrolled }}</div>
+                        @if (c.attendance_pct !== null) { <div class="small" [class.text-success]="c.attendance_pct >= 75" [class.text-warning]="c.attendance_pct < 75">{{ c.attendance_pct }}%</div> }
+                      } @else { <span class="text-body-secondary">—</span> }
+                    </td>
+                    <td><span class="badge bg-{{ statusColor(c.status) }}-subtle text-{{ statusColor(c.status) }}">@if (c.status === 'live') { <span class="live-dot"></span> }{{ statusLabel(c.status) }}</span></td>
+                    <td class="text-end text-nowrap">
+                      <button type="button" class="btn btn-sm btn-outline-secondary" (click)="onView(c)" title="Manage / attendance"><app-icon name="visibility" [size]="15" /></button>
+                      @if (c.status !== 'ended') {
+                        <button type="button" class="btn btn-sm btn-outline-secondary ms-1" (click)="onEdit(c)" title="Edit"><app-icon name="edit" [size]="15" /></button>
+                      }
+                      <button type="button" class="btn btn-sm btn-outline-danger ms-1" (click)="remove(c)" title="Delete"><app-icon name="delete" [size]="15" /></button>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        } @else {
+          <div class="text-body-secondary small py-4 text-center">No live classes match your filters. Click “Schedule Class” to create one.</div>
+        }
+      </div></div>
+
+      <!-- Attendance snapshot -->
+      <div class="card border-0 shadow-sm"><div class="card-body">
+        <h6 class="fw-semibold mb-3">Attendance Snapshot</h6>
+        @if (hasSnapshot()) {
+          <div class="d-flex flex-wrap align-items-center gap-4">
+            <app-donut-chart [segments]="donut()" caption="present" />
+            <div class="text-center px-3">
+              <div class="fs-3 fw-bold">{{ board()?.snapshot?.total_sessions ?? 0 }}</div>
+              <div class="small text-body-secondary">Sessions held</div>
+            </div>
+          </div>
+          <div class="small text-body-secondary mt-2">Present / absent counted across completed sessions with a known class roster.</div>
+        } @else {
+          <div class="text-body-secondary small py-3 text-center">No completed sessions with attendance yet.</div>
+        }
+      </div></div>
+    </div>
+
+    <!-- Right rail -->
+    <div class="col-lg-4">
+      <!-- Today's schedule -->
+      <div class="card border-0 shadow-sm mb-4"><div class="card-body">
+        <div class="fw-semibold mb-3">Today's Live Class Schedule</div>
+        @if (today().length) {
+          @for (s of today(); track s.id) {
+            <div class="sched-line">
+              <span class="sched-bar bg-{{ statusColor(s.status) }}"></span>
+              <div class="flex-grow-1">
+                <div class="small text-body-secondary">{{ s.scheduled_at | date:'h:mm a' }}</div>
+                <div class="fw-medium lh-sm">{{ s.subject }}</div>
+                <div class="small text-body-secondary lh-sm">{{ s.topic || s.title }}{{ s.class_label ? ' · ' + s.class_label : '' }}</div>
+              </div>
+              <div class="text-end">
+                <span class="badge bg-{{ statusColor(s.status) }}-subtle text-{{ statusColor(s.status) }} text-uppercase">@if (s.status === 'live') { <span class="live-dot"></span> }{{ statusLabel(s.status) }}</span>
+                @if (s.status === 'live' || s.status === 'scheduled') {
+                  <button type="button" class="btn btn-sm btn-success d-block ms-auto mt-1" (click)="onView(s)"><app-icon name="videocam" [size]="14" /> Run</button>
+                }
+              </div>
+            </div>
+          }
+        } @else {
+          <div class="text-body-secondary small py-3 text-center">No classes scheduled for today.</div>
+        }
+      </div></div>
+
+      <!-- Quick actions -->
+      <div class="card border-0 shadow-sm"><div class="card-body">
+        <div class="fw-semibold mb-3"><app-icon name="bolt" [size]="18" class="text-success" /> Quick Actions</div>
+        <button type="button" class="qa-row w-100" data-bs-toggle="modal" data-bs-target="#add_live_class" (click)="onAdd()">
+          <app-icon name="event" [size]="18" /> <span>Schedule Live Class</span><app-icon name="chevron_right" [size]="16" class="ms-auto text-body-secondary" />
+        </button>
+      </div></div>
+    </div>
+  </div>
+}
