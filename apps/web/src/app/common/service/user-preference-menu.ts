@@ -249,6 +249,7 @@ export class UserPreferenceMenu {
     { name: "Academics", icon: "school", link: "/student/academics",
       children: [
         { name: "Learn", link: "/student/academics/learn" },
+        { name: "My Subjects", link: "/student/academics/my-subjects" },
         { name: "Assessments", link: "/student/academics/assessments", module: "assessments" },
         { name: "Worksheets", link: "/student/academics/worksheets", module: "worksheets" },
         { name: "Portfolio", link: "/student/academics/portfolio", module: "portfolio" },

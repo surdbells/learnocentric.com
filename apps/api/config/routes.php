@@ -267,6 +267,7 @@ return static function (App $app): void {
             $auth->get('/billing/transactions', BillingAction::class . ':transactions');
 
             // Learn — student topic journey (lesson + stage progress)
+            $auth->get('/learn/subjects', LearnAction::class . ':subjects');
             $auth->get('/learn/topics', LearnAction::class . ':topics');
             $auth->get('/learn/topics/{id:[0-9]+}', LearnAction::class . ':lesson');
             $auth->post('/learn/topics/{id:[0-9]+}/complete-lesson', LearnAction::class . ':completeLesson');

@@ -46,6 +46,7 @@ import {MyPortfolio} from './pages/dashboard/student/academics/my-portfolio/my-p
 import {MyFeedback} from './pages/dashboard/student/academics/my-feedback/my-feedback';
 import {MyLiveClasses} from './pages/dashboard/student/academics/my-live-classes/my-live-classes';
 import {Learn} from './pages/dashboard/student/academics/learn/learn';
+import {MySubjects} from './pages/dashboard/student/academics/my-subjects/my-subjects';
 import {ProgressReport} from './pages/dashboard/student/academics/progress-report/progress-report';
 import {StudentManagement} from './pages/dashboard/student/management/management';
 import {StudentProfile} from './pages/dashboard/student/management/student-profile/student-profile';
@@ -319,6 +320,7 @@ export const routes: Routes = [
         component: Academics,
         children: [
           { path: "learn", component: Learn },
+          { path: "my-subjects", component: MySubjects },
           { path: "assessments", component: MyAssessments, canActivate: [moduleGuard('assessments')] },
           { path: "worksheets", component: MyWorksheets, canActivate: [moduleGuard('worksheets')] },
           { path: "portfolio", component: MyPortfolio, canActivate: [moduleGuard('portfolio')] },

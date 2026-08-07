@@ -46,6 +46,68 @@ final class LearnAction
         return Json::write($response, ['data' => $rows, 'meta' => ['total' => count($rows)]]);
     }
 
+    /** GET /learn/subjects — the learner's subjects with aggregate progress + next topic. */
+    public function subjects(Request $request, Response $response): Response
+    {
+        $student = $this->currentUser($request);
+        $classIds = $this->studentClassIds($student);
+
+        $bySubject = [];
+        foreach ($this->publishedTopics($student) as $topic) {
+            $summary = $this->summary($topic, $this->stages($topic, $student));
+            $subject = $topic->getSubject();
+            $sid = $subject->getId();
+            if (!isset($bySubject[$sid])) {
+                $bySubject[$sid] = [
+                    'id' => $sid,
+                    'name' => $subject->getName(),
+                    'topic_count' => 0,
+                    'completed_topics' => 0,
+                    'progress_total' => 0,
+                    'next_topic' => null,
+                    'teacher' => $this->teacherFor($subject, $classIds),
+                ];
+            }
+            $bySubject[$sid]['topic_count']++;
+            $bySubject[$sid]['progress_total'] += $summary['progress'];
+            if ($summary['complete']) {
+                $bySubject[$sid]['completed_topics']++;
+            } elseif ($bySubject[$sid]['next_topic'] === null) {
+                $bySubject[$sid]['next_topic'] = ['id' => $topic->getId(), 'title' => $summary['title'], 'week_number' => $summary['week_number']];
+            }
+        }
+
+        $rows = [];
+        foreach ($bySubject as $s) {
+            $count = max(1, $s['topic_count']);
+            $rows[] = [
+                'id' => $s['id'],
+                'name' => $s['name'],
+                'topic_count' => $s['topic_count'],
+                'completed_topics' => $s['completed_topics'],
+                'progress' => (int) round($s['progress_total'] / $count),
+                'next_topic' => $s['next_topic'],
+                'teacher' => $s['teacher'],
+            ];
+        }
+        usort($rows, static fn ($a, $b) => strcmp($a['name'], $b['name']));
+
+        return Json::write($response, ['data' => $rows, 'meta' => ['total' => count($rows)]]);
+    }
+
+    /** The teacher assigned to a subject for the student's class(es), if any. */
+    private function teacherFor(\App\Domain\Entity\Subject $subject, array $classIds): ?string
+    {
+        $qb = $this->em->createQueryBuilder()->select('u.firstName', 'u.lastName')
+            ->from(\App\Domain\Entity\TeacherAssignment::class, 'ta')->join('ta.teacher', 'u')
+            ->where('ta.subject = :subj')->setParameter('subj', $subject)->setMaxResults(1);
+        if (!empty($classIds)) {
+            $qb->andWhere('ta.schoolClass IN (:cids)')->setParameter('cids', $classIds);
+        }
+        $row = $qb->getQuery()->getArrayResult()[0] ?? null;
+        return $row ? trim($row['firstName'] . ' ' . $row['lastName']) : null;
+    }
+
     /** GET /learn/topics/{id} — the lesson content + stage detail for one topic. */
     public function lesson(Request $request, Response $response, array $args): Response
     {

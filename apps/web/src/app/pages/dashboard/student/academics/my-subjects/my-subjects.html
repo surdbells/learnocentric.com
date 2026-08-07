@@ -1,0 +1,56 @@
+<app-page-header icon="menu_book" action="My Subjects"></app-page-header>
+<p class="text-body-secondary mb-4">Your subjects this term — track progress and jump back into the next topic.</p>
+
+@if (loading()) {
+  <div class="text-body-secondary p-4">Loading…</div>
+} @else if (!subjects().length) {
+  <div class="card border-0 shadow-sm p-5 text-center text-body-secondary">You're not enrolled in any subjects yet.</div>
+} @else {
+  <app-kpi-strip class="d-block mb-4" [items]="kpis()" [cols]="3" />
+
+  <div class="row g-4">
+    @for (s of subjects(); track s.id) {
+      <div class="col-md-6 col-xl-4">
+        <div class="card border-0 shadow-sm h-100 subject-card">
+          <div class="card-body d-flex flex-column">
+            <div class="d-flex align-items-start justify-content-between gap-2 mb-2">
+              <div class="subj-ico bg-{{ progressTone(s.progress) }}-subtle text-{{ progressTone(s.progress) }}">
+                <app-icon name="menu_book" [size]="22" />
+              </div>
+              <span class="badge bg-{{ progressTone(s.progress) }}-subtle text-{{ progressTone(s.progress) }}">{{ s.progress }}%</span>
+            </div>
+
+            <h6 class="fw-semibold mb-1">{{ s.name }}</h6>
+            @if (s.teacher) {
+              <div class="text-body-secondary small mb-3"><app-icon name="person" [size]="14" /> {{ s.teacher }}</div>
+            } @else {
+              <div class="text-body-secondary small mb-3">No teacher assigned</div>
+            }
+
+            <div class="progress subj-progress mb-2" role="progressbar" [attr.aria-valuenow]="s.progress" aria-valuemin="0" aria-valuemax="100">
+              <div class="progress-bar bg-{{ progressTone(s.progress) }}" [style.width.%]="s.progress"></div>
+            </div>
+            <div class="d-flex justify-content-between small text-body-secondary mb-3">
+              <span>{{ s.completed_topics }} of {{ s.topic_count }} topics complete</span>
+            </div>
+
+            <div class="mt-auto">
+              @if (s.next_topic) {
+                <div class="next-topic mb-2">
+                  <div class="small text-body-secondary">Up next</div>
+                  <div class="fw-medium lh-sm">{{ s.next_topic.title }}</div>
+                </div>
+                <a class="btn btn-sm btn-success w-100" [routerLink]="['/student/academics/learn']">
+                  <app-icon name="play_arrow" [size]="16" /> Continue learning
+                </a>
+              } @else {
+                <div class="text-success small mb-2"><app-icon name="check_circle" [size]="16" /> All topics complete</div>
+                <a class="btn btn-sm btn-outline-secondary w-100" [routerLink]="['/student/academics/learn']">Review lessons</a>
+              }
+            </div>
+          </div>
+        </div>
+      </div>
+    }
+  </div>
+}
