@@ -89,22 +89,35 @@ final class ContentPackagesAction
         /** @var User $user */
         $user = $request->getAttribute('user');
         $institution = $user->getInstitution();
+
+        $cleared = static fn (array $r): bool => $r['licence_status'] === ContentResource::APPROVED && ($r['visibility'] ?? 'published') === 'published';
+
+        // Platform package resources assigned to the institution (if any).
+        $packageInfo = null;
+        $resources = [];
         $packageId = $institution?->getAssignedPackageId();
-        if ($packageId === null) {
-            return Json::write($response, ['package' => null, 'resources' => []]);
+        if ($packageId !== null) {
+            $package = $this->em->getRepository(ContentPackage::class)->find($packageId);
+            if ($package !== null && $package->toArray()['isActive']) {
+                $packageInfo = ['id' => $package->getId(), 'name' => $package->getName(), 'description' => $package->toArray()['description']];
+                $resources = array_values(array_filter(
+                    array_map(static fn (ContentResource $r) => $r->toArray(), $package->getResources()->getValues()),
+                    $cleared,
+                ));
+            }
         }
-        $package = $this->em->getRepository(ContentPackage::class)->find($packageId);
-        if ($package === null || !$package->toArray()['isActive']) {
-            return Json::write($response, ['package' => null, 'resources' => []]);
+
+        // School-uploaded resources scoped to the learner's institution.
+        if ($institution !== null) {
+            $school = array_values(array_filter(
+                array_map(static fn (ContentResource $r) => $r->toArray(), $this->em->getRepository(ContentResource::class)->findBy(['institution' => $institution], ['id' => 'DESC'])),
+                $cleared,
+            ));
+            $resources = array_merge($school, $resources);
         }
-        // Only serve resources cleared for learners: licence-approved and published (spec §17).
-        $resources = array_values(array_filter(
-            array_map(static fn (ContentResource $r) => $r->toArray(), $package->getResources()->getValues()),
-            static fn (array $r) => $r['licence_status'] === ContentResource::APPROVED && ($r['visibility'] ?? 'published') === 'published',
-        ));
 
         return Json::write($response, [
-            'package' => ['id' => $package->getId(), 'name' => $package->getName(), 'description' => $package->toArray()['description']],
+            'package' => $packageInfo,
             'resources' => $resources,
         ]);
     }

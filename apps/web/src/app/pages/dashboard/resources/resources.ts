@@ -9,15 +9,19 @@ import {AuthService} from '../../../common/auth/auth.service';
 import {Icon} from '../../../common/icon/icon';
 import {RichText} from '../../../common/rich-editor/rich-text';
 import {KpiItem, KpiStrip, TabBar, TabItem} from '../../../common/ui';
+import {LearnoModal} from '../../../components/learno-modal/learno-modal';
+
+declare const bootstrap: any;
 
 /**
  * Learning resources available to the institution through its assigned content
- * package (spec §8). Read-only view for staff and learners.
+ * package (spec §8). Learners + staff get a read view; staff can also upload
+ * school-owned resources (visible to the institution's learners).
  */
 @Component({
   selector: 'app-resources',
   standalone: true,
-  imports: [RichText, Icon, RouterLink, DatePipe, FormsModule, PageHeader, KpiStrip, TabBar],
+  imports: [RichText, Icon, RouterLink, DatePipe, FormsModule, PageHeader, KpiStrip, TabBar, LearnoModal],
   templateUrl: './resources.html',
   styleUrl: './resources.css',
 })
@@ -33,6 +37,18 @@ export class Resources {
   activeTab = signal<string>('all');
   sortKey = signal<'recent' | 'name' | 'size'>('recent');
   viewerRoot = signal('/student');
+
+  isStaff = signal(false);
+  myUploads = signal<any[]>([]);
+
+  // Upload form
+  upTitle = signal('');
+  upType = signal('document');
+  upSubject = signal('');
+  upDesc = signal('');
+  upTags = signal('');
+  upFile = signal<File | null>(null);
+  upBusy = signal(false);
 
   readonly kpis = computed<KpiItem[]>(() => {
     const r = this.resources();
@@ -105,7 +121,9 @@ export class Resources {
   constructor() {
     const role = this.auth.getAuthSession()?.user?.role;
     this.viewerRoot.set(role === 'teacher' ? '/teacher' : role === 'school_admin' ? '/admin' : role === 'tutor_admin' ? '/academy' : '/student');
+    this.isStaff.set(['teacher', 'academic_lead', 'school_admin', 'tutor_admin'].includes(role ?? ''));
     this.load();
+    if (this.isStaff()) this.loadUploads();
   }
 
   load(): void {
@@ -119,6 +137,54 @@ export class Resources {
       },
       error: () => { this.loading.set(false); this.loadError.set('We couldn\'t load your resources. Please check your connection and try again.'); },
     });
+  }
+
+  loadUploads(): void {
+    this.api.get<any>('/backend/content/school-resources').subscribe({
+      next: (res) => this.myUploads.set(res?.data ?? []),
+      error: () => {},
+    });
+  }
+
+  onUploadFile(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    this.upFile.set(input.files?.[0] ?? null);
+  }
+
+  uploadResource(): void {
+    if (!this.upTitle().trim()) { this.toast.error('Give the resource a title'); return; }
+    if (!this.upFile()) { this.toast.error('Choose a file to upload'); return; }
+    const form = new FormData();
+    form.append('title', this.upTitle().trim());
+    form.append('contentType', this.upType());
+    form.append('subjectArea', this.upSubject().trim());
+    form.append('description', this.upDesc().trim());
+    form.append('tags', this.upTags().trim());
+    form.append('file', this.upFile()!);
+    this.upBusy.set(true);
+    this.api.post<any>('/backend/content/school-resources', form).subscribe({
+      next: () => {
+        this.toast.success('Resource uploaded');
+        this.upBusy.set(false);
+        this.upTitle.set(''); this.upSubject.set(''); this.upDesc.set(''); this.upTags.set(''); this.upFile.set(null);
+        this.close('upload_resource');
+        this.load();
+        this.loadUploads();
+      },
+      error: (e) => { this.toast.error(e?.error?.error || 'Upload failed'); this.upBusy.set(false); },
+    });
+  }
+
+  deleteUpload(row: any): void {
+    this.api.delete<any>(`/backend/content/school-resources?id=${row.id}`, {confirm: `Delete “${row.title}”? Learners will no longer see it.`}).subscribe({
+      next: () => { this.toast.success('Resource deleted'); this.load(); this.loadUploads(); },
+      error: (e) => this.toast.error(e?.error?.error || 'Delete failed'),
+    });
+  }
+
+  private close(id: string): void {
+    const el = document.getElementById(id);
+    if (el && typeof bootstrap !== 'undefined') bootstrap.Modal.getInstance(el)?.hide();
   }
 
   /** A downloadable resource has a real file, isn't a stream, and isn't licence-locked. */

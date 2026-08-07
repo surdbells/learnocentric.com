@@ -100,6 +100,11 @@ class ContentResource
     #[ORM\JoinColumn(name: 'created_by', referencedColumnName: 'id', nullable: true, onDelete: 'SET NULL')]
     private ?User $createdBy = null;
 
+    /** Set when a school uploads its own resource (vs a platform package resource). */
+    #[ORM\ManyToOne(targetEntity: Institution::class)]
+    #[ORM\JoinColumn(name: 'institution_id', referencedColumnName: 'id', nullable: true, onDelete: 'CASCADE')]
+    private ?Institution $institution = null;
+
     public function __construct(string $title, string $contentType = 'document')
     {
         $this->title = $title;
@@ -130,6 +135,9 @@ class ContentResource
     public function setLicence(string $v): void { $this->licence = in_array($v, self::LICENCES, true) ? $v : 'owned'; }
     public function getLicenceStatus(): string { return $this->licenceStatus; }
     public function setCreatedBy(?User $v): void { $this->createdBy = $v; }
+    public function getCreatedBy(): ?User { return $this->createdBy; }
+    public function getInstitution(): ?Institution { return $this->institution; }
+    public function setInstitution(?Institution $v): void { $this->institution = $v; }
     public function getAudience(): string { return $this->audience; }
     public function setAudience(string $v): void { $this->audience = in_array($v, self::AUDIENCES, true) ? $v : 'learner'; }
     public function getVisibility(): string { return $this->visibility; }
@@ -171,6 +179,9 @@ class ContentResource
             'audience' => $this->audience,
             'visibility' => $this->visibility,
             'downloadable' => $this->downloadable,
+            'institution_id' => $this->institution?->getId(),
+            'owned_by_school' => $this->institution !== null,
+            'uploaded_by' => $this->createdBy ? trim($this->createdBy->getFirstName() . ' ' . $this->createdBy->getLastName()) : null,
             'created_at' => $this->createdAt->format(DATE_ATOM),
         ];
     }

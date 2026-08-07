@@ -1,4 +1,54 @@
-<app-page-header icon="library_books" action="Learning Resources"></app-page-header>
+<app-page-header icon="library_books" action="Learning Resources">
+  @if (isStaff()) {
+    <button type="button" class="btn btn-success d-inline-flex align-items-center gap-1" data-bs-toggle="modal" data-bs-target="#upload_resource">
+      <app-icon name="upload" [size]="18" /> Upload Resource
+    </button>
+  }
+</app-page-header>
+
+<!-- Upload (staff) -->
+@if (isStaff()) {
+  <app-learno-modal [modalId]="'upload_resource'" [modalAction]="'Upload a resource'" [showBtn]="false">
+    <div modalForm>
+      <p class="text-body-secondary small">Uploaded resources are shared with your school's learners in their Resources library.</p>
+      <div class="mb-3">
+        <label class="form-label" for="up_title">Title</label>
+        <input id="up_title" class="form-control" [ngModel]="upTitle()" (ngModelChange)="upTitle.set($event)" placeholder="e.g. JSS1 Maths Revision Notes" />
+      </div>
+      <div class="row g-3 mb-3">
+        <div class="col-md-6">
+          <label class="form-label" for="up_type">Type</label>
+          <select id="up_type" class="form-select" [ngModel]="upType()" (ngModelChange)="upType.set($event)">
+            <option value="document">Document</option>
+            <option value="video">Video</option>
+            <option value="assignment">Assignment</option>
+            <option value="interactive">Interactive</option>
+          </select>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label" for="up_subject">Subject</label>
+          <input id="up_subject" class="form-control" [ngModel]="upSubject()" (ngModelChange)="upSubject.set($event)" placeholder="e.g. Mathematics" />
+        </div>
+      </div>
+      <div class="mb-3">
+        <label class="form-label" for="up_desc">Description</label>
+        <textarea id="up_desc" class="form-control" rows="2" [ngModel]="upDesc()" (ngModelChange)="upDesc.set($event)" placeholder="What is this resource for?"></textarea>
+      </div>
+      <div class="mb-3">
+        <label class="form-label" for="up_tags">Tags <span class="text-body-secondary small">(comma-separated)</span></label>
+        <input id="up_tags" class="form-control" [ngModel]="upTags()" (ngModelChange)="upTags.set($event)" placeholder="revision, whole numbers" />
+      </div>
+      <div class="mb-3">
+        <label class="form-label" for="up_file">File</label>
+        <input id="up_file" class="form-control" type="file" accept="image/*,application/pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.csv,.txt,video/*,audio/*" (change)="onUploadFile($event)" />
+        <div class="form-text">Images, documents, audio or video — up to 15 MB.</div>
+      </div>
+      <div class="d-flex justify-content-end">
+        <button type="button" class="btn btn-primary" [disabled]="upBusy()" (click)="uploadResource()">{{ upBusy() ? 'Uploading…' : 'Upload resource' }}</button>
+      </div>
+    </div>
+  </app-learno-modal>
+}
 
 @if (loading()) {
   <div class="text-body-secondary p-4">Loading…</div>
@@ -9,17 +59,44 @@
     <div class="text-body-secondary mb-3">{{ err }}</div>
     <div><button type="button" class="btn btn-primary" (click)="load()">Try again</button></div>
   </div>
-} @else if (!package()) {
+} @else if (!package() && !resources().length) {
   <div class="card border-0 shadow-sm p-5 text-center text-body-secondary">
-    No content package is assigned to your school yet. Your administrator can request one from the platform team.
+    @if (isStaff()) {
+      No resources yet. Click “Upload Resource” to add one for your learners, or ask your administrator to request a content package.
+    } @else {
+      No content package is assigned to your school yet. Your administrator can request one from the platform team.
+    }
   </div>
 } @else {
+  @if (isStaff() && myUploads().length) {
+    <div class="card border-0 shadow-sm mb-4"><div class="card-body">
+      <h6 class="fw-semibold mb-3"><app-icon name="cloud_upload" [size]="18" class="text-success" /> Your school uploads <span class="badge bg-success-subtle text-success ms-1">{{ myUploads().length }}</span></h6>
+      <div class="table-responsive">
+        <table class="table table-sm align-middle mb-0">
+          <thead class="small text-body-secondary text-uppercase"><tr><th>Title</th><th>Type</th><th>Subject</th><th>By</th><th></th></tr></thead>
+          <tbody>
+            @for (u of myUploads(); track u.id) {
+              <tr>
+                <td class="fw-medium">{{ u.title }}</td>
+                <td class="text-capitalize">{{ u.contentType }}</td>
+                <td>{{ u.subjectArea || '—' }}</td>
+                <td class="small text-body-secondary">{{ u.uploaded_by || '—' }}</td>
+                <td class="text-end"><button type="button" class="btn btn-sm btn-outline-danger" (click)="deleteUpload(u)" title="Delete"><app-icon name="delete" [size]="15" /></button></td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div></div>
+  }
+  @if (package()) {
   <div class="card border-0 shadow-sm mb-4">
     <div class="card-body">
       <h5 class="fw-semibold mb-1">{{ package().name }}</h5>
       @if (package().description) { <app-rich-text class="text-body-secondary d-block mb-0" [value]="package().description" /> }
     </div>
   </div>
+  }
 
   @if (!resources().length) {
     <div class="card border-0 shadow-sm p-5 text-center text-body-secondary">This package has no available resources right now.</div>

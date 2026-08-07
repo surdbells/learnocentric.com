@@ -25,6 +25,7 @@ use App\Application\Actions\Assessment\WorksheetSubmissionsAction;
 use App\Application\Actions\Catalog\CatalogSubjectsAction;
 use App\Application\Actions\Content\ContentLibraryAction;
 use App\Application\Actions\Content\ContentPackagesAction;
+use App\Application\Actions\Content\SchoolResourcesAction;
 use App\Application\Actions\Curriculum\DeliveryPacksAction;
 use App\Application\Actions\Curriculum\ReviewQueueAction;
 use App\Application\Actions\Curriculum\TopicsAction;
@@ -258,6 +259,9 @@ return static function (App $app): void {
             $auth->get('/content/packages/{id:[0-9]+}/history', ContentPackagesAction::class . ':history');
             $auth->post('/content/assign', ContentPackagesAction::class . ':assign');
             $auth->get('/content/my-resources', ContentPackagesAction::class . ':myResources');
+            $auth->get('/content/school-resources', SchoolResourcesAction::class . ':list');
+            $auth->post('/content/school-resources', SchoolResourcesAction::class . ':create');
+            $auth->delete('/content/school-resources', SchoolResourcesAction::class . ':delete');
 
             // Billing (Paystack) — plan catalogue, subscribe/verify, invoices
             $auth->map(['GET', 'POST', 'PUT', 'DELETE'], '/billing/plans', PlansAction::class);
