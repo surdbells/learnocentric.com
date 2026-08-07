@@ -946,8 +946,8 @@ class SeedCommand extends Command
         $scheduled->setStatus(LiveClass::SCHEDULED);
         $this->em->persist($scheduled);
 
-        // A second class starting soon. Left SCHEDULED (not pre-LIVE): going live
-        // through the app provisions a real Daily room so the embedded call works.
+        // A second class starting soon (today). Left SCHEDULED (not pre-LIVE): going
+        // live through the app provisions a real Daily room so the embedded call works.
         [$n2, $u2] = $room('Fractions Live Q and A');
         $live = new LiveClass($subject, 'Fractions — Live Q&A', new DateTimeImmutable('+30 minutes'));
         $live->setSchoolClass($class);
@@ -957,17 +957,47 @@ class SeedCommand extends Command
         $live->setRoomUrl($u2);
         $live->setStatus(LiveClass::SCHEDULED);
         $this->em->persist($live);
+
+        // A class currently LIVE (for the learner "join now" / hero LIVE state).
+        [$n3, $u3] = $room('Whole Numbers Operations Live');
+        $liveNow = new LiveClass($subject, 'Whole Numbers — Operations', new DateTimeImmutable('-10 minutes'));
+        $liveNow->setSchoolClass($class);
+        $liveNow->setTopic($topic);
+        $liveNow->setHost($teacher);
+        $liveNow->setDurationMinutes(45);
+        $liveNow->setRoomName($n3);
+        $liveNow->setRoomUrl($u3);
+        $liveNow->setStatus(LiveClass::LIVE);
+        $this->em->persist($liveNow);
+
+        // Two past (ended) classes — one the student attended, one missed.
+        $pastAttended = new LiveClass($subject, 'Place Value & Rounding', new DateTimeImmutable('-2 days 10:00'));
+        $pastAttended->setSchoolClass($class);
+        $pastAttended->setHost($teacher);
+        $pastAttended->setDurationMinutes(55);
+        $pastAttended->setStatus(LiveClass::ENDED);
+        $this->em->persist($pastAttended);
+
+        $pastMissed = new LiveClass($subject, 'Number Patterns & Sequences', new DateTimeImmutable('-5 days 10:00'));
+        $pastMissed->setSchoolClass($class);
+        $pastMissed->setHost($teacher);
+        $pastMissed->setDurationMinutes(47);
+        $pastMissed->setStatus(LiveClass::ENDED);
+        $this->em->persist($pastMissed);
         $this->em->flush();
 
-        $student = $this->em->createQueryBuilder()->select('u')->from(User::class, 'u')->join('u.role', 'r')
-            ->where('r.code = :s')->andWhere('u.institution = :i')
-            ->setParameter('s', 'student')->setParameter('i', $institution)
-            ->setMaxResults(1)->getQuery()->getOneOrNullResult();
+        // Prefer the primary demo learner so the "Attended" state shows for student@.
+        $student = $this->em->getRepository(User::class)->findOneBy(['email' => 'student@gmail.com'])
+            ?? $this->em->createQueryBuilder()->select('u')->from(User::class, 'u')->join('u.role', 'r')
+                ->where('r.code = :s')->andWhere('u.institution = :i')
+                ->setParameter('s', 'student')->setParameter('i', $institution)
+                ->setMaxResults(1)->getQuery()->getOneOrNullResult();
         if ($student !== null) {
-            $this->em->persist(new LiveClassAttendance($live, $student, new DateTimeImmutable('-8 minutes')));
+            $this->em->persist(new LiveClassAttendance($liveNow, $student, new DateTimeImmutable('-8 minutes')));
+            $this->em->persist(new LiveClassAttendance($pastAttended, $student, new DateTimeImmutable('-2 days 10:02')));
             $this->em->flush();
         }
-        $output->writeln('  + 2 live classes (1 attendee)');
+        $output->writeln('  + 5 live classes (scheduled/live/ended, 2 attendances)');
     }
 
     /** Seed teacher feedback notes (a correction and a praise) closing the loop. */

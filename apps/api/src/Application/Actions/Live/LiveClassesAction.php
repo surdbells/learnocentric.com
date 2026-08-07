@@ -232,6 +232,71 @@ final class LiveClassesAction
         return Json::write($response, ['data' => $rows, 'meta' => ['total' => count($rows)]]);
     }
 
+    /** GET /live-classes/board — the learner Live Classes page: next, upcoming, past, today. */
+    public function board(Request $request, Response $response): Response
+    {
+        $student = $this->currentUser($request);
+        $classIds = $this->studentClassIds($student);
+
+        // Upcoming (scheduled or live), soonest first.
+        $upcomingRows = $this->visibleQb($student, $classIds)
+            ->andWhere('lc.status IN (:open)')->setParameter('open', [LiveClass::SCHEDULED, LiveClass::LIVE])
+            ->orderBy('lc.scheduledAt', 'ASC')->getQuery()->getResult();
+        $upcoming = [];
+        foreach ($upcomingRows as $lc) {
+            /** @var LiveClass $lc */
+            $upcoming[] = $lc->toArray() + ['joined' => $this->attended($lc, $student)];
+        }
+
+        // Past (ended), most recent first.
+        $pastRows = $this->visibleQb($student, $classIds)
+            ->andWhere('lc.status = :ended')->setParameter('ended', LiveClass::ENDED)
+            ->orderBy('lc.scheduledAt', 'DESC')->setMaxResults(12)->getQuery()->getResult();
+        $past = [];
+        foreach ($pastRows as $lc) {
+            /** @var LiveClass $lc */
+            $past[] = $lc->toArray() + ['attended' => $this->attended($lc, $student)];
+        }
+
+        // Today's schedule (any status), in time order.
+        $start = new DateTimeImmutable('today 00:00:00');
+        $todayRows = $this->visibleQb($student, $classIds)
+            ->andWhere('lc.scheduledAt >= :s')->andWhere('lc.scheduledAt < :e')
+            ->setParameter('s', $start)->setParameter('e', $start->modify('+1 day'))
+            ->orderBy('lc.scheduledAt', 'ASC')->getQuery()->getResult();
+        $today = array_map(static fn (LiveClass $lc) => $lc->toArray(), $todayRows);
+
+        return Json::write($response, [
+            'next' => $upcoming[0] ?? null,
+            'upcoming' => $upcoming,
+            'past' => $past,
+            'today' => $today,
+            'stats' => [
+                'upcoming' => count($upcoming),
+                'attended' => count(array_filter($past, static fn ($p) => $p['attended'])),
+            ],
+        ]);
+    }
+
+    private function attended(LiveClass $lc, User $student): bool
+    {
+        return $this->em->getRepository(LiveClassAttendance::class)->findOneBy(['liveClass' => $lc, 'student' => $student]) !== null;
+    }
+
+    private function visibleQb(User $student, array $classIds): \Doctrine\ORM\QueryBuilder
+    {
+        $qb = $this->em->createQueryBuilder()->select('lc')->from(LiveClass::class, 'lc')->join('lc.subject', 's');
+        if ($student->getInstitution() !== null) {
+            $qb->andWhere('s.institution = :inst')->setParameter('inst', $student->getInstitution());
+        }
+        if (!empty($classIds)) {
+            $qb->andWhere('lc.schoolClass IS NULL OR lc.schoolClass IN (:cids)')->setParameter('cids', $classIds);
+        } else {
+            $qb->andWhere('lc.schoolClass IS NULL');
+        }
+        return $qb;
+    }
+
     /** POST /live-classes/{id}/join — student joins; records attendance, returns the room URL. */
     public function join(Request $request, Response $response, array $args): Response
     {

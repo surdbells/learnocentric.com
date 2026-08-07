@@ -1,4 +1,9 @@
-<app-page-header icon="video_camera_front" action="Live Classes"></app-page-header>
+<app-page-header icon="video_camera_front" action="Live Classes">
+  <button type="button" class="btn btn-success d-inline-flex align-items-center gap-1" [disabled]="testing()" (click)="testConnection()">
+    <app-icon name="wifi" [size]="18" /> {{ testing() ? 'Testing…' : 'Test My Connection' }}
+  </button>
+</app-page-header>
+<p class="text-body-secondary mb-4">Join live classes, interact with your tutor and classmates, and learn in real time.</p>
 
 @if (room(); as r) {
   <app-live-room [roomUrl]="r.roomUrl" [token]="r.token" [title]="r.title" (closed)="leaveRoom()" />
@@ -6,44 +11,163 @@
 
 @if (loading()) {
   <div class="text-body-secondary p-4">Loading…</div>
-} @else if (!classes().length) {
-  <div class="card border-0 shadow-sm p-5 text-center text-body-secondary">No live classes scheduled for you right now.</div>
 } @else {
-  <div class="row g-3">
-    @for (lc of classes(); track lc.id) {
-      <div class="col-md-6 col-xl-4">
-        <div class="card border-0 shadow-sm h-100" [class.border-success]="lc.status === 'live'">
-          <div class="card-body d-flex flex-column">
-            <div class="d-flex justify-content-between align-items-start gap-2">
-              <h6 class="fw-semibold mb-1">{{ lc.title }}</h6>
-              <span class="badge bg-{{ statusColor(lc.status) }}-subtle text-{{ statusColor(lc.status) }} text-capitalize">
-                @if (lc.status === 'live') { <span class="live-dot"></span> } {{ lc.status }}
-              </span>
-            </div>
-            <div class="text-body-secondary small mb-1">{{ lc.subject }}{{ lc.topic ? ' · ' + lc.topic : '' }}</div>
-            <div class="text-body-secondary small mb-3">
-              <app-icon name="schedule" [size]="16" />
-              {{ lc.scheduled_at | date:'EEE, MMM d · h:mm a' }} · {{ lc.duration_minutes }} min
-              @if (lc.host) { · {{ lc.host }} }
-            </div>
+  <div class="row g-4">
+    <!-- Main -->
+    <div class="col-lg-8">
+      <!-- Tabs -->
+      <ul class="nav nav-tabs lc-tabs mb-3">
+        <li class="nav-item"><button class="nav-link" [class.active]="activeTab() === 'upcoming'" (click)="activeTab.set('upcoming')">Upcoming Classes</button></li>
+        <li class="nav-item"><button class="nav-link" [class.active]="activeTab() === 'past'" (click)="activeTab.set('past')">Past Classes</button></li>
+      </ul>
 
-            <div class="mt-auto d-flex align-items-center gap-2">
-              @if (lc.status === 'live') {
-                <button type="button" class="btn btn-sm btn-success" [disabled]="busy() === lc.id" (click)="join(lc)">
-                  <app-icon name="videocam" [size]="16" /> Join now
+      @if (activeTab() === 'upcoming') {
+        <!-- Next-class hero -->
+        @if (next(); as n) {
+          <div class="card border-0 shadow-sm mb-4 hero-card">
+            <div class="card-body d-flex flex-wrap align-items-center gap-3">
+              <div class="hero-icon bg-{{ accent(0) }}-subtle text-{{ accent(0) }}"><app-icon name="video_camera_front" [size]="26" /></div>
+              <div class="flex-grow-1" style="min-width:12rem">
+                <span class="badge bg-{{ accent(0) }}-subtle text-{{ accent(0) }} mb-1">NEXT CLASS</span>
+                <h5 class="fw-semibold mb-1">{{ n.title }}</h5>
+                @if (n.topic) { <div class="text-body-secondary small mb-2">{{ n.topic }}</div> }
+                <div class="text-body-secondary small d-flex flex-wrap gap-3">
+                  <span><app-icon name="event" [size]="15" /> {{ n.scheduled_at | date:'EEE, MMM d' }}</span>
+                  <span><app-icon name="schedule" [size]="15" /> {{ n.scheduled_at | date:'h:mm a' }} · {{ n.duration_minutes }} min</span>
+                  @if (n.host) { <span><app-icon name="person" [size]="15" /> {{ n.host }}</span> }
+                </div>
+              </div>
+              <div class="text-center hero-cta">
+                @if (countdown(); as c) {
+                  @if (c.live) {
+                    <div class="mb-2 fw-semibold text-success"><span class="live-dot"></span> LIVE NOW</div>
+                  } @else {
+                    <div class="small text-body-secondary">Starts in</div>
+                    <div class="countdown mb-2">{{ c.h }} : {{ c.m }} : {{ c.s }}</div>
+                  }
+                }
+                <button type="button" class="btn btn-success w-100" [disabled]="busy() === n.id || n.status !== 'live'" (click)="join(n)">
+                  <app-icon name="videocam" [size]="16" /> {{ n.status === 'live' ? 'Join Class' : 'Not started' }}
                 </button>
-              } @else if (lc.status === 'scheduled') {
-                <button type="button" class="btn btn-sm btn-outline-secondary" disabled>
-                  <app-icon name="schedule" [size]="16" /> Waiting for host to start
-                </button>
-              } @else {
-                <span class="small text-body-secondary">This class has ended.</span>
-              }
-              @if (lc.joined) { <span class="small text-success"><app-icon name="check" [size]="16" /> Joined</span> }
+              </div>
             </div>
           </div>
+        }
+
+        <!-- Upcoming list -->
+        <div class="card border-0 shadow-sm">
+          <div class="card-body">
+            <h6 class="fw-semibold mb-3">Upcoming Live Classes</h6>
+            @if (upcoming().length) {
+              @for (lc of upcoming(); track lc.id; let i = $index) {
+                <div class="lc-row">
+                  <div class="lc-ico bg-{{ accent(i) }}-subtle text-{{ accent(i) }}"><app-icon name="menu_book" [size]="20" /></div>
+                  <div class="flex-grow-1">
+                    <div class="fw-medium">{{ lc.title }}</div>
+                    @if (lc.topic) { <div class="text-body-secondary small">{{ lc.topic }}</div> }
+                    <div class="text-body-secondary small d-flex flex-wrap gap-3 mt-1">
+                      <span><app-icon name="event" [size]="14" /> {{ lc.scheduled_at | date:'EEE, MMM d' }}</span>
+                      <span><app-icon name="schedule" [size]="14" /> {{ lc.scheduled_at | date:'h:mm a' }}</span>
+                      @if (lc.host) { <span><app-icon name="person" [size]="14" /> {{ lc.host }}</span> }
+                      @if (lc.status === 'live') { <span class="badge bg-success-subtle text-success"><span class="live-dot"></span> Live</span> }
+                    </div>
+                  </div>
+                  <div class="text-end">
+                    <button type="button" class="btn btn-sm" [class.btn-success]="lc.status === 'live'" [class.btn-outline-secondary]="lc.status !== 'live'"
+                            [disabled]="busy() === lc.id || lc.status !== 'live'" (click)="join(lc)">
+                      {{ lc.status === 'live' ? 'Join' : 'Scheduled' }}
+                    </button>
+                    @if (lc.joined) { <div class="small text-success mt-1"><app-icon name="check" [size]="14" /> Joined</div> }
+                  </div>
+                </div>
+              }
+            } @else {
+              <div class="text-body-secondary small py-4 text-center">No upcoming classes scheduled.</div>
+            }
+          </div>
+        </div>
+      } @else {
+        <!-- Past classes -->
+        <div class="card border-0 shadow-sm">
+          <div class="card-body">
+            <h6 class="fw-semibold mb-3">Past Classes</h6>
+            @if (past().length) {
+              @for (lc of past(); track lc.id; let i = $index) {
+                <div class="lc-row">
+                  <div class="lc-ico bg-secondary-subtle text-secondary"><app-icon name="history" [size]="20" /></div>
+                  <div class="flex-grow-1">
+                    <div class="fw-medium">{{ lc.title }}</div>
+                    @if (lc.topic) { <div class="text-body-secondary small">{{ lc.topic }}</div> }
+                    <div class="text-body-secondary small d-flex flex-wrap gap-3 mt-1">
+                      <span><app-icon name="event" [size]="14" /> {{ lc.scheduled_at | date:'EEE, MMM d' }}</span>
+                      <span><app-icon name="schedule" [size]="14" /> {{ lc.duration_minutes }} min</span>
+                      @if (lc.host) { <span><app-icon name="person" [size]="14" /> {{ lc.host }}</span> }
+                    </div>
+                  </div>
+                  <div class="text-end">
+                    @if (lc.attended) {
+                      <span class="badge bg-success-subtle text-success"><app-icon name="check_circle" [size]="14" /> Attended</span>
+                    } @else {
+                      <span class="badge bg-secondary-subtle text-secondary">Missed</span>
+                    }
+                  </div>
+                </div>
+              }
+            } @else {
+              <div class="text-body-secondary small py-4 text-center">No past classes yet.</div>
+            }
+          </div>
+        </div>
+      }
+    </div>
+
+    <!-- Right rail -->
+    <div class="col-lg-4">
+      <!-- Today's schedule -->
+      <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body">
+          <div class="fw-semibold mb-1">Today's Schedule</div>
+          <div class="text-body-secondary small mb-3">{{ now() | date:'EEE, MMM d' }}</div>
+          @if (today().length) {
+            @for (s of today(); track s.id) {
+              <div class="sched-line">
+                <span class="sched-dot bg-{{ statusColor(s.status) }}"></span>
+                <div class="flex-grow-1">
+                  <div class="small text-body-secondary">{{ s.scheduled_at | date:'h:mm a' }}</div>
+                  <div class="fw-medium lh-sm">{{ s.subject }}</div>
+                  <div class="small text-body-secondary lh-sm">{{ s.topic || s.title }}</div>
+                </div>
+                <span class="badge bg-{{ statusColor(s.status) }}-subtle text-{{ statusColor(s.status) }} text-uppercase align-self-start">{{ s.status }}</span>
+              </div>
+            }
+          } @else {
+            <div class="text-body-secondary small py-2 text-center">No classes today.</div>
+          }
         </div>
       </div>
-    }
+
+      <!-- Class rules -->
+      <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body">
+          <div class="fw-semibold mb-3">Class Rules</div>
+          <ul class="rules list-unstyled mb-0 small">
+            <li><app-icon name="schedule" [size]="15" class="text-success" /> Be on time and prepared</li>
+            <li><app-icon name="mic_off" [size]="15" class="text-success" /> Mute your mic when not speaking</li>
+            <li><app-icon name="pan_tool" [size]="15" class="text-success" /> Raise your hand to speak</li>
+            <li><app-icon name="favorite" [size]="15" class="text-success" /> Be respectful to everyone</li>
+            <li><app-icon name="task_alt" [size]="15" class="text-success" /> Stay on topic and participate</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Need help -->
+      <div class="card border-0 shadow-sm need-help">
+        <div class="card-body">
+          <div class="fw-semibold mb-1"><app-icon name="support_agent" [size]="18" class="text-success" /> Need Help?</div>
+          <div class="text-body-secondary small mb-2">Having trouble joining or need support before class?</div>
+          <a class="btn btn-sm btn-outline-success" [routerLink]="['/student/communication/messages']">Chat with Support</a>
+        </div>
+      </div>
+    </div>
   </div>
 }

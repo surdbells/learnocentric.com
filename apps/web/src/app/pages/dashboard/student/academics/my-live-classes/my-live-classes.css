@@ -1,18 +1,55 @@
+:host { display: block; }
+
+/* Tabs */
+.lc-tabs { border-bottom: 2px solid var(--bs-border-color); gap: .5rem; }
+.lc-tabs .nav-link {
+  border: 0; background: none; color: var(--bs-secondary-color);
+  font-weight: 500; padding: .5rem .25rem; margin-bottom: -2px;
+  border-bottom: 2px solid transparent;
+}
+.lc-tabs .nav-link.active { color: var(--bs-success); border-bottom-color: var(--bs-success); background: none; }
+
+/* Hero */
+.hero-card { background: var(--bs-tertiary-bg); }
+.hero-icon {
+  width: 60px; height: 60px; border-radius: 1rem;
+  display: inline-flex; align-items: center; justify-content: center; flex: 0 0 auto;
+}
+.hero-cta { min-width: 12rem; }
+.countdown {
+  font-size: 1.5rem; font-weight: 700; letter-spacing: .05em;
+  font-variant-numeric: tabular-nums; color: var(--bs-success);
+}
+
+/* Class rows */
+.lc-row {
+  display: flex; align-items: flex-start; gap: .85rem;
+  padding: .85rem 0; border-bottom: 1px solid var(--bs-border-color);
+}
+.lc-row:last-child { border-bottom: 0; }
+.lc-ico {
+  width: 44px; height: 44px; border-radius: .7rem; flex: 0 0 auto;
+  display: inline-flex; align-items: center; justify-content: center;
+}
+
+/* Today's schedule */
+.sched-line {
+  display: flex; align-items: flex-start; gap: .6rem;
+  padding: .6rem 0; border-bottom: 1px solid var(--bs-border-color);
+}
+.sched-line:last-child { border-bottom: 0; }
+.sched-dot { width: 10px; height: 10px; border-radius: 50%; margin-top: .35rem; flex: 0 0 auto; }
+
+/* Rules */
+.rules li { display: flex; align-items: center; gap: .5rem; padding: .3rem 0; }
+
+.need-help { background: var(--bs-success-bg-subtle); }
+
+/* Live indicator */
 .live-dot {
-  display: inline-block;
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: var(--bs-success);
-  margin-right: 3px;
+  display: inline-block; width: 7px; height: 7px; border-radius: 50%;
+  background: var(--bs-success); margin-right: 3px;
   animation: pulse 1.4s ease-in-out infinite;
 }
-
-@keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.3; }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .live-dot { animation: none; }
-}
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+@media (prefers-reduced-motion: reduce) { .live-dot { animation: none; } }

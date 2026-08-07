@@ -193,6 +193,7 @@ return static function (App $app): void {
             $auth->map(['GET', 'POST', 'PUT', 'DELETE'], '/live-classes', LiveClassesAction::class);
             $auth->post('/live-classes/bulk-delete', LiveClassesAction::class . ':bulkDelete');
             $auth->get('/live-classes/upcoming', LiveClassesAction::class . ':upcoming');
+            $auth->get('/live-classes/board', LiveClassesAction::class . ':board');
             $auth->post('/live-classes/{id:[0-9]+}/start', LiveClassesAction::class . ':start');
             $auth->post('/live-classes/{id:[0-9]+}/end', LiveClassesAction::class . ':end');
             $auth->post('/live-classes/{id:[0-9]+}/join', LiveClassesAction::class . ':join');
