@@ -1,4 +1,122 @@
-<app-page-header action="Personal Information" icon="home_and_garden" />
+<app-page-header icon="account_circle" action="My Profile"></app-page-header>
+<p class="text-body-secondary mb-4">View and manage your learning profile and preferences.</p>
 
+@if (editing()) {
+  <div class="d-flex justify-content-end mb-2">
+    <button type="button" class="btn btn-sm btn-outline-secondary" (click)="onEdited()"><app-icon name="arrow_back" [size]="16" /> Back to profile</button>
+  </div>
+  <div class="card border-0 shadow-sm"><div class="card-body">
+    <app-profile-form />
+  </div></div>
+} @else {
+  <div class="row g-4">
+    <!-- Left column -->
+    <div class="col-lg-7">
+      <!-- Profile card -->
+      <div class="card border-0 shadow-sm mb-4"><div class="card-body">
+        <div class="d-flex align-items-center gap-3 flex-wrap">
+          <span class="prof-avatar">{{ (fullName() || '?')[0] }}</span>
+          <div class="flex-grow-1" style="min-width:12rem">
+            <div class="d-flex align-items-center gap-2 flex-wrap">
+              <h5 class="fw-semibold mb-0">{{ fullName() }}</h5>
+              @if (profile()?.class_label) { <span class="badge bg-success-subtle text-success">{{ profile().class_label }}</span> }
+            </div>
+            <div class="text-body-secondary small mt-1">
+              <div><app-icon name="mail" [size]="14" /> {{ email() }}</div>
+              @if (phone()) { <div><app-icon name="call" [size]="14" /> {{ phone() }}</div> }
+            </div>
+            <button type="button" class="btn btn-sm btn-outline-success mt-2" (click)="editing.set(true)"><app-icon name="edit" [size]="15" /> Edit Profile</button>
+          </div>
+          <div class="text-end small">
+            <div class="text-body-secondary">Member since</div>
+            <div class="fw-medium mb-2">{{ profile()?.member_since ? (profile().member_since | date:'d MMM y') : '—' }}</div>
+            <div class="text-body-secondary">Account type</div>
+            <div><span class="badge bg-success-subtle text-success">Student · Active</span></div>
+          </div>
+        </div>
+      </div></div>
 
-<app-profile-form/>
+      <!-- My Subjects -->
+      <div class="card border-0 shadow-sm mb-4"><div class="card-body">
+        <div class="d-flex align-items-center justify-content-between mb-3">
+          <h6 class="fw-semibold mb-0">My Subjects</h6>
+          <a class="small link-success text-decoration-none" [routerLink]="['/student/academics/my-subjects']">Manage Subjects</a>
+        </div>
+        @if (subjects().length) {
+          @for (s of subjects(); track s.id) {
+            <div class="subj-row">
+              <div class="flex-grow-1">
+                <div class="d-flex justify-content-between"><span class="fw-medium">{{ s.name }}</span><span class="small text-body-secondary">{{ s.progress }}%</span></div>
+                <div class="progress subj-bar mt-1"><div class="progress-bar bg-{{ progressTone(s.progress) }}" [style.width.%]="s.progress"></div></div>
+                @if (s.next_topic) { <div class="small text-body-secondary mt-1">Next: {{ s.next_topic.title }}</div> }
+              </div>
+              <a class="btn btn-sm btn-outline-success" [routerLink]="['/student/academics/learn']">Continue</a>
+            </div>
+          }
+        } @else {
+          <div class="text-body-secondary small py-2 text-center">No subjects yet.</div>
+        }
+      </div></div>
+
+      <!-- Preferences + Security -->
+      <div class="row g-4">
+        <div class="col-md-6">
+          <div class="card border-0 shadow-sm h-100"><div class="card-body">
+            <div class="fw-semibold mb-1">Learning Preferences</div>
+            <div class="text-body-secondary small mb-3">How you learn and get notified.</div>
+            <a class="btn btn-sm btn-outline-secondary w-100" [routerLink]="['/student/settings']"><app-icon name="tune" [size]="15" /> Manage in Settings</a>
+          </div></div>
+        </div>
+        <div class="col-md-6">
+          <div class="card border-0 shadow-sm h-100"><div class="card-body">
+            <div class="fw-semibold mb-1">Account &amp; Security</div>
+            <div class="text-body-secondary small mb-3">Password, linked email and 2FA.</div>
+            <a class="btn btn-sm btn-outline-secondary w-100" [routerLink]="['/student/settings']"><app-icon name="lock" [size]="15" /> Manage in Settings</a>
+          </div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right column -->
+    <div class="col-lg-5">
+      <!-- Learning snapshot -->
+      <div class="card border-0 shadow-sm mb-4"><div class="card-body">
+        <div class="d-flex align-items-center justify-content-between mb-3">
+          <h6 class="fw-semibold mb-0">My Learning Snapshot</h6>
+          <a class="small link-success text-decoration-none" [routerLink]="['/student/academics/progress-report']">View Progress</a>
+        </div>
+        <div class="row g-3">
+          @for (t of snapshot(); track t.label) {
+            <div class="col-6">
+              <div class="snap-tile bg-{{ t.tone }}-subtle">
+                <app-icon [name]="t.icon" [size]="22" class="text-{{ t.tone }}" />
+                <div class="fs-4 fw-bold lh-1 mt-1">{{ t.value }}</div>
+                <div class="small text-body-secondary">{{ t.label }}</div>
+              </div>
+            </div>
+          }
+        </div>
+      </div></div>
+
+      <!-- Achievements -->
+      <div class="card border-0 shadow-sm"><div class="card-body">
+        <div class="d-flex align-items-center justify-content-between mb-3">
+          <h6 class="fw-semibold mb-0">My Achievements</h6>
+          <span class="small text-body-secondary">{{ earnedCount() }}/{{ achievements().length }}</span>
+        </div>
+        <div class="row g-3">
+          @for (a of achievements(); track a.key) {
+            <div class="col-6">
+              <div class="ach-card" [class.locked]="!a.earned">
+                <span class="ach-ico" [class.bg-success-subtle]="a.earned" [class.text-success]="a.earned"><app-icon [name]="a.earned ? a.icon : 'lock'" [size]="20" /></span>
+                <div class="fw-medium small mt-1">{{ a.title }}</div>
+                <div class="small text-body-secondary">{{ a.detail }}</div>
+                @if (a.earned) { <span class="badge bg-success-subtle text-success mt-1">Earned</span> }
+              </div>
+            </div>
+          }
+        </div>
+      </div></div>
+    </div>
+  </div>
+}

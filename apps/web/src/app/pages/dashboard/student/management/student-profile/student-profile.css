@@ -1,0 +1,31 @@
+:host { display: block; }
+
+.prof-avatar {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 72px; height: 72px; flex: 0 0 auto; border-radius: 50%;
+  background: color-mix(in srgb, var(--bs-success) 18%, transparent);
+  color: var(--bs-success); font-weight: 700; font-size: 1.8rem;
+}
+
+/* Subjects */
+.subj-row {
+  display: flex; align-items: center; gap: 1rem;
+  padding: .7rem 0; border-bottom: 1px solid var(--bs-border-color);
+}
+.subj-row:last-child { border-bottom: 0; }
+.subj-bar { height: 7px; border-radius: 4px; }
+
+/* Snapshot tiles */
+.snap-tile { border-radius: .8rem; padding: 1rem; text-align: center; }
+
+/* Achievements */
+.ach-card {
+  border: 1px solid var(--bs-border-color); border-radius: .7rem;
+  padding: .85rem; text-align: center; height: 100%;
+}
+.ach-card.locked { opacity: .6; }
+.ach-ico {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 42px; height: 42px; border-radius: 50%;
+  background: var(--bs-tertiary-bg); color: var(--bs-secondary-color);
+}

@@ -289,6 +289,7 @@ return static function (App $app): void {
 
             // Learn — student topic journey (lesson + stage progress)
             $auth->get('/learn/subjects', LearnAction::class . ':subjects');
+            $auth->get('/learn/profile', LearnAction::class . ':profile');
             $auth->get('/learn/topics', LearnAction::class . ':topics');
             // Ask Tutor — tutor directory, questions (Q&A) + ratings
             $auth->get('/ask-tutor/board', AskTutorAction::class . ':board');

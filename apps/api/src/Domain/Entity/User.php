@@ -120,6 +120,7 @@ class User
     public function setPreferences(?array $v): void { $this->preferences = $v; }
     public function getLastLogin(): ?DateTimeImmutable { return $this->lastLogin; }
     public function markLoggedIn(): void { $this->lastLogin = new DateTimeImmutable(); }
+    public function getCreatedAt(): DateTimeImmutable { return $this->createdAt; }
 
     /** Public shape consumed by the Angular frontend (AuthUser). */
     public function toArray(): array

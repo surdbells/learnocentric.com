@@ -46,6 +46,51 @@ final class LearnAction
         return Json::write($response, ['data' => $rows, 'meta' => ['total' => count($rows)]]);
     }
 
+    /** GET /learn/profile — the learner profile overview: snapshot + derived achievements. */
+    public function profile(Request $request, Response $response): Response
+    {
+        $student = $this->currentUser($request);
+
+        $lessons = (int) $this->em->getRepository(TopicProgress::class)->count(['student' => $student, 'lessonViewed' => true]);
+        $attempts = $this->em->getRepository(AssessmentAttempt::class)->findBy(['student' => $student, 'status' => AssessmentAttempt::GRADED]);
+        $quizzes = count($attempts);
+        $avg = $quizzes > 0 ? (int) round(array_sum(array_map(static fn (AssessmentAttempt $a) => (float) $a->getPercentage(), $attempts)) / $quizzes) : null;
+        $worksheets = (int) $this->em->getRepository(WorksheetSubmission::class)->count(['student' => $student]);
+
+        // Enrolled class label.
+        $enrolment = $this->em->getRepository(Enrollment::class)->findOneBy(['student' => $student]);
+        $classLabel = $enrolment?->getSchoolClass()->getLabel();
+
+        return Json::write($response, [
+            'member_since' => $student->getCreatedAt()->format(DATE_ATOM),
+            'class_label' => $classLabel,
+            'snapshot' => [
+                'lessons_completed' => $lessons,
+                'average_score' => $avg,
+                'quizzes_taken' => $quizzes,
+                'worksheets_done' => $worksheets,
+            ],
+            'achievements' => $this->achievements($lessons, $avg, $quizzes, $worksheets),
+        ]);
+    }
+
+    /**
+     * Achievements DERIVED from real activity (not a stored badge model) — each
+     * unlocks at a real threshold, so nothing is fabricated.
+     *
+     * @return array<int,array{key:string,title:string,detail:string,earned:bool,icon:string}>
+     */
+    private function achievements(int $lessons, ?int $avg, int $quizzes, int $worksheets): array
+    {
+        return [
+            ['key' => 'consistent', 'title' => 'Consistent Learner', 'detail' => 'Complete 10 lessons', 'earned' => $lessons >= 10, 'icon' => 'auto_stories'],
+            ['key' => 'quiz_master', 'title' => 'Quiz Master', 'detail' => 'Score 80% or higher', 'earned' => $avg !== null && $avg >= 80, 'icon' => 'military_tech'],
+            ['key' => 'first_steps', 'title' => 'First Steps', 'detail' => 'Complete your first lesson', 'earned' => $lessons >= 1, 'icon' => 'flag'],
+            ['key' => 'quiz_taker', 'title' => 'Getting Tested', 'detail' => 'Take 3 quizzes', 'earned' => $quizzes >= 3, 'icon' => 'quiz'],
+            ['key' => 'diligent', 'title' => 'Diligent', 'detail' => 'Submit 2 worksheets', 'earned' => $worksheets >= 2, 'icon' => 'task_alt'],
+        ];
+    }
+
     /** GET /learn/subjects — the learner's subjects with aggregate progress + next topic. */
     public function subjects(Request $request, Response $response): Response
     {
