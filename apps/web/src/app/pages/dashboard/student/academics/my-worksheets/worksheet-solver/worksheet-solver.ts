@@ -72,6 +72,8 @@ export class WorksheetSolver implements OnInit, OnDestroy {
 
   /** Answers may be numbers (numeric inputs) or strings — always read as a trimmed string. */
   answerStr(qid: number): string { return String(this.answers()[qid] ?? '').trim(); }
+  /** Raw answer for ngModel binding (empty string when unanswered). */
+  answerFor(qid: number): string { return this.answers()[qid] ?? ''; }
   progressPct = computed(() => {
     const t = this.totalQuestions();
     return t ? Math.round((this.answeredCount() / t) * 100) : 0;

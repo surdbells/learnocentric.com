@@ -9,8 +9,7 @@ import { ToastrService } from 'ngx-toastr';
 import { LearnoModal } from '../../../../components/learno-modal/learno-modal';
 import { LearnoButton } from '../../../../common/learno-button/learno-button';
 import { ReactiveFormsModule, FormGroup, FormControl, Validators } from '@angular/forms';
-import { LearnoInput } from '../../../../common/learno-input/learno-input';
-import { LearnoSelect, IInputOption } from '../../../../common/learno-select/learno-select';
+import { IInputOption } from '../../../../common/learno-select/learno-select';
 import { ContentPackageForm } from "../../../../components/forms/content-package-form/content-package-form";
 import { LearnoOffset } from "../../../../components/learno-offset/learno-offset";
 import { RichText } from '../../../../common/rich-editor/rich-text';
@@ -18,7 +17,7 @@ import { RichText } from '../../../../common/rich-editor/rich-text';
 @Component({
   selector: 'app-super-admin-content-packages',
   standalone: true,
-  imports: [PageHeader, TableSearch, DataTable, DataTableNumbering, SkeletonLoader, LearnoModal, LearnoButton, ReactiveFormsModule, LearnoInput, LearnoSelect, ContentPackageForm, LearnoOffset, RichText],
+  imports: [PageHeader, TableSearch, DataTable, DataTableNumbering, SkeletonLoader, LearnoModal, LearnoButton, ReactiveFormsModule, ContentPackageForm, LearnoOffset, RichText],
   templateUrl: './content-packages.html',
   styleUrl: './content-packages.css'
 })

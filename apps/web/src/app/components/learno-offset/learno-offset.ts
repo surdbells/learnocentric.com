@@ -9,13 +9,11 @@ import {
   PLATFORM_ID,
   Output, EventEmitter
 } from '@angular/core';
-import {NgStyle, isPlatformBrowser} from '@angular/common';
+import {isPlatformBrowser} from '@angular/common';
 
 @Component({
   selector: 'app-learno-offset',
-  imports: [
-    NgStyle
-  ],
+  imports: [],
   templateUrl: './learno-offset.html',
   styleUrl: './learno-offset.css'
 })

@@ -11,7 +11,7 @@ import {RichText} from '../../../../../common/rich-editor/rich-text';
 import {FormsModule} from '@angular/forms';
 import {forkJoin, of} from 'rxjs';
 import {catchError} from 'rxjs/operators';
-import {KpiItem, KpiStrip, TabBar, TabItem, StatRing} from '../../../../../common/ui';
+import {KpiItem, TabBar, TabItem, StatRing} from '../../../../../common/ui';
 
 const STAGE_ICON: Record<string, string> = {lesson: 'menu_book', quiz: 'quiz', worksheet: 'assignment_turned_in', portfolio: 'folder_special'};
 /** Design "Lesson Flow" steps. */
@@ -23,7 +23,7 @@ const LESSON_FLOW = [
 @Component({
   selector: 'app-learn',
   standalone: true,
-  imports: [Icon, PageHeader, MediaEmbed, RichEditor, RichText, FormsModule, DatePipe, KpiStrip, TabBar, StatRing],
+  imports: [Icon, PageHeader, MediaEmbed, RichEditor, RichText, FormsModule, DatePipe, TabBar, StatRing],
   templateUrl: './learn.html',
   styleUrl: './learn.css',
 })

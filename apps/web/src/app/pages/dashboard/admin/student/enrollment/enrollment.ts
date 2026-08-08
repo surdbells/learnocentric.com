@@ -13,8 +13,6 @@ import {UtilService} from '../../../../../common/service/util.service';
 import {LearnoOffset} from '../../../../../components/learno-offset/learno-offset';
 import {EnrollmentForm} from '../../../../../components/forms/enrollment-form/enrollment-form';
 import {LearnoModal} from '../../../../../components/learno-modal/learno-modal';
-import {RoutineForm} from '../../../../../components/forms/routine-form/routine-form';
-import {CurrencyPipe, NgIf} from '@angular/common';
 
 
 export interface IEnrollmentStoreProp {
@@ -39,10 +37,7 @@ export interface IEnrollmentStoreProp {
     TableSearch,
     LearnoOffset,
     EnrollmentForm,
-    LearnoModal,
-    RoutineForm,
-    CurrencyPipe,
-    NgIf
+    LearnoModal
   ],
   templateUrl: './enrollment.html',
   styleUrl: './enrollment.css'

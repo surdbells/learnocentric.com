@@ -1,8 +1,6 @@
 import {Component, effect, ElementRef, EventEmitter, input, Output, signal, ViewChild} from '@angular/core';
 import {FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators} from '@angular/forms';
 import {LearnoInput} from '../../../common/learno-input/learno-input';
-import {LearnoSelect} from '../../../common/learno-select/learno-select';
-import {Loader} from '../../../common/loader/loader';
 import {LearnoButton} from '../../../common/learno-button/learno-button';
 import {ToastrService} from 'ngx-toastr';
 import {ApiService} from '../../../common/service/api.service';
@@ -12,8 +10,6 @@ import {ApiService} from '../../../common/service/api.service';
   imports: [
     FormsModule,
     LearnoInput,
-    LearnoSelect,
-    Loader,
     ReactiveFormsModule,
     LearnoButton
   ],

@@ -4,12 +4,11 @@ import {ToastrService} from 'ngx-toastr';
 import {LearnoInput} from '../../../common/learno-input/learno-input';
 import {LearnoButton} from '../../../common/learno-button/learno-button';
 import {ApiService} from '../../../common/service/api.service';
-import {RichEditor} from '../../../common/rich-editor/rich-editor';
 
 @Component({
   selector: 'app-intervention-form',
   standalone: true,
-  imports: [RichEditor, ReactiveFormsModule, LearnoInput, LearnoButton],
+  imports: [ReactiveFormsModule, LearnoInput, LearnoButton],
   templateUrl: './intervention-form.html',
 })
 export class InterventionForm {

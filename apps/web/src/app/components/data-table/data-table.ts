@@ -1,12 +1,10 @@
 import {Component, EventEmitter, input, Output} from '@angular/core';
-import {LearnoOffset} from '../learno-offset/learno-offset';
 import {DatePipe} from '@angular/common';
 import {Icon} from '../../common/icon/icon';
 
 @Component({
   selector: 'app-data-table',
-  imports: [Icon, 
-    LearnoOffset,
+  imports: [Icon,
     DatePipe
   ],
   templateUrl: './data-table.html',

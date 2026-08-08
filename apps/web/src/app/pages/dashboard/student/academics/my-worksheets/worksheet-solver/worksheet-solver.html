@@ -77,18 +77,18 @@
                     @switch (q.type) {
                       @case ('numeric') {
                         <input type="number" class="form-control form-control-sm wq-input" [readonly]="readOnly()"
-                               [ngModel]="answers()[q.id] ?? ''" (ngModelChange)="setAnswer(q.id, $event)" placeholder="Your answer" />
+                               [ngModel]="answerFor(q.id)" (ngModelChange)="setAnswer(q.id, $event)" placeholder="Your answer" />
                       }
                       @case ('short') {
                         <input type="text" class="form-control form-control-sm" [readonly]="readOnly()"
-                               [ngModel]="answers()[q.id] ?? ''" (ngModelChange)="setAnswer(q.id, $event)" placeholder="Your answer" />
+                               [ngModel]="answerFor(q.id)" (ngModelChange)="setAnswer(q.id, $event)" placeholder="Your answer" />
                       }
                       @case ('true_false') {
                         <div class="d-flex gap-3">
                           @for (opt of ['true','false']; track opt) {
                             <label class="wq-radio text-capitalize">
                               <input type="radio" [name]="'q'+q.id" [value]="opt" [disabled]="readOnly()"
-                                     [ngModel]="answers()[q.id] ?? ''" (ngModelChange)="setAnswer(q.id, $event)" /> {{ opt }}
+                                     [ngModel]="answerFor(q.id)" (ngModelChange)="setAnswer(q.id, $event)" /> {{ opt }}
                             </label>
                           }
                         </div>
@@ -98,14 +98,14 @@
                           @for (opt of q.options; track $index) {
                             <label class="wq-radio">
                               <input type="radio" [name]="'q'+q.id" [value]="opt" [disabled]="readOnly()"
-                                     [ngModel]="answers()[q.id] ?? ''" (ngModelChange)="setAnswer(q.id, $event)" /> {{ opt }}
+                                     [ngModel]="answerFor(q.id)" (ngModelChange)="setAnswer(q.id, $event)" /> {{ opt }}
                             </label>
                           }
                         </div>
                       }
                       @default {
                         <textarea class="form-control form-control-sm" rows="3" [readonly]="readOnly()"
-                                  [ngModel]="answers()[q.id] ?? ''" (ngModelChange)="setAnswer(q.id, $event)"
+                                  [ngModel]="answerFor(q.id)" (ngModelChange)="setAnswer(q.id, $event)"
                                   placeholder="Show your working and write your answer…"></textarea>
                       }
                     }

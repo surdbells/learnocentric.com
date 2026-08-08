@@ -1,7 +1,6 @@
 import {Component, computed, OnInit, signal, ViewChild} from '@angular/core';
 import {DataTable} from '../../../../../components/data-table/data-table';
 import {DataTableNumbering} from '../../../../../components/data-table-numbering/data-table-numbering';
-import {LearnoButton} from '../../../../../common/learno-button/learno-button';
 import {PageHeader} from '../../../../../common/layout/page-header/page-header';
 import {TableSearch} from '../../../../../components/table-search/table-search';
 import {LearnoOffset} from '../../../../../components/learno-offset/learno-offset';
@@ -18,7 +17,6 @@ import {KpiItem, KpiStrip, TabBar, TabItem} from '../../../../../common/ui';
   imports: [
     DataTable,
     DataTableNumbering,
-    LearnoButton,
     PageHeader,
     TableSearch,
     SkeletonLoader,

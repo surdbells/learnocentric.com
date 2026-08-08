@@ -1,8 +1,5 @@
 import {Component, OnInit, signal} from '@angular/core';
 import {ReactiveFormsModule, FormGroup, FormControl, Validators} from '@angular/forms';
-import {LearnoInput} from '../../../../../common/learno-input/learno-input';
-import {LearnoSelect, IInputOption} from '../../../../../common/learno-select/learno-select';
-import {LearnoButton} from '../../../../../common/learno-button/learno-button';
 import {PageHeader} from '../../../../../common/layout/page-header/page-header';
 import {ApiService} from '../../../../../common/service/api.service';
 import {ToastrService} from 'ngx-toastr';
@@ -12,7 +9,7 @@ import { InstitutionForm } from "../../../../../components/forms/institution-for
 @Component({
   selector: 'app-super-admin-onboard',
   standalone: true,
-  imports: [ReactiveFormsModule, LearnoInput, LearnoSelect, LearnoButton, PageHeader, InstitutionForm],
+  imports: [ReactiveFormsModule, PageHeader, InstitutionForm],
   templateUrl: './onboard.html',
   styleUrl: './onboard.css'
 })

@@ -11,7 +11,6 @@ import { LearnoInput } from '../../../../common/learno-input/learno-input';
 import { LearnoSelect, IInputOption } from '../../../../common/learno-select/learno-select';
 import { ApiService } from '../../../../common/service/api.service';
 import { ToastrService } from 'ngx-toastr';
-import { DatePipe } from '@angular/common';
 import { UtilService } from '../../../../common/service/util.service';
 import { LearnoOffset } from "../../../../components/learno-offset/learno-offset";
 import {Icon} from '../../../../common/icon/icon';
@@ -31,7 +30,6 @@ import {RichEditor} from '../../../../common/rich-editor/rich-editor';
     ReactiveFormsModule,
     LearnoInput,
     LearnoSelect,
-    DatePipe,
     LearnoOffset
 ],
   templateUrl: './content-library.html',

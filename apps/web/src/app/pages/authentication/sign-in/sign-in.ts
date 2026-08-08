@@ -6,16 +6,12 @@ import {AuthResponse, AuthUser} from '../../../common/auth/auth.models';
 import {AuthService} from '../../../common/auth/auth.service';
 import {ModuleAccessService} from '../../../common/auth/module-access.service';
 import {ApiService} from '../../../common/service/api.service';
-import {Loader} from '../../../common/loader/loader';
-import {NgIf} from '@angular/common';
 import {LearnoButton} from '../../../common/learno-button/learno-button';
 
 @Component({
   selector: 'app-sign-in',
   imports: [
     ReactiveFormsModule,
-    Loader,
-    NgIf,
     LearnoButton
   ],
   templateUrl: './sign-in.html',

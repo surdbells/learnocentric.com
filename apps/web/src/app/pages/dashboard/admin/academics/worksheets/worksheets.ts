@@ -120,6 +120,9 @@ export class Worksheets {
   setScore(id: number, score: any): void { this.gradeDraft.set({...this.gradeDraft(), [id]: {...this.gradeDraft()[id], score}}); }
   setFeedback(id: number, feedback: string): void { this.gradeDraft.set({...this.gradeDraft(), [id]: {...this.gradeDraft()[id], feedback}}); }
 
+  draftScore(id: number): any { return this.gradeDraft()[id]?.score; }
+  draftFeedback(id: number): string { return this.gradeDraft()[id]?.feedback ?? ''; }
+
   grade(sub: any): void {
     const draft = this.gradeDraft()[sub.id];
     if (draft?.score === null || draft?.score === undefined || draft?.score === '') {

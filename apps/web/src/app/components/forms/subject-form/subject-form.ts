@@ -1,20 +1,16 @@
 import {Component, effect, ElementRef, EventEmitter, input, Output, signal, ViewChild} from '@angular/core';
 import {LearnoInput} from "../../../common/learno-input/learno-input";
-import {LearnoSelect} from "../../../common/learno-select/learno-select";
 import {FormControl, FormGroup, ReactiveFormsModule, Validators} from "@angular/forms";
 import {ToastrService} from 'ngx-toastr';
 import {ApiService} from '../../../common/service/api.service';
 import {AuthService} from '../../../common/auth/auth.service';
-import {Loader} from '../../../common/loader/loader';
 import {LearnoButton} from '../../../common/learno-button/learno-button';
 
 @Component({
   selector: 'app-subject-form',
   imports: [
     LearnoInput,
-    LearnoSelect,
     ReactiveFormsModule,
-    Loader,
     LearnoButton
   ],
   templateUrl: './subject-form.html',

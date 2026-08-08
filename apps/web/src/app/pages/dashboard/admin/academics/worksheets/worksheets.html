@@ -103,12 +103,12 @@
                 <div class="row g-2 align-items-end mt-1">
                   <div class="col-auto" style="width:7rem">
                     <label class="form-label small mb-1">Score / {{ w.total_marks }}</label>
-                    <input type="number" class="form-control form-control-sm" [ngModel]="gradeDraft()[sub.id]?.score"
+                    <input type="number" class="form-control form-control-sm" [ngModel]="draftScore(sub.id)"
                            (ngModelChange)="setScore(sub.id, $event)" [ngModelOptions]="{standalone: true}" min="0" [max]="w.total_marks"/>
                   </div>
                   <div class="col">
                     <label class="form-label small mb-1">Feedback</label>
-                    <input type="text" class="form-control form-control-sm" [ngModel]="gradeDraft()[sub.id]?.feedback"
+                    <input type="text" class="form-control form-control-sm" [ngModel]="draftFeedback(sub.id)"
                            (ngModelChange)="setFeedback(sub.id, $event)" [ngModelOptions]="{standalone: true}" placeholder="Optional feedback"/>
                   </div>
                   <div class="col-auto">

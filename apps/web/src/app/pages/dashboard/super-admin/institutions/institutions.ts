@@ -9,7 +9,6 @@ import {SkeletonLoader} from '../../../../common/skeleton-loader/skeleton-loader
 import {LearnoOffset} from '../../../../components/learno-offset/learno-offset';
 import {ToastrService} from 'ngx-toastr';
 import { Router, RouterLink } from '@angular/router';
-import { DatePipe } from '@angular/common';
 import { LearnoModal } from "../../../../components/learno-modal/learno-modal";
 import { InstitutionForm } from "../../../../components/forms/institution-form/institution-form";
 import { FormsModule } from '@angular/forms';
@@ -27,7 +26,6 @@ import {KpiItem, KpiStrip, TabBar, TabItem} from '../../../../common/ui';
     // Loader,
     SkeletonLoader,
     LearnoOffset,
-    DatePipe,
     RouterLink,
     LearnoModal,
     InstitutionForm,

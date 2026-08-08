@@ -7,7 +7,7 @@ import {AuthService} from '../../../../../common/auth/auth.service';
 import {ApiService} from '../../../../../common/service/api.service';
 import {Icon} from '../../../../../common/icon/icon';
 import {
-  AttentionItem, AttentionList, KpiItem, KpiStrip, QuickAction, QuickActions,
+  AttentionItem, AttentionList, KpiItem, KpiStrip, QuickAction,
   DonutChart, DonutSegment, StackedBar, BarSeries, BarList, BarItem,
 } from '../../../../../common/ui';
 
@@ -16,7 +16,7 @@ interface ActivityRow { label: string; value: number; icon: string; }
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [Icon, RouterLink, DatePipe, KpiStrip, AttentionList, QuickActions, DonutChart, StackedBar, BarList],
+  imports: [Icon, RouterLink, DatePipe, KpiStrip, AttentionList, DonutChart, StackedBar, BarList],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.css',
 })
