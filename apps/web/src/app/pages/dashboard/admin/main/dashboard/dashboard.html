@@ -25,7 +25,7 @@
           <h6 class="fw-semibold mb-0">Academic performance overview</h6>
           <a class="small text-decoration-none" [routerLink]="[base(), 'analytics']">Analytics →</a>
         </div>
-        <p class="small text-body-secondary mb-3">Average score by subject · {{ d.quiz.attempts }} graded · {{ pct(d.quiz.pass_rate) }} pass rate</p>
+        <p class="small text-body-secondary mb-3">Average score by class · {{ d.quiz.attempts }} graded · school average {{ pct(schoolAverage()) }}</p>
         @if (academicLabels().length) {
           <app-stacked-bar [labels]="academicLabels()" [series]="academicSeries()" />
         } @else {

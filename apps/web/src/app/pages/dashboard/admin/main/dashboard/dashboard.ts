@@ -56,11 +56,12 @@ export class AdminDashboard {
     ];
   });
 
-  // Academic performance — average per subject (vertical bars)
-  readonly academicLabels = computed<string[]>(() => (this.data()?.quiz_by_subject ?? []).map((q: any) => q.subject));
+  // Academic performance — average per class (design: performance by class)
+  readonly academicLabels = computed<string[]>(() => (this.data()?.quiz_by_class ?? []).map((q: any) => q.class));
   readonly academicSeries = computed<BarSeries[]>(() => [
-    {label: 'Average %', tone: 'primary', values: (this.data()?.quiz_by_subject ?? []).map((q: any) => q.average)},
+    {label: 'Class average %', tone: 'primary', values: (this.data()?.quiz_by_class ?? []).map((q: any) => q.average)},
   ]);
+  readonly schoolAverage = computed<number | null>(() => this.data()?.quiz?.average ?? null);
 
   // Curriculum coverage donut
   readonly coverageDonut = computed<DonutSegment[]>(() => {

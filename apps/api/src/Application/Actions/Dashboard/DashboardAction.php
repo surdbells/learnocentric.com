@@ -69,6 +69,7 @@ final class DashboardAction
             ],
             'quiz' => ['average' => $quizAvg, 'pass_rate' => $passRate, 'attempts' => count($attempts)],
             'quiz_by_subject' => $this->quizBySubject($attempts),
+            'quiz_by_class' => $this->quizByClass($attempts),
             'curriculum_coverage' => $this->curriculumCoverage($inst),
             'teacher_activity' => $this->teacherActivity($inst),
         ]);
@@ -680,6 +681,31 @@ final class DashboardAction
         }
         return array_values(array_map(static fn (array $r) => [
             'subject' => $r['subject'], 'average' => round($r['sum'] / max(1, $r['n']), 1), 'attempts' => $r['n'],
+        ], $by));
+    }
+
+    /** Average graded score grouped by the student's class (design: performance by class). */
+    private function quizByClass(array $attempts): array
+    {
+        $classCache = [];
+        $by = [];
+        foreach ($attempts as $a) {
+            $sid = $a->getStudent()->getId();
+            if (!array_key_exists($sid, $classCache)) {
+                $enr = $this->em->getRepository(Enrollment::class)->findOneBy(['student' => $a->getStudent()]);
+                $classCache[$sid] = $enr?->getSchoolClass()->getLabel();
+            }
+            $label = $classCache[$sid];
+            if ($label === null) {
+                continue;
+            }
+            $by[$label] ??= ['class' => $label, 'sum' => 0.0, 'n' => 0];
+            $by[$label]['sum'] += (float) $a->getPercentage();
+            $by[$label]['n']++;
+        }
+        ksort($by);
+        return array_values(array_map(static fn (array $r) => [
+            'class' => $r['class'], 'average' => round($r['sum'] / max(1, $r['n']), 1), 'attempts' => $r['n'],
         ], $by));
     }
 
