@@ -93,7 +93,6 @@ export class Student implements OnInit {
           this.isLoading.set(false);
         },
         complete: () => {
-          console.log("complete");
           this.isLoading.set(false);
         }
       })

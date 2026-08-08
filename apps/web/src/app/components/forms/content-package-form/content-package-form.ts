@@ -231,7 +231,6 @@ export class ContentPackageForm implements OnInit {
     // Conditional filtering by package type
     if (pkgType === 'subject_pack' && subjVal) {
       const subjLabel = String(subjVal).toLowerCase();
-      console.log(list, subjLabel)
       list = list.filter((c: any) => String(c.subjectArea || '').toLowerCase() === subjLabel);
     } else if (pkgType === 'class_pack' && gradeVal) {
       const gradeLabel = (this.gradeOptions.find(o => String(o.value) === String(gradeVal))?.label || '').toLowerCase();

@@ -66,8 +66,6 @@ export class EnrollmentForm {
   }
 
   onEdit() {
-    console.log("edit", this.select())
-    console.log("edit", this.form.value)
     this.isLoading.set(true);
     this.apiSrv.put("/backend/school/enrollments", { ...this.form.value, id: this.select()['id'] })
       .subscribe({

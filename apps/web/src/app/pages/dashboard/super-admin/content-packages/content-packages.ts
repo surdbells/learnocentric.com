@@ -333,7 +333,6 @@ export class SuperAdminContentPackages implements OnInit {
             contentIds: resp?.content?.map((e: any) => e.id),
             contentsCount: resp.content_count //Array.isArray(resp?.contentIds) ? resp.contentIds.length : (Array.isArray(this.selectedPackage()['contentIds']) ? this.selectedPackage()['contentIds'].length : 0)
           }
-          console.log(normalized);
           this.selectedPackage.set({
             ...normalized
           });

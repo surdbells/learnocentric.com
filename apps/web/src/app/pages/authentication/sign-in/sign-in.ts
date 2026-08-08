@@ -48,7 +48,6 @@ export class SignIn {
       this.apiService.post(`/backend/auth/login`, this.form.value).subscribe(
         {
           next: (val: AuthResponse) => {
-            console.log(val);
             this.auth = val
             this.authService.persistLogin(this.auth);
             this.moduleAccess.refresh(); // load the school's granted feature modules

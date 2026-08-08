@@ -104,7 +104,6 @@ export class Enrollment implements OnInit {
           this.isLoading.set(false);
         },
         complete: () => {
-          console.log("complete");
           this.isLoading.set(false);
         }
       })
@@ -115,7 +114,6 @@ export class Enrollment implements OnInit {
   }
 
   onFilter($event: string) {
-    console.log($event, "listener");
     this.filterWithClass.set($event);
   }
 
