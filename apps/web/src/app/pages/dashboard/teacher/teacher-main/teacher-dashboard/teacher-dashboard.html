@@ -1,6 +1,6 @@
 <div class="dash-hero mb-4">
-  <h4 class="fw-bold mb-1">Hello, {{ firstName() }} 👋</h4>
-  <p class="text-body-secondary mb-0">Today's teaching, learner performance, pending reviews and academic priorities.</p>
+  <h4 class="fw-bold mb-1">Dashboard</h4>
+  <p class="text-body-secondary mb-0">Monitor today's teaching, learner performance, pending reviews and academic priorities.</p>
 </div>
 
 @if (loading()) {
@@ -10,76 +10,128 @@
 } @else if (data()) {
   <app-kpi-strip class="d-block mb-4" [items]="kpis()" [cols]="5" />
 
-  <!-- Row 1: pending submissions table + quick actions rail -->
-  <div class="row g-3 mb-3">
-    <div class="col-lg-8">
-      <div class="card border-0 shadow-sm h-100">
-        <div class="card-body pb-2 d-flex justify-content-between align-items-center">
-          <h6 class="fw-semibold mb-0">Pending submissions requiring review</h6>
-          <a class="small text-decoration-none" [routerLink]="['/teacher/academics/worksheets']">View all →</a>
+  <div class="row g-3">
+    <!-- ===== Main region ===== -->
+    <div class="col-xxl-9">
+      <div class="row g-3">
+        <!-- Today's schedule -->
+        <div class="col-lg-5">
+          <div class="card border-0 shadow-sm h-100"><div class="card-body">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <h6 class="fw-semibold mb-0"><app-icon name="calendar_month" [size]="16" class="text-primary me-1" /> Today's schedule</h6>
+              <a class="small text-decoration-none" [routerLink]="['/teacher/academics/live-classes']">Calendar →</a>
+            </div>
+            @for (s of todaySchedule(); track s.id) {
+              <div class="sched-line">
+                <div class="sched-time">{{ s.scheduled_at | date:'h:mm a' }}</div>
+                <span class="sched-bar bg-{{ scheduleTone(s.status) }}"></span>
+                <div class="flex-grow-1">
+                  <div class="fw-medium small lh-sm">{{ s.class || s.subject }} · {{ s.subject }}</div>
+                  <div class="text-body-secondary small lh-sm">{{ s.topic || s.title }}</div>
+                </div>
+                <span class="badge bg-{{ scheduleTone(s.status) }}-subtle text-{{ scheduleTone(s.status) }} text-capitalize align-self-start">{{ s.status }}</span>
+              </div>
+            } @empty { <div class="text-body-secondary small py-3 text-center">No classes scheduled for today.</div> }
+          </div></div>
         </div>
-        <div class="table-responsive">
-          <table class="table align-middle mb-0 small">
-            <thead class="table-light">
-              <tr><th>Learner</th><th>Type</th><th>Topic</th><th>Submitted</th><th class="text-end">Action</th></tr>
-            </thead>
-            <tbody>
-              @for (s of pendingSubmissions(); track $index) {
-                <tr>
-                  <td class="fw-medium">{{ s.learner }}</td>
-                  <td><span class="badge bg-light text-body-secondary">{{ s.type }}</span></td>
-                  <td class="text-body-secondary">{{ s.topic }} <span class="text-body-tertiary">· {{ s.subject }}</span></td>
-                  <td class="text-body-secondary">{{ s.submitted_at | date:'MMM d, h:mm a' }}</td>
-                  <td class="text-end">
-                    <a class="btn btn-sm btn-outline-primary" [routerLink]="[s.type === 'Portfolio task' ? '/teacher/academics/portfolio' : '/teacher/academics/worksheets']">Review</a>
-                  </td>
-                </tr>
-              } @empty {
-                <tr><td colspan="5" class="text-success small py-3"><app-icon name="check_circle" [size]="15" /> Nothing awaiting review — you're all caught up.</td></tr>
-              }
-            </tbody>
-          </table>
-        </div>
-        <div class="card-body pt-2">
-          <div class="text-body-secondary small d-flex align-items-start gap-2">
-            <app-icon name="verified" [size]="15" class="mt-1" />
-            Review worksheets, essays and portfolio tasks here before their scores enter the gradebook.
+
+        <!-- Pending submissions -->
+        <div class="col-lg-7">
+          <div class="card border-0 shadow-sm h-100">
+            <div class="card-body pb-2 d-flex justify-content-between align-items-center">
+              <h6 class="fw-semibold mb-0"><app-icon name="grading" [size]="16" class="text-warning me-1" /> Pending submissions requiring review</h6>
+              <a class="small text-decoration-none" [routerLink]="['/teacher/academics/worksheets']">View all →</a>
+            </div>
+            <div class="table-responsive">
+              <table class="table align-middle mb-0 small">
+                <thead class="table-light"><tr><th>Learner</th><th>Type</th><th>Topic</th><th>Submitted</th><th class="text-end">Action</th></tr></thead>
+                <tbody>
+                  @for (s of pendingSubmissions(); track $index) {
+                    <tr>
+                      <td class="fw-medium">{{ s.learner }}</td>
+                      <td><span class="badge bg-light text-body-secondary">{{ s.type }}</span></td>
+                      <td class="text-body-secondary">{{ s.topic }}</td>
+                      <td class="text-body-secondary">{{ s.submitted_at | date:'MMM d, h:mm a' }}</td>
+                      <td class="text-end"><a class="btn btn-sm btn-outline-primary" [routerLink]="[s.type === 'Portfolio task' ? '/teacher/academics/portfolio' : '/teacher/academics/worksheets']">Review</a></td>
+                    </tr>
+                  } @empty {
+                    <tr><td colspan="5" class="text-success small py-3"><app-icon name="check_circle" [size]="15" /> Nothing awaiting review — you're all caught up.</td></tr>
+                  }
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
-      </div>
-    </div>
 
-    <div class="col-lg-4">
-      <app-rail-card class="d-block mb-3" title="Quick Actions" icon="touch_app">
-        <app-quick-actions [actions]="quickActions" />
-      </app-rail-card>
-      <app-rail-card class="d-block" title="Needs your attention" icon="notifications">
-        <app-attention-list [items]="attention()" />
-      </app-rail-card>
-    </div>
-  </div>
-
-  <!-- Row 2: class performance + upcoming live -->
-  <div class="row g-3">
-    <div class="col-lg-8">
-      <div class="card border-0 shadow-sm h-100"><div class="card-body">
-        <div class="d-flex justify-content-between align-items-center mb-3">
-          <h6 class="fw-semibold mb-0">Class performance snapshot</h6>
-          <a class="small text-decoration-none" [routerLink]="['/teacher/academics/gradebook']">Gradebook →</a>
+        <!-- Current topics by class -->
+        <div class="col-lg-7">
+          <div class="card border-0 shadow-sm h-100"><div class="card-body">
+            <h6 class="fw-semibold mb-3"><app-icon name="menu_book" [size]="16" class="text-primary me-1" /> Current topics by class</h6>
+            @if (currentTopics().length) {
+              <div class="table-responsive">
+                <table class="table align-middle mb-0 small">
+                  <thead class="table-light"><tr><th>Class</th><th>Subject</th><th>Current topic</th><th>Delivery</th><th class="text-center">Avg</th><th></th></tr></thead>
+                  <tbody>
+                    @for (t of currentTopics(); track $index) {
+                      <tr>
+                        <td><span class="badge class-chip">{{ t.class }}</span></td>
+                        <td>{{ t.subject }}</td>
+                        <td class="text-body-secondary">{{ t.topic || '—' }}</td>
+                        <td><span class="badge bg-{{ deliveryTone(t.delivery_status) }}-subtle text-{{ deliveryTone(t.delivery_status) }}">{{ t.delivery_status === 'on_track' ? 'On track' : 'Needs attention' }}</span></td>
+                        <td class="text-center fw-semibold" [class]="'text-' + scoreTone(t.average)">{{ t.average == null ? '—' : t.average + '%' }}</td>
+                        <td class="text-end"><a class="btn btn-sm btn-outline-secondary" [routerLink]="['/teacher/academics/gradebook']">Open</a></td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+            } @else { <div class="text-body-secondary small py-3 text-center">No classes assigned yet.</div> }
+          </div></div>
         </div>
-        @if (classPerformance().length) {
-          <app-bar-list [items]="classPerformance()" />
-          <div class="text-body-secondary small mt-2">Average graded-assessment score per class, reviewed to date.</div>
-        } @else {
-          <div class="text-body-secondary small py-4 text-center">No graded assessments yet for your classes.</div>
-        }
+
+        <!-- Class performance donut -->
+        <div class="col-lg-5">
+          <div class="card border-0 shadow-sm h-100"><div class="card-body">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <h6 class="fw-semibold mb-0"><app-icon name="insights" [size]="16" class="text-primary me-1" /> Class performance snapshot</h6>
+              <a class="small text-decoration-none" [routerLink]="['/teacher/academics/gradebook']">Gradebook →</a>
+            </div>
+            @if (hasDonut()) {
+              <app-donut-chart [segments]="classDonut()" caption="avg score" />
+              <div class="text-body-secondary small mt-2">Average graded-assessment score per class, reviewed to date.</div>
+            } @else {
+              <div class="text-body-secondary small py-4 text-center">No graded assessments yet for your classes.</div>
+            }
+          </div></div>
+        </div>
+      </div>
+
+      <!-- Workflow reminder -->
+      <div class="card border-0 shadow-sm mt-3"><div class="card-body">
+        <h6 class="fw-semibold mb-3">How scores flow</h6>
+        <div class="d-flex align-items-center flex-wrap gap-2 flow">
+          <div class="flow-step"><app-icon name="assignment" [size]="16" class="text-primary" /> Assessments &amp; submissions</div>
+          <app-icon name="arrow_forward" [size]="16" class="text-body-secondary" />
+          <div class="flow-step"><app-icon name="face" [size]="16" class="text-warning" /> Teacher review</div>
+          <app-icon name="arrow_forward" [size]="16" class="text-body-secondary" />
+          <div class="flow-step"><app-icon name="insights" [size]="16" class="text-info" /> Gradebook</div>
+          <app-icon name="arrow_forward" [size]="16" class="text-body-secondary" />
+          <div class="flow-step"><app-icon name="description" [size]="16" class="text-success" /> Reports &amp; report cards</div>
+        </div>
       </div></div>
     </div>
 
-    <div class="col-lg-4">
-      <div class="card border-0 shadow-sm h-100"><div class="card-body">
+    <!-- ===== Right rail ===== -->
+    <div class="col-xxl-3">
+      <app-rail-card class="d-block mb-3" title="Quick Actions" icon="touch_app">
+        <app-quick-actions [actions]="quickActions" />
+      </app-rail-card>
+      <app-rail-card class="d-block mb-3" title="Needs your attention" icon="notifications">
+        <app-attention-list [items]="attention()" />
+      </app-rail-card>
+      <div class="card border-0 shadow-sm"><div class="card-body">
         <div class="d-flex justify-content-between align-items-center mb-3">
-          <h6 class="fw-semibold mb-0">Upcoming live classes</h6>
+          <h6 class="fw-semibold mb-0"><app-icon name="videocam" [size]="16" class="text-danger me-1" /> Upcoming live classes</h6>
           <a class="small text-decoration-none" [routerLink]="['/teacher/academics/live-classes']">Manage →</a>
         </div>
         @for (lc of upcomingLive(); track lc.id) {
@@ -94,18 +146,4 @@
       </div></div>
     </div>
   </div>
-
-  <!-- Workflow reminder -->
-  <div class="card border-0 shadow-sm mt-3"><div class="card-body">
-    <h6 class="fw-semibold mb-3">How scores flow</h6>
-    <div class="d-flex align-items-center flex-wrap gap-2 flow">
-      <div class="flow-step"><app-icon name="assignment" [size]="16" class="text-primary" /> Assessments &amp; submissions</div>
-      <app-icon name="arrow_forward" [size]="16" class="text-body-secondary" />
-      <div class="flow-step"><app-icon name="face" [size]="16" class="text-warning" /> Teacher review</div>
-      <app-icon name="arrow_forward" [size]="16" class="text-body-secondary" />
-      <div class="flow-step"><app-icon name="insights" [size]="16" class="text-info" /> Gradebook</div>
-      <app-icon name="arrow_forward" [size]="16" class="text-body-secondary" />
-      <div class="flow-step"><app-icon name="description" [size]="16" class="text-success" /> Reports &amp; report cards</div>
-    </div>
-  </div></div>
 }

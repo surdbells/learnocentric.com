@@ -5,13 +5,15 @@ import {AuthService} from '../../../../../common/auth/auth.service';
 import {ApiService} from '../../../../../common/service/api.service';
 import {Icon} from '../../../../../common/icon/icon';
 import {
-  AttentionItem, AttentionList, KpiItem, KpiStrip, QuickAction, QuickActions, RailCard, BarList, BarItem,
+  AttentionItem, AttentionList, KpiItem, KpiStrip, QuickAction, QuickActions, RailCard, DonutChart, DonutSegment,
 } from '../../../../../common/ui';
+
+const CLASS_TONES = ['success', 'primary', 'warning', 'info', 'danger', 'secondary'];
 
 @Component({
   selector: 'app-teacher-dashboard',
   standalone: true,
-  imports: [Icon, RouterLink, DatePipe, KpiStrip, RailCard, AttentionList, QuickActions, BarList],
+  imports: [Icon, RouterLink, DatePipe, KpiStrip, RailCard, AttentionList, QuickActions, DonutChart],
   templateUrl: './teacher-dashboard.html',
   styleUrl: './teacher-dashboard.css',
 })
@@ -29,20 +31,28 @@ export class TeacherDashboard {
     if (!d) return [];
     const s = d.stats;
     return [
-      {label: 'My classes', value: s.my_classes, icon: 'meeting_room', tone: 'success', link: '/teacher/main/students'},
-      {label: 'My learners', value: s.my_students, icon: 'group', tone: 'primary', link: '/teacher/main/students'},
-      {label: 'Pending reviews', value: s.pending_reviews ?? 0, icon: 'grading', tone: (s.pending_reviews ?? 0) > 0 ? 'warning' : 'secondary', link: '/teacher/academics/worksheets'},
-      {label: 'Upcoming assessments', value: s.upcoming_assessments ?? 0, icon: 'quiz', tone: 'info', link: '/teacher/academics/assessments'},
-      {label: 'Upcoming live', value: s.upcoming_live, icon: 'video_camera_front', tone: 'danger', link: '/teacher/academics/live-classes'},
+      {label: "Today's Classes", value: s.today_classes ?? 0, icon: 'video_camera_front', tone: 'success', link: '/teacher/academics/live-classes'},
+      {label: 'Pending Reviews', value: s.pending_reviews ?? 0, icon: 'grading', tone: (s.pending_reviews ?? 0) > 0 ? 'warning' : 'secondary', link: '/teacher/academics/worksheets'},
+      {label: 'Learners Needing Attention', value: s.learners_needing_attention ?? 0, icon: 'group', tone: (s.learners_needing_attention ?? 0) > 0 ? 'danger' : 'secondary', link: '/teacher/academics/interventions'},
+      {label: 'Current Topics This Week', value: s.current_topics ?? 0, icon: 'menu_book', tone: 'info', link: '/teacher/academics/curriculum-map'},
+      {label: 'Upcoming Assessments', value: s.upcoming_assessments ?? 0, icon: 'quiz', tone: 'primary', link: '/teacher/academics/assessments'},
     ];
   });
 
   readonly pendingSubmissions = computed<any[]>(() => this.data()?.pending_submissions ?? []);
+  readonly todaySchedule = computed<any[]>(() => this.data()?.today_schedule ?? []);
+  readonly currentTopics = computed<any[]>(() => this.data()?.current_topics ?? []);
 
-  readonly classPerformance = computed<BarItem[]>(() =>
+  readonly classDonut = computed<DonutSegment[]>(() =>
     (this.data()?.class_performance ?? [])
       .filter((c: any) => c.average !== null)
-      .map((c: any) => ({label: c.class, value: c.average, tone: c.average >= 70 ? 'success' : c.average >= 50 ? 'warning' : 'danger'})));
+      .map((c: any, i: number) => ({label: c.class + ' · ' + c.average + '%', value: c.average, tone: CLASS_TONES[i % CLASS_TONES.length]})));
+
+  readonly hasDonut = computed(() => this.classDonut().reduce((a, d) => a + d.value, 0) > 0);
+
+  scheduleTone(s: string): string { return s === 'live' ? 'success' : s === 'scheduled' ? 'primary' : 'secondary'; }
+  deliveryTone(s: string): string { return s === 'on_track' ? 'success' : 'warning'; }
+  scoreTone(v: number | null): string { return v == null ? 'secondary' : v >= 70 ? 'success' : v >= 50 ? 'warning' : 'danger'; }
 
   readonly attention = computed<AttentionItem[]>(() => {
     const d = this.data();

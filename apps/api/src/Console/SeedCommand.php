@@ -1024,10 +1024,12 @@ class SeedCommand extends Command
         $subject = $topic->getSubject();
         $class = $topic->getSchoolClass();
         $institution = $subject->getInstitution();
-        $teacher = $this->em->createQueryBuilder()->select('u')->from(User::class, 'u')->join('u.role', 'r')
-            ->where('r.code = :t')->andWhere('u.institution = :i')
-            ->setParameter('t', 'teacher')->setParameter('i', $institution)
-            ->setMaxResults(1)->getQuery()->getOneOrNullResult();
+        // Prefer the primary demo teacher so their dashboard shows today's schedule.
+        $teacher = $this->em->getRepository(User::class)->findOneBy(['email' => 'teacher@gmail.com'])
+            ?? $this->em->createQueryBuilder()->select('u')->from(User::class, 'u')->join('u.role', 'r')
+                ->where('r.code = :t')->andWhere('u.institution = :i')
+                ->setParameter('t', 'teacher')->setParameter('i', $institution)
+                ->setMaxResults(1)->getQuery()->getOneOrNullResult();
 
         $room = static function (string $title): array {
             $name = 'learno-' . substr(md5($title), 0, 12);

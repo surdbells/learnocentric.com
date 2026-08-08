@@ -165,6 +165,8 @@ final class DashboardAction
 
         $subjIds = array_keys($subjectIds);
         $pending = $this->pendingSubmissions($subjIds);
+        $todaySchedule = $this->teacherTodaySchedule($me);
+        $currentTopics = $this->teacherCurrentTopics($assignments);
 
         return Json::write($response, [
             'stats' => [
@@ -174,6 +176,9 @@ final class DashboardAction
                 'upcoming_live' => $this->myUpcomingLive($me),
                 'pending_reviews' => count($pending),
                 'upcoming_assessments' => $this->upcomingAssessments($subjIds),
+                'today_classes' => count($todaySchedule),
+                'current_topics' => count($currentTopics),
+                'learners_needing_attention' => $this->learnersNeedingAttention(array_keys($classIds)),
             ],
             'action_items' => [
                 'worksheets_to_grade' => $this->countSubmissions($inst, WorksheetSubmission::SUBMITTED),
@@ -185,8 +190,86 @@ final class DashboardAction
             ],
             'pending_submissions' => $pending,
             'class_performance' => $this->classPerformance($assignments),
+            'today_schedule' => $todaySchedule,
+            'current_topics' => $currentTopics,
             'upcoming' => $this->upcomingLiveList($me),
         ]);
+    }
+
+    /** Today's live classes hosted by the teacher, in time order. */
+    private function teacherTodaySchedule(User $me): array
+    {
+        $start = new \DateTimeImmutable('today 00:00');
+        $rows = $this->em->createQueryBuilder()->select('lc')->from(LiveClass::class, 'lc')
+            ->where('lc.host = :me')->andWhere('lc.scheduledAt >= :s')->andWhere('lc.scheduledAt < :e')
+            ->setParameter('me', $me)->setParameter('s', $start)->setParameter('e', $start->modify('+1 day'))
+            ->orderBy('lc.scheduledAt', 'ASC')->getQuery()->getResult();
+        return array_map(static fn (LiveClass $lc) => [
+            'id' => $lc->getId(),
+            'title' => $lc->getTitle(),
+            'class' => $lc->getSchoolClass()?->getLabel(),
+            'subject' => $lc->getSubject()->getName(),
+            'topic' => $lc->getTopic()?->getTitle(),
+            'scheduled_at' => $lc->getScheduledAt()->format(DATE_ATOM),
+            'status' => $lc->getStatus(),
+        ], $rows);
+    }
+
+    /**
+     * Per class×subject the teacher takes: the current (highest-week) published
+     * topic, the class's graded-attempt average, and a derived delivery status.
+     *
+     * @param TeacherAssignment[] $assignments
+     */
+    private function teacherCurrentTopics(array $assignments): array
+    {
+        $seen = [];
+        $rows = [];
+        foreach ($assignments as $a) {
+            $class = $a->getSchoolClass();
+            $subject = $a->getSubject();
+            $key = $class->getId() . '-' . $subject->getId();
+            if (isset($seen[$key])) {
+                continue;
+            }
+            $seen[$key] = true;
+
+            $topic = $this->em->createQueryBuilder()->select('t.title')->from(Topic::class, 't')
+                ->where('t.subject = :subj')->andWhere('t.approvalStatus = :pub')
+                ->andWhere('t.schoolClass = :cls OR t.schoolClass IS NULL')
+                ->setParameter('subj', $subject)->setParameter('pub', Lifecycle::PUBLISHED)->setParameter('cls', $class)
+                ->orderBy('t.weekNumber', 'DESC')->setMaxResults(1)->getQuery()->getArrayResult();
+
+            $avgRow = $this->em->createQueryBuilder()->select('AVG(at.percentage) AS avg')
+                ->from(AssessmentAttempt::class, 'at')->join('at.student', 'st')
+                ->join(Enrollment::class, 'e', \Doctrine\ORM\Query\Expr\Join::WITH, 'e.student = st')
+                ->where('e.schoolClass = :cid')->andWhere('at.status = :g')
+                ->setParameter('cid', $class->getId())->setParameter('g', AssessmentAttempt::GRADED)
+                ->getQuery()->getSingleScalarResult();
+            $avg = $avgRow === null ? null : (int) round((float) $avgRow);
+
+            $rows[] = [
+                'class' => $class->getLabel(),
+                'subject' => $subject->getName(),
+                'topic' => $topic[0]['title'] ?? null,
+                'average' => $avg,
+                'delivery_status' => $avg !== null && $avg < 60 ? 'needs_attention' : 'on_track',
+            ];
+        }
+        return $rows;
+    }
+
+    /** @param int[] $classIds distinct learners in the teacher's classes with an open intervention. */
+    private function learnersNeedingAttention(array $classIds): int
+    {
+        if ($classIds === []) {
+            return 0;
+        }
+        return (int) $this->em->createQueryBuilder()->select('COUNT(DISTINCT i.student)')->from(Intervention::class, 'i')
+            ->join(Enrollment::class, 'e', \Doctrine\ORM\Query\Expr\Join::WITH, 'e.student = i.student')
+            ->where('e.schoolClass IN (:cids)')->andWhere('i.status != :res')
+            ->setParameter('cids', $classIds)->setParameter('res', Intervention::RESOLVED)
+            ->getQuery()->getSingleScalarResult();
     }
 
     /**

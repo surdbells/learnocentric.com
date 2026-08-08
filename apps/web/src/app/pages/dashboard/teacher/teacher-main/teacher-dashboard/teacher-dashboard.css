@@ -28,6 +28,22 @@
   background: var(--bs-body-bg);
 }
 
+table thead th { font-size: .72rem; letter-spacing: .02em; font-weight: 600; }
+
+.class-chip {
+  background: color-mix(in srgb, var(--bs-primary) 14%, transparent);
+  color: var(--bs-primary); font-weight: 600; font-size: .78rem; padding: .25rem .5rem;
+}
+
+/* Today's schedule timeline */
+.sched-line {
+  display: flex; align-items: flex-start; gap: .6rem;
+  padding: .6rem 0; border-bottom: 1px solid var(--bs-border-color);
+}
+.sched-line:last-child { border-bottom: 0; }
+.sched-time { font-size: .78rem; font-weight: 600; width: 3.6rem; flex: 0 0 auto; color: var(--bs-secondary-color); }
+.sched-bar { width: 4px; align-self: stretch; min-height: 2.4rem; border-radius: 2px; flex: 0 0 auto; }
+
 .dash-skel {
   height: 84px;
   background: linear-gradient(90deg, var(--bs-tertiary-bg) 25%, var(--bs-secondary-bg) 50%, var(--bs-tertiary-bg) 75%);
