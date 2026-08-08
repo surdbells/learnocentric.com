@@ -152,6 +152,67 @@
   background: var(--brand-500);
 }
 
+/* Bottom profile card — pinned below the scrolling nav, floating with a top divider */
+.sb-foot {
+  flex: none;
+  padding: 0.75rem 0.85rem 0.95rem;
+  border-top: 1px solid var(--sidebar-border);
+}
+.sb-profile { width: 100%; }
+.sb-profile-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  width: 100%;
+  padding: 0.5rem 0.6rem;
+  border: 1px solid var(--sidebar-border);
+  border-radius: 0.8rem;
+  background: var(--bs-body-bg);
+  color: var(--bs-body-color);
+  text-align: left;
+  cursor: pointer;
+  box-shadow: var(--shadow-sm, 0 1px 2px rgba(0, 0, 0, 0.04));
+  transition: background-color 0.16s ease, border-color 0.16s ease;
+}
+.sb-profile-btn:hover { background: var(--_sb-hover-bg); border-color: rgba(var(--brand-rgb), 0.35); }
+.sb-profile-btn:focus { outline: none; box-shadow: none; }
+.sb-profile-btn:focus-visible { outline: 2px solid rgba(var(--brand-rgb), 0.45); outline-offset: 2px; }
+
+.sb-avatar {
+  flex: none;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  overflow: hidden;
+  display: inline-flex;
+  background: var(--_sb-active-bg);
+}
+.sb-avatar-img { width: 100%; height: 100%; object-fit: cover; }
+
+.sb-profile-meta {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  flex: 1 1 auto;
+  line-height: 1.2;
+}
+.sb-profile-name {
+  font-size: 0.85rem;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.sb-profile-role {
+  font-size: 0.72rem;
+  color: var(--_sb-muted);
+  text-transform: capitalize;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.sb-profile-caret { flex: none; font-size: 1.15rem; opacity: 0.55; }
+
 /* ---- Rail (collapsed) mode — desktop only.
    On mobile the sidebar is a full-width drawer, so rail styling must not apply. ---- */
 @media (min-width: 992px) {
@@ -198,4 +259,10 @@
 /* Flyout sub-items are not indented (no parent label above them) */
 :host.is-rail .sb-submenu .sb-sublink { padding-left: 0.8rem; }
 :host.is-rail .sb-submenu .sb-sublink.active::before { display: none; }
+
+/* Rail: collapse the profile card to just the centered avatar */
+:host.is-rail .sb-foot { padding: 0.6rem 0.5rem 0.75rem; }
+:host.is-rail .sb-profile-btn { justify-content: center; padding: 0.4rem; }
+:host.is-rail .sb-profile-meta,
+:host.is-rail .sb-profile-caret { display: none; }
 } /* end @media (min-width: 992px) rail mode */

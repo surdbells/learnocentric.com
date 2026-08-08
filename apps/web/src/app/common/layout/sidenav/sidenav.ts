@@ -1,9 +1,11 @@
-import {Component, inject, input, OnInit, output} from '@angular/core';
+import {Component, computed, inject, input, OnInit, output, signal} from '@angular/core';
 import {NgOptimizedImage} from '@angular/common';
 import {Router, RouterLink, RouterLinkActive} from '@angular/router';
 import {IMenu} from '../../service/user-preference-menu';
 import {Preferences} from '../../service/preferences';
 import {Icon} from '../../icon/icon';
+import {AuthService} from '../../auth/auth.service';
+import {AuthUser} from '../../auth/auth.models';
 
 /**
  * Modern, collapsible sidebar navigation.
@@ -31,12 +33,18 @@ export class Sidenav implements OnInit {
 
   protected router = inject(Router);
   private prefs = inject(Preferences);
+  private readonly authService = inject(AuthService);
 
   currentTheme = 'light';
   private readonly openGroups = new Set<string>();
 
+  /** Signed-in user for the bottom profile card. */
+  readonly user = signal<AuthUser | null>(null);
+  readonly avatar = computed(() => this.user()?.profileImageUrl || 'images/avatar-placeholder.svg');
+
   constructor() {
     this.prefs.theme$.subscribe(t => (this.currentTheme = t));
+    this.user.set(this.authService.getAuthSession().user);
   }
 
   ngOnInit(): void {
@@ -74,5 +82,10 @@ export class Sidenav implements OnInit {
 
   onItemClick(): void {
     this.itemClick.emit();
+  }
+
+  signOut(): void {
+    this.authService.logoutLocal();
+    this.router.navigate(['/']);
   }
 }

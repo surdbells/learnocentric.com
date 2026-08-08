@@ -64,4 +64,28 @@
       </div>
     }
   </nav>
+
+  <!-- Bottom profile card (floating, divider on top) -->
+  <div class="sb-foot">
+    <div class="dropdown sb-profile dropup">
+      <button type="button" class="sb-profile-btn" data-bs-toggle="dropdown" data-bs-display="static"
+              aria-expanded="false" [attr.data-title]="(user()?.firstName || '') + ' ' + (user()?.lastName || '')">
+        <span class="sb-avatar">
+          <img class="sb-avatar-img" [src]="avatar()" alt="Profile" />
+        </span>
+        <span class="sb-profile-meta">
+          <span class="sb-profile-name">{{ user()?.firstName }} {{ user()?.lastName }}</span>
+          <span class="sb-profile-role">{{ user()?.role }}</span>
+        </span>
+        <app-icon name="more_vert" class="sb-profile-caret" />
+      </button>
+      <ul class="dropdown-menu dropdown-menu-end w-100">
+        <li (click)="signOut()">
+          <a class="dropdown-item d-flex align-items-center gap-2" role="button">
+            <app-icon name="logout" /> Sign out
+          </a>
+        </li>
+      </ul>
+    </div>
+  </div>
 </div>

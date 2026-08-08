@@ -3,9 +3,28 @@
   display: inline-flex;
 }
 
+/* The button reuses the topbar's `.tb-icon-btn` class, but topbar.css is
+   scoped to that component and can't reach this child component — so restate
+   the icon-button styling here to match the other topbar icons exactly. */
 .nb-btn {
   position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--bs-secondary-color);
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease;
 }
+.nb-btn:hover { background: rgba(var(--brand-rgb), 0.1); color: var(--brand-700); }
+.nb-btn:focus { outline: none; box-shadow: none; }
+.nb-btn:focus-visible { outline: 2px solid rgba(var(--brand-rgb), 0.45); outline-offset: 2px; }
+.nb-btn.show,
+.nb-btn[aria-expanded="true"] { background: rgba(var(--brand-rgb), 0.12); color: var(--brand-700); }
 
 .nb-badge {
   position: absolute;
