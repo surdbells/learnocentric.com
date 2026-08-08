@@ -327,7 +327,8 @@ final class DashboardAction
                 'unread_notifications' => $unreadNotifs,
                 'upcoming_live' => count($this->upcomingLiveForStudent($me, $classIds)),
             ],
-            'continue_learning' => $this->continueLearning($subjects),
+            'continue_learning' => $this->continueLearning($subjects, $topics),
+            'class_label' => $this->em->getRepository(Enrollment::class)->findOneBy(['student' => $me])?->getSchoolClass()->getLabel(),
             'progress' => [
                 'lessons' => ['done' => $lessonsViewed, 'total' => count($topics), 'pct' => count($topics) ? (int) round($lessonsViewed / count($topics) * 100) : 0],
                 'quiz_average' => $quizAvg,
@@ -387,16 +388,36 @@ final class DashboardAction
     }
 
     /** @param array<int, array<string,mixed>> $subjects */
-    private function continueLearning(array $subjects): ?array
+    /** @param Topic[] $topics */
+    private function continueLearning(array $subjects, array $topics): ?array
     {
         // The subject with progress but not yet complete; else the first.
+        $pick = null;
         foreach ($subjects as $s) {
             if ($s['progress_pct'] > 0 && $s['progress_pct'] < 100) {
-                return ['subject' => $s['subject'], 'topic' => $s['next_topic'] ?? $s['last_topic'], 'completion_pct' => $s['progress_pct']];
+                $pick = $s;
+                break;
             }
         }
-        $first = $subjects[0] ?? null;
-        return $first === null ? null : ['subject' => $first['subject'], 'topic' => $first['next_topic'] ?? $first['last_topic'], 'completion_pct' => $first['progress_pct']];
+        $pick ??= $subjects[0] ?? null;
+        if ($pick === null) {
+            return null;
+        }
+        $title = $pick['next_topic'] ?? $pick['last_topic'];
+
+        // Pull the topic's objective + week for the "today's lesson" card.
+        $objective = null;
+        $week = null;
+        foreach ($topics as $t) {
+            if ($t->getTitle() === $title && $t->getSubject()->getName() === $pick['subject']) {
+                $data = $t->toArray();
+                $objective = $data['objective'] ?? null;
+                $week = $data['week_number'] ?? null;
+                break;
+            }
+        }
+
+        return ['subject' => $pick['subject'], 'topic' => $title, 'completion_pct' => $pick['progress_pct'], 'objective' => $objective, 'week_number' => $week];
     }
 
     /** @param Topic[] $topics @return array{done:int, total:int, pct:int} */
@@ -490,7 +511,13 @@ final class DashboardAction
             return null;
         }
         $a = $f[0]->toArray();
-        return ['message' => $a['message'], 'author' => $a['author'], 'practice_needed' => $a['practice_needed']];
+        return [
+            'message' => $a['message'],
+            'author' => $a['author'],
+            'practice_needed' => $a['practice_needed'],
+            'common_error' => $a['common_error'] ?? null,
+            'next_step' => $a['next_step'] ?? null,
+        ];
     }
 
     /** GET /dashboard/super-admin — platform overview. */

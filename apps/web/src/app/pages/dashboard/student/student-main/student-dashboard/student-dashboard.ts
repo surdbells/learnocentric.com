@@ -33,6 +33,16 @@ export class StudentDashboard {
   readonly recentSubjects = computed<any[]>(() => this.data()?.recent_subjects ?? []);
   readonly upcomingLive = computed<any[]>(() => this.data()?.upcoming ?? []);
   readonly portfolio = computed<any>(() => this.data()?.progress?.portfolio ?? null);
+  readonly classLabel = computed<string | null>(() => this.data()?.class_label ?? null);
+  // Common mistake = the tutor's flagged error, else the top weak area.
+  readonly commonMistake = computed<string | null>(() => this.latestFeedback()?.common_error ?? this.weakAreas()[0] ?? null);
+  readonly nextAction = computed<string | null>(() => this.latestFeedback()?.next_step ?? null);
+  // Portfolio task status derived from portfolio progress (no per-task due date modelled).
+  readonly portfolioStatus = computed(() => {
+    const p = this.portfolio();
+    if (!p || p.total === 0) return null;
+    return {pending: p.done < p.total, done: p.done, total: p.total};
+  });
 
   readonly progressTiles = computed<ProgressTile[]>(() => {
     const p = this.data()?.progress;

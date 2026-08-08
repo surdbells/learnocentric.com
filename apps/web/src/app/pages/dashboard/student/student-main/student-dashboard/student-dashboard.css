@@ -20,9 +20,11 @@
 .cl-card {
   background: linear-gradient(180deg, var(--brand-50, var(--bs-primary-bg-subtle)) 0%, var(--bs-body-bg) 55%);
 }
-.fb-card {
-  background: var(--bs-info-bg-subtle);
-}
+.fb-card { background: var(--bs-info-bg-subtle); }
+.today-card { background: linear-gradient(180deg, var(--bs-success-bg-subtle) 0%, var(--bs-body-bg) 60%); }
+.pf-card { background: linear-gradient(180deg, var(--bs-warning-bg-subtle) 0%, var(--bs-body-bg) 60%); }
+.mistake-card { background: var(--bs-danger-bg-subtle); }
+.action-card { background: var(--bs-success-bg-subtle); }
 
 .dash-skel {
   height: 84px;
