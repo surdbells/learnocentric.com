@@ -54,12 +54,22 @@ the API at `https://api.YOUR_DOMAIN/backend/files?p=…`.
 cd /www/wwwroot/api.YOUR_DOMAIN
 git clone https://github.com/YOUR_ORG/learnocentric.com.git .
 cd apps/api
-composer install --no-dev --optimize-autoloader
+COMPOSER_ALLOW_SUPERUSER=1 composer install --no-dev --optimize-autoloader
 ```
 
 > The Slim front controller is `apps/api/public/index.php`. Point the site's
 > **document root** at `/www/wwwroot/api.YOUR_DOMAIN/apps/api/public`
 > (Website → Settings → **Site directory / Running directory**).
+>
+> **Running as root:** aaPanel shells in as `root`; Composer warns against this.
+> `COMPOSER_ALLOW_SUPERUSER=1` suppresses the prompt. Afterwards, hand the tree
+> back to the web user so runtime writes work: `chown -R www:www /www/wwwroot/api.YOUR_DOMAIN`.
+>
+> **`ext-redis` conflict:** if an older `composer install` ever fails with
+> *"symfony/cache … conflicts with ext-redis <6.1"* (the server has phpredis < 6.1),
+> it's already handled — `composer.json` sets `config.platform.ext-redis: false`
+> so Composer ignores the unused Redis extension during resolution (the API uses a
+> filesystem metadata cache, never Redis). No `--ignore-platform-req` flag needed.
 
 ### 1.3 PostgreSQL database
 
