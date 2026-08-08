@@ -30,6 +30,7 @@ use App\Domain\Entity\Permission;
 use App\Domain\Entity\PortfolioEntry;
 use App\Domain\Entity\BillingTransaction;
 use App\Domain\Entity\Question;
+use App\Domain\Entity\Report;
 use App\Domain\Entity\Subscription;
 use App\Domain\Entity\SubscriptionPlan;
 use App\Domain\Entity\Role;
@@ -106,6 +107,7 @@ class SeedCommand extends Command
         $this->seedTopicProgress($output);
         $this->seedInterventions($output);
         $this->seedSafeguarding($output);
+        $this->seedReports($output);
         $this->seedAuditLogs($users, $output);
 
         $this->em->flush();
@@ -1459,6 +1461,79 @@ class SeedCommand extends Command
         if ($count > 0) {
             $output->writeln("  + {$count} content versions");
         }
+    }
+
+    /**
+     * Seed a couple of pre-generated platform reports so the super-admin Reports
+     * list, view and export flows are testable without first generating one.
+     * Every figure is a live count/aggregate of the rows already seeded above —
+     * nothing here is fabricated; it mirrors exactly what ReportsAction produces.
+     */
+    private function seedReports(OutputInterface $output): void
+    {
+        if ($this->em->getRepository(Report::class)->count([]) > 0) {
+            return;
+        }
+        $super = $this->em->getRepository(User::class)->findOneBy(['email' => 'surdbells@gmail.com']);
+        if ($super === null) {
+            return;
+        }
+        $by = static function (Report $r) use ($super): Report {
+            $r->setGeneratedBy($super->getId(), $super->getFirstName() . ' ' . $super->getLastName());
+            return $r;
+        };
+
+        // --- Platform overview (counts + averages) ---
+        $institutions = (int) $this->em->getRepository(Institution::class)->count([]);
+        $userCount = (int) $this->em->getRepository(User::class)->count([]);
+        $avgRow = $this->em->createQueryBuilder()->select('AVG(at.percentage) AS avg')
+            ->from(AssessmentAttempt::class, 'at')->where('at.status = :g')
+            ->setParameter('g', AssessmentAttempt::GRADED)->getQuery()->getArrayResult();
+        $avg = $avgRow[0]['avg'] ?? null;
+        $avgLabel = $avg === null ? '—' : round((float) $avg, 1) . '%';
+
+        // --- Subscriptions (real plans → active subs → MRR) ---
+        $mrr = 0.0;
+        $activeSubs = 0;
+        $subRows = [];
+        foreach ($this->em->getRepository(SubscriptionPlan::class)->findBy(['isActive' => true]) as $plan) {
+            /** @var SubscriptionPlan $plan */
+            $subs = $this->em->getRepository(Subscription::class)->findBy(['plan' => $plan]);
+            $active = array_filter($subs, static fn (Subscription $s) => in_array($s->status(), [Subscription::ACTIVE, Subscription::GRACE], true));
+            $price = $plan->getPriceKobo() / 100;
+            $planMrr = count($active) * $price;
+            $activeSubs += count($active);
+            $mrr += $planMrr;
+            $subRows[] = [$plan->getName(), count($subs), count($active), number_format($price), number_format($planMrr)];
+        }
+
+        $overview = $by(new Report('platform_overview', 'Platform overview'));
+        $overview->setSummary([
+            ['label' => 'Institutions', 'value' => $institutions],
+            ['label' => 'Users', 'value' => $userCount],
+            ['label' => 'Avg score', 'value' => $avgLabel],
+            ['label' => 'MRR', 'value' => '₦' . number_format($mrr)],
+        ]);
+        $overview->setData(['columns' => ['Metric', 'Value'], 'rows' => [
+            ['Institutions', $institutions],
+            ['Users', $userCount],
+            ['Average assessment score', $avgLabel],
+            ['Active subscriptions', $activeSubs],
+            ['Monthly recurring revenue', '₦' . number_format($mrr)],
+        ]]);
+        $this->em->persist($overview);
+
+        $subReport = $by(new Report('subscriptions', 'Subscriptions & revenue'));
+        $subReport->setSummary([
+            ['label' => 'Active subscriptions', 'value' => $activeSubs],
+            ['label' => 'MRR', 'value' => '₦' . number_format($mrr)],
+            ['label' => 'ARR', 'value' => '₦' . number_format($mrr * 12)],
+        ]);
+        $subReport->setData(['columns' => ['Plan', 'Total subscribers', 'Active', 'Price (₦)', 'MRR (₦)'], 'rows' => $subRows]);
+        $this->em->persist($subReport);
+
+        $this->em->flush();
+        $output->writeln('  + 2 platform reports');
     }
 
     /** Seed the audit_logs table so every table carries representative data. */
