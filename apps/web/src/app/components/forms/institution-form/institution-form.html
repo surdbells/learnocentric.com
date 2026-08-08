@@ -38,7 +38,10 @@
         </div>
       }
       @if (logoUploading()) {
-        <div class="mt-2 text-muted">Uploading...</div>
+        <div class="mt-2">
+          <div class="d-flex justify-content-between small text-body-secondary"><span>Uploading…</span><span class="fw-semibold">{{ uploadProgress() ?? 0 }}%</span></div>
+          <div class="progress" style="height:6px"><div class="progress-bar bg-success" [style.width.%]="uploadProgress() ?? 0"></div></div>
+        </div>
       }
     </div>
     <div class="col-md-6">

@@ -1,4 +1,5 @@
-import {Component, ElementRef, OnInit, signal, ViewChild} from '@angular/core';
+import {Component, ElementRef, OnInit, inject, signal, ViewChild} from '@angular/core';
+import {HttpClient, HttpEventType} from '@angular/common/http';
 import {LearnoButton} from "../../../common/learno-button/learno-button";
 import {LearnoInput} from "../../../common/learno-input/learno-input";
 import {FormControl, FormGroup, ReactiveFormsModule, Validators} from "@angular/forms";
@@ -34,7 +35,9 @@ export class ProfileForm implements OnInit{
   })
   isLoading = signal<boolean>(false);
   imageUploading = signal<boolean>(false);
+  uploadProgress = signal<number | null>(null);
   passportPreviewUrl = signal<string | null>(null);
+  private readonly http = inject(HttpClient);
   isDragOver = signal<boolean>(false);
 
   @ViewChild('passportFile', { static: false }) passportFileInput!: ElementRef<HTMLInputElement>;
@@ -134,9 +137,13 @@ export class ProfileForm implements OnInit{
     const fd = new FormData();
     fd.append('file', file);
     this.imageUploading.set(true);
-    this.apiSrv.post('/backend/upload', fd)
-      .subscribe({
-        next: (res: any) => {
+    this.uploadProgress.set(0);
+    this.http.post<any>('/backend/upload', fd, {reportProgress: true, observe: 'events'}).subscribe({
+      next: (event) => {
+        if (event.type === HttpEventType.UploadProgress && event.total) {
+          this.uploadProgress.set(Math.round((event.loaded / event.total) * 100));
+        } else if (event.type === HttpEventType.Response) {
+          const res: any = event.body;
           // Path-only contract: build the backend-served reference from the path.
           const uploadUrl = res?.path ? '/backend/files?p=' + res.path : (res?.url ?? '');
           if (uploadUrl) {
@@ -146,13 +153,16 @@ export class ProfileForm implements OnInit{
             this.toastService.warning('Uploaded, but no file reference returned');
           }
           this.imageUploading.set(false);
-        },
-        error: (err) => {
-          console.error(err);
-          this.toastService.error('Failed to upload passport');
-          this.imageUploading.set(false);
+          this.uploadProgress.set(null);
         }
-      });
+      },
+      error: (err) => {
+        console.error(err);
+        this.toastService.error('Failed to upload passport');
+        this.imageUploading.set(false);
+        this.uploadProgress.set(null);
+      },
+    });
   }
 
   onDragOver(event: DragEvent) {
@@ -177,9 +187,13 @@ export class ProfileForm implements OnInit{
     const fd = new FormData();
     fd.append('file', file);
     this.imageUploading.set(true);
-    this.apiSrv.post('/backend/upload', fd)
-      .subscribe({
-        next: (res: any) => {
+    this.uploadProgress.set(0);
+    this.http.post<any>('/backend/upload', fd, {reportProgress: true, observe: 'events'}).subscribe({
+      next: (event) => {
+        if (event.type === HttpEventType.UploadProgress && event.total) {
+          this.uploadProgress.set(Math.round((event.loaded / event.total) * 100));
+        } else if (event.type === HttpEventType.Response) {
+          const res: any = event.body;
           // Path-only contract: build the backend-served reference from the path.
           const uploadUrl = res?.path ? '/backend/files?p=' + res.path : (res?.url ?? '');
           if (uploadUrl) {
@@ -189,12 +203,15 @@ export class ProfileForm implements OnInit{
             this.toastService.warning('Uploaded, but no file reference returned');
           }
           this.imageUploading.set(false);
-        },
-        error: (err) => {
-          console.error(err);
-          this.toastService.error('Failed to upload passport');
-          this.imageUploading.set(false);
+          this.uploadProgress.set(null);
         }
-      });
+      },
+      error: (err) => {
+        console.error(err);
+        this.toastService.error('Failed to upload passport');
+        this.imageUploading.set(false);
+        this.uploadProgress.set(null);
+      },
+    });
   }
 }

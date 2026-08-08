@@ -1,4 +1,5 @@
-import { Component, effect, ElementRef, EventEmitter, input, OnInit, Output, signal, ViewChild } from '@angular/core';
+import { Component, effect, ElementRef, EventEmitter, inject, input, OnInit, Output, signal, ViewChild } from '@angular/core';
+import { HttpClient, HttpEventType } from '@angular/common/http';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { IInputOption, LearnoSelect } from '../../../common/learno-select/learno-select';
 import { ApiService } from '../../../common/service/api.service';
@@ -17,7 +18,9 @@ export class InstitutionForm implements OnInit {
 
   isLoading = signal(false);
   logoUploading = signal(false);
+  uploadProgress = signal<number | null>(null);
   logoPreviewUrl = signal<string | null>(null);
+  private readonly http = inject(HttpClient);
   packageOptions = signal<IInputOption[]>([]);
   action = input<string>('Add')
   select = input<{ [key:string]: string }>({})
@@ -188,19 +191,28 @@ export class InstitutionForm implements OnInit {
     fd.append('file', file);
     fd.append('folder', 'institution-logos');
     this.logoUploading.set(true);
-    this.apiSrv.post('/backend/upload', fd)
-      .subscribe({
-        next: (res: any) => {
-          const uploadUrl = res?.fileUrl ?? res?.data?.url ?? res?.location ?? res?.path ?? '';
+    this.uploadProgress.set(0);
+    this.http.post<any>('/backend/upload', fd, {reportProgress: true, observe: 'events'}).subscribe({
+        next: (event: any) => {
+          if (event.type === HttpEventType.UploadProgress && event.total) {
+            this.uploadProgress.set(Math.round((event.loaded / event.total) * 100));
+            return;
+          }
+          if (event.type !== HttpEventType.Response) { return; }
+          const res: any = event.body;
+          // Path-only contract: build the backend-served reference from the returned path.
+          const uploadUrl = res?.path ? '/backend/files?p=' + res.path : (res?.url ?? '');
           if (uploadUrl) {
             this.form.get('logoUrl')?.setValue(uploadUrl as any);
             this.toastService.success('Logo uploaded');
           } else {
-            this.toastService.warning('Uploaded, but URL not returned');
+            this.toastService.warning('Uploaded, but no file reference returned');
           }
           this.logoUploading.set(false);
+          this.uploadProgress.set(null);
         },
         error: (err) => {
+          this.uploadProgress.set(null);
           console.error(err);
           this.toastService.error('Failed to upload logo');
           this.logoUploading.set(false);

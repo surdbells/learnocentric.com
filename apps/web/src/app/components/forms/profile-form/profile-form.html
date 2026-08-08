@@ -14,7 +14,7 @@
               <span class="avatar-initials">{{ initials() || '?' }}</span>
             }
             <span class="avatar-edit">Change photo</span>
-            @if (imageUploading()) { <span class="avatar-uploading">Uploading…</span> }
+            @if (imageUploading()) { <span class="avatar-uploading">Uploading… {{ uploadProgress() ?? 0 }}%</span> }
             <input #passportFile type="file" accept="image/*" hidden (change)="onPassportFileSelected($event)" [disabled]="imageUploading()"/>
           </div>
           <h5 class="fw-semibold mb-0">{{ fullName() }}</h5>
