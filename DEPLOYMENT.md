@@ -23,10 +23,18 @@ the API at `https://api.YOUR_DOMAIN/backend/files?p=…`.
 
 - A domain on Cloudflare (e.g. `learnocentric.com`), with DNS managed by Cloudflare.
 - An aaPanel server (Linux) you can SSH into, with:
-  - **PHP 8.2 or newer** + extensions: `pdo`, `pdo_pgsql`, `mbstring`, `openssl`, `curl`, `json`, `fileinfo`.
+  - **PHP 8.2 or newer** + extensions: `pdo`, `pdo_pgsql`, `mbstring`, `ctype`, `openssl`, `curl`, `json`, `fileinfo`.
   - **PostgreSQL 14+** (aaPanel App Store → *PostgreSQL Manager*, or an external managed Postgres).
   - **Composer 2**.
 - Node 20+ locally (or in CI) to build the frontend.
+
+> **aaPanel PHP note:** aaPanel installs each PHP version under its own path
+> (e.g. `/www/server/php/82/bin/php`), and the `php` on your `$PATH` may be a
+> *different* version than the one serving the site. Run every `php` / `composer`
+> command below with the **8.2+ binary** — e.g. `/www/server/php/82/bin/php bin/console.php …`
+> — or symlink it. aaPanel also disables some functions by default
+> (Website → PHP settings → *Disabled functions*); the API needs none of the
+> commonly-disabled ones (`exec`, `proc_open`, `putenv`), so the defaults are fine.
 
 ---
 
@@ -94,10 +102,14 @@ JWT_SECRET=CHANGE_ME_LONG_RANDOM_STRING   # e.g. `openssl rand -hex 48`
 JWT_TTL=86400
 JWT_ISSUER=learnocentric
 
-# File storage (path-only; served via /backend/files?p=)
+# File storage. Uploads are served ONLY through the access-controlled route
+# /backend/files?p=… (streamed via Flysystem) — never as a static URL. Keep the
+# store OUTSIDE the web docroot (public/) so files can't be fetched directly;
+# `storage/uploads` resolves to apps/api/storage/uploads. STORAGE_PUBLIC_URL is
+# NOT used for serving (the SPA builds path-only /backend/files references).
 STORAGE_DRIVER=local
-STORAGE_LOCAL_ROOT=public/uploads
-STORAGE_PUBLIC_URL=https://api.YOUR_DOMAIN/uploads
+STORAGE_LOCAL_ROOT=storage/uploads
+STORAGE_PUBLIC_URL=https://api.YOUR_DOMAIN
 
 # Optional integrations — leave blank to disable that feature.
 ZEPTOMAIL_TOKEN=
@@ -109,12 +121,13 @@ PAYSTACK_PUBLIC_KEY=
 PAYSTACK_CALLBACK_URL=https://YOUR_DOMAIN/billing/callback
 ```
 
-### 1.5 Migrate + seed
+### 1.5 Migrate, seed + generate proxies
 
 ```bash
 cd /www/wwwroot/api.YOUR_DOMAIN/apps/api
-composer migrate      # runs: php bin/console.php migrations:migrate --no-interaction
-composer seed         # runs: php bin/console.php app:seed  (idempotent — safe to re-run)
+composer migrate                        # migrations:migrate --no-interaction
+composer seed                           # app:seed (idempotent — safe to re-run)
+php bin/console.php orm:generate-proxies # REQUIRED in prod (see note below)
 ```
 
 `app:seed` is idempotent: each block guards on existing rows, so re-running never
@@ -122,16 +135,26 @@ duplicates data. It seeds the full pilot dataset (accounts, academic spine,
 assessments, worksheets, billing, content, support, messaging, interventions,
 safeguarding, reports, audit logs) so every screen has data to render.
 
-### 1.6 Writable uploads directory
+> **Why `orm:generate-proxies`?** Doctrine's `dev_mode` follows `APP_DEBUG`. With
+> `APP_DEBUG=false` (production) Doctrine **never** auto-generates entity proxy
+> classes at runtime, so they must be built ahead of time — otherwise the first
+> lazy-loaded association throws *"proxy class not found"*. Re-run this command on
+> every deploy that changes entities (it's in the update flow in §4). If you'd
+> rather trade a little performance to skip it, set `APP_DEBUG=true`, but leave
+> `APP_ENV=prod` and keep the debug error page off at the web-server level.
 
-Uploaded files live under `apps/api/public/uploads` and must be **writable** and
-**persistent** across deploys (don't wipe it on `git pull`):
+### 1.6 Writable runtime + uploads directories
+
+The API writes to `apps/api/var/` (logs, cache, generated proxies) and stores
+uploads under `apps/api/storage/uploads` (per §1.4, outside the docroot). Both
+must be **writable by the PHP user** (`www` on aaPanel) and the store must be
+**persistent** across deploys (never wipe it on `git pull`):
 
 ```bash
 cd /www/wwwroot/api.YOUR_DOMAIN/apps/api
-mkdir -p public/uploads
-chown -R www:www public/uploads      # aaPanel's PHP runs as user `www`
-chmod -R 775 public/uploads
+mkdir -p storage/uploads var/log var/cache var/doctrine/proxies
+chown -R www:www storage var       # aaPanel's PHP-FPM runs as user `www`
+chmod -R 775 storage var
 ```
 
 ### 1.7 Web-server rewrite (route everything to the front controller)
@@ -222,7 +245,10 @@ Cloudflare Pages → your project → **Custom domains** → add `YOUR_DOMAIN`
 - [ ] Sign in works — confirms CORS (`CORS_ALLOWED_ORIGINS` includes the Pages
       origin) and JWT are correct. Browser console shows **no** CORS errors.
 - [ ] Upload a file in any form (e.g. school logo, worksheet) — the green progress
-      bar advances and the file renders back via `/backend/files?p=…`.
+      bar advances and the file renders back via `/backend/files?p=…`. (If uploads
+      500, check `apps/api/var/log` and that `storage/uploads` is writable by `www`.)
+- [ ] No *"proxy class not found"* errors on pages with related data — confirms
+      `orm:generate-proxies` ran (a symptom of skipping §1.5's proxy step).
 - [ ] Dashboards render with seeded data (no empty states from a missing seed).
 - [ ] (When ready) flip `RBAC_ENFORCE=true` in the API `.env` **after** verifying
       the grant matrix in staging, then restart PHP.
@@ -237,8 +263,9 @@ cd /www/wwwroot/api.YOUR_DOMAIN
 git pull
 cd apps/api
 composer install --no-dev --optimize-autoloader
-composer migrate          # applies any new migrations; no-op if none
-# (uploads/ is left untouched — never delete it)
+composer migrate                          # applies new migrations; no-op if none
+php bin/console.php orm:generate-proxies   # refresh proxies after entity changes
+# (storage/ and var/ are left untouched — never delete storage/uploads)
 
 # Frontend
 # Push to the connected branch → Cloudflare Pages rebuilds automatically,
