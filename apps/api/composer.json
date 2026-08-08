@@ -37,6 +37,9 @@
     "sort-packages": true,
     "allow-plugins": {
       "php-di/php-di": true
+    },
+    "platform": {
+      "ext-redis": false
     }
   },
   "scripts": {
