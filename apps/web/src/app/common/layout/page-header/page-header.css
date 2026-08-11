@@ -1,0 +1,16 @@
+:host { display: block; }
+
+/* Premium brand tile for the header icon — matches the Subject Hub / dashboard
+   marks so every page header reads as one system. */
+.avatar {
+  background: linear-gradient(135deg, var(--brand-500), var(--brand-700)) !important;
+  color: #fff !important;
+  border-radius: .9rem !important;
+  box-shadow: 0 8px 18px -8px rgba(var(--brand-rgb), .55);
+}
+.avatar app-icon { color: #fff; }
+
+h1 { font-weight: 700; letter-spacing: -.01em; }
+
+.breadcrumb { --bs-breadcrumb-divider-color: var(--bs-secondary-color); }
+.breadcrumb-item.active { color: var(--brand-700); font-weight: 600; }
