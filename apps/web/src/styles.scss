@@ -343,6 +343,10 @@ a > .card:hover,
   padding-bottom: 0.9rem;
 }
 .table > tbody td { padding-top: 0.85rem; padding-bottom: 0.85rem; vertical-align: middle; }
+/* Every data table gets the same subtle brand row-hover — even the bespoke ones
+   that never opted into .table-hover — so lists read consistently across roles. */
+.table > tbody > tr { transition: background-color 0.12s ease; }
+.table > tbody > tr:hover > * { background-color: var(--bs-table-hover-bg); }
 .table-round {
   border-collapse: separate;
   border-spacing: 0;
