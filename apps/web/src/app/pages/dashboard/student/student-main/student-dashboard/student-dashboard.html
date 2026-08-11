@@ -1,9 +1,10 @@
-<div class="dash-hero mb-4 d-flex align-items-center flex-wrap gap-2">
-  <div>
+<div class="dash-hero mb-4">
+  <div class="dash-hero-mark"><app-icon name="school" [size]="24" /></div>
+  <div class="min-w-0 flex-grow-1">
     <h4 class="fw-bold mb-1">Welcome back, {{ firstName() }} 👋</h4>
     <p class="text-body-secondary mb-0">Here's what to focus on today.</p>
   </div>
-  @if (classLabel()) { <span class="badge bg-primary-subtle text-primary ms-auto align-self-start">{{ classLabel() }}</span> }
+  @if (classLabel()) { <span class="dash-hero-chip">{{ classLabel() }}</span> }
 </div>
 
 @if (loading()) {
