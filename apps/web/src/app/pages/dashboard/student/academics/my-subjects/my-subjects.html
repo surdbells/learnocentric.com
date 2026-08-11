@@ -20,7 +20,9 @@
               <span class="badge bg-{{ progressTone(s.progress) }}-subtle text-{{ progressTone(s.progress) }}">{{ s.progress }}%</span>
             </div>
 
-            <h6 class="fw-semibold mb-1">{{ s.name }}</h6>
+            <h6 class="fw-semibold mb-1">
+              <a class="subj-link" [routerLink]="['/student/academics/subjects', s.id]">{{ s.name }}</a>
+            </h6>
             @if (s.teacher) {
               <div class="text-body-secondary small mb-3"><app-icon name="person" [size]="14" /> {{ s.teacher }}</div>
             } @else {
@@ -40,12 +42,12 @@
                   <div class="small text-body-secondary">Up next</div>
                   <div class="fw-medium lh-sm">{{ s.next_topic.title }}</div>
                 </div>
-                <a class="btn btn-sm btn-success w-100" [routerLink]="['/student/academics/learn']">
-                  <app-icon name="play_arrow" [size]="16" /> Continue learning
+                <a class="btn btn-sm btn-success w-100" [routerLink]="['/student/academics/subjects', s.id]">
+                  <app-icon name="grid_view" [size]="16" /> Open subject
                 </a>
               } @else {
                 <div class="text-success small mb-2"><app-icon name="check_circle" [size]="16" /> All topics complete</div>
-                <a class="btn btn-sm btn-outline-secondary w-100" [routerLink]="['/student/academics/learn']">Review lessons</a>
+                <a class="btn btn-sm btn-outline-secondary w-100" [routerLink]="['/student/academics/subjects', s.id]">Open subject</a>
               }
             </div>
           </div>

@@ -1,0 +1,195 @@
+@if (loading()) {
+  <div class="hub-hero skeleton-hero mb-3"><app-skeleton-loader [rows]="3" /></div>
+  <app-skeleton-loader [rows]="6" />
+} @else if (!data()) {
+  <div class="card border-0 shadow-sm p-5 text-center text-body-secondary">
+    We couldn't load this subject. <a routerLink="/student/academics/my-subjects">Back to My Subjects</a>
+  </div>
+} @else {
+  @let d = data();
+
+  <!-- Back -->
+  <a routerLink="/student/academics/my-subjects" class="hub-back">
+    <app-icon name="arrow_back" [size]="18" /> My Subjects
+  </a>
+
+  <!-- Hero -->
+  <section class="hub-hero mb-3">
+    <div class="hub-hero-main">
+      <div class="hub-hero-icon"><app-icon name="menu_book" [size]="26" /></div>
+      <div class="min-w-0">
+        <div class="d-flex align-items-center gap-2 flex-wrap">
+          <h1 class="hub-title mb-0">{{ d.name }}</h1>
+          @if (d.code) { <span class="hub-chip">{{ d.code }}</span> }
+        </div>
+        <p class="hub-sub mb-0">
+          @if (d.teacher) { <app-icon name="person" [size]="15" /> {{ d.teacher }} · }
+          {{ d.topic_count }} {{ d.topic_count === 1 ? 'topic' : 'topics' }}
+          · {{ d.completed_topics }} completed
+        </p>
+        @if (d.next_topic) {
+          <a [routerLink]="links.learn" class="btn btn-success btn-sm hub-cta mt-3">
+            <app-icon name="play_arrow" [size]="18" /> Continue: {{ d.next_topic.title }}
+          </a>
+        } @else if (d.topic_count) {
+          <span class="hub-done mt-3"><app-icon name="verified" [size]="18" /> All topics complete — nice work!</span>
+        }
+      </div>
+    </div>
+    <div class="hub-hero-ring">
+      <app-stat-ring [value]="d.progress" [tone]="progressTone(d.progress)" caption="complete" [size]="112" [stroke]="10" />
+    </div>
+  </section>
+
+  <!-- Quick-access tiles -->
+  <div class="hub-tiles mb-3">
+    @for (t of tabs(); track t.key) {
+      <button type="button" class="hub-tile" [class.is-active]="tab() === t.key" (click)="tab.set(t.key)">
+        <span class="hub-tile-n">{{ t.count }}</span>
+        <span class="hub-tile-l">{{ t.label }}</span>
+      </button>
+    }
+  </div>
+
+  <!-- Section switcher -->
+  <div class="card border-0 shadow-sm">
+    <div class="card-body">
+      <app-tab-bar [tabs]="tabs()" [(active)]="tab" class="mb-3 d-block" />
+
+      @switch (tab()) {
+        <!-- LESSONS -->
+        @case ('lessons') {
+          @if (!d.lessons.length) { <p class="hub-empty">No lessons published yet.</p> }
+          @for (l of d.lessons; track l.id) {
+            <div class="hub-row">
+              <div class="hub-row-lead">
+                <span class="hub-week">W{{ l.week_number }}</span>
+                <div class="min-w-0">
+                  <div class="hub-row-title">{{ l.title }}</div>
+                  @if (l.objective) { <div class="hub-row-meta text-truncate">{{ l.objective }}</div> }
+                </div>
+              </div>
+              <div class="hub-row-end">
+                <div class="hub-mini-bar" [attr.title]="l.progress + '%'">
+                  <span [class]="'hub-mini-fill tone-' + progressTone(l.progress)" [style.width.%]="l.progress"></span>
+                </div>
+                <span class="hub-row-num">{{ l.completed_stages }}/{{ l.total_stages }}</span>
+                <a [routerLink]="links.learn" class="btn btn-sm" [class.btn-success]="!l.complete" [class.btn-outline-secondary]="l.complete">
+                  {{ l.complete ? 'Review' : 'Continue' }}
+                </a>
+              </div>
+            </div>
+          }
+        }
+
+        <!-- WORKSHEETS -->
+        @case ('worksheets') {
+          @if (!d.worksheets.length) { <p class="hub-empty">No worksheets for this subject yet.</p> }
+          @for (w of d.worksheets; track w.id) {
+            <div class="hub-row">
+              <div class="hub-row-lead">
+                <span class="hub-ic tone-info"><app-icon name="assignment" [size]="18" /></span>
+                <div class="min-w-0">
+                  <div class="hub-row-title">{{ w.title }}</div>
+                  <div class="hub-row-meta">{{ w.topic }} · {{ w.total_marks }} marks</div>
+                </div>
+              </div>
+              <div class="hub-row-end">
+                @if (w.status === 'graded') { <span class="hub-score">{{ w.score }}/{{ w.total_marks }}</span> }
+                <app-status-badge [value]="w.status" [tone]="worksheetTones[w.status]" />
+                <a [routerLink]="links.worksheets" class="btn btn-sm btn-success">
+                  {{ w.status === 'not_started' ? 'Start' : 'Open' }}
+                </a>
+              </div>
+            </div>
+          }
+        }
+
+        <!-- QUIZZES -->
+        @case ('quizzes') {
+          @if (!d.assessments.length) { <p class="hub-empty">No quizzes for this subject yet.</p> }
+          @for (a of d.assessments; track a.id) {
+            <div class="hub-row">
+              <div class="hub-row-lead">
+                <span class="hub-ic tone-primary"><app-icon name="quiz" [size]="18" /></span>
+                <div class="min-w-0">
+                  <div class="hub-row-title">{{ a.title }}</div>
+                  @if (a.topic) { <div class="hub-row-meta">{{ a.topic }}</div> }
+                </div>
+              </div>
+              <div class="hub-row-end">
+                @if (a.attempted) {
+                  <span class="hub-score" [class.text-success]="a.best_score >= 50">{{ a.best_score }}%</span>
+                }
+                <app-status-badge [value]="a.attempted ? 'attempted' : 'new'" [tone]="a.attempted ? 'success' : 'primary'" />
+                <a [routerLink]="links.assessments" class="btn btn-sm btn-success">{{ a.attempted ? 'Retake' : 'Start' }}</a>
+              </div>
+            </div>
+          }
+        }
+
+        <!-- LIVE CLASSES -->
+        @case ('live') {
+          @if (!d.live_classes.length) { <p class="hub-empty">No live classes scheduled for this subject.</p> }
+          @for (lc of d.live_classes; track lc.id) {
+            <div class="hub-row">
+              <div class="hub-row-lead">
+                <span class="hub-ic tone-danger"><app-icon name="videocam" [size]="18" /></span>
+                <div class="min-w-0">
+                  <div class="hub-row-title">{{ lc.title }}</div>
+                  <div class="hub-row-meta">
+                    @if (lc.topic) { {{ lc.topic }} · } {{ lc.scheduled_at | date:'MMM d, h:mm a' }}
+                  </div>
+                </div>
+              </div>
+              <div class="hub-row-end">
+                <app-status-badge [value]="lc.status" [tone]="liveTones[lc.status]" />
+                <a [routerLink]="links.live" class="btn btn-sm" [class.btn-success]="liveJoinable(lc.status)" [class.btn-outline-secondary]="!liveJoinable(lc.status)">
+                  {{ lc.status === 'live' ? 'Join' : (liveJoinable(lc.status) ? 'View' : 'Recap') }}
+                </a>
+              </div>
+            </div>
+          }
+        }
+
+        <!-- RESOURCES -->
+        @case ('resources') {
+          @if (!d.resources.length) { <p class="hub-empty">No resources attached to this subject's lessons yet.</p> }
+          @for (r of d.resources; track $index) {
+            <div class="hub-row">
+              <div class="hub-row-lead">
+                <span class="hub-ic tone-warning"><app-icon [name]="resourceIcon(r.type)" [size]="18" /></span>
+                <div class="min-w-0">
+                  <div class="hub-row-title">{{ r.title || r.name || r.type || 'Resource' }}</div>
+                  <div class="hub-row-meta">{{ r.topic }}</div>
+                </div>
+              </div>
+              <div class="hub-row-end">
+                <a [href]="resourceHref(r)" target="_blank" rel="noopener" class="btn btn-sm btn-outline-secondary">
+                  <app-icon name="open_in_new" [size]="16" /> Open
+                </a>
+              </div>
+            </div>
+          }
+        }
+
+        <!-- FEEDBACK -->
+        @case ('feedback') {
+          @if (!d.feedback.length) { <p class="hub-empty">No feedback for this subject yet.</p> }
+          @for (f of d.feedback; track f.id) {
+            <div class="hub-feedback">
+              <div class="d-flex align-items-center justify-content-between mb-1">
+                <span class="hub-row-title">{{ f.topic || 'General' }}</span>
+                @if (f.score !== null && f.score !== undefined) { <span class="hub-score text-success">{{ f.score }}%</span> }
+              </div>
+              @if (f.message) { <p class="hub-fb-msg mb-1">{{ f.message }}</p> }
+              <div class="hub-row-meta">
+                @if (f.author) { {{ f.author }} · } {{ f.created_at | date:'MMM d, y' }}
+              </div>
+            </div>
+          }
+        }
+      }
+    </div>
+  </div>
+}

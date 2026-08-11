@@ -8,8 +8,11 @@ use App\Application\Support\Json;
 use App\Domain\Entity\Assessment;
 use App\Domain\Entity\AssessmentAttempt;
 use App\Domain\Entity\Enrollment;
+use App\Domain\Entity\FeedbackNote;
+use App\Domain\Entity\LiveClass;
 use App\Domain\Entity\PortfolioEntry;
 use App\Domain\Entity\StudentTopicNote;
+use App\Domain\Entity\Subject;
 use App\Domain\Entity\Topic;
 use App\Domain\Entity\TopicDeliveryPack;
 use App\Domain\Entity\TopicProgress;
@@ -138,6 +141,173 @@ final class LearnAction
         usort($rows, static fn ($a, $b) => strcmp($a['name'], $b['name']));
 
         return Json::write($response, ['data' => $rows, 'meta' => ['total' => count($rows)]]);
+    }
+
+    /**
+     * GET /learn/subjects/{id} — one subject's whole world for a learner: its
+     * lessons (topic journey), worksheets, quizzes, live classes, resources and
+     * feedback, each scoped to this student. Every figure is real activity.
+     */
+    public function subject(Request $request, Response $response, array $args): Response
+    {
+        $student = $this->currentUser($request);
+        $subject = $this->em->getRepository(Subject::class)->find((int) $args['id']);
+        if ($subject === null) {
+            return Json::error($response, 'Subject not found.', 404);
+        }
+        if ($student->getInstitution() !== null
+            && $subject->getInstitution()->getId() !== $student->getInstitution()->getId()) {
+            return Json::error($response, 'This subject is not available to you.', 403);
+        }
+
+        $classIds = $this->studentClassIds($student);
+
+        // Published topics of THIS subject that the student may see.
+        $topics = array_values(array_filter(
+            $this->publishedTopics($student),
+            static fn (Topic $t) => $t->getSubject()->getId() === $subject->getId()
+        ));
+
+        // Lessons (topic journey) + aggregate progress + lesson resources.
+        $lessons = [];
+        $resources = [];
+        $seenResources = [];
+        $progressTotal = 0;
+        $completed = 0;
+        $nextTopic = null;
+        foreach ($topics as $topic) {
+            $summary = $this->summary($topic, $this->stages($topic, $student));
+            $lessons[] = [
+                'id' => $topic->getId(),
+                'title' => $summary['title'],
+                'week_number' => $summary['week_number'],
+                'progress' => $summary['progress'],
+                'completed_stages' => $summary['completed_stages'],
+                'total_stages' => $summary['total_stages'],
+                'next_stage' => $summary['next_stage'],
+                'complete' => $summary['complete'],
+                'objective' => $topic->toArray()['objective'] ?? null,
+            ];
+            $progressTotal += $summary['progress'];
+            if ($summary['complete']) {
+                $completed++;
+            } elseif ($nextTopic === null) {
+                $nextTopic = ['id' => $topic->getId(), 'title' => $summary['title'], 'week_number' => $summary['week_number']];
+            }
+
+            $pack = $this->em->getRepository(TopicDeliveryPack::class)->findOneBy(['topic' => $topic]);
+            if ($pack !== null && $pack->getStatus() === Lifecycle::PUBLISHED) {
+                $d = $pack->toArray();
+                $addResource = function (array $r) use (&$resources, &$seenResources): void {
+                    $key = (string) ($r['url'] ?? $r['path'] ?? '');
+                    if ($key === '' || isset($seenResources[$key])) {
+                        return;
+                    }
+                    $seenResources[$key] = true;
+                    $resources[] = $r;
+                };
+                if (!empty($d['video_url'])) {
+                    $addResource(['topic_id' => $topic->getId(), 'topic' => $summary['title'], 'type' => 'video', 'title' => 'Lesson video', 'url' => $d['video_url']]);
+                }
+                foreach (($d['media'] ?? []) as $m) {
+                    $addResource(array_merge(['topic_id' => $topic->getId(), 'topic' => $summary['title']], is_array($m) ? $m : []));
+                }
+            }
+        }
+
+        // Worksheets on this subject's topics + my submission status.
+        $worksheets = [];
+        if (!empty($topics)) {
+            foreach ($this->em->getRepository(Worksheet::class)->findBy(['topic' => $topics]) as $w) {
+                if ($w->getApprovalStatus() !== Lifecycle::PUBLISHED) {
+                    continue;
+                }
+                $sub = $this->em->getRepository(WorksheetSubmission::class)->findOneBy(['worksheet' => $w, 'student' => $student]);
+                $graded = $sub !== null && $sub->getStatus() === WorksheetSubmission::GRADED;
+                $worksheets[] = [
+                    'id' => $w->getId(),
+                    'title' => $w->getTitle(),
+                    'topic' => $w->getTopic()->getTitle(),
+                    'total_marks' => $w->getTotalMarks(),
+                    'status' => $sub === null ? 'not_started' : ($graded ? 'graded' : 'submitted'),
+                    'score' => $graded ? $sub->getScore() : null,
+                ];
+            }
+        }
+
+        // Quizzes/assessments on this subject + my best graded attempt.
+        $assessments = [];
+        foreach ($this->em->getRepository(Assessment::class)->findBy(['subject' => $subject]) as $a) {
+            if ($a->getApprovalStatus() !== Lifecycle::PUBLISHED) {
+                continue;
+            }
+            $attempt = $this->em->getRepository(AssessmentAttempt::class)->findOneBy(
+                ['assessment' => $a, 'student' => $student, 'status' => AssessmentAttempt::GRADED],
+                ['percentage' => 'DESC']
+            );
+            $assessments[] = [
+                'id' => $a->getId(),
+                'title' => $a->getTitle(),
+                'topic' => $a->getTopic()?->getTitle(),
+                'attempted' => $attempt !== null,
+                'best_score' => $attempt?->getPercentage(),
+            ];
+        }
+
+        // Live classes for this subject, visible to the student's class (or class-agnostic).
+        $liveClasses = [];
+        $lcRows = $this->em->createQueryBuilder()->select('lc')->from(LiveClass::class, 'lc')
+            ->where('lc.subject = :subj')->setParameter('subj', $subject)
+            ->orderBy('lc.scheduledAt', 'DESC')->setMaxResults(12)
+            ->getQuery()->getResult();
+        foreach ($lcRows as $lc) {
+            $cid = $lc->getSchoolClass()?->getId();
+            if ($cid !== null && !empty($classIds) && !in_array($cid, $classIds, true)) {
+                continue;
+            }
+            $liveClasses[] = [
+                'id' => $lc->getId(),
+                'title' => $lc->getTitle(),
+                'topic' => $lc->getTopic()?->getTitle(),
+                'scheduled_at' => $lc->getScheduledAt()->format(DATE_ATOM),
+                'status' => $lc->getStatus(),
+            ];
+        }
+
+        // Recent feedback tied to this subject's topics.
+        $feedback = [];
+        if (!empty($topics)) {
+            foreach ($this->em->getRepository(FeedbackNote::class)->findBy(['student' => $student, 'topic' => $topics], ['id' => 'DESC'], 5) as $f) {
+                $arr = $f->toArray();
+                $feedback[] = [
+                    'id' => $arr['id'],
+                    'topic' => $arr['topic'],
+                    'author' => $arr['author'],
+                    'message' => $arr['message'],
+                    'score' => $arr['score'],
+                    'created_at' => $arr['created_at'],
+                ];
+            }
+        }
+
+        $count = max(1, count($topics));
+
+        return Json::write($response, [
+            'id' => $subject->getId(),
+            'name' => $subject->getName(),
+            'code' => $subject->toArray()['code'] ?? null,
+            'teacher' => $this->teacherFor($subject, $classIds),
+            'topic_count' => count($topics),
+            'completed_topics' => $completed,
+            'progress' => (int) round($progressTotal / $count),
+            'next_topic' => $nextTopic,
+            'lessons' => $lessons,
+            'worksheets' => $worksheets,
+            'assessments' => $assessments,
+            'live_classes' => $liveClasses,
+            'resources' => $resources,
+            'feedback' => $feedback,
+        ]);
     }
 
     /** The teacher assigned to a subject for the student's class(es), if any. */
