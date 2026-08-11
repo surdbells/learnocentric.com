@@ -15,6 +15,23 @@
 }
 .card h6 { letter-spacing: -.005em; }
 
+/* Long text must never spill out of a card */
+.card .card-body { min-width: 0; overflow-wrap: anywhere; }
+
+/* Weak areas — long sentences as a wrapping list (not overflowing pills) */
+.dash-weak li {
+  display: flex;
+  gap: .4rem;
+  align-items: flex-start;
+  font-size: .85rem;
+  line-height: 1.35;
+  padding: .3rem 0;
+  color: var(--bs-danger-text-emphasis, var(--bs-danger));
+}
+.dash-weak li + li { border-top: 1px solid var(--bs-border-color); }
+.dash-weak li app-icon { flex: none; margin-top: .08rem; }
+.dash-weak li span { min-width: 0; }
+
 /* Progress / completion bar */
 .cl-bar {
   height: 8px;

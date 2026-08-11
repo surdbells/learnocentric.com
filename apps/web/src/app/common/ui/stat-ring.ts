@@ -10,14 +10,16 @@ import {Tone, toneVars} from './ui-types';
   selector: 'app-stat-ring',
   standalone: true,
   template: `
-    <div class="ring" [style.--ui-tone]="tv().color" [style.width.px]="size()">
+    <div class="ring" [style.--ui-tone]="tv().color" [style.--ring-fs.px]="size() * 0.27" [style.width.px]="size()">
       <svg [attr.width]="size()" [attr.height]="size()" [attr.viewBox]="'0 0 ' + size() + ' ' + size()">
         <circle [attr.cx]="c()" [attr.cy]="c()" [attr.r]="r()" fill="none"
-                stroke="var(--bs-border-color)" [attr.stroke-width]="stroke()" />
-        <circle [attr.cx]="c()" [attr.cy]="c()" [attr.r]="r()" fill="none"
-                stroke="var(--ui-tone)" [attr.stroke-width]="stroke()" stroke-linecap="round"
-                [attr.stroke-dasharray]="circ()" [attr.stroke-dashoffset]="offset()"
-                [attr.transform]="'rotate(-90 ' + c() + ' ' + c() + ')'" />
+                stroke="color-mix(in srgb, var(--ui-tone) 15%, transparent)" [attr.stroke-width]="stroke()" />
+        @if (value() > 0) {
+          <circle [attr.cx]="c()" [attr.cy]="c()" [attr.r]="r()" fill="none"
+                  stroke="var(--ui-tone)" [attr.stroke-width]="stroke()" stroke-linecap="round"
+                  [attr.stroke-dasharray]="circ()" [attr.stroke-dashoffset]="offset()"
+                  [attr.transform]="'rotate(-90 ' + c() + ' ' + c() + ')'" />
+        }
       </svg>
       <div class="ring-center">
         <span class="ring-value">{{ display() }}</span>
@@ -30,8 +32,8 @@ import {Tone, toneVars} from './ui-types';
     .ring { position: relative; display: inline-grid; place-items: center; }
     .ring svg { display: block; }
     .ring-center { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-    .ring-value { font-size: 1.15rem; font-weight: 700; color: var(--bs-emphasis-color); line-height: 1; }
-    .ring-cap { font-size: .68rem; color: var(--bs-secondary-color); margin-top: .15rem; }
+    .ring-value { font-size: var(--ring-fs, 1.15rem); font-weight: 700; color: var(--bs-emphasis-color); line-height: 1; letter-spacing: -.02em; }
+    .ring-cap { font-size: calc(var(--ring-fs, 1rem) * .42); color: var(--bs-secondary-color); margin-top: .15rem; }
   `],
 })
 export class StatRing {

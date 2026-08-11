@@ -68,9 +68,11 @@
           <div class="card border-0 shadow-sm h-100"><div class="card-body">
             <h6 class="fw-semibold mb-3"><app-icon name="monitoring" [size]="16" class="text-danger me-1" /> Weak areas to revise</h6>
             @if (weakAreas().length) {
-              <div class="d-flex flex-wrap gap-2">
-                @for (w of weakAreas(); track $index) { <span class="badge bg-danger-subtle text-danger fw-normal">{{ w }}</span> }
-              </div>
+              <ul class="dash-weak list-unstyled mb-0">
+                @for (w of weakAreas(); track $index) {
+                  <li><app-icon name="chevron_right" [size]="15" class="text-danger" /><span>{{ w }}</span></li>
+                }
+              </ul>
             } @else { <div class="text-body-secondary small">No weak areas flagged — keep it up!</div> }
           </div></div>
         </div>

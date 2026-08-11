@@ -249,8 +249,8 @@ a > .card:hover,
 .dash-hero {
   display: flex;
   align-items: center;
-  gap: 1rem;
-  padding: 1.25rem 1.5rem;
+  gap: 1.15rem;
+  padding: 1.6rem 1.85rem;
   border-radius: 1.1rem;
   background:
     radial-gradient(120% 160% at 0% 0%, rgba(var(--brand-rgb), 0.14), transparent 55%),
@@ -555,7 +555,6 @@ html, .offcanvas-body {
 }
 
 /* ---- Shared dashboard widgets ---- */
-.dash-hero { padding: 4px 0; }
 .dash-skel { height: 84px; border-radius: 8px;
   background: linear-gradient(90deg, var(--bs-tertiary-bg) 25%, var(--bs-secondary-bg) 37%, var(--bs-tertiary-bg) 63%);
   background-size: 400% 100%; animation: dashShimmer 1.4s ease infinite; }
