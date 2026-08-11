@@ -244,6 +244,46 @@ a > .card:hover,
   .lo-row-end { width: 100%; justify-content: flex-end; }
 }
 
+/* ---- Premium dashboard hero — gradient brand surface shared by every role
+   dashboard. Structure: mark + body (+ optional chip / action). ---- */
+.dash-hero {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.25rem 1.5rem;
+  border-radius: 1.1rem;
+  background:
+    radial-gradient(120% 160% at 0% 0%, rgba(var(--brand-rgb), 0.14), transparent 55%),
+    linear-gradient(135deg, rgba(var(--brand-rgb), 0.10), rgba(var(--brand-rgb), 0.02));
+  border: 1px solid rgba(var(--brand-rgb), 0.18);
+}
+.dash-hero-mark {
+  flex: none;
+  width: 48px; height: 48px;
+  border-radius: 0.85rem;
+  display: inline-flex; align-items: center; justify-content: center;
+  color: #fff;
+  background: linear-gradient(135deg, var(--brand-500), var(--brand-700));
+  box-shadow: 0 8px 18px -6px rgba(var(--brand-rgb), 0.55);
+}
+.dash-hero h4 { letter-spacing: -0.01em; }
+.dash-hero-chip {
+  flex: none;
+  align-self: flex-start;
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 0.3rem 0.7rem;
+  border-radius: 999px;
+  color: var(--brand-700);
+  background: rgba(var(--brand-rgb), 0.14);
+  white-space: nowrap;
+}
+.min-w-0 { min-width: 0; }
+@media (max-width: 575px) {
+  .dash-hero { padding: 1rem 1.1rem; }
+  .dash-hero-mark { display: none; }
+}
+
 .btn {
   --bs-btn-font-weight: 500;
   --bs-btn-border-radius: var(--bs-border-radius);
