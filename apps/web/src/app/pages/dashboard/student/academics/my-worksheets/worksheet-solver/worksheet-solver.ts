@@ -5,6 +5,7 @@ import {Subject} from 'rxjs';
 import {debounceTime} from 'rxjs/operators';
 import {ToastrService} from 'ngx-toastr';
 import {Icon} from '../../../../../../common/icon/icon';
+import {StatRing} from '../../../../../../common/ui';
 import {ApiService} from '../../../../../../common/service/api.service';
 
 /**
@@ -16,7 +17,7 @@ import {ApiService} from '../../../../../../common/service/api.service';
 @Component({
   selector: 'app-worksheet-solver',
   standalone: true,
-  imports: [Icon, FormsModule],
+  imports: [Icon, FormsModule, StatRing],
   templateUrl: './worksheet-solver.html',
   styleUrl: './worksheet-solver.css',
 })

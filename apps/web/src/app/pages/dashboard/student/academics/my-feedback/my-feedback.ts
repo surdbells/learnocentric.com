@@ -5,7 +5,7 @@ import {ToastrService} from 'ngx-toastr';
 import {PageHeader} from '../../../../../common/layout/page-header/page-header';
 import {ApiService} from '../../../../../common/service/api.service';
 import {Icon} from '../../../../../common/icon/icon';
-import {KpiItem, KpiStrip, TabBar, TabItem} from '../../../../../common/ui';
+import {KpiItem, KpiStrip, StatRing, TabBar, TabItem} from '../../../../../common/ui';
 
 const SOURCE_ICON: Record<string, string> = {quiz: 'quiz', worksheet: 'assignment', portfolio: 'folder_special', general: 'chat'};
 
@@ -18,7 +18,7 @@ const SOURCE_ICON: Record<string, string> = {quiz: 'quiz', worksheet: 'assignmen
 @Component({
   selector: 'app-my-feedback',
   standalone: true,
-  imports: [Icon, PageHeader, DatePipe, TitleCasePipe, RouterLink, KpiStrip, TabBar],
+  imports: [Icon, PageHeader, DatePipe, TitleCasePipe, RouterLink, KpiStrip, TabBar, StatRing],
   templateUrl: './my-feedback.html',
   styleUrl: './my-feedback.css',
 })

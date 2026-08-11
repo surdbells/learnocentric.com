@@ -103,12 +103,7 @@
       <!-- Summary -->
       <div class="card border-0 shadow-sm mb-4"><div class="card-body text-center">
         <div class="fw-semibold mb-2 text-start">Feedback Summary</div>
-        <svg viewBox="0 0 120 120" class="ring">
-          <circle cx="60" cy="60" r="52" class="ring-bg" />
-          <circle cx="60" cy="60" r="52" class="ring-fg" [style.stroke-dasharray]="326.7" [style.stroke-dashoffset]="326.7 - (326.7 * reviewedPct() / 100)" />
-          <text x="60" y="56" class="ring-pct">{{ reviewedPct() }}%</text>
-          <text x="60" y="74" class="ring-sub">Reviewed</text>
-        </svg>
+        <app-stat-ring [value]="reviewedPct()" caption="Reviewed" tone="success" [size]="120" [stroke]="10" />
         <div class="small text-start mt-2">
           <div class="d-flex justify-content-between py-1"><span><i class="leg bg-success"></i> Reviewed</span><span class="fw-semibold">{{ reviewedCount() }}</span></div>
           <div class="d-flex justify-content-between py-1"><span><i class="leg bg-secondary"></i> Needs Review</span><span class="fw-semibold">{{ needsReview() }}</span></div>
