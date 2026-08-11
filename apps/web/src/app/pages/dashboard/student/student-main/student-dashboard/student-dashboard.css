@@ -41,12 +41,10 @@
   white-space: nowrap;
 }
 
-/* ---- Premium card elevation (scoped to this component) ---- */
-.card {
-  border-radius: 1rem;
-  border: 1px solid var(--bs-border-color);
-  transition: transform .16s ease, box-shadow .16s ease;
-}
+/* ---- Premium card elevation (scoped to this component) ----
+   Radius comes from the global card token; this adds the hover-lift that the
+   global system reserves for interactive cards — the dashboard reads as one. */
+.card { transition: transform .16s ease, box-shadow .16s ease; }
 .card:hover {
   transform: translateY(-2px);
   box-shadow: 0 12px 26px -16px rgba(0, 0, 0, .4) !important;
