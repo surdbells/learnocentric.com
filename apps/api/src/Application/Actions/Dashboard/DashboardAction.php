@@ -193,7 +193,7 @@ final class DashboardAction
             'class_performance' => $this->classPerformance($assignments),
             'today_schedule' => $todaySchedule,
             'current_topics' => $currentTopics,
-            'upcoming' => $this->upcomingLiveList($me),
+            'upcoming' => array_map(static fn (LiveClass $lc) => $lc->toArray(), $this->upcomingLiveList($me)),
         ]);
     }
 

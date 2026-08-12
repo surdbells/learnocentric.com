@@ -137,7 +137,7 @@
           <h6 class="fw-semibold mb-0"><app-icon name="videocam" [size]="16" class="text-danger me-1" /> Upcoming live classes</h6>
           <a class="small text-decoration-none" [routerLink]="['/teacher/academics/live-classes']">Manage →</a>
         </div>
-        @for (lc of upcomingLive(); track lc.id) {
+        @for (lc of upcomingLive(); track lc.id ?? $index) {
           <div class="d-flex align-items-center gap-2 py-2 border-top">
             <span class="action-ic bg-danger-subtle text-danger"><app-icon name="videocam" [size]="16" /></span>
             <div class="flex-grow-1">
