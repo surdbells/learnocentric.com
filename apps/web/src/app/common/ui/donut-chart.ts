@@ -13,6 +13,8 @@ export interface DonutSegment { label: string; value: number; tone?: Tone; }
   template: `
     <div class="dc-wrap">
       <svg viewBox="0 0 120 120" class="dc" role="img">
+        <circle cx="60" cy="60" [attr.r]="r" fill="none"
+                stroke="var(--bs-secondary-bg)" [attr.stroke-width]="stroke" />
         @for (a of arcs(); track $index) {
           <circle cx="60" cy="60" [attr.r]="r"
                   [attr.stroke]="a.color" [attr.stroke-dasharray]="a.dash" [attr.stroke-dashoffset]="a.offset"
@@ -70,10 +72,14 @@ export class DonutChart {
 
   protected readonly arcs = computed(() => {
     const tot = this.total() || 1;
+    const segs = this.computed().filter(s => s.value > 0);
+    // Thin gap between segments for a cleaner, modern donut (none when there's one slice).
+    const gap = segs.length > 1 ? 2 : 0;
     let acc = 0;
-    return this.computed().map(s => {
+    return segs.map(s => {
       const frac = s.value / tot;
-      const dash = `${(frac * this.circumference).toFixed(2)} ${this.circumference.toFixed(2)}`;
+      const len = Math.max(0.5, frac * this.circumference - gap);
+      const dash = `${len.toFixed(2)} ${(this.circumference - len).toFixed(2)}`;
       const offset = (-acc * this.circumference).toFixed(2);
       acc += frac;
       return {color: s.color, dash, offset};
