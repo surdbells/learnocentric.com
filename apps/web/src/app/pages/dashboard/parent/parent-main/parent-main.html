@@ -1,6 +1,9 @@
 <div class="dash-hero mb-4">
-  <h4 class="fw-bold mb-1">Hello, {{ firstName() }} 👋</h4>
-  <p class="text-body-secondary mb-0">Your children's learning at a glance.</p>
+  <div class="dash-hero-mark"><app-icon name="family_restroom" [size]="24" /></div>
+  <div class="min-w-0 flex-grow-1">
+    <h4 class="fw-bold mb-1">Hello, {{ firstName() }} 👋</h4>
+    <p class="text-body-secondary mb-0">Your children's learning at a glance.</p>
+  </div>
 </div>
 
 @if (loading()) {
