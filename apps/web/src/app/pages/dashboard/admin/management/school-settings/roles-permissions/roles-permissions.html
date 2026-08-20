@@ -42,8 +42,10 @@
                 <button type="button" class="btn btn-sm btn-outline-secondary" (click)="openEdit(r, !r.editable)" [title]="r.editable ? 'Edit permissions' : 'View permissions'">
                   <app-icon [name]="r.editable ? 'edit' : 'visibility'" [size]="15" />
                 </button>
+                @if (r.assignable) {
+                  <button type="button" class="btn btn-sm btn-outline-secondary ms-1" (click)="openAssign(r)" title="Assign staff"><app-icon name="person_add" [size]="15" /></button>
+                }
                 @if (r.editable) {
-                  <button type="button" class="btn btn-sm btn-outline-secondary ms-1" (click)="openAssign(r)" title="Assign users"><app-icon name="person_add" [size]="15" /></button>
                   <button type="button" class="btn btn-sm btn-outline-danger ms-1" (click)="remove(r)" title="Delete role"><app-icon name="delete" [size]="15" /></button>
                 }
               </td>

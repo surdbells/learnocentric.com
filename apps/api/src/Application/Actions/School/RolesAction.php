@@ -67,6 +67,10 @@ final class RolesAction
             $rows[] = $role->toArray() + [
                 'users_assigned' => $usersAssigned,
                 'editable' => $editable,
+                // Permissions stay read-only for system roles, but staff can still be
+                // assigned to school-scoped staff roles (e.g. Academic Lead) — not just
+                // custom roles. Platform, student and guardian roles are never assignable here.
+                'assignable' => $editable || $this->isAssignableSystemRole($role),
                 'grants' => $grants,
                 'permission_level' => $this->levelFor($grants),
                 'access_scope' => $role->getScope() === 'platform' ? 'Platform' : 'School',
@@ -180,9 +184,10 @@ final class RolesAction
         if ($institution === null) {
             return Json::write($response, ['data' => []]);
         }
+        // Any institution staff member may be re-roled — everyone except learners and guardians.
         $users = $this->em->createQueryBuilder()->select('u', 'r')->from(User::class, 'u')->join('u.role', 'r')
-            ->where('u.institution = :inst')->andWhere('r.code IN (:staff)')
-            ->setParameter('inst', $institution)->setParameter('staff', ['teacher', 'academic_lead', 'school_admin', 'tutor_admin'])
+            ->where('u.institution = :inst')->andWhere('r.code NOT IN (:excluded)')
+            ->setParameter('inst', $institution)->setParameter('excluded', ['student', 'parent'])
             ->orderBy('u.firstName', 'ASC')->getQuery()->getResult();
 
         return Json::write($response, ['data' => array_map(static fn (User $u) => [
@@ -207,9 +212,14 @@ final class RolesAction
         if ($user === null || $role === null || $institution === null || $user->getInstitution()?->getId() !== $institution->getId()) {
             return Json::error($response, 'User or role not found in your institution.', 404);
         }
-        // Only assign visible roles: a system role or one of this institution's custom roles.
+        // Custom roles must belong to this institution…
         if (!$role->isSystem() && $role->getInstitution()?->getId() !== $institution->getId()) {
             return Json::error($response, 'That role is not available to your institution.', 403);
+        }
+        // …and system roles are only assignable here if they are school-scoped staff roles.
+        // This blocks a school admin from elevating anyone to a platform role (e.g. Super Admin).
+        if ($role->isSystem() && !$this->isAssignableSystemRole($role)) {
+            return Json::error($response, 'That role cannot be assigned from here.', 403);
         }
         $user->setRole($role);
         $this->em->flush();
@@ -219,6 +229,22 @@ final class RolesAction
     }
 
     // --- helpers ---
+
+    /** Learner / guardian roles are never a school-staff assignment target. */
+    private const NON_STAFF_ROLES = ['student', 'parent'];
+
+    /**
+     * A system role a school admin may assign staff to: school-scoped (never a
+     * platform role such as Super Admin) and not a learner/guardian role. This
+     * lets non-teaching academic staff roles (e.g. Academic Lead) receive members
+     * even though their permission set stays platform-managed and read-only.
+     */
+    private function isAssignableSystemRole(Role $role): bool
+    {
+        return $role->isSystem()
+            && $role->getScope() === 'school'
+            && !in_array($role->getCode(), self::NON_STAFF_ROLES, true);
+    }
 
     /** @return array<int,array{code:string,label:string}> */
     private function modules(): array

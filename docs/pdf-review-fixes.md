@@ -33,9 +33,9 @@ Captured from *Student & Teacher Review* and *SCHOOL_SUPER ADMIN* PDFs (annotate
 - ☐ **A4** (design) Enrollment as a **tab** within Classes & Learners; reduce left-nav clutter.
 - ☑ **A5** Subjects page → remove the "Catalogue subjects" stat (Super-Admin concern).
 - ☑ **A6** Approval Queue → add a **"Review"** (view item) action before Approve/Return.
-- ☐ **A7** "School Setup" → belongs to Super Admin (remove/relocate from school-admin nav).
+- ☑ **A7** "School Setup" → removed from school-admin & academy nav (and the Settings rail quick-action); /admin/setup route kept for deep-links.
 - ☑ **A8** Calendar → proper **month/week calendar** (not a list) per the PNG.
-- ☐ **A9** Settings & Permissions → assign roles to **non-teaching academic staff**.
+- ☑ **A9** Settings & Permissions → staff can now be assigned to school-scoped system staff roles (e.g. Academic Lead), not just custom roles; platform/learner/guardian roles stay unassignable (server-enforced).
 - ◐ **A10** (general) match the PNG feature flow — minor missing details. Blocked: needs the annotated PNGs (not committed to repo) to identify the specific gaps.
 
 ## Original two (from the message)
