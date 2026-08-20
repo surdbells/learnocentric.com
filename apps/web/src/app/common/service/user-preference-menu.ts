@@ -22,12 +22,9 @@ export class UserPreferenceMenu {
       ]
     },
 
-    { name: "Student", icon: "local_library", link: "admin/students",
-      children: [
-        { name: "Students", link: "/admin/students/" },
-        { name: "Enrollment", link: "/admin/enrollments" },
-      ]
-    },
+    // Enrolment is now done while adding a learner and in bulk from Classes &
+    // Learners, so "Students" is a single entry (PDF review A1).
+    { name: "Students", icon: "local_library", link: "/admin/students/" },
 
     { name: "Teacher", icon: "supervisor_account", link: "admin/teachers",
       children: [
@@ -89,13 +86,7 @@ export class UserPreferenceMenu {
       ]
     },
 
-    { name: "Student", icon: "local_library", link: "academy/students",
-      children: [
-        { name: "Students", link: "/academy/students/" },
-        { name: "Enrollment", link: "/academy/enrollments" },
-        { name: "New Student", link: "/academy/students/new" }
-      ]
-    },
+    { name: "Students", icon: "local_library", link: "/academy/students/" },
 
     { name: "Tutor", icon: "supervisor_account", link: "academy/teachers",
       children: [

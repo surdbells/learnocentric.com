@@ -27,7 +27,7 @@ Captured from *Student & Teacher Review* and *SCHOOL_SUPER ADMIN* PDFs (annotate
 - ☑ **T13** Add the "Assignments & Submissions" unified grading inbox (missing; needed for manual grading).
 
 ## School Admin portal
-- ☐ **A1** Merge "Students" + "Enrollment"; enroll (assign class) **while adding a learner**; remove the separate "New Student" tab.
+- ☑ **A1** Merge "Students" + "Enrollment"; enroll (assign class) **while adding a learner**; remove the separate "New Student" tab.
 - ☑ **A2** Remove the "New Teacher" tab — add staff from the Teachers page.
 - ☑ **A3** Merge the "Class" page into "Classes & Learners" (bring over the **delete** option).
 - ☐ **A4** (design) Enrollment as a **tab** within Classes & Learners; reduce left-nav clutter.
