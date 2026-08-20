@@ -59,6 +59,19 @@ export class ProgressReport {
   readonly topicBars = computed<BarItem[]>(() =>
     (this.report()?.topic_mastery ?? []).map((t: any) => ({label: t.topic, value: t.average, tone: MASTERY_TONE[t.mastery] ?? 'secondary'})));
 
+  // Skill progress — the competency track, drawn from reviewed portfolio work.
+  readonly skillBars = computed<BarItem[]>(() =>
+    (this.report()?.competency?.skills ?? []).map((s: any) => ({label: s.topic, value: s.value, tone: RATING_COLOR[s.level] ?? 'secondary'})));
+  readonly competencyAvg = computed<number | null>(() => this.report()?.competency?.average ?? null);
+  readonly competencyLevel = computed<string>(() => {
+    const v = this.competencyAvg();
+    if (v == null) return '—';
+    if (v >= 88) return 'Mastery';
+    if (v >= 63) return 'Proficient';
+    if (v >= 38) return 'Developing';
+    return 'Emerging';
+  });
+
   readonly overallPct = computed<number>(() => Math.round(this.report()?.academic?.average ?? 0));
 
   masteryTone(band: string): string { return MASTERY_TONE[band] ?? 'secondary'; }

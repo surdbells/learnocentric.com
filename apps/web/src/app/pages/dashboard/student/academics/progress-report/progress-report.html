@@ -84,12 +84,27 @@
     </div>
     <div class="col-lg-5">
       <div class="card border-0 shadow-sm h-100"><div class="card-body">
-        <h6 class="fw-semibold mb-3">Topic mastery</h6>
+        <h6 class="fw-semibold mb-3">Topic mastery <span class="badge bg-light text-body-secondary ms-1">Academic</span></h6>
         @if (topicBars().length) { <app-bar-list [items]="topicBars()" /> }
         @else { <div class="text-body-secondary small">No topic results yet.</div> }
       </div></div>
     </div>
   </div>
+
+  <!-- Skill progress snapshot — the competency track, drawn from reviewed portfolio work -->
+  <div class="card border-0 shadow-sm mb-3"><div class="card-body">
+    <div class="d-flex align-items-center justify-content-between gap-2 mb-3 flex-wrap">
+      <h6 class="fw-semibold mb-0">Skill progress <span class="badge bg-light text-body-secondary ms-1">Competency · from portfolio</span></h6>
+      @if (competencyAvg() !== null) {
+        <span class="badge bg-{{ ratingColor(competencyLevel().toLowerCase()) }}-subtle text-{{ ratingColor(competencyLevel().toLowerCase()) }}">{{ competencyAvg() }}% · {{ competencyLevel() }}</span>
+      }
+    </div>
+    @if (skillBars().length) {
+      <app-bar-list [items]="skillBars()" />
+    } @else {
+      <div class="text-body-secondary small">No reviewed portfolio work yet — skill progress appears once your teacher rates your portfolio tasks.</div>
+    }
+  </div></div>
 
   <!-- Structured teacher summary for parents (spec §7.5, §18) -->
   @if (r.feedback.strengths || r.feedback.misconceptions?.length || r.feedback.practice_needed || r.feedback.teacher_comment || r.feedback.parent_support_suggestion) {

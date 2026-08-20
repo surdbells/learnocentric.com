@@ -262,6 +262,75 @@ final class AnalyticsAction
         return $out;
     }
 
+    /** Portfolio competency ratings → a 0–100 progress score (kept out of academic marks). */
+    private const COMPETENCY_PCT = ['emerging' => 25, 'developing' => 50, 'proficient' => 75, 'mastery' => 100];
+
+    /**
+     * Per-topic skill progress from REVIEWED portfolio work — the competency track.
+     * Each reviewed entry's rating maps to a score; scores are averaged per topic.
+     *
+     * @param PortfolioEntry[] $portfolio
+     * @return array<int,array{topic:string,value:int,level:string,count:int}>
+     */
+    private function competencySkills(array $portfolio): array
+    {
+        $byTopic = [];
+        foreach ($portfolio as $p) {
+            if ($p->getStatus() !== PortfolioEntry::REVIEWED) {
+                continue;
+            }
+            $rating = $p->getCompetencyRating();
+            if ($rating === null || !isset(self::COMPETENCY_PCT[$rating])) {
+                continue;
+            }
+            $topic = $p->getTopic()->getTitle();
+            $byTopic[$topic] ??= ['sum' => 0, 'count' => 0];
+            $byTopic[$topic]['sum'] += self::COMPETENCY_PCT[$rating];
+            $byTopic[$topic]['count']++;
+        }
+        $out = [];
+        foreach ($byTopic as $topic => $agg) {
+            $avg = (int) round($agg['sum'] / $agg['count']);
+            $out[] = ['topic' => $topic, 'value' => $avg, 'level' => $this->competencyBand($avg), 'count' => $agg['count']];
+        }
+        usort($out, static fn ($a, $b) => $b['value'] <=> $a['value']);
+        return $out;
+    }
+
+    /** Overall competency score (0–100) across reviewed portfolio work, or null if none. */
+    private function competencyAverage(array $portfolio): ?int
+    {
+        $sum = 0;
+        $count = 0;
+        foreach ($portfolio as $p) {
+            if ($p->getStatus() !== PortfolioEntry::REVIEWED) {
+                continue;
+            }
+            $rating = $p->getCompetencyRating();
+            if ($rating === null || !isset(self::COMPETENCY_PCT[$rating])) {
+                continue;
+            }
+            $sum += self::COMPETENCY_PCT[$rating];
+            $count++;
+        }
+        return $count ? (int) round($sum / $count) : null;
+    }
+
+    /** Map a 0–100 competency score back to its nearest competency band. */
+    private function competencyBand(int $pct): string
+    {
+        if ($pct >= 88) {
+            return 'mastery';
+        }
+        if ($pct >= 63) {
+            return 'proficient';
+        }
+        if ($pct >= 38) {
+            return 'developing';
+        }
+        return 'emerging';
+    }
+
     /**
      * GET /analytics/school-report — school-wide performance report: headline
      * figures, class × subject performance, a subject summary (school average +
@@ -623,6 +692,9 @@ final class AnalyticsAction
                 ], $subs),
             ],
             'competency' => [
+                // Skill progress is the competency track — drawn from reviewed portfolio work.
+                'average' => $this->competencyAverage($portfolio),
+                'skills' => $this->competencySkills($portfolio),
                 'entries' => array_map(static fn (PortfolioEntry $p) => [
                     'title' => $p->getTitle(),
                     'topic' => $p->getTopic()->getTitle(),
