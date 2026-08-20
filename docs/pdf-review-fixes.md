@@ -32,7 +32,7 @@ Captured from *Student & Teacher Review* and *SCHOOL_SUPER ADMIN* PDFs (annotate
 - ☑ **A3** Merge the "Class" page into "Classes & Learners" (bring over the **delete** option).
 - ☐ **A4** (design) Enrollment as a **tab** within Classes & Learners; reduce left-nav clutter.
 - ☑ **A5** Subjects page → remove the "Catalogue subjects" stat (Super-Admin concern).
-- ☐ **A6** Approval Queue → add a **"Review"** (view item) action before Approve/Return.
+- ☑ **A6** Approval Queue → add a **"Review"** (view item) action before Approve/Return.
 - ☐ **A7** "School Setup" → belongs to Super Admin (remove/relocate from school-admin nav).
 - ☐ **A8** Calendar → proper **month/week calendar** (not a list) per the PNG.
 - ☐ **A9** Settings & Permissions → assign roles to **non-teaching academic staff**.

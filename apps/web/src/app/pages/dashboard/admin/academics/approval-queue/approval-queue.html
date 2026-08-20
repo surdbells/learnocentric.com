@@ -35,6 +35,9 @@
               </td>
               <td class="text-end">
                 <div class="btn-group btn-group-sm">
+                  <button type="button" class="btn btn-outline-primary" [disabled]="isBusy(item)" (click)="review(item)">
+                    <app-icon name="visibility" [size]="15" /> Review
+                  </button>
                   <button type="button" class="btn btn-success" [disabled]="isBusy(item)" (click)="approve(item)">
                     <app-icon name="check" [size]="15" /> Approve
                   </button>
@@ -50,3 +53,67 @@
     </div>
   }
 }
+
+<!-- Review preview -->
+<app-learno-modal [modalId]="'review_item'" [modalAction]="'Review item'" [showBtn]="false">
+  <div modalForm>
+    @if (reviewItem(); as it) {
+      <div class="d-flex align-items-start justify-content-between flex-wrap gap-2 mb-1">
+        <div>
+          <span class="badge bg-light text-body-secondary d-inline-flex align-items-center gap-1 mb-2">
+            <app-icon [name]="typeIcon(it.type)" [size]="14" /> {{ typeLabel(it.type) }}
+          </span>
+          <h5 class="fw-semibold mb-0">{{ it.title }}</h5>
+        </div>
+        <span class="badge bg-{{ statusColor(it.status) }}-subtle text-{{ statusColor(it.status) }} text-capitalize px-3 py-2">
+          {{ it.status || 'review' }}
+        </span>
+      </div>
+      <p class="text-body-secondary small mb-4">{{ it.subject || '—' }} · waiting {{ waited(it.updated_at) }}</p>
+
+      @if (reviewLoading()) {
+        <div class="text-body-secondary small py-4">Loading content…</div>
+      } @else if (!reviewFields().length && !reviewQuestions().length) {
+        <div class="text-body-secondary small py-4">No previewable content for this item.</div>
+      } @else {
+        <dl class="review-grid mb-0">
+          @for (f of reviewFields(); track f.label) {
+            <dt class="text-uppercase small fw-semibold text-body-secondary">{{ f.label }}</dt>
+            <dd class="mb-3">
+              @if (f.rich) {
+                <app-rich-text class="d-block" [value]="f.value" />
+              } @else {
+                <span class="review-value">{{ f.value }}</span>
+              }
+            </dd>
+          }
+        </dl>
+
+        @if (reviewQuestions().length) {
+          <div class="mt-2">
+            <div class="text-uppercase small fw-semibold text-body-secondary mb-2">Questions ({{ reviewQuestions().length }})</div>
+            <ol class="review-questions ps-3 mb-0">
+              @for (q of reviewQuestions(); track q.id) {
+                <li class="mb-2">
+                  <div class="fw-medium">{{ q.stem }}</div>
+                  <div class="small text-body-secondary">
+                    {{ qType(q.type) }}
+                    @if (q.correct_answer) { · Answer: {{ pretty(q.correct_answer) }} }
+                    @if (q.marks) { · {{ q.marks }} mark{{ q.marks === 1 ? '' : 's' }} }
+                  </div>
+                </li>
+              }
+            </ol>
+          </div>
+        }
+      }
+
+      <div class="d-flex justify-content-end gap-2 mt-4 pt-3 border-top">
+        <button type="button" class="btn btn-outline-secondary" [disabled]="isBusy(it)" (click)="reviewReturn()">Return to author</button>
+        <button type="button" class="btn btn-success" [disabled]="isBusy(it)" (click)="reviewApprove()">
+          <app-icon name="check" [size]="16" /> Approve
+        </button>
+      </div>
+    }
+  </div>
+</app-learno-modal>

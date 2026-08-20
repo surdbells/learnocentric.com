@@ -5,3 +5,17 @@
 .item-title {
   max-width: 360px;
 }
+
+.review-grid dt {
+  letter-spacing: .04em;
+  margin-bottom: .15rem;
+}
+
+.review-value {
+  white-space: pre-line;
+}
+
+.review-questions li::marker {
+  color: var(--brand-500);
+  font-weight: 600;
+}
