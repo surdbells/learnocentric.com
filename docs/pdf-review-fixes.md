@@ -13,7 +13,7 @@ Captured from *Student & Teacher Review* and *SCHOOL_SUPER ADMIN* PDFs (annotate
 - ☐ **S8** Learner Settings → remove certain items (needs specifics).
 
 ## Teacher portal
-- ☐ **T1** Merge "Topics" + "Lesson Content" nav (topic info captured on Lesson Content).
+- ☑ **T1** Merge "Topics" + "Lesson Content" nav (topic info captured on Lesson Content).
 - ☑ **T2** Remove "Curriculum Map" from teacher nav (School Admin's).
 - ☑ **T3** Remove "Approval Queue" from teacher nav (School Admin / role-gated).
 - ☑ **T4** Question Bank → add a **Subject filter**.

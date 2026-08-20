@@ -1,4 +1,4 @@
-import {Component, computed, inject, signal, ViewChild} from '@angular/core';
+import {Component, computed, inject, input, signal, ViewChild} from '@angular/core';
 import {DatePipe} from '@angular/common';
 import {ToastrService} from 'ngx-toastr';
 import {PageHeader} from '../../../../../common/layout/page-header/page-header';
@@ -28,6 +28,9 @@ const APPROVER_ROLES = ['academic_lead', 'school_admin', 'tutor_admin', 'super_a
 })
 export class Topics {
   @ViewChild(DataGrid) grid!: DataGrid;
+
+  /** When hosted inside another page (e.g. the Lesson Content tabs), hide the page header. */
+  readonly embedded = input<boolean>(false);
 
   private readonly api = inject(ApiService);
   private readonly toast = inject(ToastrService);

@@ -1,6 +1,12 @@
-<app-page-header icon="menu_book" action="Topics">
-  <app-learno-button text="Add Topic" icon="add" data-bs-toggle="modal" data-bs-target="#add_topic" (clicked)="onAdd()"/>
-</app-page-header>
+@if (!embedded()) {
+  <app-page-header icon="menu_book" action="Topics">
+    <app-learno-button text="Add Topic" icon="add" data-bs-toggle="modal" data-bs-target="#add_topic" (clicked)="onAdd()"/>
+  </app-page-header>
+} @else {
+  <div class="d-flex justify-content-end mb-3">
+    <app-learno-button text="Add Topic" icon="add" data-bs-toggle="modal" data-bs-target="#add_topic" (clicked)="onAdd()"/>
+  </div>
+}
 
 <!-- Create / edit -->
 <app-learno-modal [modalId]="'add_topic'" [modalAction]="selectTopic() ? 'Edit Topic' : 'Add Topic'" [showBtn]="false">

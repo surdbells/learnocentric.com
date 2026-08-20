@@ -7,6 +7,8 @@ import {LearnoButton} from '../../../../../common/learno-button/learno-button';
 import {DataGrid, GridColumn, GridFilter} from '../../../../../components/data-grid/data-grid';
 import {DeliveryPackForm} from '../../../../../components/forms/delivery-pack-form/delivery-pack-form';
 import {RichText} from '../../../../../common/rich-editor/rich-text';
+import {TabBar, TabItem} from '../../../../../common/ui';
+import {Topics} from '../topics/topics';
 import {ApiService} from '../../../../../common/service/api.service';
 import {AuthService} from '../../../../../common/auth/auth.service';
 
@@ -19,12 +21,16 @@ const APPROVER_ROLES = ['academic_lead', 'school_admin', 'tutor_admin', 'super_a
 @Component({
   selector: 'app-lesson-content',
   standalone: true,
-  imports: [PageHeader, LearnoModal, LearnoButton, DataGrid, DeliveryPackForm, DatePipe, RichText],
+  imports: [PageHeader, LearnoModal, LearnoButton, DataGrid, DeliveryPackForm, DatePipe, RichText, TabBar, Topics],
   templateUrl: './lesson-content.html',
   styleUrl: './lesson-content.css',
 })
 export class LessonContent {
   @ViewChild(DataGrid) grid!: DataGrid;
+
+  /** Topics authoring is now a tab on this page (PDF review T1). */
+  tab = signal<string>('topics');
+  readonly tabs: TabItem[] = [{key: 'topics', label: 'Topics'}, {key: 'packs', label: 'Lesson content'}];
 
   private readonly api = inject(ApiService);
   private readonly toast = inject(ToastrService);
