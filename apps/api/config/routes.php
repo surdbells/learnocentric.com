@@ -184,6 +184,7 @@ return static function (App $app): void {
             $auth->map(['GET', 'POST', 'PUT', 'DELETE'], '/assessment/worksheets', WorksheetsAction::class);
             $auth->post('/assessment/worksheets/bulk-delete', WorksheetsAction::class . ':bulkDelete');
             $auth->get('/assessment/submissions/inbox', SubmissionsInboxAction::class);
+            $auth->get('/assessment/submissions/by-learner', SubmissionsInboxAction::class . ':byLearner');
             $auth->get('/assessment/worksheets/available', WorksheetSubmissionsAction::class . ':available');
             $auth->post('/assessment/worksheets/{id:[0-9]+}/transition', WorksheetsAction::class . ':transition');
             $auth->get('/assessment/worksheets/{id:[0-9]+}/history', WorksheetsAction::class . ':history');

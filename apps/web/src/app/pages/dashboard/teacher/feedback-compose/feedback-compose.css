@@ -1,3 +1,18 @@
 :host { display: block; }
 .rail-sticky { position: sticky; top: 1rem; }
 .form-range { accent-color: var(--bs-success); }
+
+/* Submitted-work viewer on the Give Feedback page */
+.work-panel {
+  border: 1px solid var(--bs-border-color);
+  border-radius: .8rem;
+  padding: .85rem 1rem;
+  background: var(--bs-tertiary-bg);
+}
+.work-body {
+  white-space: pre-wrap;
+  max-height: 220px;
+  overflow-y: auto;
+  color: var(--bs-body-color);
+  line-height: 1.4;
+}

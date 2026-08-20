@@ -8,7 +8,7 @@
       <div class="row g-3 mb-3">
         <div class="col-md-6">
           <label class="form-label small mb-1">Learner</label>
-          <select class="form-select" [ngModel]="studentId()" (ngModelChange)="studentId.set($event)">
+          <select class="form-select" [ngModel]="studentId()" (ngModelChange)="selectStudent($event)">
             <option [ngValue]="null" disabled>Choose a learner…</option>
             @for (s of students(); track s.id) { <option [ngValue]="s.id">{{ s.name }}</option> }
           </select>
@@ -35,6 +35,40 @@
           <input class="form-control" [ngModel]="subject()" (ngModelChange)="subject.set($event)" placeholder="e.g. Mathematics" />
         </div>
       </div>
+
+      <!-- Pick + view the actual submitted work -->
+      @if (studentId() && submissions().length) {
+        <div class="mb-3">
+          <label class="form-label small mb-1"><app-icon name="visibility" [size]="15" /> View submitted work</label>
+          <select class="form-select" [ngModel]="selectedKey()" (ngModelChange)="pickSubmission($event)">
+            <option value="">Select a submission to view + auto-fill the context…</option>
+            @for (s of submissions(); track s.type + '-' + s.id) {
+              <option [value]="s.type + '-' + s.id">[{{ s.type_label }}] {{ s.title }} — {{ s.topic }} ({{ s.status }})</option>
+            }
+          </select>
+        </div>
+        @if (selectedSubmission(); as w) {
+          <div class="work-panel mb-3">
+            <div class="d-flex align-items-center justify-content-between mb-2">
+              <span class="fw-semibold small"><app-icon name="description" [size]="15" /> {{ w.title }} · {{ w.topic }}</span>
+              @if (w.score != null && w.total_marks) { <span class="badge bg-success-subtle text-success">{{ w.score }}/{{ w.total_marks }}</span> }
+              @else if (w.competency_rating) { <span class="badge bg-primary-subtle text-primary text-capitalize">{{ w.competency_rating }}</span> }
+            </div>
+            @if (w.response_text) {
+              <div class="work-body small">{{ w.response_text }}</div>
+            } @else if (!w.attachment_url) {
+              <div class="text-body-secondary small fst-italic">No written response.</div>
+            }
+            @if (w.attachment_url) {
+              <a class="btn btn-sm btn-outline-secondary mt-2" [href]="w.attachment_url" target="_blank" rel="noopener">
+                <app-icon name="attach_file" [size]="15" /> Open attached work
+              </a>
+            }
+          </div>
+        }
+      } @else if (studentId() && !submissions().length) {
+        <div class="text-body-secondary small mb-3 fst-italic">This learner has no submissions in your subjects yet — you can still write general feedback below.</div>
+      }
 
       <!-- Breakdown fields -->
       <div class="mb-3">

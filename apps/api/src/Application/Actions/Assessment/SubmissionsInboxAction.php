@@ -112,6 +112,78 @@ final class SubmissionsInboxAction
     }
 
     /**
+     * GET /assessment/submissions/by-learner?student_id=X — one learner's
+     * worksheet + portfolio submissions WITH their content, so a teacher can see
+     * the actual work while giving feedback on it.
+     */
+    public function byLearner(Request $request, Response $response): Response
+    {
+        /** @var User $user */
+        $user = $request->getAttribute('user');
+        $subjectIds = $this->subjectScope($user);
+        $studentId = (int) ($request->getQueryParams()['student_id'] ?? 0);
+        if ($studentId <= 0) {
+            return Json::error($response, 'A student_id is required.', 422);
+        }
+        $student = $this->em->getRepository(User::class)->find($studentId);
+        if ($student === null) {
+            return Json::error($response, 'Learner not found.', 404);
+        }
+
+        $out = [];
+        if ($subjectIds !== []) {
+            $ws = $this->em->createQueryBuilder()->select('ws', 'w', 't')->from(WorksheetSubmission::class, 'ws')
+                ->join('ws.worksheet', 'w')->join('w.topic', 't')
+                ->where('ws.student = :st')->andWhere('t.subject IN (:subs)')
+                ->setParameter('st', $student)->setParameter('subs', $subjectIds)
+                ->orderBy('ws.id', 'DESC')->getQuery()->getResult();
+            foreach ($ws as $s) {
+                /** @var WorksheetSubmission $s */
+                $out[] = [
+                    'id' => $s->getId(),
+                    'type' => 'worksheet',
+                    'type_label' => 'Worksheet',
+                    'title' => $s->getWorksheet()->getTitle(),
+                    'topic' => $s->getWorksheet()->getTopic()->getTitle(),
+                    'subject' => $s->getWorksheet()->getTopic()->getSubject()->getName(),
+                    'status' => $s->getStatus(),
+                    'submitted_at' => ($s->getSubmittedAt() ?? $s->getCreatedAt())?->format(DATE_ATOM),
+                    'response_text' => $s->getResponseText(),
+                    'attachment_url' => \App\Service\Storage\FilePath::toUrl($s->getAttachmentUrl()),
+                    'score' => $s->getScore(),
+                    'total_marks' => $s->getWorksheet()->getTotalMarks(),
+                ];
+            }
+
+            $pf = $this->em->createQueryBuilder()->select('p', 't')->from(PortfolioEntry::class, 'p')
+                ->join('p.topic', 't')
+                ->where('p.student = :st')->andWhere('t.subject IN (:subs)')
+                ->setParameter('st', $student)->setParameter('subs', $subjectIds)
+                ->orderBy('p.id', 'DESC')->getQuery()->getResult();
+            foreach ($pf as $p) {
+                /** @var PortfolioEntry $p */
+                $a = $p->toArray();
+                $out[] = [
+                    'id' => $a['id'],
+                    'type' => 'portfolio',
+                    'type_label' => 'Portfolio task',
+                    'title' => $a['title'],
+                    'topic' => $a['topic'],
+                    'subject' => $a['subject'],
+                    'status' => $a['status'],
+                    'submitted_at' => $a['submitted_at'],
+                    'response_text' => $a['description'],
+                    'attachment_url' => $a['evidence_url'],
+                    'competency_rating' => $a['competency_rating'],
+                ];
+            }
+        }
+        usort($out, static fn ($a, $b) => strcmp((string) $b['submitted_at'], (string) $a['submitted_at']));
+
+        return Json::write($response, ['data' => $out]);
+    }
+
+    /**
      * Subjects the viewer grades: a teacher's assigned subjects, or every subject
      * in an admin's institution.
      *

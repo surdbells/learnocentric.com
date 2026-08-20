@@ -1,4 +1,4 @@
-import {Component, inject, signal} from '@angular/core';
+import {Component, computed, inject, signal} from '@angular/core';
 import {FormsModule} from '@angular/forms';
 import {ToastrService} from 'ngx-toastr';
 import {PageHeader} from '../../../../common/layout/page-header/page-header';
@@ -27,6 +27,12 @@ export class FeedbackCompose {
   students = signal<{id: number; name: string}[]>([]);
   busy = signal(false);
 
+  /** The chosen learner's submissions, so the teacher can see the work they're feeding back on. */
+  submissions = signal<any[]>([]);
+  selectedKey = signal<string>('');
+  readonly selectedSubmission = computed<any | null>(() =>
+    this.submissions().find(s => `${s.type}-${s.id}` === this.selectedKey()) ?? null);
+
   studentId = signal<number | null>(null);
   type = signal('correction');
   sourceType = signal('worksheet');
@@ -51,6 +57,29 @@ export class FeedbackCompose {
       next: (r) => this.students.set((r?.data ?? []).map((x: any) => ({id: x.student_id, name: x.student}))),
       error: () => this.toast.error('Could not load the learner list'),
     });
+  }
+
+  /** Choose a learner and load their submissions so the teacher can view the work. */
+  selectStudent(id: number | null): void {
+    this.studentId.set(id);
+    this.selectedKey.set('');
+    this.submissions.set([]);
+    if (!id) return;
+    this.api.get<any>(`/backend/assessment/submissions/by-learner?student_id=${id}`).subscribe({
+      next: (r) => this.submissions.set(r?.data ?? []),
+      error: () => {},
+    });
+  }
+
+  /** Pick a specific submission to view + pre-fill the feedback context. */
+  pickSubmission(key: string): void {
+    this.selectedKey.set(key);
+    const s = this.selectedSubmission();
+    if (!s) return;
+    this.sourceType.set(s.type);
+    this.sourceTitle.set(s.title || '');
+    if (s.subject) this.subject.set(s.subject);
+    if (s.score != null && s.total_marks) this.score.set(Math.round(s.score / s.total_marks * 100));
   }
 
   setFocus(i: number, patch: Partial<FocusArea>): void {
