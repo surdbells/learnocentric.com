@@ -8,6 +8,7 @@ table thead th { font-size: .72rem; letter-spacing: .02em; font-weight: 600; }
   text-align: left; width: 100%;
   border: 1px solid var(--bs-border-color); border-radius: .7rem;
   background: var(--bs-body-bg); padding: .7rem .85rem;
+  cursor: pointer;
   transition: border-color .12s ease, box-shadow .12s ease;
 }
 .class-card:hover { border-color: var(--bs-success); }
@@ -39,3 +40,16 @@ table thead th { font-size: .72rem; letter-spacing: .02em; font-weight: 600; }
 }
 .qa-row:last-child { border-bottom: 0; }
 .qa-row:hover { color: var(--bs-success); }
+
+/* Inline class create/edit/delete (merged from the old Class page) */
+.min-w-0 { min-width: 0; }
+.class-actions { display: flex; gap: .1rem; flex: none; opacity: 0; transition: opacity .15s ease; }
+.class-card:hover .class-actions,
+.class-card.active .class-actions { opacity: 1; }
+.cc-btn {
+  border: 0; background: transparent; color: var(--bs-secondary-color);
+  padding: .15rem .25rem; border-radius: .35rem; cursor: pointer; line-height: 1;
+  display: inline-flex; align-items: center;
+}
+.cc-btn:hover { background: var(--bs-tertiary-bg); color: var(--bs-body-color); }
+.cc-btn.text-danger:hover { color: var(--bs-danger); }

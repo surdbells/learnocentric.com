@@ -1,6 +1,16 @@
 <app-page-header icon="groups" action="Classes & Learners"></app-page-header>
 <p class="text-body-secondary mb-4">Manage class structure, enrolment, learner records and class-level academic visibility.</p>
 
+<!-- Create / edit a class (merged in from the old Class page) -->
+<app-learno-modal [modalId]="'add_class'" [modalAction]="selectedClass() ? 'Edit Class' : 'Add Class'" [showBtn]="false">
+  <app-school-class-form
+    modalForm
+    [action]="selectedClass() ? 'Update Class' : 'Add Class'"
+    [select]="selectedClass()"
+    (submitted)="handleClassSubmit($event)"
+  />
+</app-learno-modal>
+
 @if (loading()) {
   <div class="text-body-secondary p-4">Loading…</div>
 } @else {
@@ -11,24 +21,32 @@
     <div class="col-lg-3">
       <div class="d-flex align-items-center justify-content-between mb-2">
         <h6 class="fw-semibold mb-0">Classes</h6>
-        <a class="small link-success text-decoration-none" [routerLink]="[root(), 'academics', 'classes']">+ Add</a>
+        <button type="button" class="btn btn-sm btn-link link-success text-decoration-none p-0" (click)="onAddClass()">+ Add</button>
       </div>
       @if (classes().length) {
         <div class="class-list">
           @for (c of classes(); track c.id) {
-            <button type="button" class="class-card" [class.active]="selectedId() === c.id" (click)="selectClass(c.id)">
-              <div class="fw-semibold">{{ c.label }}</div>
-              <div class="small text-body-secondary">{{ c.teacher || 'No class teacher' }}</div>
+            <div class="class-card" [class.active]="selectedId() === c.id" (click)="selectClass(c.id)" role="button" tabindex="0">
+              <div class="d-flex align-items-start justify-content-between gap-2">
+                <div class="min-w-0">
+                  <div class="fw-semibold text-truncate">{{ c.label }}</div>
+                  <div class="small text-body-secondary">{{ c.teacher || 'No class teacher' }}</div>
+                </div>
+                <div class="class-actions">
+                  <button type="button" class="cc-btn" (click)="onEditClass(c, $event)" title="Edit class"><app-icon name="edit" [size]="14" /></button>
+                  <button type="button" class="cc-btn text-danger" (click)="deleteClass(c, $event)" title="Delete class"><app-icon name="delete" [size]="14" /></button>
+                </div>
+              </div>
               <div class="d-flex gap-3 small mt-1">
                 <span><app-icon name="school" [size]="13" /> {{ c.learners }}</span>
                 <span [class]="'text-' + scoreTone(c.avg_score)">{{ c.avg_score == null ? '—' : c.avg_score + '%' }} avg</span>
               </div>
               @if (c.current_topic) { <div class="small text-body-secondary mt-1 text-truncate">Now: {{ c.current_topic }}</div> }
-            </button>
+            </div>
           }
         </div>
       } @else {
-        <div class="text-body-secondary small py-3">No classes yet.</div>
+        <div class="text-body-secondary small py-3">No classes yet. Click “+ Add” to create one.</div>
       }
     </div>
 

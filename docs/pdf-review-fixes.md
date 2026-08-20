@@ -29,7 +29,7 @@ Captured from *Student & Teacher Review* and *SCHOOL_SUPER ADMIN* PDFs (annotate
 ## School Admin portal
 - ☐ **A1** Merge "Students" + "Enrollment"; enroll (assign class) **while adding a learner**; remove the separate "New Student" tab.
 - ☑ **A2** Remove the "New Teacher" tab — add staff from the Teachers page.
-- ☐ **A3** Merge the "Class" page into "Classes & Learners" (bring over the **delete** option).
+- ☑ **A3** Merge the "Class" page into "Classes & Learners" (bring over the **delete** option).
 - ☐ **A4** (design) Enrollment as a **tab** within Classes & Learners; reduce left-nav clutter.
 - ☑ **A5** Subjects page → remove the "Catalogue subjects" stat (Super-Admin concern).
 - ☐ **A6** Approval Queue → add a **"Review"** (view item) action before Approve/Return.
