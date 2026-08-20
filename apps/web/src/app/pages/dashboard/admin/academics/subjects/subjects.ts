@@ -30,8 +30,9 @@ export class Subjects {
   readonly kpis = computed<KpiItem[]>(() => {
     const c = this.catalog();
     const adopted = c.filter(x => x.adopted).length;
+    // 'Catalogue subjects' (total across the platform) is a Super-Admin concern —
+    // the school only cares what it offers and can add (PDF review A5).
     return [
-      {label: 'Catalogue subjects', value: c.length, icon: 'subject', tone: 'primary'},
       {label: 'Offered by school', value: adopted, icon: 'check_circle', tone: 'success'},
       {label: 'Available to add', value: c.length - adopted, icon: 'add', tone: 'info'},
     ];

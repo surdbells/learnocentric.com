@@ -61,12 +61,6 @@
           <div class="d-flex justify-content-between small py-1"><span class="text-success">Completed</span><b>{{ lessonKpis()[1].value }}</b></div>
           <div class="d-flex justify-content-between small py-1"><span class="text-info">In progress</span><b>{{ lessonKpis()[2].value }}</b></div>
           <div class="d-flex justify-content-between small py-1"><span class="text-warning">Upcoming</span><b>{{ lessonKpis()[3].value }}</b></div>
-          <div class="lesson-flow d-flex align-items-center flex-wrap gap-1 mt-2 pt-2 border-top">
-            @for (f of flow; track f.label; let last = $last) {
-              <span class="flow-step" [attr.title]="f.label"><app-icon [name]="f.icon" [size]="13" /></span>
-              @if (!last) { <app-icon name="chevron_right" [size]="12" class="text-body-secondary" /> }
-            }
-          </div>
         </div></div>
       </div>
     </div>

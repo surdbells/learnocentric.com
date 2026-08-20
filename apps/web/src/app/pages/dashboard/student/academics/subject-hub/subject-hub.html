@@ -27,19 +27,26 @@
           {{ d.topic_count }} {{ d.topic_count === 1 ? 'topic' : 'topics' }}
           · {{ d.completed_topics }} completed
         </p>
-        @if (d.next_topic) {
-          <a [routerLink]="links.learn" class="btn btn-success btn-sm hub-cta mt-3">
-            <app-icon name="play_arrow" [size]="18" /> Continue: {{ d.next_topic.title }}
-          </a>
-        } @else if (d.topic_count) {
-          <span class="hub-done mt-3"><app-icon name="verified" [size]="18" /> All topics complete — nice work!</span>
-        }
       </div>
     </div>
     <div class="hub-hero-ring">
       <app-stat-ring [value]="d.progress" [tone]="progressTone(d.progress)" caption="complete" [size]="112" [stroke]="10" />
     </div>
   </section>
+
+  <!-- Continue CTA — its own prominent bar, not crammed into the hero -->
+  @if (d.next_topic) {
+    <a [routerLink]="links.learn" class="hub-continue mb-3">
+      <span class="hub-continue-ic"><app-icon name="play_arrow" [size]="20" /></span>
+      <span class="hub-continue-body">
+        <span class="hub-continue-label">Continue learning</span>
+        <span class="hub-continue-topic">{{ d.next_topic.title }}</span>
+      </span>
+      <app-icon name="arrow_forward" [size]="18" class="hub-continue-go" />
+    </a>
+  } @else if (d.topic_count) {
+    <div class="hub-done-bar mb-3"><app-icon name="verified" [size]="18" /> All topics complete — nice work!</div>
+  }
 
   <!-- Quick-access tiles -->
   <div class="hub-tiles mb-3">

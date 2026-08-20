@@ -13,7 +13,7 @@
 } @else if (!catalog().length) {
   <div class="card border-0 shadow-sm p-5 text-center text-body-secondary">No subjects are published in the catalogue yet.</div>
 } @else {
-  <app-kpi-strip class="d-block mb-4" [items]="kpis()" [cols]="3" />
+  <app-kpi-strip class="d-block mb-4" [items]="kpis()" [cols]="2" />
   <app-tab-bar class="d-block mb-3" [tabs]="tabs()" [active]="listTab()" (activeChange)="listTab.set($event)" />
   @if (!filtered().length) {
     <div class="card border-0 shadow-sm p-4 text-center text-body-secondary">No subjects in this view.</div>
