@@ -22,16 +22,14 @@
           <h6 class="fw-semibold mb-2">Open now ({{ upcoming().length }})</h6>
           <div class="card border-0 shadow-sm mb-4"><div class="card-body pt-1 pb-1">
             @for (a of upcoming(); track a.id) {
-              @if (activeTab() === 'all' || a.type === activeTab()) {
-                <div class="d-flex align-items-center gap-3 py-3 border-top qa-row">
-                  <span class="qa-ic bg-primary-subtle text-primary"><app-icon name="quiz" [size]="18" /></span>
-                  <div class="flex-grow-1">
-                    <div class="fw-medium">{{ a.title }} <span class="badge bg-light text-body-secondary text-capitalize ms-1">{{ a.type }}</span></div>
-                    <div class="text-body-secondary small">{{ a.subject }} · {{ a.question_count }} question(s) · {{ a.total_marks }} mark(s)@if (a.duration_minutes) { · {{ a.duration_minutes }} min }</div>
-                  </div>
-                  <button type="button" class="btn btn-primary btn-sm" [disabled]="busy()" (click)="start(a)">Start</button>
+              <div class="d-flex align-items-center gap-3 py-3 border-top qa-row">
+                <span class="qa-ic bg-primary-subtle text-primary"><app-icon name="quiz" [size]="18" /></span>
+                <div class="flex-grow-1">
+                  <div class="fw-medium">{{ a.title }} <span class="badge bg-light text-body-secondary text-capitalize ms-1">{{ a.type }}</span></div>
+                  <div class="text-body-secondary small">{{ a.subject }} · {{ a.question_count }} question(s) · {{ a.total_marks }} mark(s)@if (a.duration_minutes) { · {{ a.duration_minutes }} min }</div>
                 </div>
-              }
+                <button type="button" class="btn btn-primary btn-sm" [disabled]="busy()" (click)="start(a)">Start</button>
+              </div>
             }
           </div></div>
         }
@@ -73,7 +71,7 @@
 
         <div class="card border-0 shadow-sm mb-3"><div class="card-body">
           <h6 class="fw-semibold mb-3">Topic performance</h6>
-          @if (topicBars().length) { <app-bar-list [items]="topicBars()" /> }
+          @if (topicBars().length) { <app-bar-list [items]="topicBars()" [max]="100" unit="%" /> }
           @else { <div class="text-body-secondary small">No topic results yet.</div> }
         </div></div>
 

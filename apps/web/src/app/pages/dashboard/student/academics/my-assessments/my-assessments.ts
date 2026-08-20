@@ -62,15 +62,21 @@ export class MyAssessments implements OnDestroy {
     ];
   });
 
-  /** Assessments not yet completed (upcoming/open). */
-  readonly upcoming = computed<any[]>(() => this.available().filter(x => x.attempt?.status !== 'graded'));
+  /** Assessments not yet completed (upcoming/open), honouring the active type tab. */
+  readonly upcoming = computed<any[]>(() => {
+    const t = this.activeTab();
+    return this.available().filter(x => x.attempt?.status !== 'graded' && (t === 'all' || x.type === t));
+  });
 
-  /** Graded attempts as recent results, newest first. */
-  readonly recentResults = computed<any[]>(() =>
-    this.graded()
+  /** Graded attempts as recent results, newest first, honouring the active type tab. */
+  readonly recentResults = computed<any[]>(() => {
+    const t = this.activeTab();
+    return this.graded()
+      .filter(x => t === 'all' || x.type === t)
       .map(x => ({title: x.title, type: x.type, subject: x.subject, percentage: x.attempt.percentage,
         score: x.attempt.score, total: x.attempt.total_marks, band: this.perfBand(x.attempt.percentage)}))
-      .slice(0, 6));
+      .slice(0, 6);
+  });
 
   // Performance overview (per-student trend) + topic performance
   readonly trendSeries = computed<number[]>(() => (this.analytics()?.performance_trend ?? []).map((m: any) => m.average ?? 0));

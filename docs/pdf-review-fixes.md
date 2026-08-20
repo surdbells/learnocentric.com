@@ -5,8 +5,8 @@ Captured from *Student & Teacher Review* and *SCHOOL_SUPER ADMIN* PDFs (annotate
 ## Learner (student portal)
 - ☑ **S1** Learn page → remove the stray icon toolbar in the "Lesson stats" card.
 - ☑ **S2** Subject Hub hero → reposition the "Continue" CTA (currently crammed inline — "not rightly placed").
-- ☐ **S3** My Assessments → the "Assessment" tab (boxed) — review/clean (empty tab when 0 assessments).
-- ☐ **S4** My Assessments (Quiz view) → "Topic performance" bar styling looks off.
+- ☑ **S3** My Assessments → the "Assessment" tab (boxed) — review/clean (empty tab when 0 assessments).
+- ☑ **S4** My Assessments (Quiz view) → "Topic performance" bar styling looks off.
 - ☑ **S5** Merge "Resources" + "Resource Viewer" nav into one.
 - ◐ **S6** Progress Report → add a **skill progress snapshot/summary drawn from portfolio** (= backend done; frontend pending).
 - ☑ **S7** Remove the "Communication" section from the learner nav (Notifications + Ask a Tutor is enough).

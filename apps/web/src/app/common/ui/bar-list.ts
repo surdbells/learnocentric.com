@@ -34,20 +34,26 @@ export interface BarItem { label: string; value: number; tone?: Tone; }
 export class BarList {
   items = input<BarItem[]>([]);
   tone = input<Tone>('primary');
+  /** Fixed scale for the bars. Defaults to the largest value (ranked view). Pass 100 for percentage data. */
+  max = input<number | null>(null);
+  /** Suffix appended to each value, e.g. '%'. */
+  unit = input<string>('');
 
   readonly rows = computed(() => {
     const items = this.items();
-    const max = Math.max(...items.map(i => i.value), 1);
+    const max = this.max() ?? Math.max(...items.map(i => i.value), 1);
     return items.map(i => ({
       label: i.label,
       value: i.value,
-      pct: Math.max((i.value / max) * 100, 2),
+      pct: Math.min(Math.max((i.value / max) * 100, 2), 100),
       color: toneVars(i.tone ?? this.tone()).color,
     }));
   });
 
   format(v: number): string {
-    if (v >= 1000) return (v / 1000).toFixed(v % 1000 === 0 ? 0 : 1) + 'k';
-    return String(v);
+    const u = this.unit();
+    const n = Math.round(v);
+    if (n >= 1000) return (n / 1000).toFixed(n % 1000 === 0 ? 0 : 1) + 'k' + u;
+    return n + u;
   }
 }
