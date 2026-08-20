@@ -53,7 +53,17 @@ export class QuestionBank {
     {key: 'approval_status', label: 'Status', type: 'badge', badge: (v) => ({text: this.titleCase(v), color: STATUS_COLOR[v] ?? 'secondary'})},
   ];
 
+  /** Unique subjects across the topic list — for the Subject filter (multi-subject teachers). */
+  readonly subjectOptions = computed(() => {
+    const seen = new Map<number, string>();
+    for (const t of this.topics()) {
+      if (t.subject_id && t.subject && !seen.has(t.subject_id)) { seen.set(t.subject_id, t.subject); }
+    }
+    return [...seen.entries()].map(([value, label]) => ({label, value: String(value)}));
+  });
+
   readonly filterDefs = computed<GridFilter[]>(() => [
+    ...(this.subjectOptions().length > 1 ? [{key: 'subject_id', label: 'Subject', options: this.subjectOptions()}] : []),
     {key: 'approval_status', label: 'Status', options: [
       {label: 'Draft', value: 'draft'}, {label: 'In review', value: 'review'}, {label: 'Approved', value: 'approved'},
       {label: 'Published', value: 'published'}, {label: 'Archived', value: 'archived'}]},

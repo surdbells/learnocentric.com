@@ -1,5 +1,5 @@
 import {Component, computed, effect, EventEmitter, inject, input, Output, signal} from '@angular/core';
-import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
+import {FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators} from '@angular/forms';
 import {ToastrService} from 'ngx-toastr';
 import {LearnoInput} from '../../../common/learno-input/learno-input';
 import {LearnoButton} from '../../../common/learno-button/learno-button';
@@ -9,7 +9,7 @@ import {ApiService} from '../../../common/service/api.service';
 @Component({
   selector: 'app-worksheet-form',
   standalone: true,
-  imports: [ReactiveFormsModule, LearnoInput, LearnoButton, FileUpload],
+  imports: [ReactiveFormsModule, FormsModule, LearnoInput, LearnoButton, FileUpload],
   templateUrl: './worksheet-form.html',
 })
 export class WorksheetForm {
@@ -33,7 +33,14 @@ export class WorksheetForm {
     attachmentUrl: new FormControl(''),
   });
 
-  readonly topicList = computed(() => this.topics());
+  /** Subject filter for the topic list — for teachers who teach more than one subject. */
+  readonly subjectFilter = signal<string>('');
+  readonly subjectOptions = computed<string[]>(() =>
+    [...new Set(this.topics().map(t => t.subject).filter(Boolean))] as string[]);
+  readonly topicList = computed(() => {
+    const s = this.subjectFilter();
+    return s ? this.topics().filter(t => t.subject === s) : this.topics();
+  });
 
   onFileUploaded(file: UploadedFile): void { this.form.get('attachmentUrl')!.setValue(file.url); }
   onFileCleared(): void { this.form.get('attachmentUrl')!.setValue(''); }

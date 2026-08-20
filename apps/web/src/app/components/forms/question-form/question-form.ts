@@ -1,5 +1,5 @@
-import {Component, effect, EventEmitter, inject, input, Output, signal} from '@angular/core';
-import {FormArray, FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
+import {Component, computed, effect, EventEmitter, inject, input, Output, signal} from '@angular/core';
+import {FormArray, FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators} from '@angular/forms';
 import {ToastrService} from 'ngx-toastr';
 import {LearnoInput} from '../../../common/learno-input/learno-input';
 import {LearnoButton} from '../../../common/learno-button/learno-button';
@@ -11,12 +11,21 @@ const LETTERS = 'abcdefghij';
 @Component({
   selector: 'app-question-form',
   standalone: true,
-  imports: [Icon, ReactiveFormsModule, LearnoInput, LearnoButton],
+  imports: [Icon, ReactiveFormsModule, FormsModule, LearnoInput, LearnoButton],
   templateUrl: './question-form.html',
 })
 export class QuestionForm {
   select = input<any | null>(null);
   topics = input<any[]>([]);
+
+  /** Subject filter for the topic list — helps teachers who teach more than one subject. */
+  readonly subjectFilter = signal<string>('');
+  readonly subjectOptions = computed<string[]>(() =>
+    [...new Set(this.topics().map(t => t.subject).filter(Boolean))] as string[]);
+  readonly filteredTopics = computed<any[]>(() => {
+    const s = this.subjectFilter();
+    return s ? this.topics().filter(t => t.subject === s) : this.topics();
+  });
 
   isEdit = signal(false);
   isLoading = signal(false);

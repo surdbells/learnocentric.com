@@ -1,11 +1,20 @@
 <form (ngSubmit)="onSubmit()" [formGroup]="form">
   <div class="modal-body">
     <div class="row">
-      <div class="col-lg-6 mb-3">
+      @if (subjectOptions().length > 1) {
+        <div class="col-lg-3 mb-3">
+          <label class="form-label" for="q_subject">Subject</label>
+          <select id="q_subject" class="form-select" [ngModel]="subjectFilter()" (ngModelChange)="subjectFilter.set($event)" [ngModelOptions]="{standalone: true}">
+            <option value="">All subjects</option>
+            @for (s of subjectOptions(); track s) { <option [value]="s">{{ s }}</option> }
+          </select>
+        </div>
+      }
+      <div [class]="subjectOptions().length > 1 ? 'col-lg-3 mb-3' : 'col-lg-6 mb-3'">
         <label class="form-label" for="q_topic">Topic</label>
         <select id="q_topic" class="form-select" formControlName="topicId">
           <option [ngValue]="null" disabled>Select a topic</option>
-          @for (t of topics(); track t.id) {
+          @for (t of filteredTopics(); track t.id) {
             <option [ngValue]="t.id">{{ t.title }}{{ t.subject ? ' · ' + t.subject : '' }}</option>
           }
         </select>
