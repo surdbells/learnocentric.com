@@ -201,45 +201,6 @@
           </div>
         </div>
 
-        <!-- Download & Storage -->
-        <div class="col-md-6 col-xl-4">
-          <div id="sec-storage" class="card border-0 shadow-sm h-100">
-            <div class="card-body">
-              <div class="fw-semibold mb-1">Download & Storage</div>
-              <p class="text-body-secondary small mb-3">On-device app data (browser cache).</p>
-              <div class="d-flex justify-content-between small mb-1">
-                <span class="text-body-secondary">Storage Used</span>
-                <span class="fw-medium">{{ storageLabel() }} of 5 MB</span>
-              </div>
-              <div class="progress mb-2" style="height:8px">
-                <div class="progress-bar bg-success" [style.width.%]="storagePct()"></div>
-              </div>
-              <div class="small text-body-secondary">{{ storagePct() | number:'1.0-0' }}% of local cache used by saved notes and progress.</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Language -->
-        <div class="col-md-6 col-xl-4">
-          <div id="sec-language" class="card border-0 shadow-sm h-100">
-            <div class="card-body">
-              <div class="fw-semibold mb-1">Language</div>
-              <p class="text-body-secondary small mb-3">Choose your preferred language.</p>
-              <label class="form-label small mb-1">App Language</label>
-              <select class="form-select form-select-sm mb-3" [ngModel]="pref('language','app')" (ngModelChange)="setLanguage('app',$event)">
-                <option value="en">English (English)</option>
-                <option value="fr">French (Français)</option>
-                <option value="ar">Arabic (العربية)</option>
-              </select>
-              <label class="form-label small mb-1">Content Language</label>
-              <select class="form-select form-select-sm" [ngModel]="pref('language','content')" (ngModelChange)="setLanguage('content',$event)">
-                <option value="en">English (English)</option>
-                <option value="fr">French (Français)</option>
-              </select>
-            </div>
-          </div>
-        </div>
-
         <!-- Help & Support -->
         <div class="col-md-6 col-xl-4">
           <div id="sec-help" class="card border-0 shadow-sm h-100">

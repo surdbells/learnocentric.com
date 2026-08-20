@@ -1,5 +1,5 @@
-import {Component, inject, OnInit, signal, computed, PLATFORM_ID} from '@angular/core';
-import {isPlatformBrowser, DecimalPipe} from '@angular/common';
+import {Component, inject, OnInit, signal, PLATFORM_ID} from '@angular/core';
+import {isPlatformBrowser} from '@angular/common';
 import {FormsModule} from '@angular/forms';
 import {RouterLink} from '@angular/router';
 import {PageHeader} from '../../../../common/layout/page-header/page-header';
@@ -19,7 +19,7 @@ interface MenuItem { key: string; label: string; sub: string; icon: string; }
 @Component({
   selector: 'app-student-settings',
   standalone: true,
-  imports: [PageHeader, Icon, FormsModule, RouterLink, DecimalPipe],
+  imports: [PageHeader, Icon, FormsModule, RouterLink],
   templateUrl: './settings.html',
   styleUrl: './settings.css',
 })
@@ -43,25 +43,17 @@ export class StudentSettings implements OnInit {
   pwShow = signal(false);
   pwBusy = signal(false);
 
-  // real browser-cache usage (honest storage figure)
-  storageBytes = signal(0);
-  private readonly storageCap = 5 * 1024 * 1024; // browser localStorage soft cap
-  storagePct = computed(() => Math.min(100, Math.round((this.storageBytes() / this.storageCap) * 100)));
-
   readonly menu: MenuItem[] = [
     {key: 'account', label: 'Account Settings', sub: 'Profile, personal info, password', icon: 'account_circle'},
     {key: 'learning', label: 'Learning Preferences', sub: 'Subjects, goals, reminders', icon: 'tune'},
     {key: 'notifications', label: 'Notifications', sub: 'Email, push, SMS preferences', icon: 'notifications'},
     {key: 'privacy', label: 'Privacy & Security', sub: 'Privacy controls, data usage', icon: 'shield'},
     {key: 'appearance', label: 'Appearance', sub: 'Theme, text size, display', icon: 'palette'},
-    {key: 'storage', label: 'Download & Storage', sub: 'Manage downloads and storage', icon: 'download'},
-    {key: 'language', label: 'Language', sub: 'App language and content', icon: 'language'},
     {key: 'help', label: 'Help & Support', sub: 'FAQs, contact support', icon: 'help'},
   ];
 
   ngOnInit(): void {
     this.load();
-    this.computeStorage();
   }
 
   private load(): void {
@@ -76,23 +68,6 @@ export class StudentSettings implements OnInit {
       error: () => { this.toast.error('Could not load your settings'); this.loading.set(false); },
     });
   }
-
-  private computeStorage(): void {
-    if (!isPlatformBrowser(this.platformId)) return;
-    let total = 0;
-    for (let i = 0; i < localStorage.length; i++) {
-      const k = localStorage.key(i)!;
-      total += (k.length + (localStorage.getItem(k)?.length ?? 0)) * 2; // UTF-16 bytes
-    }
-    this.storageBytes.set(total);
-  }
-
-  storageLabel = computed(() => {
-    const b = this.storageBytes();
-    if (b < 1024) return `${b} B`;
-    if (b < 1024 * 1024) return `${(b / 1024).toFixed(0)} KB`;
-    return `${(b / 1024 / 1024).toFixed(1)} MB`;
-  });
 
   select(key: string): void {
     this.activeSection.set(key);
@@ -135,11 +110,6 @@ export class StudentSettings implements OnInit {
     if (!isPlatformBrowser(this.platformId)) return;
     const map: Record<string, string> = {small: '15px', medium: '16px', large: '18px'};
     document.documentElement.style.fontSize = map[size] ?? '16px';
-  }
-
-  setLanguage(kind: 'app' | 'content', value: string): void {
-    if (kind === 'app') this.prefs.setLanguage(value as any);
-    this.patch('language', kind, value);
   }
 
   private save(patch: any): void {

@@ -10,7 +10,7 @@ Captured from *Student & Teacher Review* and *SCHOOL_SUPER ADMIN* PDFs (annotate
 - ☑ **S5** Merge "Resources" + "Resource Viewer" nav into one.
 - ◐ **S6** Progress Report → add a **skill progress snapshot/summary drawn from portfolio** (= backend done; frontend pending).
 - ☑ **S7** Remove the "Communication" section from the learner nav (Notifications + Ask a Tutor is enough).
-- ☐ **S8** Learner Settings → remove certain items (needs specifics).
+- ☑ **S8** Learner Settings → removed "Download & Storage" and "Language" sections (confirmed with user).
 
 ## Teacher portal
 - ☑ **T1** Merge "Topics" + "Lesson Content" nav (topic info captured on Lesson Content).
@@ -22,7 +22,7 @@ Captured from *Student & Teacher Review* and *SCHOOL_SUPER ADMIN* PDFs (annotate
 - ☑ **T8** Add Worksheet form → add a **Subject** selector.
 - ☑ **T9** Remove "Interventions" from teacher nav (School Admin's).
 - ☑ **T10** Merge "Resources" + "Resource Viewer" (teacher nav).
-- ☐ **T11** Teacher Settings "Class & Communication Preferences" → remodify fields (needs specifics).
+- ☑ **T11** Teacher Settings "Class & Communication Preferences" → reviewed; left as-is (all four fields functional; user had no preference on changes, no annotation available).
 - ☑ **T12** Give Feedback → teacher must be able to **see the learner's work** being graded.
 - ☑ **T13** Add the "Assignments & Submissions" unified grading inbox (missing; needed for manual grading).
 
@@ -36,7 +36,7 @@ Captured from *Student & Teacher Review* and *SCHOOL_SUPER ADMIN* PDFs (annotate
 - ☐ **A7** "School Setup" → belongs to Super Admin (remove/relocate from school-admin nav).
 - ☑ **A8** Calendar → proper **month/week calendar** (not a list) per the PNG.
 - ☐ **A9** Settings & Permissions → assign roles to **non-teaching academic staff**.
-- ☐ **A10** (general) match the PNG feature flow — minor missing details.
+- ◐ **A10** (general) match the PNG feature flow — minor missing details. Blocked: needs the annotated PNGs (not committed to repo) to identify the specific gaps.
 
 ## Original two (from the message)
 - ◐ #1 = **S6** (skill progress from portfolio).
