@@ -36,6 +36,7 @@ export class Assessments {
   builder = signal<any | null>(null);
   available = signal<any[]>([]);
   pickId = signal<number | null>(null);
+  drawCount = signal<number | null>(null);
   busy = signal(false);
   subjects = signal<any[]>([]);
   topics = signal<any[]>([]);
@@ -109,11 +110,33 @@ export class Assessments {
 
   private loadAvailable(a: any): void {
     const attached = new Set((a.questions ?? []).map((q: any) => q.question_id));
-    this.api.get<any>('/backend/assessment/questions', {params: {subject_id: a.subject_id, answer_validated: 1, per_page: 200}}).subscribe({
+    // Questions are topic-linked, so scope the picker to the assessment's topic
+    // (falls back to the whole subject when the assessment has no topic).
+    const params: any = {answer_validated: 1, per_page: 200};
+    if (a.topic_id) { params.topic_id = a.topic_id; } else { params.subject_id = a.subject_id; }
+    this.api.get<any>('/backend/assessment/questions', {params}).subscribe({
       next: (res) => {
         const rows = res?.data ?? res ?? [];
         this.available.set(rows.filter((q: any) => !attached.has(q.id)));
       },
+    });
+  }
+
+  /** Bulk-draw validated questions from the bank — all, or {count} at random. */
+  drawFromBank(count?: number): void {
+    const a = this.builder();
+    if (!a) return;
+    this.busy.set(true);
+    const body = count && count > 0 ? {count} : {};
+    this.api.post<any>(`/backend/assessment/assessments/${a.id}/draw-from-bank`, body).subscribe({
+      next: (detail) => {
+        this.builder.set(detail);
+        this.loadAvailable(detail);
+        this.grid?.refresh();
+        this.busy.set(false);
+        this.toast.success(`Drew ${detail.drawn ?? 0} question(s) from the bank`);
+      },
+      error: (e) => { this.toast.error(e?.error?.error || 'Could not draw questions'); this.busy.set(false); },
     });
   }
 

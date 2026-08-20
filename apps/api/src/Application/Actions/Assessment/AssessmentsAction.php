@@ -199,6 +199,59 @@ final class AssessmentsAction
         return Json::write($response, $this->row($a, true), 201);
     }
 
+    /**
+     * POST /assessment/assessments/{id}/draw-from-bank — bulk-attach validated
+     * questions from the bank instead of picking them one by one. Draws from the
+     * assessment's topic (or its whole subject when no topic is set); with an
+     * optional {count} it draws that many at random, otherwise it takes them all.
+     * Only answer-validated questions qualify (same gate as attach); already-
+     * attached questions are skipped.
+     */
+    public function drawFromBank(Request $request, Response $response, array $args): Response
+    {
+        $a = $this->em->getRepository(Assessment::class)->find((int) $args['id']);
+        if ($a === null) {
+            return Json::error($response, 'Assessment not found.', 404);
+        }
+        if (!in_array($a->getApprovalStatus(), self::EDITABLE, true)) {
+            return Json::error($response, "This assessment is {$a->getApprovalStatus()}; return it to draft to change its questions.", 409);
+        }
+
+        $topic = $a->getTopic();
+        if ($topic !== null) {
+            $pool = $this->em->getRepository(Question::class)->findBy(['topic' => $topic]);
+        } else {
+            $pool = $this->em->createQueryBuilder()->select('q')->from(Question::class, 'q')->join('q.topic', 't')
+                ->where('t.subject = :s')->setParameter('s', $a->getSubject())->getQuery()->getResult();
+        }
+
+        $attached = [];
+        foreach ($a->getItems() as $item) {
+            $attached[$item->getQuestion()->getId()] = true;
+        }
+        $candidates = array_values(array_filter(
+            $pool,
+            static fn (Question $q) => $q->isAnswerValidated() && !isset($attached[$q->getId()])
+        ));
+
+        $count = (int) (((array) $request->getParsedBody())['count'] ?? 0);
+        if ($count > 0 && count($candidates) > $count) {
+            shuffle($candidates);
+            $candidates = array_slice($candidates, 0, $count);
+        }
+
+        $order = $a->getItems()->count();
+        foreach ($candidates as $q) {
+            $link = new AssessmentQuestion($a, $q, $order++);
+            $this->em->persist($link);
+            $a->getItems()->add($link);
+        }
+        $this->em->flush();
+        $this->audit->log('assessment.draw_from_bank', $request->getAttribute('user'), 'Assessment', (string) $a->getId(), null, ['drawn' => count($candidates)]);
+
+        return Json::write($response, ['drawn' => count($candidates)] + $this->row($a, true), 201);
+    }
+
     /** DELETE /assessment/assessments/{id}/questions/{qid} — detach a question. */
     public function detach(Request $request, Response $response, array $args): Response
     {

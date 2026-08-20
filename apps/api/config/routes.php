@@ -160,6 +160,7 @@ return static function (App $app): void {
             $auth->post('/assessment/assessments/bulk-delete', AssessmentsAction::class . ':bulkDelete');
             $auth->get('/assessment/assessments/{id:[0-9]+}', AssessmentsAction::class . ':show');
             $auth->post('/assessment/assessments/{id:[0-9]+}/questions', AssessmentsAction::class . ':attach');
+            $auth->post('/assessment/assessments/{id:[0-9]+}/draw-from-bank', AssessmentsAction::class . ':drawFromBank');
             $auth->delete('/assessment/assessments/{id:[0-9]+}/questions/{qid:[0-9]+}', AssessmentsAction::class . ':detach');
             $auth->post('/assessment/assessments/{id:[0-9]+}/transition', AssessmentsAction::class . ':transition');
             $auth->get('/assessment/assessments/{id:[0-9]+}/history', AssessmentsAction::class . ':history');

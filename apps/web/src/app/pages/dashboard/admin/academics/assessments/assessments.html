@@ -53,20 +53,31 @@
         <div class="text-body-secondary small mb-3">No questions yet.</div>
       }
 
-      <!-- Add a validated question -->
       @if (editable()) {
+        <!-- Draw from the question bank — questions are already topic-linked -->
+        <label class="form-label text-uppercase small fw-semibold text-body-secondary">Build from question bank</label>
+        <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
+          <button type="button" class="btn btn-sm btn-success text-nowrap" [disabled]="busy()" (click)="drawFromBank()">
+            <app-icon name="auto_awesome" [size]="16" /> Draw all from bank
+          </button>
+          <span class="text-body-secondary small">or</span>
+          <div class="input-group input-group-sm" style="max-width: 210px">
+            <input type="number" min="1" class="form-control" placeholder="How many" [ngModel]="drawCount()" (ngModelChange)="drawCount.set($event)" [ngModelOptions]="{standalone: true}" />
+            <button type="button" class="btn btn-outline-success text-nowrap" [disabled]="busy() || !drawCount()" (click)="drawFromBank(drawCount() || 0)">Draw at random</button>
+          </div>
+        </div>
+        <div class="form-text mb-3">Pulled from this assessment's topic (or subject). Only answer-validated questions qualify.</div>
+
+        <!-- Or add a single question manually -->
         <div class="d-flex gap-2 mb-4">
           <select class="form-select form-select-sm" [ngModel]="pickId()" (ngModelChange)="pickId.set($event)" [ngModelOptions]="{standalone: true}">
-            <option [ngValue]="null" disabled>Add a validated question…</option>
+            <option [ngValue]="null" disabled>…or add one manually</option>
             @for (q of available(); track q.id) {
               <option [ngValue]="q.id">[{{ q.type }}] {{ q.stem }}</option>
             }
           </select>
-          <button type="button" class="btn btn-sm btn-primary text-nowrap" [disabled]="!pickId() || busy()" (click)="attach()">Add</button>
+          <button type="button" class="btn btn-sm btn-outline-primary text-nowrap" [disabled]="!pickId() || busy()" (click)="attach()">Add</button>
         </div>
-        @if (!available().length) {
-          <div class="form-text mt-n3 mb-4">Only validated questions from this subject can be added. Validate more in the Question Bank.</div>
-        }
       }
 
       <!-- Lifecycle -->

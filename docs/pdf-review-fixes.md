@@ -18,7 +18,7 @@ Captured from *Student & Teacher Review* and *SCHOOL_SUPER ADMIN* PDFs (annotate
 - ☑ **T3** Remove "Approval Queue" from teacher nav (School Admin / role-gated).
 - ☐ **T4** Question Bank → add a **Subject filter**.
 - ☐ **T5** Add Question form → add a **Subject** selector (multi-subject teachers).
-- ◐ **T6/T7** Assessment builder → **auto-draw questions from the bank** by topic; stop manual add-one-by-one (all 3 modes: draw-all / draw-N-random / topic-filtered picker).
+- ☑ **T6/T7** Assessment builder → **auto-draw questions from the bank** by topic; stop manual add-one-by-one (all 3 modes: draw-all / draw-N-random / topic-filtered picker).
 - ☐ **T8** Add Worksheet form → add a **Subject** selector.
 - ☑ **T9** Remove "Interventions" from teacher nav (School Admin's).
 - ☑ **T10** Merge "Resources" + "Resource Viewer" (teacher nav).
