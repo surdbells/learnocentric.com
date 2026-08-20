@@ -210,6 +210,7 @@ export class UserPreferenceMenu {
         { name: "Assessments", link: "/teacher/academics/assessments", module: "assessments" },
         { name: "Worksheets", link: "/teacher/academics/worksheets", module: "worksheets" },
         { name: "Portfolio", link: "/teacher/academics/portfolio", module: "portfolio" },
+        { name: "Assignments & Submissions", link: "/teacher/academics/submissions" },
         { name: "Live Classes", link: "/teacher/academics/live-classes", module: "live_classes" },
         { name: "Gradebook", link: "/teacher/academics/gradebook", module: "assessments" },
         { name: "Insights", link: "/teacher/academics/insights" },

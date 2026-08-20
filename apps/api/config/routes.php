@@ -21,6 +21,7 @@ use App\Application\Actions\Assessment\InsightsAction;
 use App\Application\Actions\Assessment\PortfolioAction;
 use App\Application\Actions\Assessment\QuestionsAction;
 use App\Application\Actions\Assessment\WorksheetsAction;
+use App\Application\Actions\Assessment\SubmissionsInboxAction;
 use App\Application\Actions\Assessment\WorksheetSubmissionsAction;
 use App\Application\Actions\Catalog\CatalogSubjectsAction;
 use App\Application\Actions\Content\ContentLibraryAction;
@@ -182,6 +183,7 @@ return static function (App $app): void {
             // Worksheets — topic-linked, staff CRUD + lifecycle, student submit + staff grade
             $auth->map(['GET', 'POST', 'PUT', 'DELETE'], '/assessment/worksheets', WorksheetsAction::class);
             $auth->post('/assessment/worksheets/bulk-delete', WorksheetsAction::class . ':bulkDelete');
+            $auth->get('/assessment/submissions/inbox', SubmissionsInboxAction::class);
             $auth->get('/assessment/worksheets/available', WorksheetSubmissionsAction::class . ':available');
             $auth->post('/assessment/worksheets/{id:[0-9]+}/transition', WorksheetsAction::class . ':transition');
             $auth->get('/assessment/worksheets/{id:[0-9]+}/history', WorksheetsAction::class . ':history');

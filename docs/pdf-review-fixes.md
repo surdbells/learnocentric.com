@@ -24,7 +24,7 @@ Captured from *Student & Teacher Review* and *SCHOOL_SUPER ADMIN* PDFs (annotate
 - ☑ **T10** Merge "Resources" + "Resource Viewer" (teacher nav).
 - ☐ **T11** Teacher Settings "Class & Communication Preferences" → remodify fields (needs specifics).
 - ☐ **T12** Give Feedback → teacher must be able to **see the learner's work** being graded.
-- ☐ **T13** Add the "Assignments & Submissions" unified grading inbox (missing; needed for manual grading).
+- ☑ **T13** Add the "Assignments & Submissions" unified grading inbox (missing; needed for manual grading).
 
 ## School Admin portal
 - ☐ **A1** Merge "Students" + "Enrollment"; enroll (assign class) **while adding a learner**; remove the separate "New Student" tab.

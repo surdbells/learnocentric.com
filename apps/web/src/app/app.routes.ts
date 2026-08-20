@@ -58,6 +58,7 @@ import {ReportConcern} from './pages/dashboard/student/report-concern/report-con
 import {StudentSettings} from './pages/dashboard/student/settings/settings';
 import {TeacherSettings} from './pages/dashboard/teacher/settings/settings';
 import {MyClasses} from './pages/dashboard/teacher/academics/my-classes/my-classes';
+import {SubmissionsInbox} from './pages/dashboard/teacher/submissions-inbox/submissions-inbox';
 import {FeedbackCompose} from './pages/dashboard/teacher/feedback-compose/feedback-compose';
 import {authGuard} from './common/auth/auth-guard';
 import {moduleGuard} from './common/auth/module-guard';
@@ -287,6 +288,7 @@ export const routes: Routes = [
           { path: "analytics", component: Analytics, canActivate: [moduleGuard('analytics')] },
           { path: "interventions", component: Interventions, canActivate: [moduleGuard('interventions')] },
           { path: "safeguarding", component: Safeguarding, canActivate: [moduleGuard('safeguarding')] },
+          { path: "submissions", component: SubmissionsInbox },
           { path: "resources", component: Resources },
           { path: "resource-viewer", component: ResourceViewer },
         ]
