@@ -4,35 +4,113 @@
 
 <app-tab-bar class="d-block mb-3" [tabs]="tabs()" [active]="typeTab()" (activeChange)="typeTab.set($event)" />
 
+<!-- Toolbar: period nav + view switch -->
+<div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+  <div class="d-flex align-items-center gap-2">
+    @if (view() !== 'agenda') {
+      <div class="btn-group btn-group-sm">
+        <button type="button" class="btn btn-outline-secondary" (click)="prev()" aria-label="Previous"><app-icon name="chevron_left" [size]="18" /></button>
+        <button type="button" class="btn btn-outline-secondary" (click)="goToday()">Today</button>
+        <button type="button" class="btn btn-outline-secondary" (click)="next()" aria-label="Next"><app-icon name="chevron_right" [size]="18" /></button>
+      </div>
+      <span class="fw-semibold ms-1">{{ periodLabel() }}</span>
+    } @else {
+      <span class="fw-semibold">All events</span>
+    }
+  </div>
+  <div class="btn-group btn-group-sm cal-viewswitch">
+    <button type="button" class="btn" [class.btn-primary]="view()==='month'" [class.btn-outline-secondary]="view()!=='month'" (click)="setView('month')">Month</button>
+    <button type="button" class="btn" [class.btn-primary]="view()==='week'" [class.btn-outline-secondary]="view()!=='week'" (click)="setView('week')">Week</button>
+    <button type="button" class="btn" [class.btn-primary]="view()==='agenda'" [class.btn-outline-secondary]="view()!=='agenda'" (click)="setView('agenda')">Agenda</button>
+  </div>
+</div>
+
 @if (loading()) {
   <div class="text-body-secondary p-4">Loading…</div>
-} @else if (!filtered().length) {
-  <div class="card border-0 shadow-sm p-5 text-center text-body-secondary">No events in this view.</div>
-} @else {
-  @for (day of grouped(); track day.date) {
-    <div class="mb-3">
-      <div class="cal-date small fw-semibold text-body-secondary mb-2">{{ day.date | date:'EEEE, MMMM d, y' }}</div>
-      <div class="card border-0 shadow-sm">
-        <div class="card-body p-0">
-          @for (e of day.items; track $index) {
-            <div class="d-flex align-items-center gap-3 px-3 py-2 border-bottom cal-row">
-              <span class="cal-ic bg-{{ typeColor(e.type) }}-subtle text-{{ typeColor(e.type) }}">
-                <app-icon [name]="typeIcon(e.type)" [size]="18" />
-              </span>
-              <div class="flex-grow-1">
-                <div class="fw-medium">{{ e.title }}</div>
-                <div class="small text-body-secondary">{{ typeLabel(e.type) }} · {{ e.subject }}</div>
-              </div>
-              @if (e.type === 'live_class') {
-                <span class="small text-body-secondary text-nowrap">{{ e.datetime | date:'h:mm a' }}</span>
-                <span class="badge text-capitalize bg-{{ typeColor(e.type) }}-subtle text-{{ typeColor(e.type) }}">{{ e.status }}</span>
-              } @else {
-                <span class="badge bg-warning-subtle text-warning">Due</span>
-              }
+}
+
+<!-- MONTH -->
+@else if (view() === 'month') {
+  <div class="card border-0 shadow-sm">
+    <div class="cal-grid cal-head">
+      @for (w of weekdays; track w) { <div class="cal-hcell">{{ w }}</div> }
+    </div>
+    <div class="cal-grid">
+      @for (d of monthCells(); track d.iso) {
+        <div class="cal-cell" [class.cal-out]="!d.inMonth" [class.cal-today]="d.isToday">
+          <div class="cal-daynum">{{ d.day }}</div>
+          @for (e of d.items.slice(0, 3); track $index) {
+            <div class="cal-chip cal-chip-{{ typeColor(e.type) }}" [title]="e.title + ' · ' + typeLabel(e.type)">
+              <span class="cal-dot bg-{{ typeColor(e.type) }}"></span>
+              <span class="cal-chip-text">{{ e.title }}</span>
             </div>
+          }
+          @if (d.items.length > 3) {
+            <div class="cal-more">+{{ d.items.length - 3 }} more</div>
+          }
+        </div>
+      }
+    </div>
+  </div>
+}
+
+<!-- WEEK -->
+@else if (view() === 'week') {
+  <div class="cal-week">
+    @for (d of weekCells(); track d.iso) {
+      <div class="card border-0 shadow-sm cal-weekcol" [class.cal-today]="d.isToday">
+        <div class="cal-weekhead">
+          <div class="small text-body-secondary">{{ d.weekday }}</div>
+          <div class="cal-weekdaynum" [class.text-primary]="d.isToday">{{ d.day }}</div>
+        </div>
+        <div class="cal-weekbody">
+          @if (!d.items.length) {
+            <div class="text-body-secondary small text-center py-3">—</div>
+          } @else {
+            @for (e of d.items; track $index) {
+              <div class="cal-wevent border-start border-3 border-{{ typeColor(e.type) }}">
+                @if (e.type === 'live_class') { <div class="small fw-semibold">{{ e.datetime | date:'h:mm a' }}</div> }
+                <div class="small fw-medium">{{ e.title }}</div>
+                <div class="text-body-secondary" style="font-size:.72rem">{{ typeLabel(e.type) }}</div>
+              </div>
+            }
           }
         </div>
       </div>
-    </div>
+    }
+  </div>
+}
+
+<!-- AGENDA -->
+@else {
+  @if (!grouped().length) {
+    <div class="card border-0 shadow-sm p-5 text-center text-body-secondary">No events in this view.</div>
+  } @else {
+    @for (day of grouped(); track day.date) {
+      <div class="mb-3">
+        <div class="cal-date small fw-semibold text-body-secondary mb-2">{{ day.date | date:'EEEE, MMMM d, y' }}</div>
+        <div class="card border-0 shadow-sm">
+          <div class="card-body p-0">
+            @for (e of day.items; track $index) {
+              <div class="d-flex align-items-center gap-3 px-3 py-2 border-bottom cal-row">
+                <span class="cal-ic bg-{{ typeColor(e.type) }}-subtle text-{{ typeColor(e.type) }}">
+                  <app-icon [name]="typeIcon(e.type)" [size]="18" />
+                </span>
+                <div class="flex-grow-1">
+                  <div class="fw-medium">{{ e.title }}</div>
+                  <div class="small text-body-secondary">{{ typeLabel(e.type) }} · {{ e.subject }}</div>
+                </div>
+                @if (e.type === 'live_class') {
+                  <span class="small text-body-secondary text-nowrap">{{ e.datetime | date:'h:mm a' }}</span>
+                  <span class="badge text-capitalize bg-{{ typeColor(e.type) }}-subtle text-{{ typeColor(e.type) }}">{{ e.status }}</span>
+                } @else {
+                  <span class="badge bg-warning-subtle text-warning">Due</span>
+                }
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+    }
   }
 }

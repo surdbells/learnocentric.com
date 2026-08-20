@@ -1,3 +1,43 @@
 :host{display:block}
 .cal-ic{width:36px;height:36px;flex:none;border-radius:9px;display:inline-flex;align-items:center;justify-content:center}
 .cal-row:last-child{border-bottom:0!important}
+
+/* ---- Month grid ---- */
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr)}
+.cal-head{border-bottom:1px solid var(--bs-border-color)}
+.cal-hcell{padding:.6rem .5rem;text-align:center;font-size:.75rem;font-weight:600;text-transform:uppercase;letter-spacing:.04em;color:var(--bs-secondary-color)}
+.cal-cell{
+  min-height:104px;padding:.35rem;border-right:1px solid var(--bs-border-color);
+  border-bottom:1px solid var(--bs-border-color);display:flex;flex-direction:column;gap:2px;overflow:hidden;
+}
+.cal-cell:nth-child(7n){border-right:0}
+.cal-out{background:var(--bs-tertiary-bg);}
+.cal-out .cal-daynum{color:var(--bs-secondary-color);opacity:.6}
+.cal-daynum{font-size:.8rem;font-weight:600;text-align:right;padding:0 .15rem;color:var(--bs-body-color)}
+.cal-today{background:rgba(var(--brand-rgb),.06)}
+.cal-today .cal-daynum{
+  color:#fff;background:var(--brand-500);border-radius:50%;width:22px;height:22px;
+  display:inline-flex;align-items:center;justify-content:center;margin-left:auto;font-size:.72rem
+}
+.cal-chip{display:flex;align-items:center;gap:5px;padding:1px 5px;border-radius:6px;background:var(--bs-tertiary-bg);cursor:default}
+.cal-chip-text{font-size:.72rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.35}
+.cal-dot{width:7px;height:7px;border-radius:50%;flex:none}
+.cal-chip-danger{background:rgba(var(--bs-danger-rgb),.10)}
+.cal-chip-warning{background:rgba(var(--bs-warning-rgb),.12)}
+.cal-more{font-size:.68rem;color:var(--bs-secondary-color);padding:0 .3rem;font-weight:600}
+
+/* ---- Week view ---- */
+.cal-week{display:grid;grid-template-columns:repeat(7,1fr);gap:.5rem}
+.cal-weekcol{overflow:hidden}
+.cal-weekhead{padding:.5rem;text-align:center;border-bottom:1px solid var(--bs-border-color)}
+.cal-weekdaynum{font-size:1.15rem;font-weight:700;line-height:1.1}
+.cal-weekbody{padding:.4rem;display:flex;flex-direction:column;gap:.4rem;min-height:120px}
+.cal-wevent{padding:.25rem .5rem;background:var(--bs-tertiary-bg);border-radius:0 6px 6px 0}
+
+@media (max-width:820px){
+  .cal-cell{min-height:78px}
+  .cal-chip-text{display:none}
+  .cal-week{grid-template-columns:1fr;gap:.4rem}
+  .cal-weekcol{display:grid;grid-template-columns:64px 1fr}
+  .cal-weekhead{border-bottom:0;border-right:1px solid var(--bs-border-color);display:flex;flex-direction:column;justify-content:center}
+}
