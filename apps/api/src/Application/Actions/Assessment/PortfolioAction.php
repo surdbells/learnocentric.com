@@ -285,6 +285,51 @@ final class PortfolioAction
         return Json::write($response, $entry->toArray());
     }
 
+    /**
+     * PUT /assessment/portfolio/tasks — staff assign (or update) the portfolio brief
+     * on a topic. A topic with a non-empty brief becomes a portfolio task the topic's
+     * learners see and submit evidence against. Unlike editing topic content, this is
+     * allowed regardless of the topic's approval status (it's an assignment, not a
+     * content change needing re-approval) — but the task only surfaces to learners
+     * once the topic is published.
+     */
+    public function assignTask(Request $request, Response $response): Response
+    {
+        if (($guard = $this->staffGuard($request, $response)) !== null) {
+            return $guard;
+        }
+        $user = $this->currentUser($request);
+        $body = (array) $request->getParsedBody();
+        $topic = $this->em->getRepository(Topic::class)->find((int) ($body['topic_id'] ?? 0));
+        $brief = trim((string) ($body['portfolio_evidence_expected'] ?? $body['brief'] ?? ''));
+        if ($topic === null) {
+            return Json::error($response, 'Choose a valid topic.', 422);
+        }
+        if ($brief === '') {
+            return Json::error($response, 'Describe the evidence the learner should submit.', 422);
+        }
+        $inst = $user->getInstitution();
+        if ($inst !== null && $topic->getSubject()->getInstitution()->getId() !== $inst->getId()) {
+            return Json::error($response, "You can only assign tasks for your own school's topics.", 403);
+        }
+
+        $topic->setPortfolioEvidenceExpected($brief);
+        if (array_key_exists('competency_built', $body)) {
+            $topic->setCompetencyBuilt($body['competency_built'] !== '' ? (string) $body['competency_built'] : null);
+        }
+        $this->em->flush();
+        $this->audit->log('portfolio.assign_task', $user, 'Topic', (string) $topic->getId(), null, ['brief' => $brief]);
+
+        return Json::write($response, [
+            'topic_id' => $topic->getId(),
+            'title' => $topic->getTitle(),
+            'subject' => $topic->getSubject()->getName(),
+            'status' => $topic->getApprovalStatus(),
+            'published' => $topic->getApprovalStatus() === Lifecycle::PUBLISHED,
+            'portfolio_evidence_expected' => $topic->getPortfolioEvidenceExpected(),
+        ]);
+    }
+
     // --- helpers ---
 
     private function currentUser(Request $request): User

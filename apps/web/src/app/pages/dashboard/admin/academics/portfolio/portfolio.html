@@ -1,4 +1,52 @@
-<app-page-header icon="folder_special" action="Portfolio Evidence"></app-page-header>
+<app-page-header icon="folder_special" action="Portfolio Evidence">
+  <button type="button" class="btn btn-primary btn-sm d-inline-flex align-items-center gap-1" (click)="onNewTask()">
+    <app-icon name="add" [size]="18" /> New portfolio task
+  </button>
+</app-page-header>
+
+<!-- Assign a portfolio task (evidence brief) to a topic -->
+<app-learno-modal [modalId]="'portfolio_task'" [modalAction]="'New portfolio task'" [showBtn]="false">
+  <div modalForm>
+    <p class="text-body-secondary small mb-3">
+      Assign an evidence brief to a topic. Learners in that topic's classes then see it as a
+      portfolio task and submit evidence you can review here.
+    </p>
+
+    <label class="form-label small fw-semibold">Topic</label>
+    <select class="form-select mb-1" [ngModel]="taskTopicId()" (ngModelChange)="onPickTopic($event)">
+      <option [ngValue]="null" disabled>Choose a topic…</option>
+      @for (t of topics(); track t.id) {
+        <option [ngValue]="t.id">{{ t.title }} — {{ t.subject }} ({{ titleCase(t.approval_status) }})</option>
+      }
+    </select>
+    @if (selectedTopic(); as st) {
+      @if (st.approval_status !== 'published') {
+        <div class="small text-warning-emphasis mb-2 d-flex align-items-center gap-1">
+          <app-icon name="info" [size]="15" />
+          This topic is {{ titleCase(st.approval_status) }} — the task saves now but only reaches learners once it's published.
+        </div>
+      } @else if (st.portfolio_evidence_expected) {
+        <div class="small text-body-secondary mb-2">This topic already has a brief — editing replaces it.</div>
+      }
+    }
+
+    <label class="form-label small fw-semibold mt-2">Evidence brief <span class="text-danger">*</span></label>
+    <textarea class="form-control mb-3" rows="4"
+              placeholder="e.g. Photograph or scan your completed budget worksheet and explain, in 3–4 sentences, how you found each total."
+              [ngModel]="taskBrief()" (ngModelChange)="taskBrief.set($event)"></textarea>
+
+    <label class="form-label small fw-semibold">Competency built <span class="text-body-secondary fw-normal">(optional)</span></label>
+    <input type="text" class="form-control mb-4" placeholder="e.g. Financial literacy"
+           [ngModel]="taskCompetency()" (ngModelChange)="taskCompetency.set($event)"/>
+
+    <div class="d-flex justify-content-end gap-2">
+      <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+      <button type="button" class="btn btn-primary" [disabled]="taskBusy() || !taskTopicId() || !taskBrief().trim()" (click)="submitTask()">
+        {{ taskBusy() ? 'Saving…' : 'Assign task' }}
+      </button>
+    </div>
+  </div>
+</app-learno-modal>
 
 <!-- Review -->
 <app-learno-modal [modalId]="'portfolio_review'" [modalAction]="'Review evidence'" [showBtn]="false">

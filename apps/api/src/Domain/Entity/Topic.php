@@ -99,6 +99,8 @@ class Topic implements LifecycleAware
     public function setCoreTheory(?string $v): void { $this->coreTheory = $v; }
     public function setRealLifeRelevance(?string $v): void { $this->realLifeRelevance = $v; }
     public function setCompetencyBuilt(?string $v): void { $this->competencyBuilt = $v; }
+    public function getPortfolioEvidenceExpected(): ?string { return $this->portfolioEvidenceExpected; }
+    public function setPortfolioEvidenceExpected(?string $v): void { $this->portfolioEvidenceExpected = $v; }
     public function getApprovalStatus(): string { return $this->approvalStatus; }
     public function setApprovalStatus(string $v): void { $this->approvalStatus = $v; }
 

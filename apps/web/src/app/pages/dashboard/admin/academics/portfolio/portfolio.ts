@@ -6,6 +6,7 @@ import {PageHeader} from '../../../../../common/layout/page-header/page-header';
 import {LearnoModal} from '../../../../../components/learno-modal/learno-modal';
 import {DataGrid, GridColumn, GridFilter} from '../../../../../components/data-grid/data-grid';
 import {ApiService} from '../../../../../common/service/api.service';
+import {Icon} from '../../../../../common/icon/icon';
 import {RichEditor} from '../../../../../common/rich-editor/rich-editor';
 import {RichText} from '../../../../../common/rich-editor/rich-text';
 
@@ -17,7 +18,7 @@ const RATINGS = ['emerging', 'developing', 'proficient', 'mastery'];
 @Component({
   selector: 'app-portfolio',
   standalone: true,
-  imports: [RichText, RichEditor, PageHeader, LearnoModal, DataGrid, FormsModule, DatePipe],
+  imports: [RichText, RichEditor, PageHeader, LearnoModal, DataGrid, FormsModule, DatePipe, Icon],
   templateUrl: './portfolio.html',
   styleUrl: './portfolio.css',
 })
@@ -32,6 +33,14 @@ export class Portfolio {
   feedback = signal<string>('');
   busy = signal(false);
   subjects = signal<any[]>([]);
+
+  // New portfolio task (assign an evidence brief to a topic)
+  topics = signal<any[]>([]);
+  taskTopicId = signal<number | null>(null);
+  taskBrief = signal<string>('');
+  taskCompetency = signal<string>('');
+  taskBusy = signal(false);
+  readonly selectedTopic = computed(() => this.topics().find((t) => t.id === this.taskTopicId()) ?? null);
 
   readonly ratings = RATINGS;
 
@@ -51,6 +60,53 @@ export class Portfolio {
 
   constructor() {
     this.api.get<any>('/backend/school/subjects').subscribe({next: (r) => this.subjects.set(Array.isArray(r) ? r : (r?.data ?? []))});
+    this.loadTopics();
+  }
+
+  private loadTopics(): void {
+    this.api.get<any>('/backend/curriculum/topics').subscribe({
+      next: (r) => this.topics.set(Array.isArray(r) ? r : (r?.data ?? [])),
+    });
+  }
+
+  /** Open the "New portfolio task" composer. */
+  onNewTask(): void {
+    this.taskTopicId.set(null);
+    this.taskBrief.set('');
+    this.taskCompetency.set('');
+    const el = document.getElementById('portfolio_task');
+    if (el && typeof bootstrap !== 'undefined') bootstrap.Modal.getOrCreateInstance(el).show();
+  }
+
+  /** Pre-fill the brief when a topic that already has one is chosen (so it can be edited). */
+  onPickTopic(id: number | null): void {
+    this.taskTopicId.set(id);
+    const t = this.selectedTopic();
+    this.taskBrief.set(t?.portfolio_evidence_expected ?? '');
+    this.taskCompetency.set(t?.competency_built ?? '');
+  }
+
+  submitTask(): void {
+    const id = this.taskTopicId();
+    if (!id) { this.toast.error('Choose a topic'); return; }
+    if (!this.taskBrief().trim()) { this.toast.error('Describe the evidence the learner should submit'); return; }
+    this.taskBusy.set(true);
+    this.api.put<any>('/backend/assessment/portfolio/tasks', {
+      topic_id: id,
+      portfolio_evidence_expected: this.taskBrief().trim(),
+      competency_built: this.taskCompetency().trim(),
+    }).subscribe({
+      next: (res) => {
+        this.toast.success(res?.published
+          ? 'Portfolio task assigned — learners can see it now.'
+          : 'Portfolio task saved. It reaches learners once the topic is published.');
+        this.taskBusy.set(false);
+        this.loadTopics();
+        const el = document.getElementById('portfolio_task');
+        if (el && typeof bootstrap !== 'undefined') bootstrap.Modal.getInstance(el)?.hide();
+      },
+      error: (err) => { this.toast.error(err?.error?.error || 'Could not assign the task'); this.taskBusy.set(false); },
+    });
   }
 
   onView(row: any): void {
