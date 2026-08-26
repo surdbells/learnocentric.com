@@ -1,4 +1,4 @@
-import {Component, computed, inject, signal} from '@angular/core';
+import {Component, computed, inject, input, signal} from '@angular/core';
 import {DatePipe, TitleCasePipe} from '@angular/common';
 import {RouterLink} from '@angular/router';
 import {ToastrService} from 'ngx-toastr';
@@ -23,6 +23,9 @@ const SOURCE_ICON: Record<string, string> = {quiz: 'quiz', worksheet: 'assignmen
   styleUrl: './my-feedback.css',
 })
 export class MyFeedback {
+  /** When hosted inside the merged Progress & Feedback page, hide the page header. */
+  readonly embedded = input<boolean>(false);
+
   private readonly api = inject(ApiService);
   private readonly toast = inject(ToastrService);
 

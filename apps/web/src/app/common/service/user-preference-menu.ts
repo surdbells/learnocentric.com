@@ -231,16 +231,17 @@ export class UserPreferenceMenu {
 
     { name: "Academics", icon: "school", link: "/student/academics",
       children: [
-        { name: "Learn", link: "/student/academics/learn" },
+        // Learn merged into My Subjects: the subject cards → Subject Hub is the single
+        // entry to lessons; the /learn lesson-player route is kept for the hub to deep-link.
         { name: "My Subjects", link: "/student/academics/my-subjects" },
-        { name: "Assessments", link: "/student/academics/assessments", module: "assessments" },
-        { name: "Worksheets", link: "/student/academics/worksheets", module: "worksheets" },
+        // Assessments + Worksheets merged into one tabbed page (each tab self-gates on its module).
+        { name: "Assessments & Worksheets", link: "/student/academics/assessments-worksheets" },
         { name: "Portfolio", link: "/student/academics/portfolio", module: "portfolio" },
-        { name: "Feedback", link: "/student/academics/feedback" },
         { name: "Ask Tutor", link: "/student/academics/ask-tutor" },
         { name: "Live Classes", link: "/student/academics/live-classes", module: "live_classes" },
         { name: "Resources", link: "/student/academics/resources" },
-        { name: "Progress Report", link: "/student/academics/progress-report", module: "analytics" },
+        // Progress Report + Feedback merged into one tabbed page (Progress tab self-gates on analytics).
+        { name: "Progress & Feedback", link: "/student/academics/progress-feedback" },
       ]
     },
 
@@ -248,11 +249,8 @@ export class UserPreferenceMenu {
     // Ask a Tutor cover it. Safeguarding "Report a Concern" kept as a standalone item.
     { name: "Report a Concern", icon: "health_and_safety", link: "/student/report-concern" },
 
-    { name: "Management", icon: "tenancy", link: "student/management",
-      children: [
-        { name: "Profile", link: "/student/management/profile" },
-      ]
-    },
+    // Management flattened — Profile was its only child, so it's a top-level item.
+    { name: "Profile", icon: "person", link: "/student/management/profile" },
 
     { name: "Settings", icon: "settings", link: "/student/settings" },
   ]

@@ -1,4 +1,4 @@
-<app-page-header icon="workspace_premium" action="Progress Report"></app-page-header>
+@if (!embedded()) { <app-page-header icon="workspace_premium" action="Progress Report"></app-page-header> }
 
 @if (isParent() && children().length > 1) {
   <div class="btn-group mb-4" role="group">

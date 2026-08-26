@@ -9,7 +9,7 @@ import {
   LifeBuoy, ListFilter, ListChecks, LogOut, Megaphone, Menu, MessageSquare, MessagesSquare, Monitor,
   Image, Moon, Music, Newspaper, PanelLeftClose, PartyPopper, Pencil, Play, Plus, Pointer, Receipt,
   Search, Settings, Shield, ShieldCheck, Smile, SquarePen, Star, Sun, Tag, Trash2, TrendingUp,
-  UserCog, UserPlus, Users, Video, Wallet, X,
+  User, UserCog, UserPlus, Users, Video, Wallet, X,
 } from 'lucide-angular';
 
 /**
@@ -28,7 +28,7 @@ const MAP: Record<string, any> = {
   light_mode: Sun, dark_mode: Moon, cloud_upload: CloudUpload, upload_file: FileUp,
   play_arrow: Play, play_circle: CirclePlay, smart_display: Play, touch_app: Pointer,
   // people / org
-  group: Users, supervisor_account: UserCog, person_add: UserPlus, face: Smile,
+  group: Users, supervisor_account: UserCog, person_add: UserPlus, face: Smile, person: User, account_circle: User,
   apartment: Building2, domain: Building2, tenancy: Building, home_and_garden: House, meeting_room: DoorOpen,
   // learning / content
   school: GraduationCap, dashboard: LayoutDashboard, subject: BookMarked, book: Book,

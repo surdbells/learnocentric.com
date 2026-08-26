@@ -1,4 +1,4 @@
-import {Component, computed, inject, signal} from '@angular/core';
+import {Component, computed, inject, input, signal} from '@angular/core';
 import {DatePipe} from '@angular/common';
 import {ToastrService} from 'ngx-toastr';
 import {PageHeader} from '../../../../../common/layout/page-header/page-header';
@@ -21,6 +21,9 @@ const MASTERY_TONE: Record<string, Tone> = {Strong: 'success', Good: 'primary', 
   styleUrl: './progress-report.css',
 })
 export class ProgressReport {
+  /** When hosted inside the merged Progress & Feedback page, hide the page header. */
+  readonly embedded = input<boolean>(false);
+
   private readonly api = inject(ApiService);
   private readonly toast = inject(ToastrService);
   private readonly auth = inject(AuthService);

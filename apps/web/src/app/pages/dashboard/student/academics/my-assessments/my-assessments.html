@@ -1,4 +1,4 @@
-<app-page-header icon="quiz" action="My Assessments"></app-page-header>
+@if (!embedded()) { <app-page-header icon="quiz" action="My Assessments"></app-page-header> }
 
 <!-- LIST -->
 @if (mode() === 'list') {

@@ -1,4 +1,4 @@
-import {Component, computed, inject, signal} from '@angular/core';
+import {Component, computed, inject, input, signal} from '@angular/core';
 import {DatePipe} from '@angular/common';
 import {FormsModule} from '@angular/forms';
 import {ToastrService} from 'ngx-toastr';
@@ -19,6 +19,9 @@ import {WorksheetSolver} from './worksheet-solver/worksheet-solver';
   styleUrl: './my-worksheets.css',
 })
 export class MyWorksheets {
+  /** When hosted inside the merged Assessments & Worksheets page, hide the page header. */
+  readonly embedded = input<boolean>(false);
+
   private readonly api = inject(ApiService);
   private readonly toast = inject(ToastrService);
 

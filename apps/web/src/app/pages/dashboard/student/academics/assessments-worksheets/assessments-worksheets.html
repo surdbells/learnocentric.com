@@ -1,0 +1,15 @@
+<app-page-header icon="fact_check" action="Assessments & Worksheets"></app-page-header>
+
+<app-tab-bar class="d-block mb-3" [tabs]="tabs()" [active]="tab()" (activeChange)="tab.set($event)" />
+
+@if (tab() === 'assessments') {
+  <app-my-assessments [embedded]="true" />
+} @else if (tab() === 'worksheets') {
+  <app-my-worksheets [embedded]="true" />
+}
+
+@if (!tabs().length) {
+  <div class="card border-0 shadow-sm p-5 text-center text-body-secondary">
+    Neither quizzes nor worksheets are enabled on your plan.
+  </div>
+}

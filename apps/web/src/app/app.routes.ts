@@ -49,6 +49,8 @@ import {MyLiveClasses} from './pages/dashboard/student/academics/my-live-classes
 import {Learn} from './pages/dashboard/student/academics/learn/learn';
 import {MySubjects} from './pages/dashboard/student/academics/my-subjects/my-subjects';
 import {SubjectHub} from './pages/dashboard/student/academics/subject-hub/subject-hub';
+import {AssessmentsWorksheets} from './pages/dashboard/student/academics/assessments-worksheets/assessments-worksheets';
+import {ProgressFeedback} from './pages/dashboard/student/academics/progress-feedback/progress-feedback';
 import {AskTutor} from './pages/dashboard/student/academics/ask-tutor/ask-tutor';
 import {TutorInbox} from './pages/dashboard/teacher/tutor-inbox/tutor-inbox';
 import {ProgressReport} from './pages/dashboard/student/academics/progress-report/progress-report';
@@ -332,6 +334,10 @@ export const routes: Routes = [
           { path: "my-subjects", component: MySubjects },
           { path: "subjects/:id", component: SubjectHub },
           { path: "ask-tutor", component: AskTutor },
+          // Merged learner surfaces (nav entry points). Standalone routes below are
+          // kept for deep-links (e.g. the Subject Hub links to them).
+          { path: "assessments-worksheets", component: AssessmentsWorksheets },
+          { path: "progress-feedback", component: ProgressFeedback },
           { path: "assessments", component: MyAssessments, canActivate: [moduleGuard('assessments')] },
           { path: "worksheets", component: MyWorksheets, canActivate: [moduleGuard('worksheets')] },
           { path: "portfolio", component: MyPortfolio, canActivate: [moduleGuard('portfolio')] },

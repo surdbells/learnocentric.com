@@ -1,4 +1,4 @@
-import {Component, computed, inject, OnDestroy, PLATFORM_ID, signal} from '@angular/core';
+import {Component, computed, inject, input, OnDestroy, PLATFORM_ID, signal} from '@angular/core';
 import {DatePipe, isPlatformBrowser} from '@angular/common';
 import {FormsModule} from '@angular/forms';
 import {ToastrService} from 'ngx-toastr';
@@ -19,6 +19,9 @@ import {Tone} from '../../../../../common/ui/ui-types';
   styleUrl: './my-assessments.css',
 })
 export class MyAssessments implements OnDestroy {
+  /** When hosted inside the merged Assessments & Worksheets page, hide the page header. */
+  readonly embedded = input<boolean>(false);
+
   private readonly api = inject(ApiService);
   private readonly auth = inject(AuthService);
   private readonly toast = inject(ToastrService);

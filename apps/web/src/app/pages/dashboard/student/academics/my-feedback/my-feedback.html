@@ -1,4 +1,4 @@
-<app-page-header icon="reviews" action="Feedback" />
+@if (!embedded()) { <app-page-header icon="reviews" action="Feedback" /> }
 <p class="text-body-secondary mb-4">See what your tutor said, what you did well, and what to improve next.</p>
 
 @if (loading()) {
