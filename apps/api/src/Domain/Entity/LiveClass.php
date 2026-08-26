@@ -9,8 +9,8 @@ use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * A scheduled virtual class backed by a Daily.co room. Students in the class
- * can join while it is live; attendance is recorded (spec §15).
+ * A scheduled virtual class backed by an Agora channel (stored in room_name).
+ * Students in the class can join while it is live; attendance is recorded (spec §15).
  */
 #[ORM\Entity]
 #[ORM\Table(name: 'live_classes')]
@@ -113,7 +113,7 @@ class LiveClass
             'title' => $this->title,
             'scheduled_at' => $this->scheduledAt->format(DATE_ATOM),
             'duration_minutes' => $this->durationMinutes,
-            'room_url' => $this->roomUrl,
+            'channel' => $this->roomName,
             'status' => $this->status,
         ];
     }

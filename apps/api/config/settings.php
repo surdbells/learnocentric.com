@@ -38,9 +38,9 @@ return function (): array {
             'from_address' => $env('MAIL_FROM_ADDRESS', 'noreply@learnocentric.com'),
             'from_name' => $env('MAIL_FROM_NAME', 'LearnoCentric'),
         ],
-        'daily' => [
-            'api_url' => $env('DAILY_API_URL', 'https://api.daily.co/v1'),
-            'api_key' => $env('DAILY_API_KEY', ''),
+        'agora' => [
+            'app_id' => $env('AGORA_APP_ID', ''),
+            'app_certificate' => $env('AGORA_APP_CERTIFICATE', ''),
         ],
         'storage' => [
             'driver' => $env('STORAGE_DRIVER', 'local'),

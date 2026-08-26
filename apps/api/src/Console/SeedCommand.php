@@ -1033,44 +1033,36 @@ class SeedCommand extends Command
                 ->setParameter('t', 'teacher')->setParameter('i', $institution)
                 ->setMaxResults(1)->getQuery()->getOneOrNullResult();
 
-        $room = static function (string $title): array {
-            $name = 'learno-' . substr(md5($title), 0, 12);
-            return [$name, 'https://learnocentric.daily.co/' . $name];
-        };
+        // Agora channel name for a class — no URL (the client joins the channel by name).
+        $channel = static fn (string $title): string => 'learno-' . substr(md5($title), 0, 16);
 
         // A scheduled class (tomorrow) and one currently live.
-        [$n1, $u1] = $room('Whole Numbers Revision');
         $scheduled = new LiveClass($subject, 'Whole Numbers — Live Revision', new DateTimeImmutable('tomorrow 10:00'));
         $scheduled->setSchoolClass($class);
         $scheduled->setTopic($topic);
         $scheduled->setHost($teacher);
         $scheduled->setDurationMinutes(45);
-        $scheduled->setRoomName($n1);
-        $scheduled->setRoomUrl($u1);
+        $scheduled->setRoomName($channel('Whole Numbers Revision'));
         $scheduled->setStatus(LiveClass::SCHEDULED);
         $this->em->persist($scheduled);
 
         // A second class starting soon (today). Left SCHEDULED (not pre-LIVE): going
-        // live through the app provisions a real Daily room so the embedded call works.
-        [$n2, $u2] = $room('Fractions Live Q and A');
+        // live through the app assigns a fresh channel so each session is clean.
         $live = new LiveClass($subject, 'Fractions — Live Q&A', new DateTimeImmutable('+30 minutes'));
         $live->setSchoolClass($class);
         $live->setHost($teacher);
         $live->setDurationMinutes(30);
-        $live->setRoomName($n2);
-        $live->setRoomUrl($u2);
+        $live->setRoomName($channel('Fractions Live Q and A'));
         $live->setStatus(LiveClass::SCHEDULED);
         $this->em->persist($live);
 
         // A class currently LIVE (for the learner "join now" / hero LIVE state).
-        [$n3, $u3] = $room('Whole Numbers Operations Live');
         $liveNow = new LiveClass($subject, 'Whole Numbers — Operations', new DateTimeImmutable('-10 minutes'));
         $liveNow->setSchoolClass($class);
         $liveNow->setTopic($topic);
         $liveNow->setHost($teacher);
         $liveNow->setDurationMinutes(45);
-        $liveNow->setRoomName($n3);
-        $liveNow->setRoomUrl($u3);
+        $liveNow->setRoomName($channel('Whole Numbers Operations Live'));
         $liveNow->setStatus(LiveClass::LIVE);
         $this->em->persist($liveNow);
 

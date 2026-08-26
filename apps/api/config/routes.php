@@ -212,7 +212,7 @@ return static function (App $app): void {
             $auth->post('/assessment/feedback/{id:[0-9]+}/acknowledge', FeedbackAction::class . ':acknowledge');
             $auth->get('/assessment/insights', InsightsAction::class);
 
-            // Live classes (Daily.co) — schedule, run, join, attendance
+            // Live classes (Agora) — schedule, run, join, attendance
             $auth->map(['GET', 'POST', 'PUT', 'DELETE'], '/live-classes', LiveClassesAction::class);
             $auth->post('/live-classes/bulk-delete', LiveClassesAction::class . ':bulkDelete');
             $auth->get('/live-classes/upcoming', LiveClassesAction::class . ':upcoming');

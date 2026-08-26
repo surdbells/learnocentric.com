@@ -10,7 +10,7 @@ use App\Service\PasswordService;
 use App\Service\PermissionService;
 use App\Service\Billing\PaystackClient;
 use App\Service\Storage\StorageService;
-use App\Service\Video\DailyClient;
+use App\Service\Video\AgoraTokenService;
 use Doctrine\DBAL\DriverManager;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityManagerInterface;
@@ -68,9 +68,9 @@ return [
         return new ZeptoMailer($m['api_url'], $m['token'], $m['from_address'], $m['from_name'], $c->get(LoggerInterface::class));
     }),
 
-    DailyClient::class => factory(function (ContainerInterface $c): DailyClient {
-        $d = $c->get('settings')['daily'];
-        return new DailyClient($d['api_url'], $d['api_key']);
+    AgoraTokenService::class => factory(function (ContainerInterface $c): AgoraTokenService {
+        $a = $c->get('settings')['agora'];
+        return new AgoraTokenService($a['app_id'], $a['app_certificate']);
     }),
 
     StorageService::class => factory(function (ContainerInterface $c): StorageService {

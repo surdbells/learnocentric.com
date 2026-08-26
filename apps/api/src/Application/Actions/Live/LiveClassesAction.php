@@ -16,14 +16,14 @@ use App\Domain\Entity\Subject;
 use App\Domain\Entity\Topic;
 use App\Domain\Entity\User;
 use App\Service\AuditLogger;
-use App\Service\Video\DailyClient;
+use App\Service\Video\AgoraTokenService;
 use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Throwable;
 
-/** /backend/live-classes — scheduling, running, joining and attendance for Daily.co classes. */
+/** /backend/live-classes — scheduling, running, joining and attendance for Agora live classes. */
 final class LiveClassesAction
 {
     use ResolvesInstitution;
@@ -33,7 +33,7 @@ final class LiveClassesAction
     public function __construct(
         private readonly EntityManagerInterface $em,
         private readonly AuditLogger $audit,
-        private readonly DailyClient $daily,
+        private readonly AgoraTokenService $agora,
     ) {
     }
 
@@ -100,7 +100,7 @@ final class LiveClassesAction
         $lc->setHost($this->currentUser($request));
         $lc->setDurationMinutes((int) ($body['duration_minutes'] ?? 45));
         $this->applyRelations($lc, $body);
-        $this->provisionRoom($lc);
+        $this->provisionChannel($lc);
         $this->em->persist($lc);
         $this->em->flush();
         $this->audit->log('liveclass.create', $request->getAttribute('user'), 'LiveClass', (string) $lc->getId(), null, $lc->toArray());
@@ -173,10 +173,10 @@ final class LiveClassesAction
         if ($lc === null || !$this->canActWithin($request, $lc->getSubject()->getInstitution())) {
             return Json::error($response, 'Live class not found.', 404);
         }
-        // Provision a fresh Daily room as the class goes live so the embedded
-        // call always has a real, current room (and a valid token can be issued).
+        // Assign a fresh channel as the class goes live so each session is a
+        // clean channel (no stragglers from a prior run of the same class).
         if ($status === LiveClass::LIVE) {
-            $this->provisionRoom($lc);
+            $this->provisionChannel($lc);
         }
         $lc->setStatus($status);
         $this->em->flush();
@@ -400,10 +400,17 @@ final class LiveClassesAction
         }
         $isStaff = in_array($user->getRole()->getCode(), self::STAFF, true);
 
-        // A class is only joinable once it is live (a real Daily room + token
-        // exist). Before that a learner should wait for the host to go live.
+        // A class is only joinable once it is live (a channel is assigned). Before
+        // that a learner should wait for the host to go live.
         if ($lc->getStatus() !== LiveClass::LIVE) {
             return Json::error($response, 'This class hasn\'t started yet — please wait for the host to go live.', 422);
+        }
+        $channel = (string) $lc->getRoomName();
+        if ($channel === '') {
+            return Json::error($response, 'This class has no channel yet — ask the host to restart it.', 409);
+        }
+        if (!$this->agora->isConfigured()) {
+            return Json::error($response, 'Live video is not configured on this server (missing Agora credentials).', 503);
         }
 
         // Learners get attendance recorded; staff (the host) do not.
@@ -416,30 +423,19 @@ final class LiveClassesAction
             }
         }
 
-        // Issue a per-user meeting token so Prebuilt shows the right name and
-        // grants the host owner privileges (mute/eject/recording). Embedding
-        // still works without a token for a public room, so failures are soft.
-        $token = null;
-        if ($this->daily->isConfigured() && $lc->getRoomName() !== null && $lc->getRoomName() !== '') {
-            try {
-                $exp = $this->sessionExpiry($lc);
-                $token = $this->daily->createMeetingToken([
-                    'room_name' => $lc->getRoomName(),
-                    'user_name' => trim($user->getFirstName() . ' ' . $user->getLastName()),
-                    'is_owner' => $isStaff,
-                    'exp' => $exp,
-                ]);
-            } catch (Throwable) {
-                $token = null;
-            }
-        }
+        // Everyone in a class is a speaker (publisher): host and learners can both
+        // share camera/mic. The uid ties the token to this user for the channel.
+        $uid = (int) $user->getId();
+        $ttl = max(300, $this->sessionExpiry($lc) - time());
+        $token = $this->agora->rtcToken($channel, $uid, true, $ttl);
 
         return Json::write($response, [
-            'room_url' => $lc->getRoomUrl(),
-            'room_name' => $lc->getRoomName(),
+            'app_id' => $this->agora->appId(),
+            'channel' => $channel,
             'token' => $token,
+            'uid' => $uid,
             'user_name' => trim($user->getFirstName() . ' ' . $user->getLastName()),
-            'is_owner' => $isStaff,
+            'is_host' => $isStaff,
             'title' => $lc->getTitle(),
             'status' => $lc->getStatus(),
         ]);
@@ -469,28 +465,16 @@ final class LiveClassesAction
 
     // --- helpers ---
 
-    private function provisionRoom(LiveClass $lc): void
+    /**
+     * Assign the class an Agora channel. With Agora a channel is just a name —
+     * there's no room resource to create — so this is a local slug; the RTC token
+     * that authorises joining it is minted per-user at join time.
+     */
+    private function provisionChannel(LiveClass $lc): void
     {
-        $name = 'learno-' . substr(md5($lc->getTitle() . microtime(true)), 0, 12);
-        if ($this->daily->isConfigured()) {
-            try {
-                $exp = $this->sessionExpiry($lc);
-                $room = $this->daily->createRoom($name, [
-                    'exp' => $exp,
-                    'enable_chat' => true,
-                    'enable_screenshare' => true,
-                    'enable_prejoin_ui' => true,
-                    'enable_knocking' => false,
-                ]);
-                $lc->setRoomName($room['name'] ?? $name);
-                $lc->setRoomUrl($room['url'] ?? ('https://learnocentric.daily.co/' . $name));
-                return;
-            } catch (Throwable $e) {
-                // fall through to a placeholder room so scheduling still works without Daily configured
-            }
-        }
-        $lc->setRoomName($name);
-        $lc->setRoomUrl('https://learnocentric.daily.co/' . $name);
+        $channel = 'learno-' . substr(md5($lc->getTitle() . microtime(true)), 0, 16);
+        $lc->setRoomName($channel);
+        $lc->setRoomUrl(null); // Agora has no join URL; the client joins the channel by name.
     }
 
     private function applyRelations(LiveClass $lc, array $body): void
@@ -516,9 +500,9 @@ final class LiveClassesAction
     }
 
     /**
-     * Unix expiry for a class's Daily room / token: covers the session from the
-     * later of now or the scheduled start, plus the duration and a grace buffer.
-     * Basing it on `now` avoids past-dated expiries when a class starts late.
+     * Unix expiry for a class's RTC token: covers the session from the later of
+     * now or the scheduled start, plus the duration and a grace buffer. Basing it
+     * on `now` avoids past-dated expiries when a class starts late.
      */
     private function sessionExpiry(LiveClass $lc): int
     {

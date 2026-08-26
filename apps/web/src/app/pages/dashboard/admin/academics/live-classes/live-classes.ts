@@ -46,7 +46,7 @@ export class LiveClasses {
   subjects = signal<any[]>([]);
   classes = signal<any[]>([]);
   topics = signal<any[]>([]);
-  room = signal<{ roomUrl: string; token: string | null; title: string } | null>(null);
+  room = signal<{ appId: string; channel: string; token: string | null; uid: number; isHost: boolean; title: string } | null>(null);
 
   // filters
   statusFilter = signal('all');
@@ -152,7 +152,7 @@ export class LiveClasses {
     });
   }
 
-  /** Host the class in-app (embedded Daily Prebuilt with owner privileges). */
+  /** Host the class in-app (Agora call as the host). */
   hostRoom(): void {
     const lc = this.manage();
     if (!lc) return;
@@ -160,11 +160,11 @@ export class LiveClasses {
     this.api.post<any>(`/backend/live-classes/${lc.id}/join`, {}).subscribe({
       next: (res) => {
         this.busy.set(false);
-        if (res?.room_url) {
+        if (res?.channel) {
           this.close('live_manage');
-          this.room.set({roomUrl: res.room_url, token: res.token ?? null, title: res.title || lc.title});
+          this.room.set({appId: res.app_id, channel: res.channel, token: res.token ?? null, uid: res.uid ?? 0, isHost: res.is_host ?? true, title: res.title || lc.title});
         } else {
-          this.toast.error('This class has no room yet.');
+          this.toast.error('This class has no channel yet.');
         }
       },
       error: (e) => { this.toast.error(e?.error?.error || 'Could not open the room'); this.busy.set(false); },

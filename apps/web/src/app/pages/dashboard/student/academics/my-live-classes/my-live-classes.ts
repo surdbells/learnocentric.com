@@ -35,7 +35,7 @@ export class MyLiveClasses implements OnDestroy {
   busy = signal<number | null>(null);
   board = signal<any>(null);
   activeTab = signal<'upcoming' | 'past'>('upcoming');
-  room = signal<{ roomUrl: string; token: string | null; title: string } | null>(null);
+  room = signal<{ appId: string; channel: string; token: string | null; uid: number; isHost: boolean; title: string } | null>(null);
   now = signal<number>(0);
   testing = signal(false);
 
@@ -87,10 +87,10 @@ export class MyLiveClasses implements OnDestroy {
     this.api.post<any>(`/backend/live-classes/${lc.id}/join`, {}).subscribe({
       next: (res) => {
         this.busy.set(null);
-        if (res?.room_url) {
-          this.room.set({roomUrl: res.room_url, token: res.token ?? null, title: res.title || lc.title});
+        if (res?.channel) {
+          this.room.set({appId: res.app_id, channel: res.channel, token: res.token ?? null, uid: res.uid ?? 0, isHost: res.is_host ?? false, title: res.title || lc.title});
         } else {
-          this.toast.error('This class has no room yet.');
+          this.toast.error('This class has no channel yet.');
         }
       },
       error: (e) => { this.toast.error(e?.error?.error || 'Could not join'); this.busy.set(null); },

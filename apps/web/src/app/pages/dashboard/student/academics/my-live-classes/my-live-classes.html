@@ -6,7 +6,7 @@
 <p class="text-body-secondary mb-4">Join live classes, interact with your tutor and classmates, and learn in real time.</p>
 
 @if (room(); as r) {
-  <app-live-room [roomUrl]="r.roomUrl" [token]="r.token" [title]="r.title" (closed)="leaveRoom()" />
+  <app-live-room [appId]="r.appId" [channel]="r.channel" [token]="r.token" [uid]="r.uid" [isHost]="r.isHost" [title]="r.title" (closed)="leaveRoom()" />
 }
 
 @if (loading()) {

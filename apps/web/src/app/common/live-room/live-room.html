@@ -4,6 +4,7 @@
       <app-icon name="videocam" />
       <span class="fw-semibold">{{ title }}</span>
       @if (connecting()) { <span class="small opacity-75">connecting…</span> }
+      @else if (!error()) { <span class="lr-count">{{ remotes().length + 1 }} in call</span> }
     </div>
     <div class="d-flex align-items-center gap-2">
       @if (isStudent) {
@@ -22,7 +23,58 @@
         <div>{{ error() }}</div>
         <button type="button" class="btn btn-light mt-3" (click)="leave()">Close</button>
       </div>
+    } @else {
+      <div class="lr-grid" [attr.data-count]="remotes().length + 1">
+        <!-- Local participant -->
+        <div class="lr-tile">
+          <div id="local-player" class="lr-video"></div>
+          @if (!camOn() && !sharing()) {
+            <div class="lr-avatar"><app-icon name="videocam_off" [size]="30" /></div>
+          }
+          <div class="lr-name">
+            <span>You</span>
+            @if (isHost) { <span class="lr-host">Host</span> }
+            @if (sharing()) { <span class="lr-badge">Sharing</span> }
+            @if (!micOn()) { <app-icon name="mic_off" [size]="15" class="lr-muted" /> }
+          </div>
+        </div>
+
+        <!-- Remote participants -->
+        @for (u of remotes(); track u.uid) {
+          <div class="lr-tile">
+            <div [id]="'remote-' + u.uid" class="lr-video"></div>
+            @if (!u.hasVideo) {
+              <div class="lr-avatar"><app-icon name="person" [size]="34" /></div>
+            }
+            <div class="lr-name"><span>Participant</span></div>
+          </div>
+        }
+      </div>
+
+      @if (connecting()) {
+        <div class="live-room-message"><app-icon name="videocam" [size]="30" class="mb-2" /><div>Connecting to the class…</div></div>
+      }
     }
-    <div #callContainer class="live-room-frame"></div>
   </div>
+
+  @if (!error()) {
+    <div class="lr-controls">
+      <button type="button" class="lr-ctrl" [class.off]="!micOn()" (click)="toggleMic()" [attr.aria-label]="micOn() ? 'Mute microphone' : 'Unmute microphone'">
+        <app-icon [name]="micOn() ? 'mic' : 'mic_off'" [size]="22" />
+        <span>{{ micOn() ? 'Mute' : 'Unmute' }}</span>
+      </button>
+      <button type="button" class="lr-ctrl" [class.off]="!camOn()" (click)="toggleCam()" [attr.aria-label]="camOn() ? 'Turn camera off' : 'Turn camera on'">
+        <app-icon [name]="camOn() ? 'videocam' : 'videocam_off'" [size]="22" />
+        <span>{{ camOn() ? 'Camera' : 'Camera' }}</span>
+      </button>
+      <button type="button" class="lr-ctrl" [class.active]="sharing()" (click)="toggleShare()" [attr.aria-label]="sharing() ? 'Stop sharing' : 'Share screen'">
+        <app-icon name="screen_share" [size]="22" />
+        <span>{{ sharing() ? 'Stop' : 'Share' }}</span>
+      </button>
+      <button type="button" class="lr-ctrl lr-leave" (click)="leave()" aria-label="Leave class">
+        <app-icon name="call_end" [size]="22" />
+        <span>Leave</span>
+      </button>
+    </div>
+  }
 </div>
