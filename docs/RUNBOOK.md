@@ -55,7 +55,7 @@ In aaPanel → **App Store → PHP 8.2** (or 8.3). Then enable these extensions 
 
 `pdo`, `pdo_pgsql`, `curl`, `mbstring`, `openssl`, `intl`, `fileinfo`, `ctype`, `tokenizer`, `dom`, `xml`, `json`.
 
-`pdo_pgsql` (PostgreSQL) and `curl` (outbound calls to Daily / Paystack / ZeptoMail) are the two that are easy to miss.
+`pdo_pgsql` (PostgreSQL) and `curl` (outbound calls to Paystack / ZeptoMail) are the two that are easy to miss. (Agora needs no outbound call — tokens are generated locally.)
 
 ### A4. Install PHP dependencies (production)
 
@@ -99,9 +99,9 @@ ZEPTOMAIL_TOKEN=<zeptomail token>
 MAIL_FROM_ADDRESS=noreply@learnocentric.com
 MAIL_FROM_NAME=LearnoCentric
 
-# Live classes (Daily.co)
-DAILY_API_URL=https://api.daily.co/v1
-DAILY_API_KEY=<daily api key>
+# Live classes (Agora) — tokens are generated locally; no API URL/key.
+AGORA_APP_ID=<agora app id>
+AGORA_APP_CERTIFICATE=<agora app certificate>
 
 # File storage (local disk)
 STORAGE_DRIVER=local
@@ -199,7 +199,7 @@ curl -s -X POST https://api.learnocentric.com/backend/auth/login \
   -d '{"email":"<super admin email>","password":"<password>"}'
 ```
 
-If outbound calls (Daily / Paystack / ZeptoMail) fail with **cURL error 60 (SSL certificate)**, see **Troubleshooting → CA bundle**.
+If outbound calls (Paystack / ZeptoMail) fail with **cURL error 60 (SSL certificate)**, see **Troubleshooting → CA bundle**.
 
 ---
 
@@ -267,7 +267,7 @@ CORS_ALLOWED_ORIGINS=https://learnocentric.com,https://app.learnocentric.com,htt
 - [ ] `JWT_SECRET` is a long random value unique to production.
 - [ ] `APP_DEBUG=false`, `APP_ENV=prod`.
 - [ ] Demo tenants removed (Part A9).
-- [ ] Real Daily / Paystack / ZeptoMail keys in `.env` (or intentionally blank).
+- [ ] Real Agora (App ID + Certificate) / Paystack / ZeptoMail keys in `.env` (or intentionally blank).
 - [ ] `.env` file permissions locked down (`chmod 640 .env`, owner `www`).
 - [ ] HTTPS forced on the API; Cloudflare HTTPS on the frontend.
 - [ ] Uploads directory is writable by `www` but not publicly listable.
@@ -315,7 +315,7 @@ Frontend: push to `main`. Cloudflare Pages builds and deploys automatically. (Or
 
 **Frontend route 404s on refresh (but works when navigating in-app).** The SPA fallback isn't taking effect. Confirm `apps/web/public/_redirects` (with `/* /index.html 200`) shipped in the build output, and that the Pages build command was `npm run build:pages` (not `npm run build`) so an `index.html` exists.
 
-**cURL error 60 / SSL certificate on outbound calls (Daily/Paystack/ZeptoMail).** PHP's cURL can't find the CA bundle. On Ubuntu, point it at the system bundle in the active `php.ini`:
+**cURL error 60 / SSL certificate on outbound calls (Paystack/ZeptoMail).** PHP's cURL can't find the CA bundle. On Ubuntu, point it at the system bundle in the active `php.ini`:
 ```ini
 curl.cainfo = "/etc/ssl/certs/ca-certificates.crt"
 openssl.cafile = "/etc/ssl/certs/ca-certificates.crt"
@@ -338,7 +338,7 @@ This installs from the lock file unchanged — do **not** run `composer update` 
 
 **"402 module not available" style errors for a school.** Feature-module access is gated by the school's subscription plan — expected behaviour, not a bug. See the plan-scoping design.
 
-**Live class won't connect.** A class must be **Live** (host clicked "Go live", which provisions a real Daily room + token). `DAILY_API_KEY` must be set and outbound HTTPS must work (see CA bundle above).
+**Live class won't connect.** A class must be **Live** (host clicked "Go live", which assigns its Agora channel). Both `AGORA_APP_ID` and `AGORA_APP_CERTIFICATE` must be set — the join endpoint returns **503** if either is blank. No outbound HTTPS is needed (tokens are generated locally); the browser needs camera/mic permission and reachability to Agora's edge (`*.agora.io` / `*.sd-rtn.com`). An `CAN_NOT_GET_GATEWAY_SERVER: static use dynamic key` error in the browser means the App Certificate is enabled but the token is missing or from a different certificate.
 
 ---
 
@@ -352,7 +352,7 @@ This installs from the lock file unchanged — do **not** run `composer update` 
 | `DB_DRIVER`/`DB_HOST`/`DB_PORT`/`DB_NAME`/`DB_USER`/`DB_PASSWORD` | PostgreSQL connection |
 | `JWT_SECRET`/`JWT_TTL`/`JWT_ISSUER` | Auth token signing |
 | `ZEPTOMAIL_*` / `MAIL_FROM_*` | Transactional email (optional; blank = disabled) |
-| `DAILY_API_URL` / `DAILY_API_KEY` | Live classes |
+| `AGORA_APP_ID` / `AGORA_APP_CERTIFICATE` | Live classes (Agora; local token minting, no outbound call) |
 | `STORAGE_DRIVER` / `STORAGE_LOCAL_ROOT` / `STORAGE_PUBLIC_URL` | File uploads |
 | `PAYSTACK_*` | Billing |
 

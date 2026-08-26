@@ -125,7 +125,10 @@ STORAGE_PUBLIC_URL=https://api.YOUR_DOMAIN
 ZEPTOMAIL_TOKEN=
 MAIL_FROM_ADDRESS=noreply@YOUR_DOMAIN
 MAIL_FROM_NAME=LearnoCentric
-DAILY_API_KEY=
+# Agora live video (console.agora.io → project → enable App Certificate).
+# Both must be set for live classes to connect; blank disables live video.
+AGORA_APP_ID=
+AGORA_APP_CERTIFICATE=
 PAYSTACK_SECRET_KEY=
 PAYSTACK_PUBLIC_KEY=
 PAYSTACK_CALLBACK_URL=https://YOUR_DOMAIN/billing/callback
