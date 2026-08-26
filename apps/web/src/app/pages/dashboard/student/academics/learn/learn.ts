@@ -158,19 +158,50 @@ export class Learn {
   mediaTypeLabel(url: string): string {
     return {video: 'Video', audio: 'Audio', pdf: 'PDF', image: 'Image', link: 'Resource'}[this.mediaKind(url)];
   }
+  /** Kind slug for the resource-card colour class (lv-res-{kind}). */
+  resKind(url: string): string { return this.mediaKind(url); }
 
-  /** The tabs to show for the current lesson, based on what content exists. */
+  /**
+   * Content tabs below the player. The media itself sits in the player frame, so
+   * the tabs cover the written lesson, personal notes and downloadable resources —
+   * each shown only when it has real content.
+   */
   readonly tabs = computed<{ key: string; label: string; icon: string }[]>(() => {
     const l = this.lesson();
     if (!l) return [];
     const tabs = [{key: 'lesson', label: 'Lesson', icon: 'menu_book'}];
-    if (this.lessonMedia().length) tabs.push({key: 'media', label: 'Media', icon: 'play_circle'});
-    if (l.lesson?.worked_examples) tabs.push({key: 'examples', label: 'Worked examples', icon: 'assignment'});
-    tabs.push({key: 'notes', label: 'My notes', icon: 'edit_square'});
+    tabs.push({key: 'notes', label: 'Notes', icon: 'edit_square'});
+    if (this.lessonMedia().length) tabs.push({key: 'resources', label: 'Resources', icon: 'folder'});
     return tabs;
   });
 
   setTab(key: string): void { this.activeTab.set(key); }
+
+  // --- "Course Content" side panel: the active lesson's subject is the course ---
+  /** Every lesson in the same subject as the one open, in journey order. */
+  readonly courseTopics = computed<any[]>(() => {
+    const l = this.lesson();
+    if (!l) return [];
+    const same = this.topics().filter(t => t.subject === l.subject);
+    return same.length ? same : [l];
+  });
+  readonly courseTotal = computed<number>(() => this.courseTopics().length);
+  readonly courseCompleted = computed<number>(() => this.courseTopics().filter(t => t.complete).length);
+  readonly coursePct = computed<number>(() => {
+    const total = this.courseTotal();
+    return total ? Math.round((this.courseCompleted() / total) * 100) : 0;
+  });
+
+  /** Open a lesson from the side panel unless it's already the active one. */
+  selectCourseLesson(t: any): void {
+    if (t.id !== this.lesson()?.id) this.openLesson(t);
+  }
+
+  /** Show a resource in the player frame (resources and playable media are one list). */
+  openResource(index: number): void {
+    this.selectMedia(index);
+    this.activeTab.set('resources');
+  }
 
   load(): void {
     this.loading.set(true);

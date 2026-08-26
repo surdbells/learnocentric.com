@@ -163,138 +163,171 @@
 
 <!-- LESSON viewer -->
 @if (mode() === 'lesson' && lesson(); as l) {
-  <button type="button" class="btn btn-sm btn-light mb-3" (click)="backToList()">
-    <app-icon name="arrow_back" [size]="16" /> All lessons
-  </button>
+  <div class="lv-topbar mb-3">
+    <button type="button" class="btn btn-sm btn-light" (click)="backToList()">
+      <app-icon name="arrow_back" [size]="16" /> All lessons
+    </button>
+    <div class="text-body-secondary small text-truncate">{{ l.subject }} · Week {{ l.week_number || '—' }}</div>
+  </div>
 
-  <div class="row g-4">
-    <div class="col-lg-8">
-      <div class="card border-0 shadow-sm lesson-card">
-        <div class="card-body pb-0">
-          <div class="small text-body-secondary">Week {{ l.week_number || '—' }} · {{ l.subject }}</div>
-          <h4 class="fw-semibold mb-3">{{ l.title }}</h4>
+  <div class="lv-grid">
+    <!-- LEFT: Course Content -->
+    <aside class="lv-side card border-0 shadow-sm">
+      <div class="card-body">
+        <h5 class="fw-semibold mb-1">Course Content</h5>
+        <p class="text-body-secondary small mb-3">Work through {{ l.subject }} lesson by lesson.</p>
 
-          <!-- Premium tab bar -->
-          @if (l.lesson) {
-            <div class="lesson-tabs" role="tablist">
-              @for (t of tabs(); track t.key) {
-                <button type="button" class="lesson-tab" role="tab" [class.active]="activeTab() === t.key"
-                        [attr.aria-selected]="activeTab() === t.key" (click)="setTab(t.key)">
-                  <app-icon [name]="t.icon" [size]="17" />
-                  <span>{{ t.label }}</span>
+        <!-- Progress -->
+        <div class="lv-progress mb-3">
+          <div class="d-flex justify-content-between align-items-baseline mb-2">
+            <span class="text-body-secondary small">Your progress</span>
+            <span class="fw-semibold small">{{ courseCompleted() }} of {{ courseTotal() }} lessons completed</span>
+          </div>
+          <div class="lv-bar"><span [style.width.%]="coursePct()"></span></div>
+          <div class="d-flex justify-content-between align-items-center mt-2">
+            <span class="text-body-secondary small">{{ coursePct() }}% completed</span>
+            <span class="text-primary small fw-medium">Keep going! 🎯</span>
+          </div>
+        </div>
+
+        <!-- Lesson list; the open lesson expands to show its stages -->
+        <div class="lv-lessons">
+          @for (t of courseTopics(); track t.id; let i = $index) {
+            <div class="lv-lesson" [class.active]="t.id === l.id">
+              <button type="button" class="lv-lesson-head" [disabled]="busy()" (click)="selectCourseLesson(t)">
+                <span class="lv-lesson-ic">
+                  <app-icon [name]="t.complete ? 'check_circle' : (t.id === l.id ? 'play_circle' : 'radio_button_unchecked')" [size]="20"
+                            [class.text-success]="t.complete" [class.text-primary]="!t.complete && t.id === l.id" [class.text-body-secondary]="!t.complete && t.id !== l.id" />
+                </span>
+                <span class="lv-lesson-body">
+                  <span class="lv-lesson-idx">Lesson {{ i + 1 < 10 ? '0' : '' }}{{ i + 1 }}</span>
+                  <span class="lv-lesson-title">{{ t.title }}</span>
+                </span>
+                @if (!t.complete && t.progress > 0 && t.id !== l.id) { <span class="lv-lesson-chip">{{ t.progress }}%</span> }
+              </button>
+
+              @if (t.id === l.id) {
+                <div class="lv-steps">
+                  @for (s of l.stages; track s.key) {
+                    <button type="button" class="lv-step" [class.done]="s.done" [class.na]="!s.available"
+                            [disabled]="!s.available"
+                            (click)="s.available && s.link ? goToStage(s) : null">
+                      <span class="lv-step-ic"><app-icon [name]="s.done ? 'check_circle' : stageIcon(s.key)" [size]="17" /></span>
+                      <span class="lv-step-body">
+                        <span class="lv-step-name">{{ s.label }}</span>
+                        @if (s.detail) { <span class="lv-step-meta">{{ s.detail }}</span> }
+                      </span>
+                      @if (s.available && s.link && !s.done) { <app-icon name="chevron_right" [size]="16" class="text-body-secondary" /> }
+                    </button>
+                  }
+                </div>
+              }
+            </div>
+          }
+        </div>
+      </div>
+    </aside>
+
+    <!-- RIGHT: player + content -->
+    <section class="lv-main">
+      <!-- Player frame -->
+      @if (lessonMedia().length) {
+        <div class="lv-player">
+          <app-media-embed [url]="activeMedia().url" [title]="activeMedia().name || l.title" />
+        </div>
+      } @else {
+        <div class="lv-player lv-player-empty">
+          <app-icon name="smart_display" [size]="44" class="text-body-secondary mb-2" />
+          <div class="fw-medium">No video for this lesson</div>
+          <div class="text-body-secondary small">Read the lesson content and work the stages below.</div>
+        </div>
+      }
+
+      <!-- Title + primary action -->
+      <div class="lv-head">
+        <div class="min-w-0">
+          <div class="small text-body-secondary">{{ l.subject }} · Week {{ l.week_number || '—' }}</div>
+          <h4 class="fw-semibold mb-0 text-truncate">{{ l.title }}</h4>
+        </div>
+        @if (!lessonStageDone()) {
+          <button type="button" class="btn btn-primary" [disabled]="busy()" (click)="completeLesson()">
+            <app-icon name="check" [size]="17" /> Mark lesson complete
+          </button>
+        } @else if (l.complete) {
+          <span class="badge bg-success-subtle text-success py-2 px-3 align-self-center"><app-icon name="verified" [size]="16" /> Topic complete</span>
+        } @else {
+          <span class="badge bg-success-subtle text-success py-2 px-3 align-self-center"><app-icon name="check_circle" [size]="16" /> Lesson done</span>
+        }
+      </div>
+
+      <!-- Content tabs -->
+      <div class="lv-tabs" role="tablist">
+        @for (t of tabs(); track t.key) {
+          <button type="button" class="lv-tab" role="tab" [class.active]="activeTab() === t.key"
+                  [attr.aria-selected]="activeTab() === t.key" (click)="setTab(t.key)">
+            <app-icon [name]="t.icon" [size]="16" /> <span>{{ t.label }}</span>
+          </button>
+        }
+      </div>
+
+      <div class="card border-0 shadow-sm lv-panel">
+        <div class="card-body">
+          <!-- LESSON -->
+          @if (activeTab() === 'lesson') {
+            @if (!l.lesson && !l.objective && !l.real_life_relevance) {
+              <div class="text-body-secondary small">The written lesson for this topic isn't published yet — you can still work through the stages.</div>
+            } @else {
+              @if (l.objective) {
+                <div class="mb-4"><div class="tab-label">Objective</div><p class="mb-0">{{ l.objective }}</p></div>
+              }
+              @if (l.lesson?.learner_note) {
+                <div class="mb-4"><div class="tab-label">Lesson</div><app-rich-text [value]="l.lesson.learner_note" /></div>
+              }
+              @if (l.lesson?.worked_examples) {
+                <div class="mb-4"><div class="tab-label">Worked examples</div><app-rich-text [value]="l.lesson.worked_examples" /></div>
+              }
+              @if (l.real_life_relevance) {
+                <div class="lv-why"><app-icon name="lightbulb" [size]="18" class="text-warning" /><div><b>Why it matters:</b> {{ l.real_life_relevance }}</div></div>
+              }
+            }
+          }
+
+          <!-- NOTES -->
+          @if (activeTab() === 'notes') {
+            <div class="d-flex align-items-center justify-content-between mb-2">
+              <span class="text-body-secondary small">Only you can see these notes.</span>
+              @if (noteSavedAt()) { <span class="small text-body-secondary">Saved {{ noteSavedAt() | date:'MMM d, h:mm a' }}</span> }
+            </div>
+            <app-rich-editor [ngModel]="noteBody()" (ngModelChange)="noteBody.set($event)"
+                             placeholder="Jot down key points, questions or reminders — you can add maths with the ƒx button…" minHeight="200px" />
+            <div class="d-flex justify-content-end mt-2">
+              <button type="button" class="btn btn-sm btn-primary" [disabled]="noteSaving()" (click)="saveNote()">
+                {{ noteSaving() ? 'Saving…' : 'Save note' }}
+              </button>
+            </div>
+          }
+
+          <!-- RESOURCES -->
+          @if (activeTab() === 'resources') {
+            <div class="d-flex align-items-center justify-content-between mb-3">
+              <h6 class="fw-semibold mb-0">Lesson resources</h6>
+              <span class="text-body-secondary small">{{ lessonMedia().length }} item(s)</span>
+            </div>
+            <div class="lv-res-grid">
+              @for (m of lessonMedia(); track $index) {
+                <button type="button" class="lv-res" [class.active]="activeMediaIndex() === $index" (click)="openResource($index)">
+                  <span class="lv-res-ic lv-res-{{ resKind(m.url) }}"><app-icon [name]="mediaIcon(m.url)" [size]="20" /></span>
+                  <span class="lv-res-body">
+                    <span class="lv-res-name">{{ m.name || 'Resource ' + ($index + 1) }}</span>
+                    <span class="lv-res-meta">{{ mediaTypeLabel(m.url) }}@if (activeMediaIndex() === $index) { · playing }</span>
+                  </span>
+                  <app-icon [name]="activeMediaIndex() === $index ? 'play_circle' : 'play_arrow'" [size]="20" class="lv-res-act" />
                 </button>
               }
             </div>
           }
         </div>
-
-        <div class="card-body pt-3">
-          @if (!l.lesson) {
-            <div class="alert alert-light border mb-0">The lesson pack for this topic isn't published yet — you can still work through the stages.</div>
-          } @else {
-            <!-- LESSON -->
-            @if (activeTab() === 'lesson') {
-              @if (l.objective) {
-                <div class="mb-3"><div class="tab-label">Objective</div><p class="mb-0">{{ l.objective }}</p></div>
-              }
-              @if (l.lesson.learner_note) {
-                <div class="mb-3"><div class="tab-label">Lesson note</div><app-rich-text [value]="l.lesson.learner_note" /></div>
-              }
-              @if (l.real_life_relevance) {
-                <div class="alert alert-success-subtle border-0 mb-0"><b>Why it matters:</b> {{ l.real_life_relevance }}</div>
-              }
-              @if (!l.objective && !l.lesson.learner_note && !l.real_life_relevance) {
-                <div class="text-body-secondary small">No written notes for this lesson — check the Media tab.</div>
-              }
-            }
-
-            <!-- MEDIA -->
-            @if (activeTab() === 'media') {
-              <div class="row g-3">
-                <!-- Main player -->
-                <div [class.col-lg-8]="lessonMedia().length > 1" [class.col-12]="lessonMedia().length <= 1">
-                  <app-media-embed [url]="activeMedia().url" [title]="activeMedia().name || l.title" />
-                  <div class="d-flex align-items-center gap-2 mt-2">
-                    <app-icon [name]="mediaIcon(activeMedia().url)" [size]="18" class="text-primary" />
-                    <span class="fw-semibold">{{ activeMedia().name || 'Lesson media' }}</span>
-                    <span class="badge bg-light text-body-secondary">{{ mediaTypeLabel(activeMedia().url) }}</span>
-                  </div>
-                </div>
-
-                <!-- Playlist (only when there's more than one) -->
-                @if (lessonMedia().length > 1) {
-                  <div class="col-lg-4">
-                    <div class="media-list-label">In this lesson · {{ lessonMedia().length }} items</div>
-                    <div class="media-list">
-                      @for (m of lessonMedia(); track $index) {
-                        <button type="button" class="media-item" [class.active]="activeMediaIndex() === $index" (click)="selectMedia($index)">
-                          <span class="media-item-ic"><app-icon [name]="mediaIcon(m.url)" [size]="18" /></span>
-                          <span class="media-item-body">
-                            <span class="media-item-name">{{ m.name || 'Media ' + ($index + 1) }}</span>
-                            <span class="media-item-type">{{ mediaTypeLabel(m.url) }}</span>
-                          </span>
-                          @if (activeMediaIndex() === $index) { <app-icon name="play_arrow" [size]="16" class="text-primary" /> }
-                        </button>
-                      }
-                    </div>
-                  </div>
-                }
-              </div>
-            }
-
-            <!-- WORKED EXAMPLES -->
-            @if (activeTab() === 'examples') {
-              <app-rich-text [value]="l.lesson.worked_examples" />
-            }
-
-            <!-- MY NOTES -->
-            @if (activeTab() === 'notes') {
-              <div class="d-flex align-items-center justify-content-between mb-2">
-                <span class="text-body-secondary small">Only you can see these notes.</span>
-                @if (noteSavedAt()) { <span class="small text-body-secondary">Saved {{ noteSavedAt() | date:'MMM d, h:mm a' }}</span> }
-              </div>
-              <app-rich-editor [ngModel]="noteBody()" (ngModelChange)="noteBody.set($event)"
-                               placeholder="Jot down key points, questions or reminders — you can add maths with the ƒx button…" minHeight="180px" />
-              <div class="d-flex justify-content-end mt-2">
-                <button type="button" class="btn btn-sm btn-primary" [disabled]="noteSaving()" (click)="saveNote()">
-                  {{ noteSaving() ? 'Saving…' : 'Save note' }}
-                </button>
-              </div>
-            }
-          }
-        </div>
       </div>
-    </div>
-
-    <!-- Journey checklist -->
-    <div class="col-lg-4">
-      <div class="card border-0 shadow-sm">
-        <div class="card-body">
-          <div class="d-flex justify-content-between align-items-center mb-3">
-            <h6 class="fw-semibold mb-0">Your progress</h6>
-            <span class="badge bg-{{ barColor(l.progress) }}-subtle text-{{ barColor(l.progress) }}">{{ l.progress }}%</span>
-          </div>
-          <ul class="list-unstyled mb-3">
-            @for (s of l.stages; track s.key) {
-              <li class="d-flex align-items-center gap-2 py-2 border-bottom stage-row"
-                  [class.text-body-secondary]="!s.available" [class.clickable]="s.available && s.link" (click)="s.available && goToStage(s)">
-                <app-icon [name]="s.done ? 'check_circle' : (s.available ? 'radio_button_unchecked' : 'block')" [class.text-success]="s.done" [class.text-primary]="s.available && !s.done" />
-                <span class="flex-grow-1">{{ s.label }}</span>
-                @if (s.detail) { <span class="small badge bg-light text-body-secondary">{{ s.detail }}</span> }
-                @if (s.available && s.link) { <app-icon name="chevron_right" [size]="16" class="text-body-secondary" /> }
-              </li>
-            }
-          </ul>
-
-          @if (!lessonStageDone()) {
-            <button type="button" class="btn btn-primary w-100" [disabled]="busy()" (click)="completeLesson()">Mark lesson complete</button>
-          } @else if (l.complete) {
-            <div class="text-center text-success"><app-icon name="verified" /> Topic complete!</div>
-          } @else {
-            <div class="text-center small text-body-secondary">Lesson done — continue with the stages above.</div>
-          }
-        </div>
-      </div>
-    </div>
+    </section>
   </div>
 }
