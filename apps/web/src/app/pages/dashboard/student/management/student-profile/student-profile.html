@@ -1,4 +1,6 @@
-<app-page-header icon="account_circle" action="My Profile"></app-page-header>
+<app-page-header icon="account_circle" action="My Profile">
+  <a class="btn btn-sm btn-outline-secondary" [routerLink]="['/student/settings']"><app-icon name="settings" [size]="16" /> Settings</a>
+</app-page-header>
 <p class="text-body-secondary mb-4">View and manage your learning profile and preferences.</p>
 
 @if (editing()) {

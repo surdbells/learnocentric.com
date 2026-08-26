@@ -222,37 +222,22 @@ export class UserPreferenceMenu {
     { name: "Settings", icon: "settings", link: "/teacher/settings" },
   ]
 
+  // Flat learner sidebar — no group categories; every item is a direct icon + link.
   student = [
-    { name: "Main", icon: "dashboard", link: "student/main",
-      children: [
-        { name: "Dashboard", link: "/student/main" },
-      ]
-    },
-
-    { name: "Academics", icon: "school", link: "/student/academics",
-      children: [
-        // Learn merged into My Subjects: the subject cards → Subject Hub is the single
-        // entry to lessons; the /learn lesson-player route is kept for the hub to deep-link.
-        { name: "My Subjects", link: "/student/academics/my-subjects" },
-        // Assessments + Worksheets merged into one tabbed page (each tab self-gates on its module).
-        { name: "Assessments & Worksheets", link: "/student/academics/assessments-worksheets" },
-        { name: "Portfolio", link: "/student/academics/portfolio", module: "portfolio" },
-        { name: "Ask Tutor", link: "/student/academics/ask-tutor" },
-        { name: "Live Classes", link: "/student/academics/live-classes", module: "live_classes" },
-        { name: "Resources", link: "/student/academics/resources" },
-        // Progress Report + Feedback merged into one tabbed page (Progress tab self-gates on analytics).
-        { name: "Progress & Feedback", link: "/student/academics/progress-feedback" },
-      ]
-    },
-
-    // Communication (Messages/Announcements) removed for learners — Notifications +
-    // Ask a Tutor cover it. Safeguarding "Report a Concern" kept as a standalone item.
+    { name: "Dashboard", icon: "dashboard", link: "/student/main" },
+    // Learn merged into My Subjects (the /learn lesson-player route is kept for deep-links).
+    { name: "My Subjects", icon: "subject", link: "/student/academics/my-subjects" },
+    // Assessments + Worksheets merged into one tabbed page (each tab self-gates on its module).
+    { name: "Coursework", icon: "assignment", link: "/student/academics/assessments-worksheets" },
+    { name: "Portfolio", icon: "folder_special", link: "/student/academics/portfolio", module: "portfolio" },
+    { name: "Ask Tutor", icon: "forum", link: "/student/academics/ask-tutor" },
+    { name: "Live Classes", icon: "video", link: "/student/academics/live-classes", module: "live_classes" },
+    { name: "Resources", icon: "library_books", link: "/student/academics/resources" },
+    // Progress Report + Feedback merged into one tabbed page (Progress tab self-gates on analytics).
+    { name: "Progress", icon: "insights", link: "/student/academics/progress-feedback" },
     { name: "Report a Concern", icon: "health_and_safety", link: "/student/report-concern" },
-
-    // Management flattened — Profile was its only child, so it's a top-level item.
+    // Settings access lives on the Profile page now (its /student/settings route is kept).
     { name: "Profile", icon: "person", link: "/student/management/profile" },
-
-    { name: "Settings", icon: "settings", link: "/student/settings" },
   ]
 
   parent = [

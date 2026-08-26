@@ -46,7 +46,7 @@ const MAP: Record<string, any> = {
   insights: ChartLine, monitoring: Activity, trending_up: TrendingUp,
   // misc
   shield: Shield, layers: Layers, monitor: Monitor, download: Download, groups: Users,
-  alarm: AlarmClock, edit_square: SquarePen, verified_user: ShieldCheck,
+  alarm: AlarmClock, edit_square: SquarePen, verified_user: ShieldCheck, health_and_safety: ShieldCheck,
   circle_check: CircleCheck, group_add: UserPlus, audiotrack: Music, image: Image,
 };
 
