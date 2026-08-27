@@ -69,7 +69,7 @@
             <span class="hl-ic bg-success-subtle text-success"><app-icon name="workspace_premium" [size]="20" /></span>
             <div>
               <div class="text-body-secondary small">Top performing class</div>
-              <div class="fs-5 fw-bold">{{ topClass()?.class || '—' }}</div>
+              <div class="fs-5 fw-bold">{{ topClass()?.class || '-' }}</div>
               <div class="small text-success">{{ topClass()?.average }}% average</div>
             </div>
           </div></div>
@@ -94,7 +94,7 @@
         <div class="d-flex justify-content-between small py-1"><span class="text-body-secondary">Total learners</span><b>{{ report().kpis.total_learners }}</b></div>
         <div class="d-flex justify-content-between small py-1"><span class="text-body-secondary">Classes analysed</span><b>{{ report().kpis.classes_analysed }}</b></div>
         <div class="d-flex justify-content-between small py-1"><span class="text-body-secondary">Subjects analysed</span><b>{{ report().kpis.subjects_analysed }}</b></div>
-        <div class="d-flex justify-content-between small py-1"><span class="text-body-secondary">Report completion</span><b>{{ report().kpis.report_completion ?? '—' }}%</b></div>
+        <div class="d-flex justify-content-between small py-1"><span class="text-body-secondary">Report completion</span><b>{{ report().kpis.report_completion ?? '-' }}%</b></div>
       </div></div>
 
       <div class="card border-0 shadow-sm mb-3 border-danger-subtle"><div class="card-body">
@@ -104,7 +104,7 @@
             <span class="pa-num">{{ $index + 1 }}</span>
             <span class="small">{{ p }}</span>
           </div>
-        } @empty { <div class="text-success small"><app-icon name="check_circle" [size]="15" /> No priority areas — performance is on track.</div> }
+        } @empty { <div class="text-success small"><app-icon name="check_circle" [size]="15" /> No priority areas, performance is on track.</div> }
       </div></div>
 
       <div class="card border-0 shadow-sm"><div class="card-body">

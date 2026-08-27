@@ -112,7 +112,7 @@
       <label class="form-label" for="assign_user">Staff member</label>
       <select id="assign_user" class="form-select mb-3" [ngModel]="assignUserId()" (ngModelChange)="assignUserId.set($event)">
         <option value="">Choose a staff member…</option>
-        @for (u of assignable(); track u.id) { <option [value]="u.id">{{ u.name }} — currently {{ u.role }}</option> }
+        @for (u of assignable(); track u.id) { <option [value]="u.id">{{ u.name }}, currently {{ u.role }}</option> }
       </select>
       <div class="d-flex justify-content-end">
         <button type="button" class="btn btn-primary" [disabled]="busy() || !assignUserId()" (click)="doAssign()">Assign role</button>

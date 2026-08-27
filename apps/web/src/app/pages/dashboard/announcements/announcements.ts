@@ -14,7 +14,7 @@ const CATEGORY_TONE: Record<string, string> = {general: 'secondary', academics: 
 const STATUS_TONE: Record<string, string> = {sent: 'success', scheduled: 'primary', draft: 'secondary'};
 
 /**
- * Communication hub (design: Communication_SA) for staff — KPI strip, an
+ * Communication hub (design: Communication_SA) for staff, KPI strip, an
  * announcements log with filters, and a summary/attention/quick-actions rail.
  * Learners/parents get a clean read-only feed of what's addressed to them.
  */

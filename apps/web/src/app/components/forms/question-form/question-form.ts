@@ -18,7 +18,7 @@ export class QuestionForm {
   select = input<any | null>(null);
   topics = input<any[]>([]);
 
-  /** Subject filter for the topic list — helps teachers who teach more than one subject. */
+  /** Subject filter for the topic list, helps teachers who teach more than one subject. */
   readonly subjectFilter = signal<string>('');
   readonly subjectOptions = computed<string[]>(() =>
     [...new Set(this.topics().map(t => t.subject).filter(Boolean))] as string[]);

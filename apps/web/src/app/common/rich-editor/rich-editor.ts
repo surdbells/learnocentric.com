@@ -7,7 +7,7 @@ import katex from 'katex';
 /**
  * Reusable rich-text editor (Quill + KaTeX) used in place of plain textareas so
  * authors can format text and write precise mathematics (LaTeX via the ƒx
- * button). Stores HTML, works with formControlName and ngModel. SSR-safe — Quill
+ * button). Stores HTML, works with formControlName and ngModel. SSR-safe, Quill
  * only mounts in the browser.
  */
 @Component({

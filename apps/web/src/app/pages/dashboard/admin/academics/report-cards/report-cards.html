@@ -43,7 +43,7 @@
     <!-- Student info -->
     <div class="row g-2 mb-3">
       <div class="col-sm-6"><span class="text-body-secondary small">Learner</span><div class="fw-semibold">{{ c.student.name }}</div></div>
-      <div class="col-sm-3"><span class="text-body-secondary small">Class</span><div class="fw-semibold">{{ c.student.class || '—' }}</div></div>
+      <div class="col-sm-3"><span class="text-body-secondary small">Class</span><div class="fw-semibold">{{ c.student.class || '-' }}</div></div>
       <div class="col-sm-3"><span class="text-body-secondary small">Attendance</span><div class="fw-semibold">{{ c.attendance.joined }}/{{ c.attendance.offered }} ({{ pct(c.attendance.rate) }})</div></div>
     </div>
 

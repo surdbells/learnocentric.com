@@ -62,5 +62,5 @@ export class ReportCards {
     }
   }
 
-  pct(v: number | null): string { return v === null || v === undefined ? '—' : v + '%'; }
+  pct(v: number | null): string { return v === null || v === undefined ? '-' : v + '%'; }
 }

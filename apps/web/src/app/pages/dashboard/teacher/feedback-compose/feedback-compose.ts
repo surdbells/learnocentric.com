@@ -11,7 +11,7 @@ interface FocusArea { label: string; score: number; on: boolean; }
  * Teacher structured-feedback authoring (the other half of the Feedback loop).
  * Writes a multi-part FeedbackNote (did-well / improve / common-error / tutor
  * comment / next-step + score + teacher-rated focus areas) the learner sees as
- * the Feedback breakdown. Focus-area scores are author-provided — no fabrication.
+ * the Feedback breakdown. Focus-area scores are author-provided, no fabrication.
  */
 @Component({
   selector: 'app-feedback-compose',

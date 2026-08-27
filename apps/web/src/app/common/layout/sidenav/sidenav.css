@@ -109,7 +109,7 @@
   background: var(--brand-500);
 }
 
-/* Submenu (accordion) — no connector line; items align under the parent label */
+/* Submenu (accordion), no connector line; items align under the parent label */
 .sb-submenu {
   display: grid;
   grid-template-rows: 0fr;
@@ -152,7 +152,7 @@
   background: var(--brand-500);
 }
 
-/* Bottom profile card — pinned below the scrolling nav, floating with a top divider */
+/* Bottom profile card, pinned below the scrolling nav, floating with a top divider */
 .sb-foot {
   flex: none;
   padding: 0.75rem 0.85rem 0.95rem;
@@ -213,7 +213,7 @@
 }
 .sb-profile-caret { flex: none; font-size: 1.15rem; opacity: 0.55; }
 
-/* ---- Rail (collapsed) mode — desktop only.
+/* ---- Rail (collapsed) mode, desktop only.
    On mobile the sidebar is a full-width drawer, so rail styling must not apply. ---- */
 @media (min-width: 992px) {
 :host.is-rail .sb-inner { overflow: visible; }

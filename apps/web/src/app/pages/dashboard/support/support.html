@@ -34,7 +34,7 @@
                   <div class="fw-medium">{{ t.subject }}</div>
                   <div class="small text-body-secondary">{{ titleCase(t.category) }} · {{ t.message_count }} message(s)</div>
                 </td>
-                @if (isStaff()) { <td class="small">{{ t.institution || '—' }}</td> }
+                @if (isStaff()) { <td class="small">{{ t.institution || '-' }}</td> }
                 <td><span class="badge bg-{{ priorityColor(t.priority) }}-subtle text-{{ priorityColor(t.priority) }} text-capitalize">{{ t.priority }}</span></td>
                 <td>
                   <span class="badge bg-{{ statusColor(t.status) }}-subtle text-{{ statusColor(t.status) }}">{{ titleCase(t.status) }}</span>

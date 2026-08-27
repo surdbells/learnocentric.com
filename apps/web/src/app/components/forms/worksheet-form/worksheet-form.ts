@@ -33,7 +33,7 @@ export class WorksheetForm {
     attachmentUrl: new FormControl(''),
   });
 
-  /** Subject filter for the topic list — for teachers who teach more than one subject. */
+  /** Subject filter for the topic list, for teachers who teach more than one subject. */
   readonly subjectFilter = signal<string>('');
   readonly subjectOptions = computed<string[]>(() =>
     [...new Set(this.topics().map(t => t.subject).filter(Boolean))] as string[]);

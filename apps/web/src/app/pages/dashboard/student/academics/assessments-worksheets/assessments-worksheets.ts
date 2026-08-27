@@ -6,7 +6,7 @@ import {MyAssessments} from '../my-assessments/my-assessments';
 import {MyWorksheets} from '../my-worksheets/my-worksheets';
 
 /**
- * Merged learner "Assessments & Worksheets" — both graded-work surfaces on one
+ * Merged learner "Assessments & Worksheets", both graded-work surfaces on one
  * page, switched by a tab. Each child is embedded (its own page header hidden);
  * a tab appears only for a module the learner's plan grants.
  */

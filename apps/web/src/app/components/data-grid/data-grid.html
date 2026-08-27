@@ -89,9 +89,9 @@
                       <span class="badge text-bg-{{ badgeFor(row, col).color }}">{{ badgeFor(row, col).text }}</span>
                     }
                     @case ('date') {
-                      {{ cell(row, col) ? (cell(row, col) | date:'mediumDate') : '—' }}
+                      {{ cell(row, col) ? (cell(row, col) | date:'mediumDate') : '-' }}
                     }
-                    @default { {{ cell(row, col) ?? '—' }} }
+                    @default { {{ cell(row, col) ?? '-' }} }
                   }
                 </td>
               }

@@ -1,5 +1,5 @@
 /* ============================================================
-   Learno — Global UI theme
+   Learno, Global UI theme
    Modern, mobile-friendly layer on top of Bootstrap 5 + Dashbrd theme.
    Loaded last, so these overrides win the cascade.
    ============================================================ */
@@ -178,7 +178,7 @@
 .dropdown-menu { --bs-dropdown-link-active-bg: var(--brand-500); }
 
 /* -----------------------------------------------------------
-   3. Modern polish — cards, buttons, inputs, typography
+   3. Modern polish, cards, buttons, inputs, typography
    ----------------------------------------------------------- */
 body {
   -webkit-font-smoothing: antialiased;
@@ -204,7 +204,7 @@ a > .card:hover,
 }
 [data-bs-theme="dark"] .card { --bs-card-box-shadow: none; }
 
-/* ---- Premium list rows — the Subject Hub row pattern, reusable app-wide.
+/* ---- Premium list rows, the Subject Hub row pattern, reusable app-wide.
    Use: <div class="lo-list"> <div class="lo-row">…</div> </div> ---- */
 .lo-list { display: flex; flex-direction: column; gap: 0.6rem; }
 .lo-row {
@@ -244,7 +244,7 @@ a > .card:hover,
   .lo-row-end { width: 100%; justify-content: flex-end; }
 }
 
-/* ---- Premium dashboard hero — gradient brand surface shared by every role
+/* ---- Premium dashboard hero, gradient brand surface shared by every role
    dashboard. Structure: mark + body (+ optional chip / action). ---- */
 .dash-hero {
   display: flex;
@@ -327,7 +327,7 @@ a > .card:hover,
   margin-bottom: 0.35rem;
 }
 
-/* Tables — used by the shared data-table component */
+/* Tables, used by the shared data-table component */
 .table {
   --bs-table-hover-bg: rgba(var(--brand-rgb), 0.06);
   margin-bottom: 0;
@@ -343,8 +343,8 @@ a > .card:hover,
   padding-bottom: 0.9rem;
 }
 .table > tbody td { padding-top: 0.85rem; padding-bottom: 0.85rem; vertical-align: middle; }
-/* Every data table gets the same subtle brand row-hover — even the bespoke ones
-   that never opted into .table-hover — so lists read consistently across roles. */
+/* Every data table gets the same subtle brand row-hover, even the bespoke ones
+   that never opted into .table-hover, so lists read consistently across roles. */
 .table > tbody > tr { transition: background-color 0.12s ease; }
 .table > tbody > tr:hover > * { background-color: var(--bs-table-hover-bg); }
 .table-round {
@@ -360,7 +360,7 @@ a > .card:hover,
   overflow: hidden;
 }
 
-/* Welcome hero (app-user-intro) — brand gradient banner with projected greeting */
+/* Welcome hero (app-user-intro), brand gradient banner with projected greeting */
 app-user-intro .user-intro-hero {
   position: relative;
   overflow: hidden;
@@ -423,7 +423,7 @@ app-user-intro .user-intro-decor {
 .btn-icon.btn-sm { width: 34px; height: 34px; }
 .btn-icon:hover { background: rgba(var(--brand-rgb), 0.1); color: var(--brand-700); }
 
-/* Page header (app-page-header) — tint the icon avatar with the brand */
+/* Page header (app-page-header), tint the icon avatar with the brand */
 app-page-header .avatar {
   background: var(--brand-50) !important;
   color: var(--brand-700) !important;
@@ -456,7 +456,7 @@ app-page-header .avatar {
 .badge { font-weight: 600; letter-spacing: 0.01em; padding: 0.4em 0.7em; border-radius: 999px; }
 .badge.text-bg-success { --bs-badge-color: #fff; }
 
-/* FullCalendar — align with the brand */
+/* FullCalendar, align with the brand */
 :root {
   --fc-button-bg-color: var(--brand-500);
   --fc-button-border-color: var(--brand-500);
@@ -473,7 +473,7 @@ app-page-header .avatar {
 .fc .fc-toolbar-title { font-size: 1.15rem; font-weight: 600; }
 .fc .fc-col-header-cell-cushion { font-weight: 600; font-size: 0.8rem; }
 
-/* bootstrap-datepicker (inline .datetimepicker widget) — brand today/active cell */
+/* bootstrap-datepicker (inline .datetimepicker widget), brand today/active cell */
 :is(.datetimepicker, .datepicker) td.active,
 :is(.datetimepicker, .datepicker) td.active:hover,
 :is(.datetimepicker, .datepicker) td.today,

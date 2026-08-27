@@ -99,7 +99,7 @@ export class ApprovalQueue {
       {label: 'Awaiting approval', value: it.length, icon: 'inbox', tone: it.length > 0 ? 'warning' : 'success'},
       {label: 'Content types', value: new Set(it.map(x => x.type)).size, icon: 'layers', tone: 'info'},
       {label: 'Assessments', value: it.filter(x => x.type === 'Assessment' || x.type === 'Question').length, icon: 'quiz', tone: 'primary'},
-      {label: 'Oldest waiting', value: oldest ? this.waited(oldest.updated_at) : '—', icon: 'schedule', tone: 'secondary'},
+      {label: 'Oldest waiting', value: oldest ? this.waited(oldest.updated_at) : '-', icon: 'schedule', tone: 'secondary'},
     ];
   });
 
@@ -169,7 +169,7 @@ export class ApprovalQueue {
       next: () => {
         this.busyKey.set(null);
         this.toast.success(`${this.typeLabel(item.type)} ${verb}`);
-        // Drop it from the queue — it's no longer in review.
+        // Drop it from the queue, it's no longer in review.
         this.items.set(this.items().filter(x => !(x.type === item.type && x.id === item.id)));
       },
       error: (e) => { this.busyKey.set(null); this.toast.error(e?.error?.error || 'Could not update this item'); },

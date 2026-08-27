@@ -56,7 +56,7 @@
                 <div class="col-12"><label class="form-label small mb-1">Address</label>
                   <input class="form-control form-control-sm" [ngModel]="prof('address')" (ngModelChange)="setProf('address',$event)" /></div>
                 <div class="col-12"><label class="form-label small mb-1">School Logo</label>
-                  <app-file-upload label="Upload logo" accept="image/*" hint="PNG, JPG or SVG — up to 15 MB."
+                  <app-file-upload label="Upload logo" accept="image/*" hint="PNG, JPG or SVG, up to 15 MB."
                                    [value]="prof('logo_url')" (uploaded)="onLogoUploaded($event)" (cleared)="onLogoCleared()" /></div>
               </div>
             </div></div>

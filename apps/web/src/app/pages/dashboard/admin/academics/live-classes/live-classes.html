@@ -109,7 +109,7 @@
               <tbody>
                 @for (c of filtered(); track c.id) {
                   <tr>
-                    <td>@if (c.class_label) { <span class="badge class-chip">{{ c.class_label }}</span> } @else { <span class="text-body-secondary">—</span> }</td>
+                    <td>@if (c.class_label) { <span class="badge class-chip">{{ c.class_label }}</span> } @else { <span class="text-body-secondary">-</span> }</td>
                     <td>{{ c.subject }}</td>
                     <td class="small">{{ c.topic || c.title }}</td>
                     <td class="small text-body-secondary">{{ c.scheduled_at | date:'MMM d, h:mm a' }}</td>
@@ -117,7 +117,7 @@
                       @if ((c.status === 'live' || c.status === 'ended') && c.enrolled !== null) {
                         <div class="fw-medium">{{ c.attended }} / {{ c.enrolled }}</div>
                         @if (c.attendance_pct !== null) { <div class="small" [class.text-success]="c.attendance_pct >= 75" [class.text-warning]="c.attendance_pct < 75">{{ c.attendance_pct }}%</div> }
-                      } @else { <span class="text-body-secondary">—</span> }
+                      } @else { <span class="text-body-secondary">-</span> }
                     </td>
                     <td><span class="badge bg-{{ statusColor(c.status) }}-subtle text-{{ statusColor(c.status) }}">@if (c.status === 'live') { <span class="live-dot"></span> }{{ statusLabel(c.status) }}</span></td>
                     <td class="text-end text-nowrap">

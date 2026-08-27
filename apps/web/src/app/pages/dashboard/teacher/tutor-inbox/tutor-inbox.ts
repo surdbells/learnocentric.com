@@ -7,7 +7,7 @@ import {Icon} from '../../../../common/icon/icon';
 import {ApiService} from '../../../../common/service/api.service';
 
 /**
- * Tutor inbox — the teacher side of Ask Tutor. Questions directed to the tutor
+ * Tutor inbox, the teacher side of Ask Tutor. Questions directed to the tutor
  * or asked within their subjects; the tutor types an answer, which notifies the
  * learner and closes the question. Backed by /ask-tutor/inbox + answer.
  */

@@ -4,7 +4,7 @@
 }
 
 /* The button reuses the topbar's `.tb-icon-btn` class, but topbar.css is
-   scoped to that component and can't reach this child component — so restate
+   scoped to that component and can't reach this child component, so restate
    the icon-button styling here to match the other topbar icons exactly. */
 .nb-btn {
   position: relative;

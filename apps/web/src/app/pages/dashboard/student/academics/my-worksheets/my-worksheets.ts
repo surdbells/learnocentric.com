@@ -53,7 +53,7 @@ export class MyWorksheets {
       {label: 'Total worksheets', value: a.length, icon: 'assignment', tone: 'primary'},
       {label: 'Completed', value: graded.length, icon: 'assignment_turned_in', tone: 'success'},
       {label: 'Awaiting grade', value: submitted.length, icon: 'schedule', tone: submitted.length ? 'info' : 'secondary'},
-      {label: 'Average score', value: avg === null ? '—' : avg + '%', icon: 'workspace_premium', tone: 'warning'},
+      {label: 'Average score', value: avg === null ? '-' : avg + '%', icon: 'workspace_premium', tone: 'warning'},
     ];
   });
 

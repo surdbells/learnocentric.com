@@ -163,7 +163,7 @@ export class Learn {
 
   /**
    * Content tabs below the player. The media itself sits in the player frame, so
-   * the tabs cover the written lesson, personal notes and downloadable resources —
+   * the tabs cover the written lesson, personal notes and downloadable resources -
    * each shown only when it has real content.
    */
   readonly tabs = computed<{ key: string; label: string; icon: string }[]>(() => {

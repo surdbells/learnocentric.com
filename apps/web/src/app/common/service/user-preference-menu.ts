@@ -222,7 +222,7 @@ export class UserPreferenceMenu {
     { name: "Settings", icon: "settings", link: "/teacher/settings" },
   ]
 
-  // Flat learner sidebar — no group categories; every item is a direct icon + link.
+  // Flat learner sidebar, no group categories; every item is a direct icon + link.
   student = [
     { name: "Dashboard", icon: "dashboard", link: "/student/main" },
     // Learn merged into My Subjects (the /learn lesson-player route is kept for deep-links).

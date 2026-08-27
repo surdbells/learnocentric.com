@@ -6,7 +6,7 @@ type Kind = 'youtube' | 'vimeo' | 'video' | 'audio' | 'pdf' | 'image' | 'link';
 
 /**
  * Renders any lesson media inline: YouTube/Vimeo, direct video/audio files, PDFs
- * and images — detected from the URL — so the Learn experience covers every
+ * and images, detected from the URL, so the Learn experience covers every
  * content type instead of just linking out.
  */
 @Component({

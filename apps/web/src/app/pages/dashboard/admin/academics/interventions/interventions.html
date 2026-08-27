@@ -41,11 +41,11 @@
                       @if (i.class_label) { <div class="small text-body-secondary">{{ i.class_label }}</div> }
                     </td>
                     <td class="small" style="max-width:14rem">{{ i.reason }}</td>
-                    <td class="small">{{ i.type || '—' }}</td>
+                    <td class="small">{{ i.type || '-' }}</td>
                     <td class="small">{{ i.assigned_to || 'Unassigned' }}</td>
                     <td><span class="badge bg-{{ statusColor(i.status) }}-subtle text-{{ statusColor(i.status) }}">{{ statusLabel(i.status) }}</span></td>
                     <td><span class="badge bg-{{ priorityTone(i.priority) }}-subtle text-{{ priorityTone(i.priority) }} text-capitalize">{{ i.priority }}</span></td>
-                    <td class="small" [class.text-danger]="i.overdue">{{ i.due_date ? (i.due_date | date:'MMM d') : '—' }}@if (i.overdue) { <div class="small text-danger">Overdue</div> }</td>
+                    <td class="small" [class.text-danger]="i.overdue">{{ i.due_date ? (i.due_date | date:'MMM d') : '-' }}@if (i.overdue) { <div class="small text-danger">Overdue</div> }</td>
                     <td>
                       <div class="progress iv-progress" role="progressbar" [attr.aria-valuenow]="i.progress"><div class="progress-bar bg-{{ statusColor(i.status) }}" [style.width.%]="i.progress"></div></div>
                       <div class="small text-body-secondary text-end">{{ i.progress }}%</div>

@@ -11,7 +11,7 @@ import {AuthService} from '../../../../../common/auth/auth.service';
 const DRAFT_KEY = 'add_staff_draft';
 
 /**
- * Sectioned "Add Staff" onboarding form (design: Teachers & Staff II_SA) —
+ * Sectioned "Add Staff" onboarding form (design: Teachers & Staff II_SA) -
  * Profile / Role & Employment / Teaching Assignment / Login / Compliance, with
  * a staff-summary rail and a progress checklist. Posts to /school/staff which
  * creates the account, sets role + gender, stores the employment/consent

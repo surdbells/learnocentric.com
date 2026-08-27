@@ -49,7 +49,7 @@
             <div class="fw-medium mb-2">{{ n.title }}</div>
             <span class="badge bg-info-subtle text-info mb-3">Up next</span>
             <button type="button" class="btn btn-success btn-sm w-100" [disabled]="busy()" (click)="openLesson(n)"><app-icon name="play_arrow" [size]="16" /> Start lesson</button>
-          } @else { <div class="text-body-secondary small">You're all caught up — nothing new to start.</div> }
+          } @else { <div class="text-body-secondary small">You're all caught up, nothing new to start.</div> }
         </div></div>
       </div>
 
@@ -94,7 +94,7 @@
                   <tr>
                     <td class="fw-medium">{{ t.title }}</td>
                     <td class="text-body-secondary">{{ t.subject }}</td>
-                    <td class="text-center">{{ t.week_number || '—' }}</td>
+                    <td class="text-center">{{ t.week_number || '-' }}</td>
                     <td class="text-center">
                       <span class="badge" [class.bg-success-subtle]="t.complete" [class.text-success]="t.complete"
                             [class.bg-info-subtle]="!t.complete && t.progress>0" [class.text-info]="!t.complete && t.progress>0"
@@ -121,7 +121,7 @@
               <div class="col-md-4">
                 <div class="card border-0 shadow-sm h-100"><div class="card-body py-3">
                   <div class="fw-semibold small">{{ t.title }}</div>
-                  <div class="text-body-secondary small mb-1">{{ t.subject }} · Week {{ t.week_number || '—' }}</div>
+                  <div class="text-body-secondary small mb-1">{{ t.subject }} · Week {{ t.week_number || '-' }}</div>
                   <span class="badge bg-success-subtle text-success">Completed</span>
                 </div></div>
               </div>
@@ -153,7 +153,7 @@
           <div class="card border-0 shadow-sm tn-card"><div class="card-body">
             <h6 class="fw-semibold mb-2"><app-icon name="chat" [size]="16" class="text-info me-1" /> Tutor note</h6>
             <div class="small">{{ n.message }}</div>
-            @if (n.author) { <div class="small text-info text-end mt-1">— {{ n.author }}</div> }
+            @if (n.author) { <div class="small text-info text-end mt-1">- {{ n.author }}</div> }
           </div></div>
         }
       </div>
@@ -167,7 +167,7 @@
     <button type="button" class="btn btn-sm btn-light" (click)="backToList()">
       <app-icon name="arrow_back" [size]="16" /> All lessons
     </button>
-    <div class="text-body-secondary small text-truncate">{{ l.subject }} · Week {{ l.week_number || '—' }}</div>
+    <div class="text-body-secondary small text-truncate">{{ l.subject }} · Week {{ l.week_number || '-' }}</div>
   </div>
 
   <div class="lv-grid">
@@ -246,7 +246,7 @@
       <!-- Title + primary action -->
       <div class="lv-head">
         <div class="min-w-0">
-          <div class="small text-body-secondary">{{ l.subject }} · Week {{ l.week_number || '—' }}</div>
+          <div class="small text-body-secondary">{{ l.subject }} · Week {{ l.week_number || '-' }}</div>
           <h4 class="fw-semibold mb-0 text-truncate">{{ l.title }}</h4>
         </div>
         @if (!lessonStageDone()) {
@@ -275,7 +275,7 @@
           <!-- LESSON -->
           @if (activeTab() === 'lesson') {
             @if (!l.lesson && !l.objective && !l.real_life_relevance) {
-              <div class="text-body-secondary small">The written lesson for this topic isn't published yet — you can still work through the stages.</div>
+              <div class="text-body-secondary small">The written lesson for this topic isn't published yet, you can still work through the stages.</div>
             } @else {
               @if (l.objective) {
                 <div class="mb-4"><div class="tab-label">Objective</div><p class="mb-0">{{ l.objective }}</p></div>
@@ -299,7 +299,7 @@
               @if (noteSavedAt()) { <span class="small text-body-secondary">Saved {{ noteSavedAt() | date:'MMM d, h:mm a' }}</span> }
             </div>
             <app-rich-editor [ngModel]="noteBody()" (ngModelChange)="noteBody.set($event)"
-                             placeholder="Jot down key points, questions or reminders — you can add maths with the ƒx button…" minHeight="200px" />
+                             placeholder="Jot down key points, questions or reminders, you can add maths with the ƒx button…" minHeight="200px" />
             <div class="d-flex justify-content-end mt-2">
               <button type="button" class="btn btn-sm btn-primary" [disabled]="noteSaving()" (click)="saveNote()">
                 {{ noteSaving() ? 'Saving…' : 'Save note' }}

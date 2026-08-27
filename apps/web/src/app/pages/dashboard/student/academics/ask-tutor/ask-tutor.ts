@@ -8,7 +8,7 @@ import {Icon} from '../../../../../common/icon/icon';
 import {ApiService} from '../../../../../common/service/api.service';
 
 /**
- * Learner Ask Tutor — a directory of the learner's subject tutors (with
+ * Learner Ask Tutor, a directory of the learner's subject tutors (with
  * ratings), a Q&A board (ask a question, see answers), and tutor ratings.
  * Direct chat hands off to the existing messaging page. Backed by
  * /ask-tutor/board + /ask-tutor/questions + /ask-tutor/ratings.

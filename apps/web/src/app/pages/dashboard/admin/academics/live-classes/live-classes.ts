@@ -17,7 +17,7 @@ const STATUS_COLOR: Record<string, string> = {scheduled: 'info', live: 'success'
 const STATUS_LABEL: Record<string, string> = {scheduled: 'Upcoming', live: 'Live Now', ended: 'Completed', cancelled: 'Cancelled'};
 
 /**
- * Teacher/School-Admin Live Classes workspace (design: Live Classes_TD) — KPI
+ * Teacher/School-Admin Live Classes workspace (design: Live Classes_TD), KPI
  * strip, a scheduled-classes table with per-class attendance, an attendance
  * snapshot donut, a Today's-Schedule rail and quick actions. Backed by
  * /live-classes/staff-board (real classes + attendance). Scheduling, running
@@ -60,7 +60,7 @@ export class LiveClasses {
       {label: 'This Week', value: k.this_week ?? 0, icon: 'date_range', tone: 'info'},
       {label: 'Upcoming Today', value: k.upcoming_today ?? 0, icon: 'schedule', tone: 'warning'},
       {label: 'Completed (week)', value: k.completed_this_week ?? 0, icon: 'check_circle', tone: 'success'},
-      {label: 'Attendance Rate', value: k.attendance_rate == null ? '—' : k.attendance_rate + '%', icon: 'groups', tone: 'primary'},
+      {label: 'Attendance Rate', value: k.attendance_rate == null ? '-' : k.attendance_rate + '%', icon: 'groups', tone: 'primary'},
     ];
   });
 

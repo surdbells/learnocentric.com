@@ -32,7 +32,7 @@
             <tr>
               <td><app-avatar-cell [name]="fullName(r)" [sub]="r.email" [image]="r.profile_image_url" /></td>
               <td><app-status-badge [value]="r.role_name" [tone]="roleColor(r.role)" /></td>
-              <td class="small text-body-secondary">{{ r.institution || '—' }}</td>
+              <td class="small text-body-secondary">{{ r.institution || '-' }}</td>
               <td><app-status-badge [value]="r.status" [map]="statusMap" /></td>
             </tr>
           }

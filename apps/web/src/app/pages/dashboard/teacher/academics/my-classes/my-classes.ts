@@ -10,7 +10,7 @@ import {ApiService} from '../../../../../common/service/api.service';
 import {KpiStrip, KpiItem, DonutChart, DonutSegment} from '../../../../../common/ui';
 
 /**
- * Teacher "My Classes" workspace (design: My Classes_TD) — KPI strip, a
+ * Teacher "My Classes" workspace (design: My Classes_TD), KPI strip, a
  * filterable class table, a performance-distribution donut, today's live
  * schedule, and pending-review panels. Backed by /teacher/classes (real
  * roster + graded-attempt figures) + /dashboard/teacher (pending work).
@@ -61,7 +61,7 @@ export class MyClasses {
     return [
       {label: 'Total Classes', value: k.total_classes ?? 0, icon: 'groups', tone: 'primary'},
       {label: 'Total Learners', value: k.total_learners ?? 0, icon: 'school', tone: 'info'},
-      {label: 'Class Average', value: k.class_average == null ? '—' : k.class_average + '%', icon: 'trending_up', tone: 'success'},
+      {label: 'Class Average', value: k.class_average == null ? '-' : k.class_average + '%', icon: 'trending_up', tone: 'success'},
       {label: 'Classes Today', value: k.classes_today ?? 0, icon: 'event', tone: 'warning'},
       {label: 'Pending Reviews', value: k.pending_reviews ?? 0, icon: 'fact_check', tone: (k.pending_reviews ? 'danger' : 'secondary')},
     ];

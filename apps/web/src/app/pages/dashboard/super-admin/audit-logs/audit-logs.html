@@ -34,9 +34,9 @@
               <td class="fw-medium">{{ r.actor }}</td>
               <td><code class="small">{{ r.action_type }}</code></td>
               <td class="small text-body-secondary">{{ r.object_type }}@if (r.object_id) { #{{ r.object_id }} }</td>
-              <td class="small text-body-secondary">{{ r.institution || '—' }}</td>
+              <td class="small text-body-secondary">{{ r.institution || '-' }}</td>
               <td><app-status-badge [value]="r.risk" [tone]="riskColor(r.risk)" /></td>
-              <td class="small text-body-secondary text-truncate" style="max-width: 220px">{{ r.ip_device || '—' }}</td>
+              <td class="small text-body-secondary text-truncate" style="max-width: 220px">{{ r.ip_device || '-' }}</td>
             </tr>
           }
         }

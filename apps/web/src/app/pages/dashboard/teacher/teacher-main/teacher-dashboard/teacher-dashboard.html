@@ -58,7 +58,7 @@
                       <td class="text-end"><a class="btn btn-sm btn-outline-primary" [routerLink]="[s.type === 'Portfolio task' ? '/teacher/academics/portfolio' : '/teacher/academics/worksheets']">Review</a></td>
                     </tr>
                   } @empty {
-                    <tr><td colspan="5" class="text-success small py-3"><app-icon name="check_circle" [size]="15" /> Nothing awaiting review — you're all caught up.</td></tr>
+                    <tr><td colspan="5" class="text-success small py-3"><app-icon name="check_circle" [size]="15" /> Nothing awaiting review, you're all caught up.</td></tr>
                   }
                 </tbody>
               </table>
@@ -79,9 +79,9 @@
                       <tr>
                         <td><span class="badge class-chip">{{ t.class }}</span></td>
                         <td>{{ t.subject }}</td>
-                        <td class="text-body-secondary">{{ t.topic || '—' }}</td>
+                        <td class="text-body-secondary">{{ t.topic || '-' }}</td>
                         <td><span class="badge bg-{{ deliveryTone(t.delivery_status) }}-subtle text-{{ deliveryTone(t.delivery_status) }}">{{ t.delivery_status === 'on_track' ? 'On track' : 'Needs attention' }}</span></td>
-                        <td class="text-center fw-semibold" [class]="'text-' + scoreTone(t.average)">{{ t.average == null ? '—' : t.average + '%' }}</td>
+                        <td class="text-center fw-semibold" [class]="'text-' + scoreTone(t.average)">{{ t.average == null ? '-' : t.average + '%' }}</td>
                         <td class="text-end"><a class="btn btn-sm btn-outline-secondary" [routerLink]="['/teacher/academics/gradebook']">Open</a></td>
                       </tr>
                     }

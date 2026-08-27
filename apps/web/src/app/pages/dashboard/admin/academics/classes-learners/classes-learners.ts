@@ -14,7 +14,7 @@ declare const bootstrap: any;
 
 /**
  * School-Admin "Classes & Learners" unified hub (design: Classes & Learners_SA)
- * — KPI strip, a class list (with inline create / edit / delete), and the
+ *, KPI strip, a class list (with inline create / edit / delete), and the
  * selected class's learner roster with real average scores, risk status and
  * intervention flags, plus a class-overview rail. The separate "Class" page is
  * merged in here (PDF review A3). Backed by /school/classes-learners,
@@ -71,10 +71,10 @@ export class ClassesLearners {
     if (el && typeof bootstrap !== 'undefined') { bootstrap.Modal.getOrCreateInstance(el).show(); }
   }
 
-  /** New class — opens the form empty. */
+  /** New class, opens the form empty. */
   onAddClass(): void { this.selectedClass.set(null); this.openClassModal(); }
 
-  /** Edit — pre-fills from the raw class row. */
+  /** Edit, pre-fills from the raw class row. */
   onEditClass(c: any, event: Event): void {
     event.stopPropagation();
     this.selectedClass.set(this.rawClasses().find(r => r.id === c.id) ?? {id: c.id, name: c.label});

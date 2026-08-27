@@ -79,7 +79,7 @@
                 <span class="text-body-secondary fst-italic">No topic set</span>
               }
             </td>
-            <td class="text-body-secondary small">{{ w.assigned_teacher || '—' }}</td>
+            <td class="text-body-secondary small">{{ w.assigned_teacher || '-' }}</td>
             <td class="text-center">
               @if (w.pack) {
                 <span class="materials" [attr.title]="materialsReady(w) + ' of 4 materials'">
@@ -89,7 +89,7 @@
                   }
                 </span>
               } @else {
-                <span class="text-body-secondary small">—</span>
+                <span class="text-body-secondary small">-</span>
               }
             </td>
             <td class="text-center">

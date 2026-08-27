@@ -35,8 +35,8 @@ export class Gradebook {
     return [
       {label: 'Assessments', value: o.length, icon: 'quiz', tone: 'primary'},
       {label: 'Total attempts', value: attempts, icon: 'assignment_turned_in', tone: 'info'},
-      {label: 'Class average', value: avg === null ? '—' : avg + '%', icon: 'workspace_premium', tone: avg === null ? 'secondary' : avg >= 70 ? 'success' : avg >= 50 ? 'warning' : 'danger'},
-      {label: 'Avg pass rate', value: passRate === null ? '—' : passRate + '%', icon: 'check_circle', tone: 'success'},
+      {label: 'Class average', value: avg === null ? '-' : avg + '%', icon: 'workspace_premium', tone: avg === null ? 'secondary' : avg >= 70 ? 'success' : avg >= 50 ? 'warning' : 'danger'},
+      {label: 'Avg pass rate', value: passRate === null ? '-' : passRate + '%', icon: 'check_circle', tone: 'success'},
     ];
   });
 

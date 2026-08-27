@@ -9,7 +9,7 @@ import {KpiItem, KpiStrip, StatRing} from '../../../../common/ui';
 interface Step { key: string; label: string; hint: string; done: boolean; link: string; icon: string; }
 
 /**
- * School Setup (school admin) — a consolidated onboarding hub. Reads the config
+ * School Setup (school admin), a consolidated onboarding hub. Reads the config
  * that already exists (roster counts, grading policy, safeguarding lead) and
  * shows a completion ring + a checklist that links each step to where it's set.
  * No new backend: derived from /dashboard/admin + /school/settings.

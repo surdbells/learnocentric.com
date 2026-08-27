@@ -1,6 +1,6 @@
 :host { display: block; }
 
-/* Premium brand tile for the header icon — matches the Subject Hub / dashboard
+/* Premium brand tile for the header icon, matches the Subject Hub / dashboard
    marks so every page header reads as one system. */
 .avatar {
   background: linear-gradient(135deg, var(--brand-500), var(--brand-700)) !important;

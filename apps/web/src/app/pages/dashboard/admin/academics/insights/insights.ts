@@ -63,7 +63,7 @@ export class Insights {
   }
 
   prefillFeedback(insight: any): void {
-    this.form.patchValue({type: 'reteach', topicId: insight.topic_id, message: `On "${insight.stem}" — let's revisit this. `});
+    this.form.patchValue({type: 'reteach', topicId: insight.topic_id, message: `On "${insight.stem}", let's revisit this. `});
     this.mode.set('feedback');
     if (!this.sent().length) this.loadSent();
   }

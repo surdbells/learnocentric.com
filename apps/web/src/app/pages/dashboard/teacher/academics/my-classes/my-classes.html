@@ -57,7 +57,7 @@
                     <td><span class="badge class-chip">{{ c.label }}</span></td>
                     <td>{{ c.subject }}</td>
                     <td class="text-center">{{ c.learners }}</td>
-                    <td class="text-center fw-semibold" [class]="avgTone(c.average)">{{ c.average == null ? '—' : c.average + '%' }}</td>
+                    <td class="text-center fw-semibold" [class]="avgTone(c.average)">{{ c.average == null ? '-' : c.average + '%' }}</td>
                     <td class="text-center">{{ c.attempts }}</td>
                     <td class="small text-body-secondary">{{ c.last_activity ? (c.last_activity | date:'MMM d, h:mm a') : 'No activity' }}</td>
                     <td><span class="badge bg-success-subtle text-success text-capitalize">{{ c.status }}</span></td>
@@ -123,7 +123,7 @@
             <div class="sched-line">
               <span class="badge bg-{{ scheduleTone(s.status) }}-subtle text-{{ scheduleTone(s.status) }} text-uppercase">{{ s.status }}</span>
               <div class="flex-grow-1">
-                <div class="fw-medium lh-sm">{{ s.class || s.subject }} — {{ s.subject }}</div>
+                <div class="fw-medium lh-sm">{{ s.class || s.subject }}, {{ s.subject }}</div>
                 <div class="small text-body-secondary lh-sm">{{ s.topic || s.title }}</div>
                 <div class="small text-body-secondary">{{ s.scheduled_at | date:'h:mm a' }} · {{ s.duration_minutes }} min</div>
               </div>

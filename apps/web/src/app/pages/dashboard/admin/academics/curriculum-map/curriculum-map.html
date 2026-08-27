@@ -68,7 +68,7 @@
           <tbody>
             @for (t of sub.topics; track t.id) {
               <tr [class.table-success-subtle]="t.ready">
-                <td class="text-center fw-semibold">{{ t.week_number || '—' }}</td>
+                <td class="text-center fw-semibold">{{ t.week_number || '-' }}</td>
                 <td class="fw-medium">{{ t.title }}</td>
                 <td class="text-center">
                   <app-icon [name]="cellIcon(t.pack)" [size]="18" class="text-{{ cellTone(t.pack) }}" [attr.title]="cellLabel(t.pack)" />
@@ -86,7 +86,7 @@
                 </td>
                 <td class="text-center">
                   @if (t.ready) { <app-icon name="check_circle" [size]="18" class="text-success" /> }
-                  @else { <span class="text-body-secondary">—</span> }
+                  @else { <span class="text-body-secondary">-</span> }
                 </td>
               </tr>
             }

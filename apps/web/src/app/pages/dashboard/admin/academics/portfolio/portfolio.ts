@@ -49,7 +49,7 @@ export class Portfolio {
     {key: 'title', label: 'Evidence', sortable: true},
     {key: 'topic', label: 'Topic'},
     {key: 'status', label: 'Status', type: 'badge', badge: (v) => ({text: this.titleCase(v), color: v === 'reviewed' ? 'success' : 'info'})},
-    {key: 'competency_rating', label: 'Competency', type: 'badge', badge: (v) => v ? {text: this.titleCase(v), color: RATING_COLOR[v] ?? 'secondary'} : {text: '—', color: 'light'}},
+    {key: 'competency_rating', label: 'Competency', type: 'badge', badge: (v) => v ? {text: this.titleCase(v), color: RATING_COLOR[v] ?? 'secondary'} : {text: '-', color: 'light'}},
   ];
 
   readonly filterDefs = computed<GridFilter[]>(() => [
@@ -98,7 +98,7 @@ export class Portfolio {
     }).subscribe({
       next: (res) => {
         this.toast.success(res?.published
-          ? 'Portfolio task assigned — learners can see it now.'
+          ? 'Portfolio task assigned, learners can see it now.'
           : 'Portfolio task saved. It reaches learners once the topic is published.');
         this.taskBusy.set(false);
         this.loadTopics();

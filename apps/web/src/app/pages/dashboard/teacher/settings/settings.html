@@ -16,7 +16,7 @@
               <div class="small mt-3">
                 <div class="pref-line"><span class="text-body-secondary">Full Name</span><span class="fw-medium">{{ profile()?.fullName }}</span></div>
                 <div class="pref-line"><span class="text-body-secondary">Email</span><span class="fw-medium">{{ profile()?.email }}</span></div>
-                <div class="pref-line"><span class="text-body-secondary">Phone</span><span class="fw-medium">{{ profile()?.phone || '—' }}</span></div>
+                <div class="pref-line"><span class="text-body-secondary">Phone</span><span class="fw-medium">{{ profile()?.phone || '-' }}</span></div>
                 <div class="pref-line"><span class="text-body-secondary">Staff ID</span><span class="fw-medium">{{ profile()?.staffId }}</span></div>
               </div>
               <a class="btn btn-outline-success btn-sm w-100 mt-3" routerLink="/teacher/management/profile">
@@ -82,7 +82,7 @@
               <div class="sec-head"><span class="sec-num">4</span><app-icon name="shield" [size]="18" /> Account Security</div>
               <div class="mt-3">
                 <div class="setting-row"><span>Two-Factor Authentication</span><label class="switch"><input type="checkbox" [checked]="pref('privacy','two_factor')" (change)="toggle('privacy','two_factor')" /><span></span></label></div>
-                <div class="pref-line small"><span class="text-body-secondary">Last Login</span><span class="fw-medium">{{ security()?.last_login ? (security()?.last_login | date:'medium') : '—' }}</span></div>
+                <div class="pref-line small"><span class="text-body-secondary">Last Login</span><span class="fw-medium">{{ security()?.last_login ? (security()?.last_login | date:'medium') : '-' }}</span></div>
                 <div class="pref-line small"><span class="text-body-secondary">Active Session</span><span class="fw-medium">{{ security()?.active_session }}</span></div>
               </div>
               <hr class="my-3" />
@@ -157,7 +157,7 @@
       <div class="card border-0 shadow-sm mb-4">
         <div class="card-body">
           <div class="fw-semibold mb-2"><app-icon name="schedule" [size]="18" /> Account Snapshot</div>
-          <div class="pref-line small"><span class="text-body-secondary">Last Login</span><span class="fw-medium">{{ security()?.last_login ? (security()?.last_login | date:'MMM d, h:mm a') : '—' }}</span></div>
+          <div class="pref-line small"><span class="text-body-secondary">Last Login</span><span class="fw-medium">{{ security()?.last_login ? (security()?.last_login | date:'MMM d, h:mm a') : '-' }}</span></div>
           <div class="pref-line small"><span class="text-body-secondary">Active Session</span><span class="fw-medium">{{ security()?.active_session }}</span></div>
           <div class="pref-line small border-0"><span class="text-body-secondary">Two-Factor</span><span class="fw-medium">{{ pref('privacy','two_factor') ? 'Enabled' : 'Off' }}</span></div>
         </div>

@@ -13,7 +13,7 @@ const STATUS_COLOR: Record<string, string> = {scheduled: 'info', live: 'success'
 const ACCENTS = ['primary', 'success', 'warning', 'info', 'danger'];
 
 /**
- * Learner Live Classes list (design: Live Classes_LD) — Upcoming / Past tabs,
+ * Learner Live Classes list (design: Live Classes_LD), Upcoming / Past tabs,
  * a next-class countdown hero, today's schedule rail, and class rules. Backed
  * by /live-classes/board (real classes + attendance). The design's "seats
  * left" and past-class video recordings have no data source, so they are
@@ -80,7 +80,7 @@ export class MyLiveClasses implements OnDestroy {
 
   join(lc: any): void {
     if (lc.status !== 'live') {
-      this.toast.info('This class hasn\'t started yet — please wait for the host to go live.');
+      this.toast.info('This class hasn\'t started yet, please wait for the host to go live.');
       return;
     }
     this.busy.set(lc.id);
@@ -102,7 +102,7 @@ export class MyLiveClasses implements OnDestroy {
     this.load();
   }
 
-  /** Client-side connection check — network + camera/mic availability. */
+  /** Client-side connection check, network + camera/mic availability. */
   async testConnection(): Promise<void> {
     this.testing.set(true);
     if (!navigator.onLine) {
@@ -113,7 +113,7 @@ export class MyLiveClasses implements OnDestroy {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({video: true, audio: true});
       stream.getTracks().forEach(t => t.stop());
-      this.toast.success('Connection looks good — camera and microphone are working.');
+      this.toast.success('Connection looks good, camera and microphone are working.');
     } catch {
       this.toast.warning('Online, but we couldn\'t access your camera/microphone. Check browser permissions.');
     } finally {

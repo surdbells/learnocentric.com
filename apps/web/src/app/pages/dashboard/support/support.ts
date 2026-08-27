@@ -10,7 +10,7 @@ import {RichEditor} from '../../../common/rich-editor/rich-editor';
 import {RichText} from '../../../common/rich-editor/rich-text';
 
 /**
- * Support centre — list tickets, open a new one, and work a thread. Requesters
+ * Support centre, list tickets, open a new one, and work a thread. Requesters
  * (any role) see and follow their own; the platform super admin can assign,
  * reply as staff, escalate and resolve. SLA state is shown per ticket.
  */

@@ -5,7 +5,7 @@ export interface BarItem { label: string; value: number; tone?: Tone; }
 
 /**
  * Horizontal ranked bar list (Top Institutions, Content by Subject). Each row is
- * a label, a proportional bar and its value — CSS bars, no SVG needed.
+ * a label, a proportional bar and its value, CSS bars, no SVG needed.
  */
 @Component({
   selector: 'app-bar-list',

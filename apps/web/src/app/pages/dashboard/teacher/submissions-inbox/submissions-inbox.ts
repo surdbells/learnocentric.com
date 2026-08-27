@@ -10,7 +10,7 @@ import {AuthService} from '../../../../common/auth/auth.service';
 import {KpiStrip, KpiItem, TabBar, TabItem, DonutChart, DonutSegment} from '../../../../common/ui';
 
 /**
- * Unified grading inbox — every worksheet + portfolio submission awaiting review
+ * Unified grading inbox, every worksheet + portfolio submission awaiting review
  * in one place, with headline counts and a jump-to-grade action. Backed by
  * GET /assessment/submissions/inbox.
  */
@@ -87,7 +87,7 @@ export class SubmissionsInbox {
     });
   });
 
-  /** Where "Grade" lands — the relevant grading page for the submission type. */
+  /** Where "Grade" lands, the relevant grading page for the submission type. */
   gradeLink(item: any): string {
     return item.type === 'worksheet' ? `${this.base}/academics/worksheets` : `${this.base}/academics/portfolio`;
   }

@@ -18,7 +18,7 @@ const PRIORITY_TONE: Record<string, string> = {high: 'danger', medium: 'warning'
 const TONES = ['primary', 'success', 'warning', 'info', 'danger', 'secondary'];
 
 /**
- * School-Admin Interventions workspace (design: Interventions_SA) — KPI strip,
+ * School-Admin Interventions workspace (design: Interventions_SA), KPI strip,
  * status tabs, a rich support-plan table (learner/class/concern/type/staff/
  * status/priority/next-review/progress), a summary + attention rail, and
  * concern/type distributions. Backed by /school/interventions/board (real).
@@ -72,7 +72,7 @@ export class Interventions {
       {label: 'Active Interventions', value: k.active ?? 0, icon: 'assignment', tone: 'info'},
       {label: 'Overdue Follow-ups', value: k.overdue_followups ?? 0, icon: 'schedule', tone: (k.overdue_followups ? 'danger' : 'secondary')},
       {label: 'Resolved Cases', value: k.resolved ?? 0, icon: 'check_circle', tone: 'success'},
-      {label: 'Success Rate', value: k.success_rate == null ? '—' : k.success_rate + '%', icon: 'trending_up', tone: 'primary'},
+      {label: 'Success Rate', value: k.success_rate == null ? '-' : k.success_rate + '%', icon: 'trending_up', tone: 'primary'},
     ];
   });
 

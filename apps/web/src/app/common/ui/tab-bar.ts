@@ -2,7 +2,7 @@ import {Component, input, model} from '@angular/core';
 import {TabItem} from './ui-types';
 
 /**
- * Segmented tab bar with optional per-tab counts — the sub-view switcher the
+ * Segmented tab bar with optional per-tab counts, the sub-view switcher the
  * designs use on most screens. Two-way bound active key.
  * Usage: <app-tab-bar [tabs]="tabs" [(active)]="tab" />
  */

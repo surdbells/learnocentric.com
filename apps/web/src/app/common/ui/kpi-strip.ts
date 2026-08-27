@@ -3,7 +3,7 @@ import {StatCard} from './stat-card';
 import {KpiItem} from './ui-types';
 
 /**
- * Responsive row of KPI cards — the metric strip at the top of nearly every
+ * Responsive row of KPI cards, the metric strip at the top of nearly every
  * design screen. Pass 4–6 items; the grid wraps on narrow viewports.
  * Usage: <app-kpi-strip [items]="kpis" [cols]="6" />
  */

@@ -9,7 +9,7 @@ import {ApiService} from '../../../../../common/service/api.service';
 import {AuthService} from '../../../../../common/auth/auth.service';
 
 /**
- * Learner "My Profile" overview (design: Profile_LD) — profile card, a learning
+ * Learner "My Profile" overview (design: Profile_LD), profile card, a learning
  * snapshot, enrolled subjects with progress, and derived achievements, plus
  * links to Settings for preferences and account security. Backed by
  * /learn/profile (real snapshot + threshold-derived achievements) and
@@ -61,7 +61,7 @@ export class StudentProfile {
     const s = this.profile()?.snapshot ?? {};
     return [
       {label: 'Lessons Completed', value: s.lessons_completed ?? 0, icon: 'auto_stories', tone: 'primary'},
-      {label: 'Average Score', value: s.average_score == null ? '—' : s.average_score + '%', icon: 'fact_check', tone: 'success'},
+      {label: 'Average Score', value: s.average_score == null ? '-' : s.average_score + '%', icon: 'fact_check', tone: 'success'},
       {label: 'Quizzes Taken', value: s.quizzes_taken ?? 0, icon: 'quiz', tone: 'info'},
       {label: 'Worksheets Done', value: s.worksheets_done ?? 0, icon: 'task_alt', tone: 'warning'},
     ];

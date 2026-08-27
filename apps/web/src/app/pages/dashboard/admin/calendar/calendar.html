@@ -65,7 +65,7 @@
         </div>
         <div class="cal-weekbody">
           @if (!d.items.length) {
-            <div class="text-body-secondary small text-center py-3">—</div>
+            <div class="text-body-secondary small text-center py-3">-</div>
           } @else {
             @for (e of d.items; track $index) {
               <div class="cal-wevent border-start border-3 border-{{ typeColor(e.type) }}">

@@ -7,7 +7,7 @@ import {FileUpload, UploadedFile} from '../../../common/file-upload/file-upload'
 import {ApiService} from '../../../common/service/api.service';
 
 /**
- * School / academy profile editor — loads the signed-in admin's own institution
+ * School / academy profile editor, loads the signed-in admin's own institution
  * and saves name, type, address, brand colour, logo and primary contact.
  */
 @Component({

@@ -9,7 +9,7 @@ import {KpiItem, KpiStrip, TabBar, TabItem} from '../../../../common/ui';
 interface CalDay {iso: string; day: number; weekday: string; inMonth: boolean; isToday: boolean; items: any[]}
 
 /**
- * Academic calendar (school admin) — the institution's dated events (scheduled
+ * Academic calendar (school admin), the institution's dated events (scheduled
  * live classes + worksheet deadlines) from /backend/school/calendar. Offers a
  * month grid, a week view and a grouped agenda, all sharing the type filter.
  */
@@ -77,7 +77,7 @@ export class Calendar {
   readonly grouped = computed<{date: string; items: any[]}[]>(() =>
     [...this.byDate().entries()].sort((a, b) => a[0].localeCompare(b[0])).map(([date, items]) => ({date, items})));
 
-  /** The month grid — whole weeks (Sun–Sat) covering the cursor's month. */
+  /** The month grid, whole weeks (Sun–Sat) covering the cursor's month. */
   readonly monthCells = computed<CalDay[]>(() => {
     const c = this.cursor(), y = c.getFullYear(), m = c.getMonth();
     const offset = new Date(y, m, 1).getDay();

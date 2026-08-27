@@ -122,7 +122,7 @@ export class Assessments {
     });
   }
 
-  /** Bulk-draw validated questions from the bank — all, or {count} at random. */
+  /** Bulk-draw validated questions from the bank, all, or {count} at random. */
   drawFromBank(count?: number): void {
     const a = this.builder();
     if (!a) return;

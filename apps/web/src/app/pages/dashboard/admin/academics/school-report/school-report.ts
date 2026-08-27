@@ -35,12 +35,12 @@ export class SchoolReport {
     const k = this.report()?.kpis;
     if (!k) return [];
     return [
-      {label: 'School average', value: k.school_average === null ? '—' : k.school_average + '%', icon: 'trending_up', tone: k.school_average >= 70 ? 'success' : k.school_average >= 50 ? 'warning' : 'danger'},
+      {label: 'School average', value: k.school_average === null ? '-' : k.school_average + '%', icon: 'trending_up', tone: k.school_average >= 70 ? 'success' : k.school_average >= 50 ? 'warning' : 'danger'},
       {label: 'Total learners', value: k.total_learners, icon: 'group', tone: 'primary'},
       {label: 'Classes analysed', value: k.classes_analysed, icon: 'meeting_room', tone: 'info'},
       {label: 'Subjects analysed', value: k.subjects_analysed, icon: 'subject', tone: 'warning'},
-      {label: 'Attendance average', value: k.attendance_average === null ? '—' : k.attendance_average + '%', icon: 'calendar_month', tone: 'success'},
-      {label: 'Report completion', value: k.report_completion === null ? '—' : k.report_completion + '%', icon: 'assignment_turned_in', tone: 'primary'},
+      {label: 'Attendance average', value: k.attendance_average === null ? '-' : k.attendance_average + '%', icon: 'calendar_month', tone: 'success'},
+      {label: 'Report completion', value: k.report_completion === null ? '-' : k.report_completion + '%', icon: 'assignment_turned_in', tone: 'primary'},
     ];
   });
 

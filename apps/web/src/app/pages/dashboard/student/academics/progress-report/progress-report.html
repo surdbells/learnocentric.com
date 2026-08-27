@@ -71,7 +71,7 @@
               @for (s of subjectProgress(); track s.subject) {
                 <tr>
                   <td class="fw-medium">{{ s.subject }}</td>
-                  <td class="text-body-secondary">{{ s.last_topic || '—' }}</td>
+                  <td class="text-body-secondary">{{ s.last_topic || '-' }}</td>
                   <td class="text-center fw-semibold">{{ s.quiz_average }}%</td>
                   <td class="text-center">{{ s.attempts }}</td>
                   <td><app-status-badge [value]="s.mastery" [map]="masteryTones" /></td>
@@ -91,7 +91,7 @@
     </div>
   </div>
 
-  <!-- Skill progress snapshot — the competency track, drawn from reviewed portfolio work -->
+  <!-- Skill progress snapshot, the competency track, drawn from reviewed portfolio work -->
   <div class="card border-0 shadow-sm mb-3"><div class="card-body">
     <div class="d-flex align-items-center justify-content-between gap-2 mb-3 flex-wrap">
       <h6 class="fw-semibold mb-0">Skill progress <span class="badge bg-light text-body-secondary ms-1">Competency · from portfolio</span></h6>
@@ -102,7 +102,7 @@
     @if (skillBars().length) {
       <app-bar-list [items]="skillBars()" />
     } @else {
-      <div class="text-body-secondary small">No reviewed portfolio work yet — skill progress appears once your teacher rates your portfolio tasks.</div>
+      <div class="text-body-secondary small">No reviewed portfolio work yet, skill progress appears once your teacher rates your portfolio tasks.</div>
     }
   </div></div>
 

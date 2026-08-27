@@ -6,7 +6,7 @@ import {ProgressReport} from '../progress-report/progress-report';
 import {MyFeedback} from '../my-feedback/my-feedback';
 
 /**
- * Merged learner "Progress & Feedback" — the performance overview and tutor
+ * Merged learner "Progress & Feedback", the performance overview and tutor
  * feedback on one page, switched by a tab. Progress is analytics-gated; Feedback
  * is always available. Each child is embedded (its own page header hidden).
  */

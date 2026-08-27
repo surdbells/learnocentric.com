@@ -34,7 +34,7 @@
     </div>
   </section>
 
-  <!-- Continue CTA — its own prominent bar, not crammed into the hero -->
+  <!-- Continue CTA, its own prominent bar, not crammed into the hero -->
   @if (d.next_topic) {
     <a [routerLink]="links.learn" class="hub-continue mb-3">
       <span class="hub-continue-ic"><app-icon name="play_arrow" [size]="20" /></span>
@@ -45,7 +45,7 @@
       <app-icon name="arrow_forward" [size]="18" class="hub-continue-go" />
     </a>
   } @else if (d.topic_count) {
-    <div class="hub-done-bar mb-3"><app-icon name="verified" [size]="18" /> All topics complete — nice work!</div>
+    <div class="hub-done-bar mb-3"><app-icon name="verified" [size]="18" /> All topics complete, nice work!</div>
   }
 
   <!-- Quick-access tiles -->

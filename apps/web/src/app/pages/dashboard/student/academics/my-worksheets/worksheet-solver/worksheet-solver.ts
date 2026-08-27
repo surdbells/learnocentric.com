@@ -9,7 +9,7 @@ import {StatRing} from '../../../../../../common/ui';
 import {ApiService} from '../../../../../../common/service/api.service';
 
 /**
- * Rich worksheet solver (design: Worksheet II_LD) — sectioned questions with
+ * Rich worksheet solver (design: Worksheet II_LD), sectioned questions with
  * per-type answer inputs, a progress ring, a question navigator, autosave, and
  * submit with hybrid grading (objective auto-scored, free-response deferred to
  * the teacher). Read-only once submitted/graded, showing per-question marks.
@@ -71,7 +71,7 @@ export class WorksheetSolver implements OnInit, OnDestroy {
   totalQuestions = computed(() => this.flatQuestions().length);
   answeredCount = computed(() => this.flatQuestions().filter((q: any) => this.answerStr(q.id) !== '').length);
 
-  /** Answers may be numbers (numeric inputs) or strings — always read as a trimmed string. */
+  /** Answers may be numbers (numeric inputs) or strings, always read as a trimmed string. */
   answerStr(qid: number): string { return String(this.answers()[qid] ?? '').trim(); }
   /** Raw answer for ngModel binding (empty string when unanswered). */
   answerFor(qid: number): string { return this.answers()[qid] ?? ''; }

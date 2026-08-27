@@ -53,7 +53,7 @@ export class QuestionBank {
     {key: 'approval_status', label: 'Status', type: 'badge', badge: (v) => ({text: this.titleCase(v), color: STATUS_COLOR[v] ?? 'secondary'})},
   ];
 
-  /** Unique subjects across the topic list — for the Subject filter (multi-subject teachers). */
+  /** Unique subjects across the topic list, for the Subject filter (multi-subject teachers). */
   readonly subjectOptions = computed(() => {
     const seen = new Map<number, string>();
     for (const t of this.topics()) {
@@ -157,7 +157,7 @@ export class QuestionBank {
 
   submitBulk(): void {
     const questions = this.bulkParsed();
-    if (!questions.length) { this.toast.error('Nothing to import — parse a CSV first.'); return; }
+    if (!questions.length) { this.toast.error('Nothing to import, parse a CSV first.'); return; }
     if (!this.bulkTopicId()) { this.toast.error('Choose a default topic for rows without a topic_id.'); return; }
     this.bulkBusy.set(true);
     this.api.post<any>('/backend/assessment/questions/bulk', {topic_id: this.bulkTopicId(), questions}).subscribe({

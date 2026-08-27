@@ -41,10 +41,10 @@
               <td class="text-center">{{ a.attempts }}</td>
               <td class="text-center">
                 @if (a.average !== null) { <span class="badge bg-{{ scoreColor(a.average) }}-subtle text-{{ scoreColor(a.average) }}">{{ a.average }}%</span> }
-                @else { <span class="text-body-secondary">—</span> }
+                @else { <span class="text-body-secondary">-</span> }
               </td>
-              <td class="text-center">{{ a.pass_rate !== null ? a.pass_rate + '%' : '—' }}</td>
-              <td class="text-center text-body-secondary small">{{ a.attempts ? a.lowest + '–' + a.highest : '—' }}</td>
+              <td class="text-center">{{ a.pass_rate !== null ? a.pass_rate + '%' : '-' }}</td>
+              <td class="text-center text-body-secondary small">{{ a.attempts ? a.lowest + '–' + a.highest : '-' }}</td>
               <td class="text-end">
                 <button type="button" class="btn btn-sm btn-outline-secondary" [disabled]="!a.attempts" (click)="openDetail(a)">View</button>
               </td>
@@ -77,11 +77,11 @@
               <td class="text-center">{{ s.passed }}</td>
               <td class="text-center">
                 @if (s.academic_avg !== null) { <span class="badge bg-{{ scoreColor(s.academic_avg) }}-subtle text-{{ scoreColor(s.academic_avg) }}">{{ s.academic_avg }}%</span> }
-                @else { <span class="text-body-secondary">—</span> }
+                @else { <span class="text-body-secondary">-</span> }
               </td>
               <td class="text-center">
                 @if (s.competency_avg !== null) { <span class="badge bg-{{ scoreColor(s.competency_avg) }}-subtle text-{{ scoreColor(s.competency_avg) }}">{{ s.competency_avg }}%</span> }
-                @else { <span class="text-body-secondary">—</span> }
+                @else { <span class="text-body-secondary">-</span> }
               </td>
             </tr>
           }
@@ -127,16 +127,16 @@
                     @if (cellScore(r, c.id) !== null) {
                       <span class="badge bg-{{ scoreColor(cellScore(r, c.id)) }}-subtle text-{{ scoreColor(cellScore(r, c.id)) }}">{{ cellScore(r, c.id) }}%</span>
                     } @else {
-                      <span class="text-body-secondary" title="Not attempted">—</span>
+                      <span class="text-body-secondary" title="Not attempted">-</span>
                     }
                   </td>
                 }
                 <td class="text-center">
-                  @if (r.weighted_avg !== null) { <b>{{ r.weighted_avg }}%</b> } @else { <span class="text-body-secondary">—</span> }
+                  @if (r.weighted_avg !== null) { <b>{{ r.weighted_avg }}%</b> } @else { <span class="text-body-secondary">-</span> }
                 </td>
                 <td class="text-center">
                   @if (r.grade) { <span class="badge bg-{{ gradeColor(r.grade, r.weighted_avg) }} grade-badge">{{ r.grade }}</span> }
-                  @else { <span class="text-body-secondary">—</span> }
+                  @else { <span class="text-body-secondary">-</span> }
                 </td>
               </tr>
             }
@@ -145,7 +145,7 @@
             <tr>
               <td class="fw-semibold sticky-col">Class average</td>
               @for (c of m.columns; track c.id) {
-                <td class="text-center text-body-secondary small">{{ c.average !== null ? c.average + '%' : '—' }}</td>
+                <td class="text-center text-body-secondary small">{{ c.average !== null ? c.average + '%' : '-' }}</td>
               }
               <td colspan="2"></td>
             </tr>

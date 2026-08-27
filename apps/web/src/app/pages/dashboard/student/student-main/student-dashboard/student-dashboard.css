@@ -7,7 +7,7 @@
 
 /* ---- Premium card elevation (scoped to this component) ----
    Radius comes from the global card token; this adds the hover-lift that the
-   global system reserves for interactive cards — the dashboard reads as one. */
+   global system reserves for interactive cards, the dashboard reads as one. */
 .card { transition: transform .16s ease, box-shadow .16s ease; }
 .card:hover {
   transform: translateY(-2px);
@@ -18,7 +18,7 @@
 /* Long text must never spill out of a card */
 .card .card-body { min-width: 0; overflow-wrap: anywhere; }
 
-/* Weak areas — long sentences as a wrapping list (not overflowing pills) */
+/* Weak areas, long sentences as a wrapping list (not overflowing pills) */
 .dash-weak li {
   display: flex;
   gap: .4rem;

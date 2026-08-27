@@ -68,7 +68,7 @@ export class CurriculumMap {
   cellIcon(status: string): string {
     if (status === 'published') return 'check_circle';
     if (status === 'none') return 'circle';
-    return 'schedule'; // draft / review / approved — in progress
+    return 'schedule'; // draft / review / approved, in progress
   }
   cellTone(status: string): string {
     if (status === 'published') return 'success';

@@ -71,7 +71,7 @@
           @if (w.submission.graded_at) { <div class="small text-body-secondary mt-1">Graded {{ w.submission.graded_at | date:'medium' }}</div> }
         </div>
         <label class="form-label small text-body-secondary">Your submitted answers</label>
-        <div class="border rounded-3 p-3 bg-light">@if (w.submission.response_text) { <app-rich-text [value]="w.submission.response_text" /> } @else { — }</div>
+        <div class="border rounded-3 p-3 bg-light">@if (w.submission.response_text) { <app-rich-text [value]="w.submission.response_text" /> } @else {, }</div>
         @if (w.submission.attachment_url) {
           <a class="btn btn-sm btn-outline-secondary d-inline-flex align-items-center gap-1 mt-3" [href]="w.submission.attachment_url" [attr.download]="downloadName(w.submission.attachment_url)" title="Save your submitted work">
             <app-icon name="download" [size]="16" /> Download your submitted file

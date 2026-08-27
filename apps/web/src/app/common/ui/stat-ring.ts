@@ -3,7 +3,7 @@ import {Tone, toneVars} from './ui-types';
 
 /**
  * SVG progress ring (single value 0–100) with a centred value + optional caption.
- * Self-contained — no chart library. Used for "Overall Progress", completion
+ * Self-contained, no chart library. Used for "Overall Progress", completion
  * rates, mastery, etc. throughout the designs.
  */
 @Component({

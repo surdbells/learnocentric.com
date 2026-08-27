@@ -46,7 +46,7 @@ export class SuperAdminSafeguarding {
       {label: 'Open cases', value: s.open, icon: 'shield', tone: s.open > 0 ? 'warning' : 'success'},
       {label: 'Escalated', value: s.escalated, icon: 'campaign', tone: s.escalated > 0 ? 'danger' : 'secondary'},
       {label: 'Critical (open)', value: s.critical_open, icon: 'cancel', tone: s.critical_open > 0 ? 'danger' : 'secondary'},
-      {label: 'Lead coverage', value: cov === null ? '—' : cov + '%', sublabel: c ? `${c.with_lead}/${c.total} schools` : '', icon: 'verified', tone: cov === 100 ? 'success' : cov === null ? 'secondary' : 'warning'},
+      {label: 'Lead coverage', value: cov === null ? '-' : cov + '%', sublabel: c ? `${c.with_lead}/${c.total} schools` : '', icon: 'verified', tone: cov === 100 ? 'success' : cov === null ? 'secondary' : 'warning'},
     ];
   });
 

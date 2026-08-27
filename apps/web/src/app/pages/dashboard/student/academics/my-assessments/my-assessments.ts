@@ -57,10 +57,10 @@ export class MyAssessments implements OnDestroy {
     const assessments = g.filter(x => x.type !== 'quiz').length;
     const areas = (this.analytics()?.topic_mastery ?? []).filter((t: any) => t.average < 60).length;
     return [
-      {label: 'Overall average', value: avg === null ? '—' : avg + '%', icon: 'workspace_premium', tone: avg === null ? 'secondary' : avg >= 70 ? 'success' : avg >= 50 ? 'warning' : 'danger'},
+      {label: 'Overall average', value: avg === null ? '-' : avg + '%', icon: 'workspace_premium', tone: avg === null ? 'secondary' : avg >= 70 ? 'success' : avg >= 50 ? 'warning' : 'danger'},
       {label: 'Quizzes taken', value: quizzes, icon: 'quiz', tone: 'info'},
       {label: 'Assessments taken', value: assessments, icon: 'assignment_turned_in', tone: 'primary'},
-      {label: 'Best score', value: best === null ? '—' : best + '%', icon: 'star', tone: 'success'},
+      {label: 'Best score', value: best === null ? '-' : best + '%', icon: 'star', tone: 'success'},
       {label: 'Areas to improve', value: areas, sublabel: 'below mastery', icon: 'monitoring', tone: areas > 0 ? 'danger' : 'success'},
     ];
   });
@@ -196,7 +196,7 @@ export class MyAssessments implements OnDestroy {
     if (secs <= 0) {
       this.clearTimer();
       if (this.mode() === 'take' && !this.busy()) {
-        this.toast.info('Time is up — submitting your answers.');
+        this.toast.info('Time is up, submitting your answers.');
         this.submit();
       }
     }
@@ -211,7 +211,7 @@ export class MyAssessments implements OnDestroy {
     return `${m}:${sec.toString().padStart(2, '0')}`;
   }
 
-  /** Timer is in the last 60 seconds — used to flash the badge. */
+  /** Timer is in the last 60 seconds, used to flash the badge. */
   timeCritical(): boolean { return this.timed() && this.remaining() <= 60; }
 
   /** Question-navigator: jump to a question and report whether it's answered. */
@@ -245,8 +245,8 @@ export class MyAssessments implements OnDestroy {
   }
 
   responseText(r: any): string {
-    if (r === null || r === undefined || r === '') return '—';
-    if (Array.isArray(r)) return r.length ? r.join(' / ') : '—';
+    if (r === null || r === undefined || r === '') return '-';
+    if (Array.isArray(r)) return r.length ? r.join(' / ') : '-';
     return String(r);
   }
 

@@ -11,7 +11,7 @@ import {AuthService} from '../../../../../common/auth/auth.service';
 const DRAFT_KEY = 'add_learner_draft';
 
 /**
- * Sectioned "Add Learner" onboarding form (design: Classes & Learners II_SA) —
+ * Sectioned "Add Learner" onboarding form (design: Classes & Learners II_SA) -
  * six sections (Profile / Academic Placement / Login / Guardian / Support /
  * Consent) with an enrolment-summary rail, a live progress checklist, and Save
  * Draft. Posts to /school/learners which creates the account, sets the

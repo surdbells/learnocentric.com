@@ -15,7 +15,7 @@ import {
 /**
  * Icon wrapper backed by Lucide. Call sites keep passing the old Material-symbol
  * names (many are produced dynamically in TS), and this component maps them to
- * the equivalent Lucide glyph — so migrating icons didn't require touching that
+ * the equivalent Lucide glyph, so migrating icons didn't require touching that
  * logic. Unknown names fall back to a neutral dot.
  */
 const MAP: Record<string, any> = {

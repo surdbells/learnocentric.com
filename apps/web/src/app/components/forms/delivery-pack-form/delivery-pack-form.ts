@@ -17,7 +17,7 @@ interface MediaItem { url: string; name: string; }
 })
 export class DeliveryPackForm {
   select = input<any | null>(null);
-  /** Topics that don't yet have a pack — used only when creating. */
+  /** Topics that don't yet have a pack, used only when creating. */
   availableTopics = input<any[]>([]);
 
   isEdit = signal(false);
@@ -38,7 +38,7 @@ export class DeliveryPackForm {
 
   readonly editTopicTitle = computed(() => this.select()?.topic ?? '');
 
-  /** Multiple lesson media items — video, audio, PDF or image; URL or uploaded. */
+  /** Multiple lesson media items, video, audio, PDF or image; URL or uploaded. */
   media = signal<MediaItem[]>([]);
 
   addMedia(): void { this.media.set([...this.media(), {url: '', name: ''}]); }

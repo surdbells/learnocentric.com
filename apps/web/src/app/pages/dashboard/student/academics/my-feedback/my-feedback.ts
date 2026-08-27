@@ -10,7 +10,7 @@ import {KpiItem, KpiStrip, StatRing, TabBar, TabItem} from '../../../../../commo
 const SOURCE_ICON: Record<string, string> = {quiz: 'quiz', worksheet: 'assignment', portfolio: 'folder_special', general: 'chat'};
 
 /**
- * Learner Feedback breakdown (design: Feedback_LD) — KPI strip, source tabs,
+ * Learner Feedback breakdown (design: Feedback_LD), KPI strip, source tabs,
  * a recent-feedback list, a structured detail panel (did-well / improve /
  * common-error / tutor-comment / next-step + score + marked work) and a rail
  * (reviewed summary + teacher-rated focus areas + quick actions).
@@ -41,7 +41,7 @@ export class MyFeedback {
       {label: 'Total Feedback', value: this.notes().length, icon: 'forum', tone: 'primary', sublabel: 'Across all subjects'},
       {label: 'Needs Action', value: m.unread ?? 0, icon: 'error', tone: (m.unread ? 'warning' : 'secondary'), sublabel: 'Awaiting your review'},
       {label: 'Reviewed', value: m.reviewed ?? 0, icon: 'check_circle', tone: 'success', sublabel: 'Marked as reviewed'},
-      {label: 'Average Performance', value: m.avg_performance == null ? '—' : m.avg_performance + '%', icon: 'star', tone: 'info', sublabel: 'Across scored feedback'},
+      {label: 'Average Performance', value: m.avg_performance == null ? '-' : m.avg_performance + '%', icon: 'star', tone: 'info', sublabel: 'Across scored feedback'},
     ];
   });
 

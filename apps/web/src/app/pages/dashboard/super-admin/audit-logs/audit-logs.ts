@@ -8,7 +8,7 @@ import {Icon} from '../../../../common/icon/icon';
 import {KpiItem, KpiStrip, StatusBadge, TabBar, TabItem, Tone} from '../../../../common/ui';
 
 /**
- * Platform audit trail (super admin) — read-only view of the AuditLog rows the
+ * Platform audit trail (super admin), read-only view of the AuditLog rows the
  * app already writes, with derived category + risk, KPI totals, category tabs,
  * search and pagination (all server-driven via /backend/audit-logs).
  */

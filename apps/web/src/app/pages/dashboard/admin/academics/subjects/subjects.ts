@@ -30,7 +30,7 @@ export class Subjects {
   readonly kpis = computed<KpiItem[]>(() => {
     const c = this.catalog();
     const adopted = c.filter(x => x.adopted).length;
-    // 'Catalogue subjects' (total across the platform) is a Super-Admin concern —
+    // 'Catalogue subjects' (total across the platform) is a Super-Admin concern -
     // the school only cares what it offers and can add (PDF review A5).
     return [
       {label: 'Offered by school', value: adopted, icon: 'check_circle', tone: 'success'},
@@ -70,7 +70,7 @@ export class Subjects {
     if (item.adopted) {
       this.api.delete(`/backend/school/subjects?id=${item.subject_id}`, {confirm: false}).subscribe({
         next: () => { this.toast.success(`${item.name} removed from your school`); this.after(); },
-        error: (e) => { this.toast.error(e?.error?.error || 'Could not remove — it may have topics or classes attached'); this.busy.set(null); },
+        error: (e) => { this.toast.error(e?.error?.error || 'Could not remove, it may have topics or classes attached'); this.busy.set(null); },
       });
     } else {
       this.api.post('/backend/school/subjects/adopt', {catalog_subject_id: item.id}).subscribe({

@@ -49,7 +49,7 @@ export class ProgressReport {
       {label: 'Overall academic', value: this.pct(acad ?? null), icon: 'trending_up', tone: band(acad) as any},
       {label: 'Average quiz score', value: this.pct(acad ?? null), icon: 'workspace_premium', tone: band(acad) as any},
       {label: 'Worksheet completion', value: this.pct(ws ?? null), icon: 'assignment_turned_in', tone: band(ws) as any},
-      {label: 'Portfolio completion', value: entries.length ? Math.round(reviewed / entries.length * 100) + '%' : '—', sublabel: `${reviewed}/${entries.length} reviewed`, icon: 'folder_special', tone: 'primary'},
+      {label: 'Portfolio completion', value: entries.length ? Math.round(reviewed / entries.length * 100) + '%' : '-', sublabel: `${reviewed}/${entries.length} reviewed`, icon: 'folder_special', tone: 'primary'},
     ];
   });
 
@@ -62,13 +62,13 @@ export class ProgressReport {
   readonly topicBars = computed<BarItem[]>(() =>
     (this.report()?.topic_mastery ?? []).map((t: any) => ({label: t.topic, value: t.average, tone: MASTERY_TONE[t.mastery] ?? 'secondary'})));
 
-  // Skill progress — the competency track, drawn from reviewed portfolio work.
+  // Skill progress, the competency track, drawn from reviewed portfolio work.
   readonly skillBars = computed<BarItem[]>(() =>
     (this.report()?.competency?.skills ?? []).map((s: any) => ({label: s.topic, value: s.value, tone: RATING_COLOR[s.level] ?? 'secondary'})));
   readonly competencyAvg = computed<number | null>(() => this.report()?.competency?.average ?? null);
   readonly competencyLevel = computed<string>(() => {
     const v = this.competencyAvg();
-    if (v == null) return '—';
+    if (v == null) return '-';
     if (v >= 88) return 'Mastery';
     if (v >= 63) return 'Proficient';
     if (v >= 38) return 'Developing';
@@ -136,7 +136,7 @@ export class ProgressReport {
   }
 
   ratingColor(r: string | null): string { return r ? (RATING_COLOR[r] ?? 'secondary') : 'secondary'; }
-  pct(v: number | null): string { return v === null || v === undefined ? '—' : v + '%'; }
+  pct(v: number | null): string { return v === null || v === undefined ? '-' : v + '%'; }
   titleCase(s: string): string { return s ? s.charAt(0).toUpperCase() + s.slice(1) : ''; }
 
   /** Strip HTML tags (feedback may be rich text) and collapse whitespace for plain-text share. */
@@ -151,7 +151,7 @@ export class ProgressReport {
     if (!r) return '';
     const fb = r.feedback ?? {};
     const lines: string[] = [];
-    lines.push(`Progress report — ${r.student?.name ?? 'Student'}`);
+    lines.push(`Progress report, ${r.student?.name ?? 'Student'}`);
     lines.push(`Quiz average: ${this.pct(r.academic?.average ?? null)}`);
     lines.push(`Worksheet average: ${this.pct(r.worksheets?.average ?? null)}`);
     lines.push(`Live classes joined: ${r.attendance?.joined ?? 0}/${r.attendance?.offered ?? 0}`);
@@ -180,7 +180,7 @@ export class ProgressReport {
         await nav.share({ title: 'Progress report', text });
         return;
       } catch {
-        // User dismissed or share unsupported — fall through to WhatsApp link.
+        // User dismissed or share unsupported, fall through to WhatsApp link.
       }
     }
     window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');

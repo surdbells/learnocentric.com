@@ -14,9 +14,9 @@
           </h5>
           <div class="small text-body-secondary">
             @if (s.status === 'grace') {
-              Grace period — renew by {{ s.grace_until | date:'mediumDate' }} to keep access
+              Grace period, renew by {{ s.grace_until | date:'mediumDate' }} to keep access
             } @else if (s.status === 'expired') {
-              Expired on {{ s.period_end | date:'mediumDate' }} — renew to restore access
+              Expired on {{ s.period_end | date:'mediumDate' }}, renew to restore access
             } @else {
               Renews on {{ s.period_end | date:'mediumDate' }}
             }

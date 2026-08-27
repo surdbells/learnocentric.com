@@ -54,7 +54,7 @@
       }
 
       @if (editable()) {
-        <!-- Draw from the question bank — questions are already topic-linked -->
+        <!-- Draw from the question bank, questions are already topic-linked -->
         <label class="form-label text-uppercase small fw-semibold text-body-secondary">Build from question bank</label>
         <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
           <button type="button" class="btn btn-sm btn-success text-nowrap" [disabled]="busy()" (click)="drawFromBank()">

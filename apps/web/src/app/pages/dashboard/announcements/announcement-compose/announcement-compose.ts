@@ -113,7 +113,7 @@ export class AnnouncementCompose {
       return this.classId() ? 'Selected class' : 'Choose a class';
     }
     const map: Record<string, string> = {all: 'Everyone in the school', students: 'All students', teachers: 'All teachers', parents: 'All parents', staff: 'Teachers & staff'};
-    return map[this.audience()] ?? '—';
+    return map[this.audience()] ?? '-';
   });
 
   private payload(intent: 'draft' | 'send'): any {

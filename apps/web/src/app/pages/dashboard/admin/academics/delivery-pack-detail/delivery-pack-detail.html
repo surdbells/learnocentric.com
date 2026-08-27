@@ -140,7 +140,7 @@
           <div class="d-flex gap-2 py-1 small">
             <span class="text-body-secondary">{{ h.created_at | date:'medium' }}</span>
             <span class="fw-medium text-capitalize">{{ h.to_status || h.status }}</span>
-            @if (h.note) { <span class="text-body-secondary">— {{ h.note }}</span> }
+            @if (h.note) { <span class="text-body-secondary">- {{ h.note }}</span> }
           </div>
         }
       </div>

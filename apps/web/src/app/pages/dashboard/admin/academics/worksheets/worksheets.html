@@ -53,7 +53,7 @@
               @if (wsQuestionCount() > 0) {
                 <!-- Structured worksheet: per-question marking -->
                 <div class="d-flex align-items-center justify-content-between gap-2">
-                  <span class="small text-body-secondary">Score <b>{{ sub.score ?? '—' }}/{{ w.total_marks }}</b></span>
+                  <span class="small text-body-secondary">Score <b>{{ sub.score ?? '-' }}/{{ w.total_marks }}</b></span>
                   <button type="button" class="btn btn-sm btn-outline-primary" (click)="openMark(sub)">
                     <app-icon name="checklist" [size]="15" /> {{ markSubId() === sub.id ? 'Close' : 'Mark questions' }}
                   </button>
@@ -67,7 +67,7 @@
                       @for (q of markDetail().questions; track q.question_id) {
                         <div class="mark-q">
                           <div class="small fw-medium">{{ q.prompt }} <span class="text-body-secondary">({{ q.marks }} {{ q.marks === 1 ? 'mark' : 'marks' }})</span></div>
-                          <div class="small text-body-secondary mb-1">Answer: {{ q.answer || '— (blank)' }}</div>
+                          <div class="small text-body-secondary mb-1">Answer: {{ q.answer || '- (blank)' }}</div>
                           @if (q.auto) {
                             <span class="badge" [class.bg-success-subtle]="q.correct" [class.text-success]="q.correct" [class.bg-danger-subtle]="!q.correct" [class.text-danger]="!q.correct">
                               <app-icon [name]="q.correct ? 'check_circle' : 'cancel'" [size]="13" /> Auto {{ q.awarded_marks ?? 0 }}/{{ q.marks }}

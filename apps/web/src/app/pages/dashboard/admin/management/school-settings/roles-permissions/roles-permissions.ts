@@ -11,7 +11,7 @@ const ACTIONS = ['view', 'create', 'edit', 'approve', 'export', 'delete'] as con
 type Matrix = Record<string, Record<string, boolean>>;
 
 /**
- * School Roles & Permissions (design: Settings & Permission_SA) — the roles
+ * School Roles & Permissions (design: Settings & Permission_SA), the roles
  * table with a permission matrix. System roles are read-only (shared across
  * institutions); custom institution roles can be created, edited, assigned and
  * deleted. Backed by /school/roles (real RolePermission RBAC).

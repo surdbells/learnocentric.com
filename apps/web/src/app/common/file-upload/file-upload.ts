@@ -4,7 +4,7 @@ import {ToastrService} from 'ngx-toastr';
 import {Icon} from '../icon/icon';
 
 export interface UploadedFile {
-  /** Backend-served reference (/backend/files?p=…) — never a raw file URL. */
+  /** Backend-served reference (/backend/files?p=…), never a raw file URL. */
   url: string;
   /** Bare Flysystem path stored server-side. */
   path?: string;
@@ -13,7 +13,7 @@ export interface UploadedFile {
   type: string;
 }
 
-/** Server response from POST /backend/upload — path-only (no URL issued). */
+/** Server response from POST /backend/upload, path-only (no URL issued). */
 interface UploadResponse { path: string; name: string; size: number; type: string; }
 
 /**
@@ -32,7 +32,7 @@ export class FileUpload {
   value = input<string | null>(null);
   label = input<string>('Upload a file');
   accept = input<string>('image/*,application/pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.csv,.txt,video/*,audio/*');
-  hint = input<string>('Images, documents, audio or video — up to 15 MB.');
+  hint = input<string>('Images, documents, audio or video, up to 15 MB.');
 
   @Output() uploaded = new EventEmitter<UploadedFile>();
   @Output() cleared = new EventEmitter<void>();
@@ -94,7 +94,7 @@ export class FileUpload {
       },
       error: (e) => {
         this.progress.set(null);
-        this.error.set(e?.error?.error || 'Upload failed — check your connection and try again.');
+        this.error.set(e?.error?.error || 'Upload failed, check your connection and try again.');
       },
     });
   }

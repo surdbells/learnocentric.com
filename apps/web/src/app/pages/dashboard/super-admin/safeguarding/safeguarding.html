@@ -112,8 +112,8 @@
           @if (c.details) { <p class="mb-3">{{ c.details }}</p> }
 
           <dl class="row small mb-0">
-            <dt class="col-4 text-body-secondary fw-normal">Learner</dt><dd class="col-8">{{ c.student || '—' }}</dd>
-            <dt class="col-4 text-body-secondary fw-normal">Reported by</dt><dd class="col-8">{{ c.reported_by || '—' }}</dd>
+            <dt class="col-4 text-body-secondary fw-normal">Learner</dt><dd class="col-8">{{ c.student || '-' }}</dd>
+            <dt class="col-4 text-body-secondary fw-normal">Reported by</dt><dd class="col-8">{{ c.reported_by || '-' }}</dd>
             <dt class="col-4 text-body-secondary fw-normal">Access level</dt><dd class="col-8 text-capitalize">{{ c.access_level }}</dd>
             @if (c.handled_by) { <dt class="col-4 text-body-secondary fw-normal">Handled by</dt><dd class="col-8">{{ c.handled_by }}</dd> }
             @if (c.closed_at) { <dt class="col-4 text-body-secondary fw-normal">Closed</dt><dd class="col-8">{{ c.closed_at | date:'medium' }}</dd> }

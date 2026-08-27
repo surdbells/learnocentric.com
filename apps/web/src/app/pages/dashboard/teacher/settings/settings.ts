@@ -8,7 +8,7 @@ import {ApiService} from '../../../../common/service/api.service';
 import {ToastrService} from 'ngx-toastr';
 
 /**
- * Teacher Settings hub — numbered sections + right rail (design: Settings_TD).
+ * Teacher Settings hub, numbered sections + right rail (design: Settings_TD).
  * Edits accumulate in a working copy and persist on explicit Save (design has
  * Save Changes / Reset). Reads/writes the shared /auth/settings blob; the rail's
  * account snapshot (last login, session) is REAL from the settings payload.

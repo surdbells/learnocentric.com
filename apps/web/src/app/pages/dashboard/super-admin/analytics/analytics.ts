@@ -49,7 +49,7 @@ export class SuperAdminAnalytics {
       {label: 'Platform users', value: t.users, icon: 'group', tone: 'info', spark: usersTrend, ...this.delta('users')},
       {label: 'Learners', value: t.students, icon: 'school', tone: 'success'},
       {label: 'Graded attempts', value: t.graded_attempts, icon: 'quiz', tone: 'warning', spark: attemptsTrend, ...this.delta('attempts')},
-      {label: 'Avg score', value: t.avg_score === null ? '—' : t.avg_score + '%', icon: 'workspace_premium', tone: 'success'},
+      {label: 'Avg score', value: t.avg_score === null ? '-' : t.avg_score + '%', icon: 'workspace_premium', tone: 'success'},
       {label: 'At-risk schools', value: atRisk, sublabel: 'no activity', icon: 'warning', tone: atRisk > 0 ? 'danger' : 'secondary'},
     ];
   });

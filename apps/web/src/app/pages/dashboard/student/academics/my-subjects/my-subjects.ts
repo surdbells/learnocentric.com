@@ -7,7 +7,7 @@ import {ApiService} from '../../../../../common/service/api.service';
 import {KpiStrip, KpiItem} from '../../../../../common/ui';
 
 /**
- * Learner "My Subjects" — the subjects the student is enrolled in, each with
+ * Learner "My Subjects", the subjects the student is enrolled in, each with
  * aggregate progress, topic counts, the next topic to continue, and the
  * assigned teacher. Backed by /learn/subjects (real topic-journey progress).
  */

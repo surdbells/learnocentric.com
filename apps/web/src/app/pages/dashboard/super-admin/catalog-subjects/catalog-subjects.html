@@ -56,7 +56,7 @@
                 @if (s.description) { <div class="small text-body-secondary"><app-rich-text [value]="s.description" /></div> }
               </td>
               <td class="font-monospace">{{ s.code }}</td>
-              <td class="small">{{ s.curriculum || '—' }}</td>
+              <td class="small">{{ s.curriculum || '-' }}</td>
               <td>
                 <span class="badge" [class.bg-success-subtle]="s.is_active" [class.text-success]="s.is_active"
                       [class.bg-secondary-subtle]="!s.is_active" [class.text-secondary]="!s.is_active">

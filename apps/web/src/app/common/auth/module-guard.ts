@@ -19,7 +19,7 @@ export function moduleGuard(module: string): CanActivateFn {
     }
 
     inject(ToastrService).info(`This feature isn’t included in your school’s current plan.`);
-    // Send them to their role's dashboard — the first segment of the *target* URL
+    // Send them to their role's dashboard, the first segment of the *target* URL
     // (router.url isn't the target yet during a hard navigation).
     const seg = state.url.split('/').filter(Boolean)[0] || '';
     return router.parseUrl(seg ? `/${seg}/main` : '/');

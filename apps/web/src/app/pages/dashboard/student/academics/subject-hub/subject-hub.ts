@@ -8,7 +8,7 @@ import {SkeletonLoader} from '../../../../../common/skeleton-loader/skeleton-loa
 import {StatRing, TabBar, TabItem, StatusBadge, Tone} from '../../../../../common/ui';
 
 /**
- * Learner Subject Hub — one subject's whole world in a single place: lessons
+ * Learner Subject Hub, one subject's whole world in a single place: lessons
  * (topic journey), worksheets, quizzes, live classes, resources and feedback,
  * all scoped to the signed-in learner. Backed by GET /learn/subjects/{id}.
  */

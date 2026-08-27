@@ -38,7 +38,7 @@ export class TermContext {
   load(): void {
     if (this.loaded || !isPlatformBrowser(this.platformId)) return;
     // Terms are institution-scoped; platform users (e.g. super admin, no institution)
-    // have none — skip the fetch so the switcher stays hidden for them.
+    // have none, skip the fetch so the switcher stays hidden for them.
     if (!this.auth.getAuthSession()?.user?.institutionId) return;
     this.loaded = true;
     this.api.get<TermOption[]>('/backend/school/terms').subscribe({

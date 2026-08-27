@@ -56,7 +56,7 @@
             </table>
           </div>
         } @else {
-          <div class="card border-0 shadow-sm p-4 text-center text-body-secondary">No results yet — take a quiz to see your performance here.</div>
+          <div class="card border-0 shadow-sm p-4 text-center text-body-secondary">No results yet, take a quiz to see your performance here.</div>
         }
       </div>
 
@@ -112,7 +112,7 @@
       <div class="q-nav d-flex flex-wrap gap-1 mb-4">
         @for (q of att.questions; track q.question_id) {
           <button type="button" class="q-nav-btn" [class.done]="qAnswered(q.question_id)"
-                  [attr.title]="'Question ' + (q.position + 1) + (qAnswered(q.question_id) ? ' — answered' : '')"
+                  [attr.title]="'Question ' + (q.position + 1) + (qAnswered(q.question_id) ? ', answered' : '')"
                   (click)="scrollToQ(q.question_id)">{{ q.position + 1 }}</button>
         }
       </div>

@@ -49,7 +49,7 @@ export class SuperAdminDashboard {
       {label: 'Active learners', value: t.students, icon: 'group', tone: 'info', ...this.delta('students')},
       {label: 'Active teachers', value: t.teachers, icon: 'supervisor_account', tone: 'success', ...this.delta('teachers')},
       {label: 'School admins', value: admins, icon: 'shield', tone: 'warning'},
-      {label: 'Active subscriptions', value: b?.active_subscriptions ?? '—', icon: 'credit_card', tone: 'primary', link: `${M}/billing`},
+      {label: 'Active subscriptions', value: b?.active_subscriptions ?? '-', icon: 'credit_card', tone: 'primary', link: `${M}/billing`},
       {label: 'Renewals due', value: (this.billing()?.renewals ?? []).length, icon: 'schedule', tone: 'danger', link: `${M}/billing`},
     ];
   });

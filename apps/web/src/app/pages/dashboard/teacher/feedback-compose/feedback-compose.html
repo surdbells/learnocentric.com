@@ -1,5 +1,5 @@
 <app-page-header icon="rate_review" action="Give Feedback" />
-<p class="text-body-secondary mb-4">Write structured feedback a learner sees as a full breakdown — strengths, improvements, and next steps.</p>
+<p class="text-body-secondary mb-4">Write structured feedback a learner sees as a full breakdown, strengths, improvements, and next steps.</p>
 
 <div class="row g-4">
   <div class="col-lg-8">
@@ -24,7 +24,7 @@
         </div>
         <div class="col-md-3">
           <label class="form-label small mb-1">Score (%)</label>
-          <input type="number" min="0" max="100" class="form-control" [ngModel]="score()" (ngModelChange)="score.set($event === '' ? null : +$event)" placeholder="—" />
+          <input type="number" min="0" max="100" class="form-control" [ngModel]="score()" (ngModelChange)="score.set($event === '' ? null : +$event)" placeholder="-" />
         </div>
         <div class="col-md-8">
           <label class="form-label small mb-1">Title</label>
@@ -43,7 +43,7 @@
           <select class="form-select" [ngModel]="selectedKey()" (ngModelChange)="pickSubmission($event)">
             <option value="">Select a submission to view + auto-fill the context…</option>
             @for (s of submissions(); track s.type + '-' + s.id) {
-              <option [value]="s.type + '-' + s.id">[{{ s.type_label }}] {{ s.title }} — {{ s.topic }} ({{ s.status }})</option>
+              <option [value]="s.type + '-' + s.id">[{{ s.type_label }}] {{ s.title }}, {{ s.topic }} ({{ s.status }})</option>
             }
           </select>
         </div>
@@ -67,7 +67,7 @@
           </div>
         }
       } @else if (studentId() && !submissions().length) {
-        <div class="text-body-secondary small mb-3 fst-italic">This learner has no submissions in your subjects yet — you can still write general feedback below.</div>
+        <div class="text-body-secondary small mb-3 fst-italic">This learner has no submissions in your subjects yet, you can still write general feedback below.</div>
       }
 
       <!-- Breakdown fields -->

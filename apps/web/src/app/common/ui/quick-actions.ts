@@ -5,7 +5,7 @@ import {Icon} from '../icon/icon';
 import {QuickAction, toneVars} from './ui-types';
 
 /**
- * "Quick Actions" panel for the right rail — a stack of icon + label (+ sublabel)
+ * "Quick Actions" panel for the right rail, a stack of icon + label (+ sublabel)
  * rows. Rows with `link` navigate; rows with `key` emit (action). Place inside
  * an <app-rail-card title="Quick Actions">.
  */

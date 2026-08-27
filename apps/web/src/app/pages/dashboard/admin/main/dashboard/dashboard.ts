@@ -51,12 +51,12 @@ export class AdminDashboard {
       {label: 'Total teachers', value: s.teachers, icon: 'supervisor_account', tone: 'info', link: `${r}/teachers`},
       {label: 'Total classes', value: s.classes, icon: 'meeting_room', tone: 'success', link: `${b}/classes`},
       {label: 'Subjects offered', value: s.subjects, icon: 'subject', tone: 'warning', link: `${b}/subjects`},
-      {label: 'Pass rate', value: q.pass_rate === null ? '—' : q.pass_rate + '%', sublabel: q.attempts + ' attempts', icon: 'check_circle', tone: 'success'},
-      {label: 'Overall performance', value: q.average === null ? '—' : q.average + '%', icon: 'trending_up', tone: q.average >= 70 ? 'success' : q.average >= 50 ? 'warning' : 'danger'},
+      {label: 'Pass rate', value: q.pass_rate === null ? '-' : q.pass_rate + '%', sublabel: q.attempts + ' attempts', icon: 'check_circle', tone: 'success'},
+      {label: 'Overall performance', value: q.average === null ? '-' : q.average + '%', icon: 'trending_up', tone: q.average >= 70 ? 'success' : q.average >= 50 ? 'warning' : 'danger'},
     ];
   });
 
-  // Academic performance — average per class (design: performance by class)
+  // Academic performance, average per class (design: performance by class)
   readonly academicLabels = computed<string[]>(() => (this.data()?.quiz_by_class ?? []).map((q: any) => q.class));
   readonly academicSeries = computed<BarSeries[]>(() => [
     {label: 'Class average %', tone: 'primary', values: (this.data()?.quiz_by_class ?? []).map((q: any) => q.average)},
@@ -133,5 +133,5 @@ export class AdminDashboard {
     });
   }
 
-  pct(v: number | null): string { return v === null || v === undefined ? '—' : v + '%'; }
+  pct(v: number | null): string { return v === null || v === undefined ? '-' : v + '%'; }
 }

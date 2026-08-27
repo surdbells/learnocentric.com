@@ -4,7 +4,7 @@ import {TermContext} from '../service/term-context';
 
 /**
  * Top-bar academic Session/Term switcher (a global control the designs place in
- * the header). Renders only when the institution has terms — so roles without a
+ * the header). Renders only when the institution has terms, so roles without a
  * term context (e.g. super admin) show nothing. Reads/writes the shared
  * TermContext; screens scope their data off `TermContext.active()`.
  */

@@ -37,5 +37,5 @@ export class ParentMain {
     if (p >= 50) return 'warning';
     return 'danger';
   }
-  pct(v: number | null): string { return v === null || v === undefined ? '—' : v + '%'; }
+  pct(v: number | null): string { return v === null || v === undefined ? '-' : v + '%'; }
 }

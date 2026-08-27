@@ -59,13 +59,13 @@
                   @if (t.reviewer_feedback) {
                     <div class="small fst-italic text-body-secondary">
                       <app-rich-text [value]="t.reviewer_feedback" />
-                      @if (t.reviewed_by) { <span> — {{ t.reviewed_by }}</span> }
+                      @if (t.reviewed_by) { <span>, {{ t.reviewed_by }}</span> }
                     </div>
                   }
                   <button type="button" class="btn btn-outline-secondary btn-sm mt-2" (click)="openTask(t)">Resubmit</button>
                 } @else if (t.status === 'submitted') {
                   <div class="small text-info d-flex align-items-center gap-1">
-                    <app-icon name="schedule" [size]="15" /> Submitted@if (t.submitted_at) { {{ t.submitted_at | date:'mediumDate' }} } — awaiting teacher review
+                    <app-icon name="schedule" [size]="15" /> Submitted@if (t.submitted_at) { {{ t.submitted_at | date:'mediumDate' }} }, awaiting teacher review
                   </div>
                   @if (t.evidence_url) { <a class="small d-inline-block mt-1" [href]="t.evidence_url" target="_blank" rel="noopener">View evidence</a> }
                 } @else {

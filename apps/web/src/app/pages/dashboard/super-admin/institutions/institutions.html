@@ -51,7 +51,7 @@
               <div class="col-12 mb-2 fw-semibold">Content package</div>
               <div class="col">
                 <select class="form-select form-select-sm" [ngModel]="assignPackageId()" (ngModelChange)="assignPackageId.set($event)">
-                  <option value="">— None —</option>
+                  <option value="">- None -</option>
                   @for (p of packages(); track p.id) {
                     <option [value]="p.id">{{ p.name }}</option>
                   }

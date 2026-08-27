@@ -50,7 +50,7 @@
           <label class="form-label small mb-1">Subject (optional)</label>
           @if (subjects().length) {
             <select class="form-select" [ngModel]="subject()" (ngModelChange)="subject.set($event)">
-              <option value="">—</option>
+              <option value="">-</option>
               @for (s of subjects(); track s) { <option [value]="s">{{ s }}</option> }
             </select>
           } @else {
@@ -134,7 +134,7 @@
     <div class="card border-0 shadow-sm mb-4"><div class="card-body">
       <div class="fw-semibold mb-2"><app-icon name="groups" [size]="18" class="text-success" /> Recipient Summary</div>
       <div class="pref-line small"><span class="text-body-secondary">Audience</span><span class="fw-medium text-capitalize">{{ recipientEstimate() }}</span></div>
-      <div class="pref-line small border-0"><span class="text-body-secondary">Channels</span><span class="fw-medium">{{ (channels().in_app ? 'In-app ' : '') + (channels().email ? 'Email ' : '') + (channels().parent_copy ? 'Parent' : '') || '—' }}</span></div>
+      <div class="pref-line small border-0"><span class="text-body-secondary">Channels</span><span class="fw-medium">{{ (channels().in_app ? 'In-app ' : '') + (channels().email ? 'Email ' : '') + (channels().parent_copy ? 'Parent' : '') || '-' }}</span></div>
     </div></div>
 
     <!-- Templates -->

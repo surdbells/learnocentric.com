@@ -11,7 +11,7 @@ import {ToastrService} from 'ngx-toastr';
 interface MenuItem { key: string; label: string; sub: string; icon: string; }
 
 /**
- * Learner Settings hub — menu + section cards (design: Settings_LD).
+ * Learner Settings hub, menu + section cards (design: Settings_LD).
  * Reads/writes the shared /auth/settings preferences blob; Appearance also
  * drives the live app theme via Preferences. No fabricated data: the storage
  * card reports real browser-cache usage.

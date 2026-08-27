@@ -86,7 +86,7 @@ export class LiveRoom implements OnDestroy {
         this.camOn.set(true);
         this.playLocal();
       } catch {
-        this.toast.info('Joined without camera/mic — allow device access to share.');
+        this.toast.info('Joined without camera/mic, allow device access to share.');
       }
       this.connecting.set(false);
     } catch (e: any) {

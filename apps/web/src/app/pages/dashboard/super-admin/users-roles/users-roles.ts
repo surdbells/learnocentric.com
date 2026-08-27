@@ -7,7 +7,7 @@ import {Icon} from '../../../../common/icon/icon';
 import {AvatarCell, KpiItem, KpiStrip, StatusBadge, TabBar, TabItem, Tone} from '../../../../common/ui';
 
 /**
- * Users & Roles (super admin) — platform-wide user directory over
+ * Users & Roles (super admin), platform-wide user directory over
  * /backend/admin/users, with per-role KPI cards, role tabs, search and
  * pagination. Read-only view; the RBAC tables drive the role labels.
  */

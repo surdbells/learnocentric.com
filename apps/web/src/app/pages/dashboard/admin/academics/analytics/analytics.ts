@@ -52,10 +52,10 @@ export class Analytics {
     if (!d) return [];
     const avg = this.avgClassScore();
     return [
-      {label: 'Average class score', value: avg === null ? '—' : avg + '%', icon: 'trending_up', tone: avg !== null && avg >= 70 ? 'success' : avg !== null && avg >= 50 ? 'warning' : 'danger'},
+      {label: 'Average class score', value: avg === null ? '-' : avg + '%', icon: 'trending_up', tone: avg !== null && avg >= 70 ? 'success' : avg !== null && avg >= 50 ? 'warning' : 'danger'},
       {label: 'Learners below mastery', value: this.learnersAttention().length, sublabel: 'flagged', icon: 'group', tone: this.learnersAttention().length ? 'danger' : 'success'},
       {label: 'Portfolio completion', value: this.portfolioCompletion() + '%', icon: 'folder_special', tone: 'info'},
-      {label: 'Feedback ack rate', value: d.feedback?.ack_rate === null ? '—' : (d.feedback?.ack_rate ?? 0) + '%', icon: 'forum', tone: 'primary'},
+      {label: 'Feedback ack rate', value: d.feedback?.ack_rate === null ? '-' : (d.feedback?.ack_rate ?? 0) + '%', icon: 'forum', tone: 'primary'},
     ];
   });
 
@@ -100,7 +100,7 @@ export class Analytics {
     if (!y || !m) return ym;
     return new Date(y, m - 1, 1).toLocaleString('en', {month: 'short'});
   }
-  pct(v: number | null): string { return v === null || v === undefined ? '—' : v + '%'; }
+  pct(v: number | null): string { return v === null || v === undefined ? '-' : v + '%'; }
 
   exportCsv(): void {
     this.exporting.set(true);

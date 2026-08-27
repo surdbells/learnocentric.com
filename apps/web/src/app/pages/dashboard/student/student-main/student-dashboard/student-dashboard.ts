@@ -26,7 +26,7 @@ export class StudentDashboard {
 
   readonly continueLearning = computed<any>(() => this.data()?.continue_learning ?? null);
   readonly latestQuiz = computed<any>(() => this.data()?.latest_quiz ?? null);
-  readonly mastery = computed<string>(() => this.data()?.mastery ?? '—');
+  readonly mastery = computed<string>(() => this.data()?.mastery ?? '-');
   readonly weakAreas = computed<string[]>(() => this.data()?.weak_areas ?? []);
   readonly dueTasks = computed<any[]>(() => this.data()?.due_tasks ?? []);
   readonly latestFeedback = computed<any>(() => this.data()?.latest_feedback ?? null);
@@ -50,7 +50,7 @@ export class StudentDashboard {
     const q = p.quiz_average;
     return [
       {label: 'Lessons completed', value: `${p.lessons.done} / ${p.lessons.total}`, sub: p.lessons.pct + '%', pct: p.lessons.pct, icon: 'menu_book', tone: 'primary'},
-      {label: 'Quiz average', value: q === null ? '—' : q + '%', sub: this.mastery(), pct: q ?? 0, icon: 'workspace_premium', tone: this.tone(q)},
+      {label: 'Quiz average', value: q === null ? '-' : q + '%', sub: this.mastery(), pct: q ?? 0, icon: 'workspace_premium', tone: this.tone(q)},
       {label: 'Worksheet completion', value: p.worksheet.pct + '%', sub: `${p.worksheet.done} / ${p.worksheet.total}`, pct: p.worksheet.pct, icon: 'assignment_turned_in', tone: 'success'},
       {label: 'Portfolio completion', value: p.portfolio.pct + '%', sub: `${p.portfolio.done} / ${p.portfolio.total}`, pct: p.portfolio.pct, icon: 'folder_special', tone: 'warning'},
     ];
@@ -74,5 +74,5 @@ export class StudentDashboard {
     if (p >= 50) return 'warning';
     return 'danger';
   }
-  pct(v: number | null): string { return v === null || v === undefined ? '—' : v + '%'; }
+  pct(v: number | null): string { return v === null || v === undefined ? '-' : v + '%'; }
 }

@@ -79,7 +79,7 @@ export class Resources {
     return r;
   });
 
-  /** Featured picks — up to 4, one per type where possible for variety. */
+  /** Featured picks, up to 4, one per type where possible for variety. */
   readonly featured = computed<any[]>(() => {
     const r = this.resources();
     const seen = new Set<string>();
@@ -109,7 +109,7 @@ export class Resources {
   });
 
   fileSizeLabel(bytes: number): string {
-    if (!bytes) return '—';
+    if (!bytes) return '-';
     if (bytes < 1024) return bytes + ' B';
     if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(0) + ' KB';
     if (bytes < 1024 * 1024 * 1024) return (bytes / 1024 / 1024).toFixed(1) + ' MB';

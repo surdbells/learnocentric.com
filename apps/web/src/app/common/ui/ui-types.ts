@@ -1,5 +1,5 @@
 /**
- * Shared types + helpers for the Phase-0 UI kit — the reusable building blocks
+ * Shared types + helpers for the Phase-0 UI kit, the reusable building blocks
  * (KPI cards, right-rail panels, tabs, rings, table cells) that the design
  * mockups repeat on nearly every screen. Theme stays green: tones map to
  * Bootstrap contextual colours, tinted via CSS custom properties.

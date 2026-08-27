@@ -47,7 +47,7 @@ export class Dashboard implements OnInit {
 
   ngOnInit(): void {
     if (isPlatformBrowser(this.platformId)) {
-      // Students always get the full, expanded sidebar — never the icon rail.
+      // Students always get the full, expanded sidebar, never the icon rail.
       this.collapsed.set(!this.alwaysOpenMenu() && localStorage.getItem(COLLAPSE_KEY) === '1');
     }
   }

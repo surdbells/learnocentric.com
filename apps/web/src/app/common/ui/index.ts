@@ -1,5 +1,5 @@
 /**
- * Phase-0 shared UI kit — reusable building blocks the design mockups repeat on
+ * Phase-0 shared UI kit, reusable building blocks the design mockups repeat on
  * nearly every screen. Import from here, e.g.
  *   import {KpiStrip, RailCard, AttentionList, TabBar} from '../../common/ui';
  */

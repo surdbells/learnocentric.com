@@ -125,7 +125,7 @@
               <td class="text-body-secondary">{{ t.plan }}</td>
               <td class="text-end fw-medium">{{ naira(t.amount_naira) }}</td>
               <td><app-status-badge [value]="t.status" [map]="invoiceTones" /></td>
-              <td class="text-body-secondary small text-capitalize">{{ t.channel || '—' }}</td>
+              <td class="text-body-secondary small text-capitalize">{{ t.channel || '-' }}</td>
               <td class="text-body-secondary small">{{ (t.paid_at || t.created_at) | date:'mediumDate' }}</td>
             </tr>
           }

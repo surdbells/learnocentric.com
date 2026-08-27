@@ -73,7 +73,7 @@ export class Billing {
     this.busy.set(-1);
     this.api.post<any>('/backend/billing/verify', {reference: ref}).subscribe({
       next: () => {
-        this.toast.success('Payment confirmed — subscription updated');
+        this.toast.success('Payment confirmed, subscription updated');
         this.pendingRef.set(null);
         this.pendingPlan.set(null);
         this.busy.set(null);

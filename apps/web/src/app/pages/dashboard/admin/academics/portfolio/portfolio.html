@@ -16,17 +16,17 @@
     <select class="form-select mb-1" [ngModel]="taskTopicId()" (ngModelChange)="onPickTopic($event)">
       <option [ngValue]="null" disabled>Choose a topic…</option>
       @for (t of topics(); track t.id) {
-        <option [ngValue]="t.id">{{ t.title }} — {{ t.subject }} ({{ titleCase(t.approval_status) }})</option>
+        <option [ngValue]="t.id">{{ t.title }}, {{ t.subject }} ({{ titleCase(t.approval_status) }})</option>
       }
     </select>
     @if (selectedTopic(); as st) {
       @if (st.approval_status !== 'published') {
         <div class="small text-warning-emphasis mb-2 d-flex align-items-center gap-1">
           <app-icon name="info" [size]="15" />
-          This topic is {{ titleCase(st.approval_status) }} — the task saves now but only reaches learners once it's published.
+          This topic is {{ titleCase(st.approval_status) }}, the task saves now but only reaches learners once it's published.
         </div>
       } @else if (st.portfolio_evidence_expected) {
-        <div class="small text-body-secondary mb-2">This topic already has a brief — editing replaces it.</div>
+        <div class="small text-body-secondary mb-2">This topic already has a brief, editing replaces it.</div>
       }
     }
 
