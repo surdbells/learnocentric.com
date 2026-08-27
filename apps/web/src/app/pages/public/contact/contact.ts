@@ -22,7 +22,7 @@ export class PublicContact {
 
   /** Compose a pre-filled email to our inbox (no backend needed). */
   submit(): void {
-    const subject = `Demo request — ${this.school() || this.name() || 'Learnocentric'}`;
+    const subject = `Demo request from ${this.school() || this.name() || 'a school'}`;
     const body = [
       `Name: ${this.name()}`,
       `Email: ${this.from()}`,
