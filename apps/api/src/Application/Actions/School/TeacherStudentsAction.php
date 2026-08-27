@@ -14,7 +14,7 @@ use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 
 /**
- * GET /backend/teacher/students/{id} — the students a teacher works with:
+ * GET /backend/teacher/students/{id}, the students a teacher works with:
  * everyone enrolled in a class they lead. If the teacher leads no class yet,
  * it falls back to the institution's students so the roster isn't empty.
  */

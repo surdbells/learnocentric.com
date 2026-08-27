@@ -12,7 +12,7 @@ use RuntimeException;
  * Unlike Daily.co there is no room REST resource: a live class is just a channel
  * name, and each participant joins with a short-lived RTC token generated here
  * from the App ID + App Certificate. Token generation is pure local crypto
- * (HMAC-SHA256 + zlib) — no network call — mirroring Agora's official
+ * (HMAC-SHA256 + zlib), no network call, mirroring Agora's official
  * RtcTokenBuilder2 / AccessToken2.
  *
  * @see https://docs.agora.io/en/video-calling/develop/authentication-workflow

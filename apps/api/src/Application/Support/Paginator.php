@@ -15,7 +15,7 @@ final class Paginator
     /**
      * @param string $rootAlias the QB root alias (e.g. 's')
      * @param array<string,string> $sortMap maps client sort keys -> DQL expressions
-     * @param callable $mapper fn(object): array — serialises each entity
+     * @param callable $mapper fn(object): array, serialises each entity
      * @return array{data: array<int,array>, meta: array<string,mixed>}
      */
     public static function paginate(QueryBuilder $qb, string $rootAlias, ListQuery $query, array $sortMap, callable $mapper): array

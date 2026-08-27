@@ -11,7 +11,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 
-/** GET /backend/auth/profile — read; PUT — update own profile fields. */
+/** GET /backend/auth/profile, read; PUT, update own profile fields. */
 final class ProfileAction
 {
     public function __construct(

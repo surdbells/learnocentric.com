@@ -9,7 +9,7 @@ use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * A targeted note a teacher sends a student — praise, a correction, or a
+ * A targeted note a teacher sends a student, praise, a correction, or a
  * re-teach prompt (often off the back of a missed question). Closes the
  * feedback/misconception loop of the learner journey (spec §14).
  */
@@ -45,7 +45,7 @@ class FeedbackNote
     #[ORM\Column(type: Types::TEXT)]
     private string $message;
 
-    /** Structured feedback for parent reports (spec §7.5, §18) — all optional. */
+    /** Structured feedback for parent reports (spec §7.5, §18), all optional. */
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $strengths = null;
 
@@ -55,7 +55,7 @@ class FeedbackNote
     #[ORM\Column(name: 'parent_support_suggestion', type: Types::TEXT, nullable: true)]
     private ?string $parentSupportSuggestion = null;
 
-    // --- Structured breakdown (design: Feedback_LD) — all optional ---
+    // --- Structured breakdown (design: Feedback_LD), all optional ---
 
     /** Percentage score this feedback relates to. */
     #[ORM\Column(type: Types::SMALLINT, nullable: true)]

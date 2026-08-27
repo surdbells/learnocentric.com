@@ -8,7 +8,7 @@ use App\Domain\Entity\Concern\TimestampsTrait;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
-/** A Paystack payment attempt for a plan — doubles as the invoice record. */
+/** A Paystack payment attempt for a plan, doubles as the invoice record. */
 #[ORM\Entity]
 #[ORM\Table(name: 'billing_transactions')]
 #[ORM\HasLifecycleCallbacks]

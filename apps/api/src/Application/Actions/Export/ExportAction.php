@@ -26,7 +26,7 @@ use Psr\Http\Message\ServerRequestInterface as Request;
  * own tenant's data) and restricted to staff roles.
  *
  * Every export writes an audit entry via AuditLogger so that data leaving the
- * platform is accountable — this closes the gap where `can_export` grants were
+ * platform is accountable, this closes the gap where `can_export` grants were
  * effectively dead because exports were neither served here nor audited.
  */
 final class ExportAction
@@ -43,7 +43,7 @@ final class ExportAction
     }
 
     /**
-     * GET /export/gradebook — CSV of published assessments (optionally one
+     * GET /export/gradebook, CSV of published assessments (optionally one
      * subject) with attempt statistics. Mirrors GradebookAction::overview.
      */
     public function gradebook(Request $request, Response $response): Response
@@ -111,7 +111,7 @@ final class ExportAction
     }
 
     /**
-     * GET /export/summary — CSV of the school performance summary: headline
+     * GET /export/summary, CSV of the school performance summary: headline
      * counts plus per-subject quiz performance, worksheet and portfolio rollups.
      * Mirrors the figures shown on the analytics overview.
      */
@@ -183,7 +183,7 @@ final class ExportAction
             ['institution_id' => $institution?->getId(), 'rows' => count($rows)],
         );
 
-        // No header row here — the first cell of each row already carries the section.
+        // No header row here, the first cell of each row already carries the section.
         return $this->csv($response, 'school-summary', null, $rows);
     }
 

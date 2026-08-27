@@ -32,7 +32,7 @@ final class WorksheetSubmissionsAction
     ) {
     }
 
-    /** GET /assessment/worksheets/available — published worksheets for the student + their submission. */
+    /** GET /assessment/worksheets/available, published worksheets for the student + their submission. */
     public function available(Request $request, Response $response): Response
     {
         $student = $this->currentUser($request);
@@ -61,7 +61,7 @@ final class WorksheetSubmissionsAction
         return Json::write($response, ['data' => $rows, 'meta' => ['total' => count($rows)]]);
     }
 
-    /** POST /assessment/worksheets/{id}/submit — student submits (or updates before grading). */
+    /** POST /assessment/worksheets/{id}/submit, student submits (or updates before grading). */
     public function submit(Request $request, Response $response, array $args): Response
     {
         $student = $this->currentUser($request);
@@ -136,7 +136,7 @@ final class WorksheetSubmissionsAction
         return Json::write($response, $submission->toArray());
     }
 
-    /** GET /assessment/worksheets/{id}/solve — the solver payload (sections, questions, my draft, progress). */
+    /** GET /assessment/worksheets/{id}/solve, the solver payload (sections, questions, my draft, progress). */
     public function solve(Request $request, Response $response, array $args): Response
     {
         $student = $this->currentUser($request);
@@ -149,7 +149,7 @@ final class WorksheetSubmissionsAction
         return Json::write($response, $this->solvePayload($worksheet, $submission));
     }
 
-    /** POST /assessment/worksheets/{id}/save — autosave the student's in-progress answers. */
+    /** POST /assessment/worksheets/{id}/save, autosave the student's in-progress answers. */
     public function save(Request $request, Response $response, array $args): Response
     {
         $student = $this->currentUser($request);
@@ -180,7 +180,7 @@ final class WorksheetSubmissionsAction
         return Json::write($response, ['ok' => true, 'saved_at' => (new DateTimeImmutable())->format(DATE_ATOM)]);
     }
 
-    /** POST /assessment/worksheets/{id}/questions — staff define the worksheet's questions (bulk replace). */
+    /** POST /assessment/worksheets/{id}/questions, staff define the worksheet's questions (bulk replace). */
     public function setQuestions(Request $request, Response $response, array $args): Response
     {
         if (($guard = $this->staffGuard($request, $response)) !== null) {
@@ -230,7 +230,7 @@ final class WorksheetSubmissionsAction
         return Json::write($response, ['ok' => true, 'count' => $pos, 'total_marks' => $total]);
     }
 
-    /** GET /assessment/worksheets/{id}/submission — the current student's own submission. */
+    /** GET /assessment/worksheets/{id}/submission, the current student's own submission. */
     public function mine(Request $request, Response $response, array $args): Response
     {
         $student = $this->currentUser($request);
@@ -243,7 +243,7 @@ final class WorksheetSubmissionsAction
         return Json::write($response, $submission?->toArray() ?? ['submission' => null]);
     }
 
-    /** GET /assessment/worksheets/{id}/submissions — staff view of all submissions. */
+    /** GET /assessment/worksheets/{id}/submissions, staff view of all submissions. */
     public function submissions(Request $request, Response $response, array $args): Response
     {
         if (($guard = $this->staffGuard($request, $response)) !== null) {
@@ -264,7 +264,7 @@ final class WorksheetSubmissionsAction
         ]);
     }
 
-    /** POST /assessment/worksheet-submissions/{id}/grade — staff records score + feedback. */
+    /** POST /assessment/worksheet-submissions/{id}/grade, staff records score + feedback. */
     public function grade(Request $request, Response $response, array $args): Response
     {
         if (($guard = $this->staffGuard($request, $response)) !== null) {
@@ -300,7 +300,7 @@ final class WorksheetSubmissionsAction
         return Json::write($response, $submission->toArray());
     }
 
-    /** GET /assessment/worksheet-submissions/{id}/detail — staff per-question view for marking. */
+    /** GET /assessment/worksheet-submissions/{id}/detail, staff per-question view for marking. */
     public function submissionDetail(Request $request, Response $response, array $args): Response
     {
         if (($guard = $this->staffGuard($request, $response)) !== null) {
@@ -355,7 +355,7 @@ final class WorksheetSubmissionsAction
         ]);
     }
 
-    /** POST /assessment/worksheet-submissions/{id}/grade-questions — staff award per-question marks + finalize. */
+    /** POST /assessment/worksheet-submissions/{id}/grade-questions, staff award per-question marks + finalize. */
     public function gradeQuestions(Request $request, Response $response, array $args): Response
     {
         if (($guard = $this->staffGuard($request, $response)) !== null) {

@@ -15,7 +15,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 
-/** /backend/school/classes — GET list, POST create, PUT update, DELETE remove. */
+/** /backend/school/classes, GET list, POST create, PUT update, DELETE remove. */
 final class ClassesAction
 {
     use ResolvesInstitution;
@@ -63,7 +63,7 @@ final class ClassesAction
         return Json::write($response, Paginator::paginate($qb, 'c', $query, $sortMap, [$this, 'row']));
     }
 
-    /** POST /backend/school/classes/bulk-delete — body: { ids: number[] } */
+    /** POST /backend/school/classes/bulk-delete, body: { ids: number[] } */
     public function bulkDelete(Request $request, Response $response): Response
     {
         $ids = array_values(array_filter(array_map('intval', (array) (($request->getParsedBody()['ids'] ?? [])))));

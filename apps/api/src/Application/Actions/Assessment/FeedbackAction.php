@@ -39,7 +39,7 @@ final class FeedbackAction
         return $this->staffList($request, $response);
     }
 
-    /** GET /assessment/feedback — staff list (filter by student_id / type). */
+    /** GET /assessment/feedback, staff list (filter by student_id / type). */
     private function staffList(Request $request, Response $response): Response
     {
         if (($guard = $this->staffGuard($request, $response)) !== null) {
@@ -101,7 +101,7 @@ final class FeedbackAction
         if (!empty($body['topic_id'])) {
             $note->setTopic($this->em->getRepository(Topic::class)->find((int) $body['topic_id']));
         }
-        // Structured fields for parent reports (spec §7.5, §18) — all optional.
+        // Structured fields for parent reports (spec §7.5, §18), all optional.
         if (array_key_exists('strengths', $body)) {
             $note->setStrengths(trim((string) $body['strengths']));
         }
@@ -158,7 +158,7 @@ final class FeedbackAction
         return Json::write($response, $note->toArray(), 201);
     }
 
-    /** GET /assessment/feedback/mine — the current student's feedback inbox + summary. */
+    /** GET /assessment/feedback/mine, the current student's feedback inbox + summary. */
     public function mine(Request $request, Response $response): Response
     {
         $student = $this->currentUser($request);
@@ -201,7 +201,7 @@ final class FeedbackAction
         ]);
     }
 
-    /** POST /assessment/feedback/{id}/acknowledge — student marks a note read. */
+    /** POST /assessment/feedback/{id}/acknowledge, student marks a note read. */
     public function acknowledge(Request $request, Response $response, array $args): Response
     {
         $student = $this->currentUser($request);

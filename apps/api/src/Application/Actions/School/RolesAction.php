@@ -35,7 +35,7 @@ final class RolesAction
     ) {
     }
 
-    /** GET /school/roles — roles visible to the admin + grants, counts and stats. */
+    /** GET /school/roles, roles visible to the admin + grants, counts and stats. */
     public function list(Request $request, Response $response): Response
     {
         if (($g = $this->adminGuard($request, $response)) !== null) {
@@ -68,7 +68,7 @@ final class RolesAction
                 'users_assigned' => $usersAssigned,
                 'editable' => $editable,
                 // Permissions stay read-only for system roles, but staff can still be
-                // assigned to school-scoped staff roles (e.g. Academic Lead) — not just
+                // assigned to school-scoped staff roles (e.g. Academic Lead), not just
                 // custom roles. Platform, student and guardian roles are never assignable here.
                 'assignable' => $editable || $this->isAssignableSystemRole($role),
                 'grants' => $grants,
@@ -90,7 +90,7 @@ final class RolesAction
         ]);
     }
 
-    /** POST /school/roles — create a custom institution role {name, description?, scope?, grants}. */
+    /** POST /school/roles, create a custom institution role {name, description?, scope?, grants}. */
     public function create(Request $request, Response $response): Response
     {
         if (($g = $this->adminGuard($request, $response)) !== null) {
@@ -117,7 +117,7 @@ final class RolesAction
         return Json::write($response, $role->toArray(), 201);
     }
 
-    /** PUT /school/roles/{id} — edit a custom role's name/description/grants. */
+    /** PUT /school/roles/{id}, edit a custom role's name/description/grants. */
     public function update(Request $request, Response $response, array $args): Response
     {
         if (($g = $this->adminGuard($request, $response)) !== null) {
@@ -149,7 +149,7 @@ final class RolesAction
         return Json::write($response, $role->toArray());
     }
 
-    /** DELETE /school/roles?id= — delete a custom role (must have no users assigned). */
+    /** DELETE /school/roles?id=, delete a custom role (must have no users assigned). */
     public function delete(Request $request, Response $response): Response
     {
         if (($g = $this->adminGuard($request, $response)) !== null) {
@@ -174,7 +174,7 @@ final class RolesAction
         return Json::write($response, ['deleted' => true, 'id' => $id]);
     }
 
-    /** GET /school/roles/assignable-users — institution staff + their current role. */
+    /** GET /school/roles/assignable-users, institution staff + their current role. */
     public function assignableUsers(Request $request, Response $response): Response
     {
         if (($g = $this->adminGuard($request, $response)) !== null) {
@@ -184,7 +184,7 @@ final class RolesAction
         if ($institution === null) {
             return Json::write($response, ['data' => []]);
         }
-        // Any institution staff member may be re-roled — everyone except learners and guardians.
+        // Any institution staff member may be re-roled, everyone except learners and guardians.
         $users = $this->em->createQueryBuilder()->select('u', 'r')->from(User::class, 'u')->join('u.role', 'r')
             ->where('u.institution = :inst')->andWhere('r.code NOT IN (:excluded)')
             ->setParameter('inst', $institution)->setParameter('excluded', ['student', 'parent'])
@@ -199,7 +199,7 @@ final class RolesAction
         ], $users)]);
     }
 
-    /** POST /school/roles/assign — {user_id, role_id} set a staff member's role. */
+    /** POST /school/roles/assign, {user_id, role_id} set a staff member's role. */
     public function assign(Request $request, Response $response): Response
     {
         if (($g = $this->adminGuard($request, $response)) !== null) {

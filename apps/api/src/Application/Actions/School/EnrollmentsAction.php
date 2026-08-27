@@ -15,7 +15,7 @@ use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Throwable;
 
-/** /backend/school/enrollments — GET list, POST create, PUT update, DELETE remove. */
+/** /backend/school/enrollments, GET list, POST create, PUT update, DELETE remove. */
 final class EnrollmentsAction
 {
     use ResolvesInstitution;

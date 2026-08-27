@@ -18,7 +18,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 
-/** GET /backend/curriculum/review-queue — content awaiting approval across every governed type. */
+/** GET /backend/curriculum/review-queue, content awaiting approval across every governed type. */
 final class ReviewQueueAction
 {
     use ResolvesInstitution;

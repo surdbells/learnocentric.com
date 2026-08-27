@@ -18,7 +18,7 @@ use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 
 /**
- * Ask Tutor — a learner's tutoring surface: a directory of their subject
+ * Ask Tutor, a learner's tutoring surface: a directory of their subject
  * tutors (with ratings), asking a tutor a question, and rating a tutor; plus
  * the tutor-side inbox to answer questions. Direct chat reuses messaging.
  */
@@ -33,7 +33,7 @@ final class AskTutorAction
     ) {
     }
 
-    /** GET /ask-tutor/board — the learner's tutors, their own questions, and recent answered Q&A. */
+    /** GET /ask-tutor/board, the learner's tutors, their own questions, and recent answered Q&A. */
     public function board(Request $request, Response $response): Response
     {
         $student = $this->currentUser($request);
@@ -95,7 +95,7 @@ final class AskTutorAction
         ]);
     }
 
-    /** POST /ask-tutor/questions — learner asks {question, subject_id?, tutor_id?}. */
+    /** POST /ask-tutor/questions, learner asks {question, subject_id?, tutor_id?}. */
     public function ask(Request $request, Response $response): Response
     {
         $student = $this->currentUser($request);
@@ -122,7 +122,7 @@ final class AskTutorAction
         return Json::write($response, $q->toArray(), 201);
     }
 
-    /** POST /ask-tutor/ratings — learner rates {tutor_id, rating, comment?}. Upsert. */
+    /** POST /ask-tutor/ratings, learner rates {tutor_id, rating, comment?}. Upsert. */
     public function rate(Request $request, Response $response): Response
     {
         $student = $this->currentUser($request);
@@ -145,7 +145,7 @@ final class AskTutorAction
         return Json::write($response, ['tutor_id' => $tutor->getId(), 'rating' => $existing->getRating()], 201);
     }
 
-    /** GET /ask-tutor/inbox — tutor's incoming questions (directed to them or unanswered in their subjects). */
+    /** GET /ask-tutor/inbox, tutor's incoming questions (directed to them or unanswered in their subjects). */
     public function inbox(Request $request, Response $response): Response
     {
         if (($g = $this->staffGuard($request, $response)) !== null) {
@@ -172,7 +172,7 @@ final class AskTutorAction
         ]);
     }
 
-    /** POST /ask-tutor/questions/{id}/answer — tutor answers {answer}. */
+    /** POST /ask-tutor/questions/{id}/answer, tutor answers {answer}. */
     public function answerQuestion(Request $request, Response $response, array $args): Response
     {
         if (($g = $this->staffGuard($request, $response)) !== null) {

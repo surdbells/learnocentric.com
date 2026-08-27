@@ -15,7 +15,7 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 use Throwable;
 
 /**
- * /backend/auth/user-profile/{id} — admin views/updates/deletes a user account.
+ * /backend/auth/user-profile/{id}, admin views/updates/deletes a user account.
  * Non-super admins are restricted to users within their own institution.
  */
 final class UserProfileAction

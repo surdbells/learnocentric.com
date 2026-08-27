@@ -11,7 +11,7 @@ use Doctrine\ORM\Mapping as ORM;
 /**
  * Platform-wide configuration held as a single JSON row: general settings,
  * self-registration policy, feature flags, security policy and integration
- * toggles. Secrets are never stored here — only provider names and on/off state.
+ * toggles. Secrets are never stored here, only provider names and on/off state.
  */
 #[ORM\Entity]
 #[ORM\Table(name: 'platform_settings')]

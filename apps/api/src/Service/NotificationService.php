@@ -12,7 +12,7 @@ use Throwable;
 
 /**
  * Creates in-app notifications and mirrors them to email (ZeptoMail).
- * Email is best-effort — a delivery failure never blocks the triggering action.
+ * Email is best-effort, a delivery failure never blocks the triggering action.
  */
 final class NotificationService
 {
@@ -42,7 +42,7 @@ final class NotificationService
                     $this->textBody($title, $message),
                 );
             } catch (Throwable $e) {
-                // best-effort — swallow so the triggering action still succeeds
+                // best-effort, swallow so the triggering action still succeeds
             }
         }
 

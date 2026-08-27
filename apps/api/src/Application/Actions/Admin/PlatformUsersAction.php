@@ -12,7 +12,7 @@ use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 
 /**
- * GET /backend/admin/users — platform-wide user directory (super admin only).
+ * GET /backend/admin/users, platform-wide user directory (super admin only).
  *
  * Lists every user across institutions with role + institution resolved, plus
  * per-role stats for the Users & Roles page. Read-only.

@@ -10,7 +10,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 
-/** GET /backend/school/terms — academic terms in the institution's sessions. */
+/** GET /backend/school/terms, academic terms in the institution's sessions. */
 final class TermsAction
 {
     use ResolvesInstitution;

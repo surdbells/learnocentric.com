@@ -17,7 +17,7 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 
 /**
  * Platform billing depth for the super admin: recurring revenue, per-plan
- * breakdown, a revenue trend, upcoming renewals and payment issues — aggregated
+ * breakdown, a revenue trend, upcoming renewals and payment issues, aggregated
  * across every institution's subscriptions and transactions. Read-only.
  */
 final class PlatformBillingAction
@@ -29,7 +29,7 @@ final class PlatformBillingAction
     {
     }
 
-    /** GET /platform/billing/overview — headline revenue, plans, trend, renewals, issues. */
+    /** GET /platform/billing/overview, headline revenue, plans, trend, renewals, issues. */
     public function overview(Request $request, Response $response): Response
     {
         if (($g = $this->guard($request, $response)) !== null) {
@@ -114,7 +114,7 @@ final class PlatformBillingAction
         ]);
     }
 
-    /** GET /platform/billing/invoices — every transaction, newest first, filterable by status. */
+    /** GET /platform/billing/invoices, every transaction, newest first, filterable by status. */
     public function invoices(Request $request, Response $response): Response
     {
         if (($g = $this->guard($request, $response)) !== null) {
@@ -134,7 +134,7 @@ final class PlatformBillingAction
         return Json::write($response, ['data' => $rows, 'meta' => ['total' => count($rows)]]);
     }
 
-    /** GET /platform/billing/subscriptions — every subscription with renewal info. */
+    /** GET /platform/billing/subscriptions, every subscription with renewal info. */
     public function subscriptions(Request $request, Response $response): Response
     {
         if (($g = $this->guard($request, $response)) !== null) {

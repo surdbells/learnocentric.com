@@ -21,7 +21,7 @@ use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Throwable;
 
-/** /backend/school/scheme-of-work — term/week curriculum plan per class + subject. */
+/** /backend/school/scheme-of-work, term/week curriculum plan per class + subject. */
 final class SchemeOfWorkAction
 {
     use ResolvesInstitution;
@@ -82,7 +82,7 @@ final class SchemeOfWorkAction
     }
 
     /**
-     * GET /school/scheme-of-work/detail?class_id=&subject_id=&term_id= — the full
+     * GET /school/scheme-of-work/detail?class_id=&subject_id=&term_id=, the full
      * weekly plan for one class × subject (× term) as a coherent scheme: ordered
      * weeks with objective, assigned teacher, lifecycle status and delivery-pack
      * readiness, plus coverage stats. This is the detail view behind the grid.
@@ -274,7 +274,7 @@ final class SchemeOfWorkAction
         return Json::write($response, ['deleted' => $count]);
     }
 
-    /** POST /backend/school/scheme-of-work/{id}/transition — body { to, note } */
+    /** POST /backend/school/scheme-of-work/{id}/transition, body { to, note } */
     public function transition(Request $request, Response $response, array $args): Response
     {
         $scheme = $this->em->getRepository(SchemeOfWork::class)->find((int) $args['id']);

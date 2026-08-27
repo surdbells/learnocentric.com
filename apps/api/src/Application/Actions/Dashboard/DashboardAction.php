@@ -43,7 +43,7 @@ final class DashboardAction
     {
     }
 
-    /** GET /dashboard/admin — institution overview + action items. */
+    /** GET /dashboard/admin, institution overview + action items. */
     public function admin(Request $request, Response $response): Response
     {
         $inst = $this->resolveInstitution($request, $this->em);
@@ -109,7 +109,7 @@ final class DashboardAction
     }
 
     /**
-     * Teacher delivery activity counts for the activity panel — all real totals
+     * Teacher delivery activity counts for the activity panel, all real totals
      * over the institution.
      *
      * @return array<string, int>
@@ -145,7 +145,7 @@ final class DashboardAction
         return (int) $qb->getQuery()->getSingleScalarResult();
     }
 
-    /** GET /dashboard/teacher — my classes + things needing my attention. */
+    /** GET /dashboard/teacher, my classes + things needing my attention. */
     public function teacher(Request $request, Response $response): Response
     {
         /** @var User $me */
@@ -369,7 +369,7 @@ final class DashboardAction
             ->getQuery()->getSingleScalarResult();
     }
 
-    /** GET /dashboard/student — my progress + what's next. */
+    /** GET /dashboard/student, my progress + what's next. */
     public function student(Request $request, Response $response): Response
     {
         /** @var User $me */
@@ -604,7 +604,7 @@ final class DashboardAction
         ];
     }
 
-    /** GET /dashboard/super-admin — platform overview. */
+    /** GET /dashboard/super-admin, platform overview. */
     public function superAdmin(Request $request, Response $response): Response
     {
         $subs = $this->em->getRepository(Subscription::class)->findAll();
@@ -633,7 +633,7 @@ final class DashboardAction
         ]);
     }
 
-    /** GET /dashboard/parent — each child at a glance. */
+    /** GET /dashboard/parent, each child at a glance. */
     public function parent(Request $request, Response $response): Response
     {
         /** @var User $me */

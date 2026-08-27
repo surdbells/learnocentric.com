@@ -37,7 +37,7 @@ trait ResolvesInstitution
      *
      * List queries are institution-scoped, but update/delete handlers that load a
      * record by primary key must also verify the record belongs to the caller's
-     * institution — otherwise a scoped user (school_admin/teacher) can act on another
+     * institution, otherwise a scoped user (school_admin/teacher) can act on another
      * school's record by supplying its id (cross-tenant IDOR).
      *
      * Rules:
@@ -56,7 +56,7 @@ trait ResolvesInstitution
         $caller = $user?->getInstitution();
 
         if ($caller === null) {
-            return true; // platform-level actor (super admin) — governs across tenants
+            return true; // platform-level actor (super admin), governs across tenants
         }
 
         return $owner !== null && $owner->getId() === $caller->getId();

@@ -10,7 +10,7 @@ use Doctrine\ORM\Mapping as ORM;
 
 /**
  * Immutable record of sensitive actions (logins, role changes, score edits,
- * exports, settings changes) — required by the spec for accountability.
+ * exports, settings changes), required by the spec for accountability.
  */
 #[ORM\Entity]
 #[ORM\Table(name: 'audit_logs')]

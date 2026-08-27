@@ -13,7 +13,7 @@ use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 
 /**
- * /backend/school/profile — the signed-in admin's own institution profile
+ * /backend/school/profile, the signed-in admin's own institution profile
  * (name, type, address, logo, brand colour, contact). Read by any authed member
  * of the institution; only a school/tutor admin may update it.
  */

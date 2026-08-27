@@ -25,7 +25,7 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 use Throwable;
 
 /**
- * /backend/assessment/assessments — build quizzes/tests/worksheets from
+ * /backend/assessment/assessments, build quizzes/tests/worksheets from
  * validated questions. Enforces the answer gate on attach and on publish.
  */
 final class AssessmentsAction
@@ -94,7 +94,7 @@ final class AssessmentsAction
         return Json::write($response, Paginator::paginate($qb, 'a', $query, $sortMap, $mapper));
     }
 
-    /** GET /assessment/assessments/{id} — full detail with ordered questions. */
+    /** GET /assessment/assessments/{id}, full detail with ordered questions. */
     public function show(Request $request, Response $response, array $args): Response
     {
         $a = $this->em->getRepository(Assessment::class)->find((int) $args['id']);
@@ -159,7 +159,7 @@ final class AssessmentsAction
         return Json::write($response, ['deleted' => true, 'id' => $id]);
     }
 
-    /** POST /assessment/assessments/{id}/questions — attach a validated question. */
+    /** POST /assessment/assessments/{id}/questions, attach a validated question. */
     public function attach(Request $request, Response $response, array $args): Response
     {
         $a = $this->em->getRepository(Assessment::class)->find((int) $args['id']);
@@ -200,7 +200,7 @@ final class AssessmentsAction
     }
 
     /**
-     * POST /assessment/assessments/{id}/draw-from-bank — bulk-attach validated
+     * POST /assessment/assessments/{id}/draw-from-bank, bulk-attach validated
      * questions from the bank instead of picking them one by one. Draws from the
      * assessment's topic (or its whole subject when no topic is set); with an
      * optional {count} it draws that many at random, otherwise it takes them all.
@@ -252,7 +252,7 @@ final class AssessmentsAction
         return Json::write($response, ['drawn' => count($candidates)] + $this->row($a, true), 201);
     }
 
-    /** DELETE /assessment/assessments/{id}/questions/{qid} — detach a question. */
+    /** DELETE /assessment/assessments/{id}/questions/{qid}, detach a question. */
     public function detach(Request $request, Response $response, array $args): Response
     {
         $a = $this->em->getRepository(Assessment::class)->find((int) $args['id']);
@@ -275,7 +275,7 @@ final class AssessmentsAction
         return Json::error($response, 'That question is not in this assessment.', 404);
     }
 
-    /** POST /assessment/assessments/{id}/transition — lifecycle, gated on all questions being validated. */
+    /** POST /assessment/assessments/{id}/transition, lifecycle, gated on all questions being validated. */
     public function transition(Request $request, Response $response, array $args): Response
     {
         $a = $this->em->getRepository(Assessment::class)->find((int) $args['id']);
@@ -304,7 +304,7 @@ final class AssessmentsAction
         return Json::write($response, ['assessment' => $this->row($a, true)] + $result);
     }
 
-    /** POST /assessment/assessments/{id}/moderate — set the moderation status (staff/approver only). */
+    /** POST /assessment/assessments/{id}/moderate, set the moderation status (staff/approver only). */
     public function moderate(Request $request, Response $response, array $args): Response
     {
         $a = $this->em->getRepository(Assessment::class)->find((int) $args['id']);
@@ -339,7 +339,7 @@ final class AssessmentsAction
         return Json::write($response, array_map(static fn ($v) => $v->toArray(), $this->lifecycle->history($a)));
     }
 
-    /** POST /assessment/assessments/bulk-delete — body { ids: number[] } */
+    /** POST /assessment/assessments/bulk-delete, body { ids: number[] } */
     public function bulkDelete(Request $request, Response $response): Response
     {
         $ids = array_values(array_filter(array_map('intval', (array) (($request->getParsedBody()['ids'] ?? [])))));

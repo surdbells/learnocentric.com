@@ -419,7 +419,7 @@ class SeedCommand extends Command
         $output->writeln("  + {$count} enrollments");
     }
 
-    /** Seed the question bank (JSS 1 Maths) — including one draft that fails the answer gate. */
+    /** Seed the question bank (JSS 1 Maths), including one draft that fails the answer gate. */
     private function seedQuestions(OutputInterface $output): void
     {
         if ($this->em->getRepository(Question::class)->count([]) > 0) {
@@ -454,7 +454,7 @@ class SeedCommand extends Command
                 null, 'true',
                 'Distinct primes share no factor other than 1.', 1, Lifecycle::APPROVED, true],
             [$frac, 'short', 'academic', 'easy', 'Simplify 4/8 to its lowest term.',
-                null, null, // deliberately no answer yet — must fail the validation gate
+                null, null, // deliberately no answer yet, must fail the validation gate
                 null, 1, Lifecycle::DRAFT, false],
         ];
 
@@ -527,7 +527,7 @@ class SeedCommand extends Command
             return;
         }
 
-        $one = new Intervention($tunde, 'Scored 0% on the Whole Numbers quiz — needs place-value support.');
+        $one = new Intervention($tunde, 'Scored 0% on the Whole Numbers quiz, needs place-value support.');
         $one->setSubject($subject);
         $one->setTopic($topic);
         $one->setRaisedBy($lead);
@@ -541,7 +541,7 @@ class SeedCommand extends Command
 
         $count = 1;
         if ($chiamaka !== null) {
-            $two = new Intervention($chiamaka, 'Borderline pass (50%) — monitor and revisit fractions.');
+            $two = new Intervention($chiamaka, 'Borderline pass (50%), monitor and revisit fractions.');
             $two->setSubject($subject);
             $two->setRaisedBy($teacher);
             $two->setAssignedTo($teacher);
@@ -567,7 +567,7 @@ class SeedCommand extends Command
             $count++;
         }
 
-        $four = new Intervention($tunde, 'Reading fluency below expected level — phonics support.');
+        $four = new Intervention($tunde, 'Reading fluency below expected level, phonics support.');
         $four->setSubject($subject);
         $four->setRaisedBy($teacher);
         $four->setAssignedTo($teacher);
@@ -613,10 +613,10 @@ class SeedCommand extends Command
         $find = fn (string $email) => $this->em->getRepository(User::class)->findOneBy(['email' => $email]);
         // [email, type, title, message, link, read]
         $defs = [
-            ['student3@gmail.com', 'feedback', 'New feedback from Ngozi Okafor', 'You mixed up place value in Q3 — remember the hundreds column. Redo questions 3 and 7.', '/student/academics/feedback', false],
-            ['student2@gmail.com', 'grade', 'Worksheet graded: Whole Numbers — Practice Worksheet', 'You scored 8/10. Good work — revisit place value in Q3 and Q7.', '/student/academics/worksheets', false],
-            ['student@gmail.com', 'live', 'Live class starting soon', 'Fractions — Live Q&A begins shortly. Join from your dashboard.', '/student/academics/live-classes', true],
-            ['school@gmail.com', 'billing', 'Payment received — Standard plan', 'We received your payment of ₦35,000. Your subscription is active.', '/admin/management/billing', true],
+            ['student3@gmail.com', 'feedback', 'New feedback from Ngozi Okafor', 'You mixed up place value in Q3, remember the hundreds column. Redo questions 3 and 7.', '/student/academics/feedback', false],
+            ['student2@gmail.com', 'grade', 'Worksheet graded: Whole Numbers, Practice Worksheet', 'You scored 8/10. Good work, revisit place value in Q3 and Q7.', '/student/academics/worksheets', false],
+            ['student@gmail.com', 'live', 'Live class starting soon', 'Fractions, Live Q&A begins shortly. Join from your dashboard.', '/student/academics/live-classes', true],
+            ['school@gmail.com', 'billing', 'Payment received, Standard plan', 'We received your payment of ₦35,000. Your subscription is active.', '/admin/management/billing', true],
         ];
         $count = 0;
         foreach ($defs as [$email, $type, $title, $message, $link, $read]) {
@@ -698,7 +698,7 @@ class SeedCommand extends Command
     /** Seed the platform subject catalogue (full Nigerian curriculum) and link school subjects. */
     private function seedCatalogSubjects(OutputInterface $output): void
     {
-        // [name, code, level] — the NERDC junior + senior secondary curriculum.
+        // [name, code, level], the NERDC junior + senior secondary curriculum.
         $defs = [
             // Junior secondary (JSS) core
             ['Mathematics', 'MTH', 'Junior/Senior'],
@@ -755,7 +755,7 @@ class SeedCommand extends Command
             }
             $c = new CatalogSubject($name, $code);
             $c->setCurriculum('NERDC');
-            $c->setDescription($name . ' — Nigerian ' . strtolower($level) . ' secondary curriculum.');
+            $c->setDescription($name . ', Nigerian ' . strtolower($level) . ' secondary curriculum.');
             $this->em->persist($c);
             $byCode[$code] = $c;
             $added++;
@@ -784,7 +784,7 @@ class SeedCommand extends Command
 
         // [title, type, subject, grade, licence, source, premium]
         $defs = [
-            ['Whole Numbers — teaching slides', 'document', 'Mathematics', 'JSS 1', 'owned', null, false],
+            ['Whole Numbers, teaching slides', 'document', 'Mathematics', 'JSS 1', 'owned', null, false],
             ['LCM & HCF worked examples (video)', 'video', 'Mathematics', 'JSS 1', 'cc-by', 'Khan Academy', false],
             ['Fractions practice set', 'assignment', 'Mathematics', 'JSS 1', 'owned', null, false],
             ['Basic Operations interactive drill', 'interactive', 'Mathematics', 'JSS 1', 'licensed', 'GeoGebra', true],
@@ -805,7 +805,7 @@ class SeedCommand extends Command
         }
         $this->em->flush();
 
-        $pack = new ContentPackage('JSS 1 Mathematics — Term 1', 'subject_pack');
+        $pack = new ContentPackage('JSS 1 Mathematics, Term 1', 'subject_pack');
         $pack->setSubjectArea('Mathematics');
         $mathCatalog = $this->em->getRepository(CatalogSubject::class)->findOneBy(['code' => 'MTH']);
         if ($mathCatalog !== null) {
@@ -903,10 +903,10 @@ class SeedCommand extends Command
         $specs = [
             ['Mid-Year Holiday Notice', 'The school will close for the mid-year holiday on Friday and resume the following Monday. Please travel safely.', 'all', 'general', 'medium', 'sent', 6, ['in_app' => true, 'email' => true, 'parent_copy' => false]],
             ['Third-Term Assessment Reminder', 'Third-term assessments begin next week. Please revise all topics covered so far and bring the required materials.', 'students', 'academics', 'high', 'sent', 4, ['in_app' => true, 'email' => true, 'parent_copy' => false]],
-            ['PTA Meeting — Saturday 10am', 'Dear parents, the termly PTA meeting holds this Saturday at 10am in the main hall. Your attendance is important.', 'parents', 'events', 'medium', 'sent', 3, ['in_app' => true, 'email' => true, 'parent_copy' => true]],
-            ['Teacher Briefing — Third-Term Plan', 'All teaching staff: please meet in the staff room at 8am tomorrow to review the third-term instructional plan.', 'staff', 'internal', 'medium', 'sent', 2, ['in_app' => true, 'email' => false, 'parent_copy' => false]],
-            ['School Assembly — Friday 8am', 'A whole-school assembly holds this Friday at 8am. All students and staff should be seated by 7:50am.', 'all', 'general', 'low', 'sent', 1, ['in_app' => true, 'email' => false, 'parent_copy' => false]],
-            ['Attendance Follow-up — Term 3 Week 4', '', 'parents', 'attendance', 'medium', 'draft', 0, ['in_app' => true, 'email' => true, 'parent_copy' => true]],
+            ['PTA Meeting, Saturday 10am', 'Dear parents, the termly PTA meeting holds this Saturday at 10am in the main hall. Your attendance is important.', 'parents', 'events', 'medium', 'sent', 3, ['in_app' => true, 'email' => true, 'parent_copy' => true]],
+            ['Teacher Briefing, Third-Term Plan', 'All teaching staff: please meet in the staff room at 8am tomorrow to review the third-term instructional plan.', 'staff', 'internal', 'medium', 'sent', 2, ['in_app' => true, 'email' => false, 'parent_copy' => false]],
+            ['School Assembly, Friday 8am', 'A whole-school assembly holds this Friday at 8am. All students and staff should be seated by 7:50am.', 'all', 'general', 'low', 'sent', 1, ['in_app' => true, 'email' => false, 'parent_copy' => false]],
+            ['Attendance Follow-up, Term 3 Week 4', '', 'parents', 'attendance', 'medium', 'draft', 0, ['in_app' => true, 'email' => true, 'parent_copy' => true]],
             ['Class Assembly Reminder', 'A reminder that your class assembly holds next week. Please be prompt and in full uniform.', 'class', 'reminder', 'medium', 'scheduled', 5, ['in_app' => true, 'email' => false, 'parent_copy' => false]],
         ];
         $author = $teacher ?? $admin;
@@ -946,7 +946,7 @@ class SeedCommand extends Command
         }
         $role = new Role('c' . $school->getId() . '_vice_principal_academics', 'Vice Principal Academics', 'school', false);
         $role->setInstitution($school);
-        $role->setDescription('Academic leadership — oversees assessments, gradebook and reports.');
+        $role->setDescription('Academic leadership, oversees assessments, gradebook and reports.');
         $this->em->persist($role);
 
         $grants = [
@@ -963,7 +963,7 @@ class SeedCommand extends Command
         $output->writeln('  + 1 custom role (Vice Principal Academics)');
     }
 
-    /** Seed Ask Tutor — one answered question, one open, and a tutor rating. */
+    /** Seed Ask Tutor, one answered question, one open, and a tutor rating. */
     private function seedAskTutor(OutputInterface $output): void
     {
         if ($this->em->getRepository(TutorQuestion::class)->count([]) > 0) {
@@ -1013,7 +1013,7 @@ class SeedCommand extends Command
         $output->writeln('  + 1 guardian link (parent@ → student@)');
     }
 
-    /** Seed live classes — one scheduled, one live with an attendee. */
+    /** Seed live classes, one scheduled, one live with an attendee. */
     private function seedLiveClasses(OutputInterface $output): void
     {
         if ($this->em->getRepository(LiveClass::class)->count([]) > 0) {
@@ -1033,11 +1033,11 @@ class SeedCommand extends Command
                 ->setParameter('t', 'teacher')->setParameter('i', $institution)
                 ->setMaxResults(1)->getQuery()->getOneOrNullResult();
 
-        // Agora channel name for a class — no URL (the client joins the channel by name).
+        // Agora channel name for a class, no URL (the client joins the channel by name).
         $channel = static fn (string $title): string => 'learno-' . substr(md5($title), 0, 16);
 
         // A scheduled class (tomorrow) and one currently live.
-        $scheduled = new LiveClass($subject, 'Whole Numbers — Live Revision', new DateTimeImmutable('tomorrow 10:00'));
+        $scheduled = new LiveClass($subject, 'Whole Numbers, Live Revision', new DateTimeImmutable('tomorrow 10:00'));
         $scheduled->setSchoolClass($class);
         $scheduled->setTopic($topic);
         $scheduled->setHost($teacher);
@@ -1048,7 +1048,7 @@ class SeedCommand extends Command
 
         // A second class starting soon (today). Left SCHEDULED (not pre-LIVE): going
         // live through the app assigns a fresh channel so each session is clean.
-        $live = new LiveClass($subject, 'Fractions — Live Q&A', new DateTimeImmutable('+30 minutes'));
+        $live = new LiveClass($subject, 'Fractions, Live Q&A', new DateTimeImmutable('+30 minutes'));
         $live->setSchoolClass($class);
         $live->setHost($teacher);
         $live->setDurationMinutes(30);
@@ -1057,7 +1057,7 @@ class SeedCommand extends Command
         $this->em->persist($live);
 
         // A class currently LIVE (for the learner "join now" / hero LIVE state).
-        $liveNow = new LiveClass($subject, 'Whole Numbers — Operations', new DateTimeImmutable('-10 minutes'));
+        $liveNow = new LiveClass($subject, 'Whole Numbers, Operations', new DateTimeImmutable('-10 minutes'));
         $liveNow->setSchoolClass($class);
         $liveNow->setTopic($topic);
         $liveNow->setHost($teacher);
@@ -1066,7 +1066,7 @@ class SeedCommand extends Command
         $liveNow->setStatus(LiveClass::LIVE);
         $this->em->persist($liveNow);
 
-        // Two past (ended) classes — one the student attended, one missed.
+        // Two past (ended) classes, one the student attended, one missed.
         $pastAttended = new LiveClass($subject, 'Place Value & Rounding', new DateTimeImmutable('-2 days 10:00'));
         $pastAttended->setSchoolClass($class);
         $pastAttended->setHost($teacher);
@@ -1119,7 +1119,7 @@ class SeedCommand extends Command
             return;
         }
 
-        // Structured feedback breakdowns (design: Feedback_LD) — teacher-authored.
+        // Structured feedback breakdowns (design: Feedback_LD), teacher-authored.
         $notes = [
             [
                 'student' => 0, 'type' => 'correction', 'topic' => $topic, 'ack' => false,
@@ -1128,23 +1128,23 @@ class SeedCommand extends Command
                 'message' => 'Good work! You understand the basics well. Focus on aligning numbers by place value.',
                 'strengths' => 'You added and subtracted whole numbers accurately, and showed good understanding of place value in most questions.',
                 'practice_needed' => 'Check your place value alignment in subtraction, and show your working clearly for multi-step problems.',
-                'common_error' => 'Place value confusion in subtraction — some answers were off by tens or hundreds due to incorrect borrowing.',
+                'common_error' => 'Place value confusion in subtraction, some answers were off by tens or hundreds due to incorrect borrowing.',
                 'next_step' => 'Revise place value and subtraction with borrowing; redo questions 4–6 and attempt the follow-up quiz.',
                 'focus' => [['Accuracy', 76], ['Showing Working', 64], ['Question Interpretation', 58], ['Problem Solving', 72]],
             ],
             [
                 'student' => 0, 'type' => 'praise', 'topic' => null, 'ack' => true,
                 'source_type' => 'quiz', 'source_title' => 'Estimation Quiz', 'subject' => 'Mathematics', 'score' => 85,
-                'message' => 'Nice work! Your estimation skills are strong — keep practising to stay sharp.',
+                'message' => 'Nice work! Your estimation skills are strong, keep practising to stay sharp.',
                 'strengths' => 'Strong number sense and quick, accurate rounding.',
                 'practice_needed' => null, 'common_error' => null, 'next_step' => 'Try the harder estimation set next.',
                 'focus' => [['Accuracy', 88], ['Problem Solving', 80]],
             ],
             [
                 'student' => 1, 'type' => 'praise', 'topic' => null, 'ack' => true,
-                'source_type' => 'worksheet', 'source_title' => 'Whole Numbers — Practice Worksheet',
+                'source_type' => 'worksheet', 'source_title' => 'Whole Numbers, Practice Worksheet',
                 'subject' => 'Mathematics', 'score' => 80,
-                'message' => 'Excellent improvement this week — your working is much clearer. Keep it up!',
+                'message' => 'Excellent improvement this week, your working is much clearer. Keep it up!',
                 'strengths' => 'Clear, well-ordered working and accurate addition.',
                 'practice_needed' => 'Watch the ordering of 6-digit numbers.',
                 'common_error' => null, 'next_step' => 'Revise Greater Than / Less Than before the next class.',
@@ -1178,7 +1178,7 @@ class SeedCommand extends Command
         $output->writeln('  + ' . count($notes) . ' feedback notes');
     }
 
-    /** Seed portfolio evidence — one reviewed, one pending — for the competency track. */
+    /** Seed portfolio evidence, one reviewed, one pending, for the competency track. */
     private function seedPortfolio(OutputInterface $output): void
     {
         if ($this->em->getRepository(PortfolioEntry::class)->count([]) > 0) {
@@ -1233,7 +1233,7 @@ class SeedCommand extends Command
         if ($topic === null) {
             return;
         }
-        $worksheet = new Worksheet($topic, 'Whole Numbers — Practice Worksheet');
+        $worksheet = new Worksheet($topic, 'Whole Numbers, Practice Worksheet');
         $worksheet->setTrack('academic');
         $worksheet->setInstructions('Attempt all questions. Show your working where necessary. You can save your progress and return later.');
         $worksheet->setDueDate(new DateTimeImmutable('+7 days'));
@@ -1282,8 +1282,8 @@ class SeedCommand extends Command
             ->setMaxResults(2)->getQuery()->getResult();
 
         // Per-student answers: [answer, awardedMarks|null, correct|null] aligned to $questions.
-        // Student 0 — fully graded 6/6 (free-response teacher-marked).
-        // Student 1 — submitted, auto-marked 3/6 (Q2 wrong), free-response still awaiting the teacher.
+        // Student 0, fully graded 6/6 (free-response teacher-marked).
+        // Student 1, submitted, auto-marked 3/6 (Q2 wrong), free-response still awaiting the teacher.
         $answerSets = [
             [['623', 1, true], ['9134', 1, true], ['12', 1, true], ['false', 1, true], ['2,450 + 3,275 = 5,725 pencils altogether.', 2, null]],
             [['623', 1, true], ['9999', 0, false], ['12', 1, true], ['false', 1, true], ['2450 add 3275 is 5725', null, null]],
@@ -1308,7 +1308,7 @@ class SeedCommand extends Command
 
             if ($i === 0) {
                 $submission->setScore($auto);
-                $submission->setFeedback('Great working shown — correct total. Keep aligning your subtraction by place value.');
+                $submission->setFeedback('Great working shown, correct total. Keep aligning your subtraction by place value.');
                 $submission->setStatus(WorksheetSubmission::GRADED);
                 $submission->setGradedAt(new DateTimeImmutable('-12 hours'));
             } else {
@@ -1407,7 +1407,7 @@ class SeedCommand extends Command
             return;
         }
 
-        $quiz = new Assessment($topic->getSubject(), 'Whole Numbers — Diagnostic Quiz');
+        $quiz = new Assessment($topic->getSubject(), 'Whole Numbers, Diagnostic Quiz');
         $quiz->setTopic($topic);
         $quiz->setType('quiz');
         $quiz->setTrack('academic');
@@ -1458,7 +1458,7 @@ class SeedCommand extends Command
     /**
      * Seed a couple of pre-generated platform reports so the super-admin Reports
      * list, view and export flows are testable without first generating one.
-     * Every figure is a live count/aggregate of the rows already seeded above —
+     * Every figure is a live count/aggregate of the rows already seeded above -
      * nothing here is fabricated; it mirrors exactly what ReportsAction produces.
      */
     private function seedReports(OutputInterface $output): void
@@ -1482,7 +1482,7 @@ class SeedCommand extends Command
             ->from(AssessmentAttempt::class, 'at')->where('at.status = :g')
             ->setParameter('g', AssessmentAttempt::GRADED)->getQuery()->getArrayResult();
         $avg = $avgRow[0]['avg'] ?? null;
-        $avgLabel = $avg === null ? '—' : round((float) $avg, 1) . '%';
+        $avgLabel = $avg === null ? '-' : round((float) $avg, 1) . '%';
 
         // --- Subscriptions (real plans → active subs → MRR) ---
         $mrr = 0.0;

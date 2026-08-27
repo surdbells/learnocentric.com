@@ -21,7 +21,7 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 use Throwable;
 
 /**
- * /backend/curriculum/topics — GET (paginated list), POST (create draft),
+ * /backend/curriculum/topics, GET (paginated list), POST (create draft),
  * PUT (edit while draft/review), DELETE; plus transition/history sub-actions
  * and bulk delete.
  */
@@ -138,7 +138,7 @@ final class TopicsAction
         return Json::write($response, ['deleted' => true, 'id' => $id]);
     }
 
-    /** POST /backend/curriculum/topics/{id}/transition — body { to, note } */
+    /** POST /backend/curriculum/topics/{id}/transition, body { to, note } */
     public function transition(Request $request, Response $response, array $args): Response
     {
         $topic = $this->em->getRepository(Topic::class)->find((int) $args['id']);
@@ -166,7 +166,7 @@ final class TopicsAction
         return Json::write($response, array_map(static fn ($v) => $v->toArray(), $this->lifecycle->history($topic)));
     }
 
-    /** POST /backend/curriculum/topics/bulk-delete — body { ids: number[] } */
+    /** POST /backend/curriculum/topics/bulk-delete, body { ids: number[] } */
     public function bulkDelete(Request $request, Response $response): Response
     {
         $ids = array_values(array_filter(array_map('intval', (array) (($request->getParsedBody()['ids'] ?? [])))));

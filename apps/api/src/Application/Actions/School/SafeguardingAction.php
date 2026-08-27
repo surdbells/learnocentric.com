@@ -25,7 +25,7 @@ final class SafeguardingAction
 {
     use ResolvesInstitution;
 
-    /** Who may raise a concern (staff plus learners — students and parents). */
+    /** Who may raise a concern (staff plus learners, students and parents). */
     private const REPORTERS = ['teacher', 'academic_lead', 'school_admin', 'tutor_admin', 'super_admin', 'student', 'parent'];
     /** Who may see and manage the register. */
     private const LEADS = ['school_admin', 'tutor_admin', 'super_admin'];
@@ -46,7 +46,7 @@ final class SafeguardingAction
         };
     }
 
-    /** GET /safeguarding/cases — the register (leads only). */
+    /** GET /safeguarding/cases, the register (leads only). */
     private function list(Request $request, Response $response): Response
     {
         if (($guard = $this->leadGuard($request, $response)) !== null) {
@@ -78,7 +78,7 @@ final class SafeguardingAction
         return Json::write($response, Paginator::paginate($qb, 'c', $query, ['status' => 'c.status', 'category' => 'c.category', 'created_at' => 'c.createdAt'], $mapper));
     }
 
-    /** POST /safeguarding/cases — report a concern (any staff). */
+    /** POST /safeguarding/cases, report a concern (any staff). */
     private function report(Request $request, Response $response): Response
     {
         /** @var User $user */
@@ -106,7 +106,7 @@ final class SafeguardingAction
 
         $reporterRole = $user->getRole()->getCode();
         if ($reporterRole === 'student') {
-            // A student raising a concern — the case is about themselves.
+            // A student raising a concern, the case is about themselves.
             $case->setStudent($user);
         } elseif ($reporterRole === 'parent') {
             // A parent may only raise a concern about a student they guard.
@@ -128,7 +128,7 @@ final class SafeguardingAction
         return Json::write($response, ['reported' => true, 'reference' => 'SG-' . str_pad((string) $case->getId(), 5, '0', STR_PAD_LEFT)], 201);
     }
 
-    /** PUT /safeguarding/cases — manage a case (leads only). */
+    /** PUT /safeguarding/cases, manage a case (leads only). */
     private function update(Request $request, Response $response): Response
     {
         if (($guard = $this->leadGuard($request, $response)) !== null) {

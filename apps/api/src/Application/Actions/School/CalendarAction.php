@@ -12,10 +12,10 @@ use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 
 /**
- * GET /backend/school/calendar — academic events for the institution.
+ * GET /backend/school/calendar, academic events for the institution.
  *
- * Aggregates the dated things the app already tracks — scheduled live classes and
- * worksheet due dates — into a single, sorted events feed with per-type counts.
+ * Aggregates the dated things the app already tracks, scheduled live classes and
+ * worksheet due dates, into a single, sorted events feed with per-type counts.
  * Institution-scoped like the other school actions.
  */
 final class CalendarAction

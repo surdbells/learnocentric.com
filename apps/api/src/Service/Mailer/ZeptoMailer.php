@@ -33,7 +33,7 @@ class ZeptoMailer
     public function send(array $to, string $subject, string $htmlBody, ?string $textBody = null): bool
     {
         if ($this->token === '') {
-            // No credentials configured — log and skip so dev flows don't fail.
+            // No credentials configured, log and skip so dev flows don't fail.
             $this->logger->info('ZeptoMail skipped (no token configured)', ['to' => $to['address'] ?? null, 'subject' => $subject]);
             return false;
         }

@@ -20,7 +20,7 @@ use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 
 /**
- * Platform-wide analytics for the super admin — the first cross-institution
+ * Platform-wide analytics for the super admin, the first cross-institution
  * aggregation surface (everything else is school-scoped). All figures are real
  * counts/averages over the current data; nothing is synthesised.
  */
@@ -30,7 +30,7 @@ final class PlatformAnalyticsAction
     {
     }
 
-    /** GET /platform/analytics — headline totals, growth + activity trends, and an engagement leaderboard. */
+    /** GET /platform/analytics, headline totals, growth + activity trends, and an engagement leaderboard. */
     public function overview(Request $request, Response $response): Response
     {
         /** @var User|null $user */
@@ -134,7 +134,7 @@ final class PlatformAnalyticsAction
     }
 
     /**
-     * Graded attempts grouped by subject — content consumption signal.
+     * Graded attempts grouped by subject, content consumption signal.
      *
      * @return array<int, array{subject:string, count:int}>
      */
@@ -149,7 +149,7 @@ final class PlatformAnalyticsAction
 
     /**
      * Distinct active users per weekday across the last $weeks weeks (from the
-     * audit trail) — a week × weekday engagement heatmap.
+     * audit trail), a week × weekday engagement heatmap.
      *
      * @return array<int, array{label:string, values:int[]}>
      */

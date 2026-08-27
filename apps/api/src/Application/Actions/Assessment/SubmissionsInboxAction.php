@@ -16,7 +16,7 @@ use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 
 /**
- * GET /assessment/submissions/inbox — a unified grading inbox. It gathers every
+ * GET /assessment/submissions/inbox, a unified grading inbox. It gathers every
  * worksheet and portfolio submission awaiting manual review (scoped to the
  * teacher's assigned subjects, or the whole institution for an admin) with
  * headline counts, so grading happens in one place instead of hunting across
@@ -112,7 +112,7 @@ final class SubmissionsInboxAction
     }
 
     /**
-     * GET /assessment/submissions/by-learner?student_id=X — one learner's
+     * GET /assessment/submissions/by-learner?student_id=X, one learner's
      * worksheet + portfolio submissions WITH their content, so a teacher can see
      * the actual work while giving feedback on it.
      */

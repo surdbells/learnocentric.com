@@ -11,7 +11,7 @@ use Doctrine\ORM\Mapping as ORM;
 /**
  * A platform-wide subject in the SaaS catalogue, owned by the super admin.
  * Schools adopt catalogue subjects into their own Subject list, and content
- * packages are scoped to catalogue subjects — so a package's subject is the same
+ * packages are scoped to catalogue subjects, so a package's subject is the same
  * canonical entity a school has adopted (spec §8).
  */
 #[ORM\Entity]

@@ -18,7 +18,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 
-/** /backend/school/interventions — flag and track student support (staff). */
+/** /backend/school/interventions, flag and track student support (staff). */
 final class InterventionsAction
 {
     use ResolvesInstitution;
@@ -212,7 +212,7 @@ final class InterventionsAction
         }
     }
 
-    /** GET /school/interventions/board — the Interventions workspace: KPIs, list, rail, distributions. */
+    /** GET /school/interventions/board, the Interventions workspace: KPIs, list, rail, distributions. */
     public function board(Request $request, Response $response): Response
     {
         if (($guard = $this->staffGuard($request, $response)) !== null) {

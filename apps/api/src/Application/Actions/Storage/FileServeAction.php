@@ -11,7 +11,7 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 use Slim\Psr7\Stream;
 
 /**
- * GET /backend/files?p={path} — stream a stored file from Flysystem's local
+ * GET /backend/files?p={path}, stream a stored file from Flysystem's local
  * adapter. Public (matching the prior static /uploads serving); paths are
  * unguessable 20-hex names. Append &download=1 to force a download. The path
  * travels in the query string so the request URL carries no static-file

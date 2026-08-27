@@ -46,7 +46,7 @@ final class ModuleAccess
      * @return string[] module keys granted to an institution right now.
      *
      * DATA-RETENTION GUARANTEE (spec §19): expiry, lapse or suspension of a
-     * subscription only withdraws access to gated feature MODULES — it NEVER
+     * subscription only withdraws access to gated feature MODULES, it NEVER
      * deletes or hides learner records, academic results or reports. An expired
      * institution simply returns an empty module set here; its underlying data
      * (users, attempts, worksheet/portfolio submissions, feedback, analytics)

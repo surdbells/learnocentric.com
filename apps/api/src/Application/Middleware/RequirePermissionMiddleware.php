@@ -24,7 +24,7 @@ use Slim\Routing\RouteContext;
  *
  * When the RBAC_ENFORCE env flag is on, the caller's role must be granted that action
  * in the role_permissions table (via PermissionService) or the request is rejected 403.
- * When the flag is OFF (the default) this is a pass-through — so switching to
+ * When the flag is OFF (the default) this is a pass-through, so switching to
  * table-driven enforcement is a deliberate, reversible step that cannot lock anyone out
  * until the seeded permission matrix has been verified in staging. Untagged routes are
  * never affected.
@@ -44,7 +44,7 @@ class RequirePermissionMiddleware implements MiddlewareInterface
         $route = RouteContext::fromRequest($request)->getRoute();
         $perm = $route?->getArgument('perm');
         if ($perm === null || !str_contains($perm, ':')) {
-            return $handler->handle($request); // untagged route — not enforced
+            return $handler->handle($request); // untagged route, not enforced
         }
         [$code, $action] = explode(':', $perm, 2);
 

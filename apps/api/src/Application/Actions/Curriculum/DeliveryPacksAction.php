@@ -19,7 +19,7 @@ use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Throwable;
 
-/** /backend/curriculum/delivery-packs — author lesson packs (staff), lifecycle-governed. */
+/** /backend/curriculum/delivery-packs, author lesson packs (staff), lifecycle-governed. */
 final class DeliveryPacksAction
 {
     use ResolvesInstitution;
@@ -127,7 +127,7 @@ final class DeliveryPacksAction
     }
 
     /**
-     * GET /curriculum/delivery-packs/{id} — the full pack for its detail page:
+     * GET /curriculum/delivery-packs/{id}, the full pack for its detail page:
      * content, a materials-readiness checklist, the parent topic's context
      * (objective + misconception watch) and the lifecycle history.
      */

@@ -20,7 +20,7 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 use Throwable;
 
 /**
- * /backend/billing — an institution admin subscribes to a plan (Paystack
+ * /backend/billing, an institution admin subscribes to a plan (Paystack
  * checkout), the payment is verified, and access is granted with a grace
  * window after each period (spec §17).
  */
@@ -38,7 +38,7 @@ final class BillingAction
     ) {
     }
 
-    /** GET /billing/subscription — the institution's current subscription + access state. */
+    /** GET /billing/subscription, the institution's current subscription + access state. */
     public function current(Request $request, Response $response): Response
     {
         if (($guard = $this->adminGuard($request, $response)) !== null) {
@@ -58,7 +58,7 @@ final class BillingAction
         ]);
     }
 
-    /** POST /billing/subscribe — start a Paystack transaction for { plan_id }. */
+    /** POST /billing/subscribe, start a Paystack transaction for { plan_id }. */
     public function subscribe(Request $request, Response $response): Response
     {
         if (($guard = $this->adminGuard($request, $response)) !== null) {
@@ -109,7 +109,7 @@ final class BillingAction
         ], 201);
     }
 
-    /** POST /billing/verify — confirm a payment by { reference } and activate the subscription. */
+    /** POST /billing/verify, confirm a payment by { reference } and activate the subscription. */
     public function verify(Request $request, Response $response): Response
     {
         if (($guard = $this->adminGuard($request, $response)) !== null) {
@@ -158,7 +158,7 @@ final class BillingAction
         $this->notify->notify(
             $actor,
             'billing',
-            'Payment received — ' . $txn->getPlan()->getName() . ' plan',
+            'Payment received, ' . $txn->getPlan()->getName() . ' plan',
             'We received your payment of ₦' . number_format($txn->getAmountKobo() / 100) . '. Your subscription is active until ' . $sub->getPeriodEnd()->format('j M Y') . '.',
             '/admin/management/billing',
         );
@@ -168,7 +168,7 @@ final class BillingAction
         return Json::write($response, ['transaction' => $txn->toArray(), 'subscription' => $sub->toArray()]);
     }
 
-    /** GET /billing/transactions — invoice history for the institution. */
+    /** GET /billing/transactions, invoice history for the institution. */
     public function transactions(Request $request, Response $response): Response
     {
         if (($guard = $this->adminGuard($request, $response)) !== null) {

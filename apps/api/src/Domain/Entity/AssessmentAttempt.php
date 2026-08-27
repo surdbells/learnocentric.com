@@ -41,7 +41,7 @@ class AssessmentAttempt
     #[ORM\Column(length: 20)]
     private string $status = self::IN_PROGRESS;
 
-    /** academic | competency — snapshot from the assessment. */
+    /** academic | competency, snapshot from the assessment. */
     #[ORM\Column(length: 20)]
     private string $track = 'academic';
 

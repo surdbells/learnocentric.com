@@ -12,8 +12,8 @@ use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 
 /**
- * GET  /backend/auth/settings — profile summary + role-aware preferences (defaults merged over stored).
- * PUT  /backend/auth/settings — persist a type-checked merge of the incoming preferences.
+ * GET  /backend/auth/settings, profile summary + role-aware preferences (defaults merged over stored).
+ * PUT  /backend/auth/settings, persist a type-checked merge of the incoming preferences.
  *
  * Preferences are a single JSON blob on the user; unknown keys are ignored and
  * every scalar is cast to the type of its default, so the store can't be polluted.
@@ -124,7 +124,7 @@ final class UserSettingsAction
             return $base;
         }
 
-        // learner (student) — the fullest personal preference set
+        // learner (student), the fullest personal preference set
         $base['learning'] = [
             'daily_reminder' => true,
             'daily_reminder_time' => '19:00',
@@ -140,7 +140,7 @@ final class UserSettingsAction
     /**
      * Build a result where, for every section/key present in $schema, the value comes
      * from $override if it supplies a same-typed scalar, else from $stored, else the schema default.
-     * Unknown keys in the overriding arrays are ignored — the schema is the whitelist.
+     * Unknown keys in the overriding arrays are ignored, the schema is the whitelist.
      */
     private function mergeTyped(array $schema, array $stored, array $override): array
     {

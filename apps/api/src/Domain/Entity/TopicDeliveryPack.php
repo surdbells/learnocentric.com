@@ -40,7 +40,7 @@ class TopicDeliveryPack implements LifecycleAware
     #[ORM\Column(name: 'video_url', length: 1024, nullable: true)]
     private ?string $videoUrl = null;
 
-    /** Additional lesson media: array of {url, name}. Any type — video, audio, PDF, image. */
+    /** Additional lesson media: array of {url, name}. Any type, video, audio, PDF, image. */
     #[ORM\Column(type: Types::JSON, nullable: true)]
     private ?array $media = null;
 

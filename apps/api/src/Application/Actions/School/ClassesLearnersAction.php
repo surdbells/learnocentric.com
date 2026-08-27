@@ -19,7 +19,7 @@ use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 
 /**
- * School-Admin "Classes & Learners" unified hub — KPIs, the class list with
+ * School-Admin "Classes & Learners" unified hub, KPIs, the class list with
  * per-class stats, and a per-class learner roster with real average scores,
  * derived risk status and intervention flags. Backed by classes, enrolments,
  * graded attempts and interventions. Admission number, gender and attendance
@@ -37,7 +37,7 @@ final class ClassesLearnersAction
     {
     }
 
-    /** GET /school/classes-learners — KPI strip + class cards. */
+    /** GET /school/classes-learners, KPI strip + class cards. */
     public function hub(Request $request, Response $response): Response
     {
         if (($g = $this->staffGuard($request, $response)) !== null) {
@@ -82,7 +82,7 @@ final class ClassesLearnersAction
         ]);
     }
 
-    /** GET /school/classes/{id}/roster — a class's learners + overview stats. */
+    /** GET /school/classes/{id}/roster, a class's learners + overview stats. */
     public function roster(Request $request, Response $response, array $args): Response
     {
         if (($g = $this->staffGuard($request, $response)) !== null) {

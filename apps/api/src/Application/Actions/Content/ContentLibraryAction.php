@@ -15,7 +15,7 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Http\Message\UploadedFileInterface;
 
 /**
- * /backend/content/library — the platform content library (super admin only).
+ * /backend/content/library, the platform content library (super admin only).
  * Upload/curate resources, record their licence, and take items down.
  */
 final class ContentLibraryAction

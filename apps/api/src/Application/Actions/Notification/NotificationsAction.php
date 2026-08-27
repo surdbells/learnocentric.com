@@ -19,7 +19,7 @@ final class NotificationsAction
     {
     }
 
-    /** GET /notifications — recent notifications + unread count (?unread=1 to filter). */
+    /** GET /notifications, recent notifications + unread count (?unread=1 to filter). */
     public function mine(Request $request, Response $response): Response
     {
         $user = $this->currentUser($request);
@@ -44,7 +44,7 @@ final class NotificationsAction
         ]);
     }
 
-    /** POST /notifications/{id}/read — mark one read. */
+    /** POST /notifications/{id}/read, mark one read. */
     public function read(Request $request, Response $response, array $args): Response
     {
         $user = $this->currentUser($request);
@@ -61,7 +61,7 @@ final class NotificationsAction
         return Json::write($response, $notification->toArray());
     }
 
-    /** POST /notifications/read-all — mark every notification read. */
+    /** POST /notifications/read-all, mark every notification read. */
     public function readAll(Request $request, Response $response): Response
     {
         $user = $this->currentUser($request);

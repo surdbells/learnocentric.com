@@ -15,7 +15,7 @@ use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 
 /**
- * /backend/support/tickets — the support centre. Any user can open and follow
+ * /backend/support/tickets, the support centre. Any user can open and follow
  * their own tickets; institution admins see their institution's; the platform
  * super admin sees and works everything (assign, reply, escalate, resolve).
  */
@@ -28,7 +28,7 @@ final class SupportAction
     ) {
     }
 
-    /** GET list — scoped by role. */
+    /** GET list, scoped by role. */
     public function list(Request $request, Response $response): Response
     {
         /** @var User $user */
@@ -46,7 +46,7 @@ final class SupportAction
         return Json::write($response, array_map(static fn (SupportTicket $t) => $t->toArray(), $tickets));
     }
 
-    /** POST — open a ticket. */
+    /** POST, open a ticket. */
     public function create(Request $request, Response $response): Response
     {
         /** @var User $user */
@@ -91,7 +91,7 @@ final class SupportAction
         return Json::write($response, $ticket->toArray(true));
     }
 
-    /** POST reply — add a message to the thread. */
+    /** POST reply, add a message to the thread. */
     public function reply(Request $request, Response $response, array $args): Response
     {
         /** @var User $user */
@@ -123,7 +123,7 @@ final class SupportAction
         return Json::write($response, $ticket->toArray(true));
     }
 
-    /** POST transition — status change / assign-to-me / escalate (platform only). */
+    /** POST transition, status change / assign-to-me / escalate (platform only). */
     public function transition(Request $request, Response $response, array $args): Response
     {
         /** @var User $user */

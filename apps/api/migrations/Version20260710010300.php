@@ -10,7 +10,7 @@ use Doctrine\Migrations\AbstractMigration;
 /**
  * Structured teacher feedback for parent reports (spec §7.5, §18):
  * add optional strengths / practice_needed / parent_support_suggestion to
- * feedback_notes. Backward-compatible — all columns are nullable.
+ * feedback_notes. Backward-compatible, all columns are nullable.
  */
 final class Version20260710010300 extends AbstractMigration
 {

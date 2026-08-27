@@ -84,7 +84,7 @@ class WorksheetQuestion
         return in_array($this->type, self::AUTO_TYPES, true) && $this->correctAnswer !== null && trim($this->correctAnswer) !== '';
     }
 
-    /** Learner-facing shape — never leaks the correct answer. */
+    /** Learner-facing shape, never leaks the correct answer. */
     public function toLearnerArray(): array
     {
         return [
@@ -99,7 +99,7 @@ class WorksheetQuestion
         ];
     }
 
-    /** Staff-facing shape — includes the correct answer. */
+    /** Staff-facing shape, includes the correct answer. */
     public function toArray(): array
     {
         return $this->toLearnerArray() + ['correct_answer' => $this->correctAnswer];

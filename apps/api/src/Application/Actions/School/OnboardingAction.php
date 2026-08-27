@@ -40,7 +40,7 @@ final class OnboardingAction
     ) {
     }
 
-    /** POST /school/learners — create a learner with placement + guardian/support/consent. */
+    /** POST /school/learners, create a learner with placement + guardian/support/consent. */
     public function createLearner(Request $request, Response $response): Response
     {
         if (($g = $this->adminGuard($request, $response)) !== null) {
@@ -86,7 +86,7 @@ final class OnboardingAction
         return Json::write($response, ['user' => $user->toArray(), 'class_id' => $class?->getId()], 201);
     }
 
-    /** POST /school/staff — create a staff member with role + optional class/subject assignment. */
+    /** POST /school/staff, create a staff member with role + optional class/subject assignment. */
     public function createStaff(Request $request, Response $response): Response
     {
         if (($g = $this->adminGuard($request, $response)) !== null) {

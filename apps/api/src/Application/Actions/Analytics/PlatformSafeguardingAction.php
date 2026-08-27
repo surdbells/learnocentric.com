@@ -30,7 +30,7 @@ final class PlatformSafeguardingAction
     ) {
     }
 
-    /** GET /platform/safeguarding/overview — cross-institution stats + compliance. */
+    /** GET /platform/safeguarding/overview, cross-institution stats + compliance. */
     public function overview(Request $request, Response $response): Response
     {
         if (($g = $this->guard($request, $response)) !== null) {
@@ -111,7 +111,7 @@ final class PlatformSafeguardingAction
         ]);
     }
 
-    /** GET /platform/safeguarding/cases — every case, institution-tagged, filterable. */
+    /** GET /platform/safeguarding/cases, every case, institution-tagged, filterable. */
     public function cases(Request $request, Response $response): Response
     {
         if (($g = $this->guard($request, $response)) !== null) {
@@ -147,7 +147,7 @@ final class PlatformSafeguardingAction
         return Json::write($response, ['data' => $rows, 'meta' => ['total' => count($rows)]]);
     }
 
-    /** PUT /platform/safeguarding/{id} — triage a case (status / severity / outcome). */
+    /** PUT /platform/safeguarding/{id}, triage a case (status / severity / outcome). */
     public function update(Request $request, Response $response, array $args): Response
     {
         if (($g = $this->guard($request, $response)) !== null) {

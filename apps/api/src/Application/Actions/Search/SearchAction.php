@@ -20,7 +20,7 @@ use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 
 /**
- * GET /search?q= — global, permission-aware search over the modules the current
+ * GET /search?q=, global, permission-aware search over the modules the current
  * user can reach. Each persona searches a different slice; results carry a
  * role-correct deep link so the header search can navigate anywhere in the app.
  */

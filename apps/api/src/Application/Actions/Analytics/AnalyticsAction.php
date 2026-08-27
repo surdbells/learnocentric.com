@@ -26,7 +26,7 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 
 /**
  * Analytics rollups (spec §16): a school-level overview for staff and a
- * per-student progress report for the student, their guardian, or staff —
+ * per-student progress report for the student, their guardian, or staff -
  * always keeping academic marks and competency ratings separate.
  */
 final class AnalyticsAction
@@ -39,7 +39,7 @@ final class AnalyticsAction
     {
     }
 
-    /** GET /analytics/overview — staff dashboard rollup. */
+    /** GET /analytics/overview, staff dashboard rollup. */
     public function overview(Request $request, Response $response): Response
     {
         $user = $this->currentUser($request);
@@ -266,7 +266,7 @@ final class AnalyticsAction
     private const COMPETENCY_PCT = ['emerging' => 25, 'developing' => 50, 'proficient' => 75, 'mastery' => 100];
 
     /**
-     * Per-topic skill progress from REVIEWED portfolio work — the competency track.
+     * Per-topic skill progress from REVIEWED portfolio work, the competency track.
      * Each reviewed entry's rating maps to a score; scores are averaged per topic.
      *
      * @param PortfolioEntry[] $portfolio
@@ -332,7 +332,7 @@ final class AnalyticsAction
     }
 
     /**
-     * GET /analytics/school-report — school-wide performance report: headline
+     * GET /analytics/school-report, school-wide performance report: headline
      * figures, class × subject performance, a subject summary (school average +
      * highest/lowest class + pass rate + status) and priority attention areas.
      * All computed from graded attempts; nothing synthesised.
@@ -460,7 +460,7 @@ final class AnalyticsAction
     }
 
     /**
-     * GET /analytics/report-card/{id} — a formal term report card for one learner:
+     * GET /analytics/report-card/{id}, a formal term report card for one learner:
      * per-subject score + letter grade (from the school's grade bands) + remark,
      * an overall grade, attendance and the latest teacher comment. Viewable by the
      * learner, their guardian, or staff.
@@ -563,7 +563,7 @@ final class AnalyticsAction
                 return $b['grade'];
             }
         }
-        return $bands !== [] ? end($bands)['grade'] : '—';
+        return $bands !== [] ? end($bands)['grade'] : '-';
     }
 
     private function remarkFor(float $score): string
@@ -571,7 +571,7 @@ final class AnalyticsAction
         return $score >= 80 ? 'Excellent' : ($score >= 65 ? 'Very good' : ($score >= 50 ? 'Good' : ($score >= 40 ? 'Fair' : 'Needs improvement')));
     }
 
-    /** GET /analytics/children — students linked to the current guardian. */
+    /** GET /analytics/children, students linked to the current guardian. */
     public function children(Request $request, Response $response): Response
     {
         $user = $this->currentUser($request);
@@ -580,7 +580,7 @@ final class AnalyticsAction
         return Json::write($response, ['data' => array_map(static fn (GuardianLink $l) => $l->toArray(), $links)]);
     }
 
-    /** GET /analytics/student/{id} — progress report for self, guardian, or staff. */
+    /** GET /analytics/student/{id}, progress report for self, guardian, or staff. */
     public function student(Request $request, Response $response, array $args): Response
     {
         $viewer = $this->currentUser($request);
@@ -612,7 +612,7 @@ final class AnalyticsAction
             $wsAvg = round($sum / count($gradedSubs), 1);
         }
 
-        // Portfolio (competency — reported separately, never averaged into marks)
+        // Portfolio (competency, reported separately, never averaged into marks)
         $portfolio = $this->em->getRepository(PortfolioEntry::class)->findBy(['student' => $student], ['createdAt' => 'DESC']);
 
         // Feedback
@@ -633,7 +633,7 @@ final class AnalyticsAction
         $strengths = $mostRecent(static fn (FeedbackNote $n) => $n->getStrengths());
         $practiceNeeded = $mostRecent(static fn (FeedbackNote $n) => $n->getPracticeNeeded());
         $parentSupport = $mostRecent(static fn (FeedbackNote $n) => $n->getParentSupportSuggestion());
-        // Misconceptions to work on — from the known misconceptions of topics the
+        // Misconceptions to work on, from the known misconceptions of topics the
         // student has received feedback on (topic data already available here).
         $misconceptions = [];
         foreach ($notes as $n) {
@@ -692,7 +692,7 @@ final class AnalyticsAction
                 ], $subs),
             ],
             'competency' => [
-                // Skill progress is the competency track — drawn from reviewed portfolio work.
+                // Skill progress is the competency track, drawn from reviewed portfolio work.
                 'average' => $this->competencyAverage($portfolio),
                 'skills' => $this->competencySkills($portfolio),
                 'entries' => array_map(static fn (PortfolioEntry $p) => [

@@ -18,7 +18,7 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 use Throwable;
 
 /**
- * /backend/content/packages — curated content bundles (super admin only).
+ * /backend/content/packages, curated content bundles (super admin only).
  * List / show (with resources) / create / delete; plus lifecycle transition/history.
  */
 final class ContentPackagesAction
@@ -48,7 +48,7 @@ final class ContentPackagesAction
         return Json::write($response, $package->toArray(true));
     }
 
-    /** POST /content/assign — assign a package to an institution (or unassign with package_id null). */
+    /** POST /content/assign, assign a package to an institution (or unassign with package_id null). */
     public function assign(Request $request, Response $response): Response
     {
         if (($g = $this->guard($request, $response)) !== null) {
@@ -83,7 +83,7 @@ final class ContentPackagesAction
         ]);
     }
 
-    /** GET /content/my-resources — the caller institution's assigned package + its resources. */
+    /** GET /content/my-resources, the caller institution's assigned package + its resources. */
     public function myResources(Request $request, Response $response): Response
     {
         /** @var User $user */
@@ -183,7 +183,7 @@ final class ContentPackagesAction
         return Json::write($response, ['deleted' => true]);
     }
 
-    /** POST /content/packages/{id}/transition — body { to, note } */
+    /** POST /content/packages/{id}/transition, body { to, note } */
     public function transition(Request $request, Response $response, array $args): Response
     {
         if (($g = $this->guard($request, $response)) !== null) {

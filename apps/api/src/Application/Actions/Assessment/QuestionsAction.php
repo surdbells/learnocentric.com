@@ -20,7 +20,7 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 use Throwable;
 
 /**
- * /backend/assessment/questions — the question bank. CRUD plus the
+ * /backend/assessment/questions, the question bank. CRUD plus the
  * answer-validation gate (/validate) and the shared lifecycle (/transition).
  */
 final class QuestionsAction
@@ -111,7 +111,7 @@ final class QuestionsAction
     }
 
     /**
-     * POST /assessment/questions/bulk — import many questions at once. Body:
+     * POST /assessment/questions/bulk, import many questions at once. Body:
      * { topic_id?: int, questions: [{ stem, type, options?, correct_answer?,
      * marks?, difficulty?, explanation?, misconception_tag?, topic_id? }, ...] }.
      * Each row is created as a draft; malformed rows are reported, not fatal.
@@ -179,7 +179,7 @@ final class QuestionsAction
             $q->setStem((string) $body['stem']);
         }
         $this->applyFields($q, $body);
-        // Any content change invalidates a prior answer validation — must re-check.
+        // Any content change invalidates a prior answer validation, must re-check.
         $q->setAnswerValidated(false);
         $this->em->flush();
         $this->audit->log('question.update', $request->getAttribute('user'), 'Question', (string) $q->getId(), $before, $q->toArray());
@@ -202,7 +202,7 @@ final class QuestionsAction
         return Json::write($response, ['deleted' => true, 'id' => $id]);
     }
 
-    /** POST /assessment/questions/{id}/validate — run the answer-validation gate. */
+    /** POST /assessment/questions/{id}/validate, run the answer-validation gate. */
     public function validate(Request $request, Response $response, array $args): Response
     {
         $q = $this->em->getRepository(Question::class)->find((int) $args['id']);
@@ -222,7 +222,7 @@ final class QuestionsAction
         return Json::write($response, $this->row($q));
     }
 
-    /** POST /assessment/questions/{id}/transition — lifecycle, gated on validation for publish. */
+    /** POST /assessment/questions/{id}/transition, lifecycle, gated on validation for publish. */
     public function transition(Request $request, Response $response, array $args): Response
     {
         $q = $this->em->getRepository(Question::class)->find((int) $args['id']);
@@ -274,7 +274,7 @@ final class QuestionsAction
         return Json::write($response, array_map(static fn ($v) => $v->toArray(), $this->lifecycle->history($q)));
     }
 
-    /** POST /assessment/questions/bulk-delete — body { ids: number[] } */
+    /** POST /assessment/questions/bulk-delete, body { ids: number[] } */
     public function bulkDelete(Request $request, Response $response): Response
     {
         $ids = array_values(array_filter(array_map('intval', (array) (($request->getParsedBody()['ids'] ?? [])))));

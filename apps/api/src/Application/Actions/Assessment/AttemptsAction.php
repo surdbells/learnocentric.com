@@ -33,7 +33,7 @@ final class AttemptsAction
     ) {
     }
 
-    /** GET /assessment/attempts/available — published assessments the student can take. */
+    /** GET /assessment/attempts/available, published assessments the student can take. */
     public function available(Request $request, Response $response): Response
     {
         $student = $this->currentUser($request);
@@ -74,7 +74,7 @@ final class AttemptsAction
         return Json::write($response, ['data' => $rows, 'meta' => ['total' => count($rows)]]);
     }
 
-    /** POST /assessment/attempts — start (or resume) an attempt for { assessment_id }. */
+    /** POST /assessment/attempts, start (or resume) an attempt for { assessment_id }. */
     public function start(Request $request, Response $response): Response
     {
         $student = $this->currentUser($request);
@@ -104,7 +104,7 @@ final class AttemptsAction
         return Json::write($response, $this->takeView($attempt), 201);
     }
 
-    /** GET /assessment/attempts/{id} — owner (or staff) view of an attempt. */
+    /** GET /assessment/attempts/{id}, owner (or staff) view of an attempt. */
     public function show(Request $request, Response $response, array $args): Response
     {
         $attempt = $this->em->getRepository(AssessmentAttempt::class)->find((int) $args['id']);
@@ -123,7 +123,7 @@ final class AttemptsAction
         return Json::write($response, $this->takeView($attempt));
     }
 
-    /** POST /assessment/attempts/{id}/submit — submit answers and auto-grade. */
+    /** POST /assessment/attempts/{id}/submit, submit answers and auto-grade. */
     public function submit(Request $request, Response $response, array $args): Response
     {
         $attempt = $this->em->getRepository(AssessmentAttempt::class)->find((int) $args['id']);

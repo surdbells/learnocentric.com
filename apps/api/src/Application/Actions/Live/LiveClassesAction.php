@@ -23,7 +23,7 @@ use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Throwable;
 
-/** /backend/live-classes — scheduling, running, joining and attendance for Agora live classes. */
+/** /backend/live-classes, scheduling, running, joining and attendance for Agora live classes. */
 final class LiveClassesAction
 {
     use ResolvesInstitution;
@@ -47,7 +47,7 @@ final class LiveClassesAction
         };
     }
 
-    /** GET /live-classes — staff schedule. */
+    /** GET /live-classes, staff schedule. */
     private function list(Request $request, Response $response): Response
     {
         if (($guard = $this->staffGuard($request, $response)) !== null) {
@@ -153,7 +153,7 @@ final class LiveClassesAction
         return Json::write($response, ['deleted' => true, 'id' => $id]);
     }
 
-    /** POST /live-classes/{id}/start | /end — host changes the session state. */
+    /** POST /live-classes/{id}/start | /end, host changes the session state. */
     public function start(Request $request, Response $response, array $args): Response
     {
         return $this->setStatus($request, $response, (int) $args['id'], LiveClass::LIVE);
@@ -204,7 +204,7 @@ final class LiveClassesAction
         return Json::write($response, ['deleted' => $count]);
     }
 
-    /** GET /live-classes/upcoming — scheduled/live classes for the student's classes. */
+    /** GET /live-classes/upcoming, scheduled/live classes for the student's classes. */
     public function upcoming(Request $request, Response $response): Response
     {
         $student = $this->currentUser($request);
@@ -232,7 +232,7 @@ final class LiveClassesAction
         return Json::write($response, ['data' => $rows, 'meta' => ['total' => count($rows)]]);
     }
 
-    /** GET /live-classes/board — the learner Live Classes page: next, upcoming, past, today. */
+    /** GET /live-classes/board, the learner Live Classes page: next, upcoming, past, today. */
     public function board(Request $request, Response $response): Response
     {
         $student = $this->currentUser($request);
@@ -278,7 +278,7 @@ final class LiveClassesAction
         ]);
     }
 
-    /** GET /live-classes/staff-board — teacher/admin Live Classes page (KPIs, attendance, today). */
+    /** GET /live-classes/staff-board, teacher/admin Live Classes page (KPIs, attendance, today). */
     public function staffBoard(Request $request, Response $response): Response
     {
         if (($guard = $this->staffGuard($request, $response)) !== null) {
@@ -390,7 +390,7 @@ final class LiveClassesAction
         return $qb;
     }
 
-    /** POST /live-classes/{id}/join — student joins; records attendance, returns the room URL. */
+    /** POST /live-classes/{id}/join, student joins; records attendance, returns the room URL. */
     public function join(Request $request, Response $response, array $args): Response
     {
         $user = $this->currentUser($request);
@@ -403,11 +403,11 @@ final class LiveClassesAction
         // A class is only joinable once it is live (a channel is assigned). Before
         // that a learner should wait for the host to go live.
         if ($lc->getStatus() !== LiveClass::LIVE) {
-            return Json::error($response, 'This class hasn\'t started yet — please wait for the host to go live.', 422);
+            return Json::error($response, 'This class hasn\'t started yet, please wait for the host to go live.', 422);
         }
         $channel = (string) $lc->getRoomName();
         if ($channel === '') {
-            return Json::error($response, 'This class has no channel yet — ask the host to restart it.', 409);
+            return Json::error($response, 'This class has no channel yet, ask the host to restart it.', 409);
         }
         if (!$this->agora->isConfigured()) {
             return Json::error($response, 'Live video is not configured on this server (missing Agora credentials).', 503);
@@ -441,7 +441,7 @@ final class LiveClassesAction
         ]);
     }
 
-    /** GET /live-classes/{id}/attendance — staff view of who joined. */
+    /** GET /live-classes/{id}/attendance, staff view of who joined. */
     public function attendance(Request $request, Response $response, array $args): Response
     {
         if (($guard = $this->staffGuard($request, $response)) !== null) {
@@ -466,8 +466,8 @@ final class LiveClassesAction
     // --- helpers ---
 
     /**
-     * Assign the class an Agora channel. With Agora a channel is just a name —
-     * there's no room resource to create — so this is a local slug; the RTC token
+     * Assign the class an Agora channel. With Agora a channel is just a name -
+     * there's no room resource to create, so this is a local slug; the RTC token
      * that authorises joining it is minted per-user at join time.
      */
     private function provisionChannel(LiveClass $lc): void

@@ -29,7 +29,7 @@ final class GradebookAction
     {
     }
 
-    /** GET /assessment/gradebook — published assessments with attempt stats. */
+    /** GET /assessment/gradebook, published assessments with attempt stats. */
     public function overview(Request $request, Response $response): Response
     {
         if (($guard = $this->guard($request, $response)) !== null) {
@@ -62,7 +62,7 @@ final class GradebookAction
         return Json::write($response, ['data' => $rows, 'meta' => ['total' => count($rows)]]);
     }
 
-    /** GET /assessment/gradebook/{id} — every attempt for one assessment plus a summary. */
+    /** GET /assessment/gradebook/{id}, every attempt for one assessment plus a summary. */
     public function assessment(Request $request, Response $response, array $args): Response
     {
         if (($guard = $this->guard($request, $response)) !== null) {
@@ -92,7 +92,7 @@ final class GradebookAction
         ]);
     }
 
-    /** GET /assessment/gradebook/students — per-student rollup, academic vs competency kept apart. */
+    /** GET /assessment/gradebook/students, per-student rollup, academic vs competency kept apart. */
     public function students(Request $request, Response $response): Response
     {
         if (($guard = $this->guard($request, $response)) !== null) {
@@ -149,7 +149,7 @@ final class GradebookAction
     }
 
     /**
-     * GET /assessment/gradebook/matrix — the learner × component grid: published
+     * GET /assessment/gradebook/matrix, the learner × component grid: published
      * academic assessments become weighted columns (weight = the component's share
      * of total marks), graded attempts fill the cells, and each learner gets a
      * marks-weighted average mapped to a letter grade via the school's grade bands.
@@ -306,7 +306,7 @@ final class GradebookAction
                 return $band['grade'];
             }
         }
-        return $bands !== [] ? end($bands)['grade'] : '—';
+        return $bands !== [] ? end($bands)['grade'] : '-';
     }
 
     /**

@@ -9,7 +9,7 @@ use Doctrine\Migrations\AbstractMigration;
 
 /**
  * Safeguarding cases: add severity, access_level and evidence (spec §15).
- * Backward-compatible — existing rows adopt the column defaults.
+ * Backward-compatible, existing rows adopt the column defaults.
  */
 final class Version20260710010200 extends AbstractMigration
 {

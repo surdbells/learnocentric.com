@@ -12,7 +12,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 
-/** /backend/billing/plans — plan catalogue (anyone authed reads; super admin manages). */
+/** /backend/billing/plans, plan catalogue (anyone authed reads; super admin manages). */
 final class PlansAction
 {
     public function __construct(

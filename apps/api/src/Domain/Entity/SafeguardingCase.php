@@ -43,7 +43,7 @@ class SafeguardingCase
     #[ORM\Column(type: Types::INTEGER)]
     private ?int $id = null;
 
-    /** The student the concern is about (optional — a concern may be general). */
+    /** The student the concern is about (optional, a concern may be general). */
     #[ORM\ManyToOne(targetEntity: User::class)]
     #[ORM\JoinColumn(name: 'student_id', referencedColumnName: 'id', nullable: true, onDelete: 'SET NULL')]
     private ?User $student = null;

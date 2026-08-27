@@ -27,7 +27,7 @@ final class InsightsAction
     {
     }
 
-    /** GET /assessment/insights — most-missed questions with the topic's known misconceptions. */
+    /** GET /assessment/insights, most-missed questions with the topic's known misconceptions. */
     public function __invoke(Request $request, Response $response): Response
     {
         /** @var User|null $user */

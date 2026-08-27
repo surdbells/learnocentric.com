@@ -141,14 +141,14 @@ return static function (App $app): void {
             $auth->get('/curriculum/review-queue', ReviewQueueAction::class);
             $auth->get('/curriculum/map', \App\Application\Actions\Curriculum\CurriculumMapAction::class);
 
-            // Delivery packs — author lesson content (staff), lifecycle-governed
+            // Delivery packs, author lesson content (staff), lifecycle-governed
             $auth->map(['GET', 'POST', 'PUT', 'DELETE'], '/curriculum/delivery-packs', DeliveryPacksAction::class);
             $auth->post('/curriculum/delivery-packs/bulk-delete', DeliveryPacksAction::class . ':bulkDelete');
             $auth->post('/curriculum/delivery-packs/{id:[0-9]+}/transition', DeliveryPacksAction::class . ':transition');
             $auth->get('/curriculum/delivery-packs/{id:[0-9]+}/history', DeliveryPacksAction::class . ':history');
             $auth->get('/curriculum/delivery-packs/{id:[0-9]+}', DeliveryPacksAction::class . ':show');
 
-            // Assessment — question bank (answer-validation gate) + lifecycle
+            // Assessment, question bank (answer-validation gate) + lifecycle
             $auth->map(['GET', 'POST', 'PUT', 'DELETE'], '/assessment/questions', QuestionsAction::class);
             $auth->post('/assessment/questions/bulk-delete', QuestionsAction::class . ':bulkDelete');
             $auth->post('/assessment/questions/bulk', QuestionsAction::class . ':bulkCreate');
@@ -156,7 +156,7 @@ return static function (App $app): void {
             $auth->post('/assessment/questions/{id:[0-9]+}/transition', QuestionsAction::class . ':transition');
             $auth->get('/assessment/questions/{id:[0-9]+}/history', QuestionsAction::class . ':history');
 
-            // Assessment — quiz/test builder assembled from validated questions
+            // Assessment, quiz/test builder assembled from validated questions
             $auth->map(['GET', 'POST', 'PUT', 'DELETE'], '/assessment/assessments', AssessmentsAction::class);
             $auth->post('/assessment/assessments/bulk-delete', AssessmentsAction::class . ':bulkDelete');
             $auth->get('/assessment/assessments/{id:[0-9]+}', AssessmentsAction::class . ':show');
@@ -168,19 +168,19 @@ return static function (App $app): void {
             $auth->post('/assessment/assessments/{id:[0-9]+}/moderate', AssessmentsAction::class . ':moderate')
                 ->setArgument('perm', 'assessment:approve');
 
-            // Assessment — learner attempts (take + auto-grade)
+            // Assessment, learner attempts (take + auto-grade)
             $auth->get('/assessment/attempts/available', AttemptsAction::class . ':available');
             $auth->post('/assessment/attempts', AttemptsAction::class . ':start');
             $auth->get('/assessment/attempts/{id:[0-9]+}', AttemptsAction::class . ':show');
             $auth->post('/assessment/attempts/{id:[0-9]+}/submit', AttemptsAction::class . ':submit');
 
-            // Assessment — gradebook (staff)
+            // Assessment, gradebook (staff)
             $auth->get('/assessment/gradebook', GradebookAction::class . ':overview');
             $auth->get('/assessment/gradebook/matrix', GradebookAction::class . ':matrix');
             $auth->get('/assessment/gradebook/students', GradebookAction::class . ':students');
             $auth->get('/assessment/gradebook/{id:[0-9]+}', GradebookAction::class . ':assessment');
 
-            // Worksheets — topic-linked, staff CRUD + lifecycle, student submit + staff grade
+            // Worksheets, topic-linked, staff CRUD + lifecycle, student submit + staff grade
             $auth->map(['GET', 'POST', 'PUT', 'DELETE'], '/assessment/worksheets', WorksheetsAction::class);
             $auth->post('/assessment/worksheets/bulk-delete', WorksheetsAction::class . ':bulkDelete');
             $auth->get('/assessment/submissions/inbox', SubmissionsInboxAction::class);
@@ -198,7 +198,7 @@ return static function (App $app): void {
             $auth->get('/assessment/worksheet-submissions/{id:[0-9]+}/detail', WorksheetSubmissionsAction::class . ':submissionDetail');
             $auth->post('/assessment/worksheet-submissions/{id:[0-9]+}/grade-questions', WorksheetSubmissionsAction::class . ':gradeQuestions');
 
-            // Portfolio — competency-track evidence (student submit, staff review)
+            // Portfolio, competency-track evidence (student submit, staff review)
             $auth->map(['GET', 'POST', 'PUT', 'DELETE'], '/assessment/portfolio', PortfolioAction::class);
             $auth->get('/assessment/portfolio/mine', PortfolioAction::class . ':mine');
             $auth->get('/assessment/portfolio/tasks', PortfolioAction::class . ':tasks');
@@ -212,7 +212,7 @@ return static function (App $app): void {
             $auth->post('/assessment/feedback/{id:[0-9]+}/acknowledge', FeedbackAction::class . ':acknowledge');
             $auth->get('/assessment/insights', InsightsAction::class);
 
-            // Live classes (Agora) — schedule, run, join, attendance
+            // Live classes (Agora), schedule, run, join, attendance
             $auth->map(['GET', 'POST', 'PUT', 'DELETE'], '/live-classes', LiveClassesAction::class);
             $auth->post('/live-classes/bulk-delete', LiveClassesAction::class . ':bulkDelete');
             $auth->get('/live-classes/upcoming', LiveClassesAction::class . ':upcoming');
@@ -230,7 +230,7 @@ return static function (App $app): void {
             $auth->get('/dashboard/super-admin', DashboardAction::class . ':superAdmin');
             $auth->get('/dashboard/parent', DashboardAction::class . ':parent');
 
-            // Analytics — school overview (staff) + student progress report (self/guardian/staff)
+            // Analytics, school overview (staff) + student progress report (self/guardian/staff)
             $auth->get('/search', \App\Application\Actions\Search\SearchAction::class);
 
             $auth->get('/analytics/overview', AnalyticsAction::class . ':overview');
@@ -239,20 +239,20 @@ return static function (App $app): void {
             $auth->get('/analytics/children', AnalyticsAction::class . ':children');
             $auth->get('/analytics/student/{id:[0-9]+}', AnalyticsAction::class . ':student');
 
-            // Server-side CSV exports (staff) — audited via AuditLogger (report.export)
+            // Server-side CSV exports (staff), audited via AuditLogger (report.export)
             $auth->get('/export/gradebook', ExportAction::class . ':gradebook')->setArgument('perm', 'report:export');
             $auth->get('/export/summary', ExportAction::class . ':summary')->setArgument('perm', 'report:export');
 
-            // Platform audit trail (super admin) — read-only view of AuditLog rows
+            // Platform audit trail (super admin), read-only view of AuditLog rows
             $auth->get('/audit-logs', AuditLogsAction::class);
 
-            // Platform user directory (super admin) — Users & Roles
+            // Platform user directory (super admin), Users & Roles
             $auth->get('/admin/users', \App\Application\Actions\Admin\PlatformUsersAction::class);
 
-            // Platform analytics (super admin) — cross-institution aggregation
+            // Platform analytics (super admin), cross-institution aggregation
             $auth->get('/platform/analytics', \App\Application\Actions\Analytics\PlatformAnalyticsAction::class . ':overview');
 
-            // Platform reports engine (super admin) — templated, persisted, exportable
+            // Platform reports engine (super admin), templated, persisted, exportable
             $auth->get('/platform/reports/templates', \App\Application\Actions\Analytics\ReportsAction::class . ':templates');
             $auth->get('/platform/reports', \App\Application\Actions\Analytics\ReportsAction::class . ':list');
             $auth->post('/platform/reports', \App\Application\Actions\Analytics\ReportsAction::class . ':generate');
@@ -260,15 +260,15 @@ return static function (App $app): void {
             $auth->get('/platform/reports/{id:[0-9]+}', \App\Application\Actions\Analytics\ReportsAction::class . ':show');
             $auth->delete('/platform/reports/{id:[0-9]+}', \App\Application\Actions\Analytics\ReportsAction::class . ':delete');
 
-            // Platform system settings (super admin) — general/flags/security/integrations
+            // Platform system settings (super admin), general/flags/security/integrations
             $auth->map(['GET', 'PUT'], '/platform/settings', \App\Application\Actions\Analytics\SystemSettingsAction::class);
 
-            // Platform billing depth (super admin) — revenue, renewals, invoices, payment issues
+            // Platform billing depth (super admin), revenue, renewals, invoices, payment issues
             $auth->get('/platform/billing/overview', \App\Application\Actions\Analytics\PlatformBillingAction::class . ':overview');
             $auth->get('/platform/billing/invoices', \App\Application\Actions\Analytics\PlatformBillingAction::class . ':invoices');
             $auth->get('/platform/billing/subscriptions', \App\Application\Actions\Analytics\PlatformBillingAction::class . ':subscriptions');
 
-            // Platform safeguarding & compliance (super admin) — cross-institution register
+            // Platform safeguarding & compliance (super admin), cross-institution register
             $auth->get('/platform/safeguarding/overview', \App\Application\Actions\Analytics\PlatformSafeguardingAction::class . ':overview');
             $auth->get('/platform/safeguarding/cases', \App\Application\Actions\Analytics\PlatformSafeguardingAction::class . ':cases');
             $auth->put('/platform/safeguarding/{id:[0-9]+}', \App\Application\Actions\Analytics\PlatformSafeguardingAction::class . ':update');
@@ -285,19 +285,19 @@ return static function (App $app): void {
             $auth->post('/content/school-resources', SchoolResourcesAction::class . ':create');
             $auth->delete('/content/school-resources', SchoolResourcesAction::class . ':delete');
 
-            // Billing (Paystack) — plan catalogue, subscribe/verify, invoices
+            // Billing (Paystack), plan catalogue, subscribe/verify, invoices
             $auth->map(['GET', 'POST', 'PUT', 'DELETE'], '/billing/plans', PlansAction::class);
             $auth->get('/billing/subscription', BillingAction::class . ':current');
             $auth->post('/billing/subscribe', BillingAction::class . ':subscribe');
             $auth->post('/billing/verify', BillingAction::class . ':verify');
             $auth->get('/billing/transactions', BillingAction::class . ':transactions');
 
-            // Learn — student topic journey (lesson + stage progress)
+            // Learn, student topic journey (lesson + stage progress)
             $auth->get('/learn/subjects', LearnAction::class . ':subjects');
             $auth->get('/learn/subjects/{id:[0-9]+}', LearnAction::class . ':subject');
             $auth->get('/learn/profile', LearnAction::class . ':profile');
             $auth->get('/learn/topics', LearnAction::class . ':topics');
-            // Ask Tutor — tutor directory, questions (Q&A) + ratings
+            // Ask Tutor, tutor directory, questions (Q&A) + ratings
             $auth->get('/ask-tutor/board', AskTutorAction::class . ':board');
             $auth->post('/ask-tutor/questions', AskTutorAction::class . ':ask');
             $auth->post('/ask-tutor/questions/{id:[0-9]+}/answer', AskTutorAction::class . ':answerQuestion');
@@ -323,7 +323,7 @@ return static function (App $app): void {
             $auth->post('/notifications/read-all', NotificationsAction::class . ':readAll');
             $auth->post('/notifications/{id:[0-9]+}/read', NotificationsAction::class . ':read');
 
-            // Support centre — tickets, SLA, threaded replies, escalation
+            // Support centre, tickets, SLA, threaded replies, escalation
             $auth->get('/support/tickets', SupportAction::class . ':list');
             $auth->post('/support/tickets', SupportAction::class . ':create');
             $auth->get('/support/tickets/{id:[0-9]+}', SupportAction::class . ':show');

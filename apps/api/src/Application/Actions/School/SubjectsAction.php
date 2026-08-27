@@ -17,7 +17,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 
-/** /backend/school/subjects — GET list, POST create, PUT update, DELETE remove. */
+/** /backend/school/subjects, GET list, POST create, PUT update, DELETE remove. */
 final class SubjectsAction
 {
     use ResolvesInstitution;
@@ -70,7 +70,7 @@ final class SubjectsAction
         return Json::write($response, Paginator::paginate($qb, 's', $query, $sortMap, $mapper));
     }
 
-    /** POST /backend/school/subjects/bulk-delete — body: { ids: number[] } */
+    /** POST /backend/school/subjects/bulk-delete, body: { ids: number[] } */
     public function bulkDelete(Request $request, Response $response): Response
     {
         $ids = array_values(array_filter(array_map('intval', (array) (($request->getParsedBody()['ids'] ?? [])))));
@@ -155,7 +155,7 @@ final class SubjectsAction
     }
 
     /**
-     * GET /school/subjects/available — the catalogue, each entry flagged with
+     * GET /school/subjects/available, the catalogue, each entry flagged with
      * whether this institution has already adopted it.
      */
     public function available(Request $request, Response $response): Response
@@ -182,7 +182,7 @@ final class SubjectsAction
         return Json::write($response, $rows);
     }
 
-    /** POST /school/subjects/adopt — adopt a catalogue subject into this institution. */
+    /** POST /school/subjects/adopt, adopt a catalogue subject into this institution. */
     public function adopt(Request $request, Response $response): Response
     {
         $institution = $this->institutionForWrite($request, (array) $request->getParsedBody());

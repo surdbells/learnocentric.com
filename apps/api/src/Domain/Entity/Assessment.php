@@ -119,7 +119,7 @@ class Assessment implements LifecycleAware
         return $total;
     }
 
-    /** Attached questions still failing the answer gate — empty means publishable. */
+    /** Attached questions still failing the answer gate, empty means publishable. */
     public function unvalidatedQuestions(): array
     {
         $bad = [];

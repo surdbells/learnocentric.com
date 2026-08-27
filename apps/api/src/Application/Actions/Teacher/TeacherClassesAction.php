@@ -18,7 +18,7 @@ use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 
 /**
- * GET /backend/teacher/classes — the "My Classes" workspace for a teacher:
+ * GET /backend/teacher/classes, the "My Classes" workspace for a teacher:
  * per-class roster stats (learners, graded-attempt average, last activity),
  * a performance distribution across their learners, today's live schedule,
  * and headline KPIs. All figures come from real data (assignments,

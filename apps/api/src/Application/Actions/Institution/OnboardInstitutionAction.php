@@ -15,7 +15,7 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 use Throwable;
 
 /**
- * POST /backend/admin/onboard — Super Admin onboards a school and (optionally)
+ * POST /backend/admin/onboard, Super Admin onboards a school and (optionally)
  * its first School Admin user.
  */
 final class OnboardInstitutionAction
@@ -61,7 +61,7 @@ final class OnboardInstitutionAction
                     'institutionId' => $institution->getId(),
                 ]);
             } catch (Throwable $e) {
-                // Institution created but admin failed — report partial success.
+                // Institution created but admin failed, report partial success.
                 return Json::write($response, [
                     'institution' => $institution->toArray(),
                     'admin_error' => $e->getMessage(),

@@ -8,7 +8,7 @@ use App\Domain\Entity\Concern\TimestampsTrait;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
-/** Tracks a student viewing a topic's lesson — the entry point of the topic journey. */
+/** Tracks a student viewing a topic's lesson, the entry point of the topic journey. */
 #[ORM\Entity]
 #[ORM\Table(name: 'topic_progress')]
 #[ORM\UniqueConstraint(name: 'uniq_topic_student_progress', columns: ['topic_id', 'student_id'])]

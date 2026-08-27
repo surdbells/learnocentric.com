@@ -8,7 +8,7 @@ namespace App\Service\Storage;
  * Normalises stored file references. The database holds a bare Flysystem path
  * (e.g. "2026/08/ab12cd.png"); the API exposes it as a backend-served route
  * ("/backend/files/2026/08/ab12cd.png"). External links a user legitimately
- * provides (e.g. a YouTube URL on a resource) are left untouched — only our
+ * provides (e.g. a YouTube URL on a resource) are left untouched, only our
  * own uploaded-file references are pathified.
  */
 final class FilePath
@@ -34,7 +34,7 @@ final class FilePath
         if (preg_match('#^(?:https?://[^/]+)?/?uploads/(.+)$#', $v, $m) === 1) {
             return self::clean($m[1]);
         }
-        // Any other absolute URL is an external link (YouTube, Vimeo, …) — keep as-is.
+        // Any other absolute URL is an external link (YouTube, Vimeo, …), keep as-is.
         if (preg_match('#^https?://#', $v) === 1) {
             return $v;
         }
@@ -52,7 +52,7 @@ final class FilePath
         if ($v === '') {
             return null;
         }
-        // External link or legacy absolute URL — leave it.
+        // External link or legacy absolute URL, leave it.
         if (preg_match('#^https?://#', $v) === 1) {
             return $v;
         }

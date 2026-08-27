@@ -13,7 +13,7 @@ use Doctrine\ORM\Mapping as ORM;
 /**
  * A question in the bank, tied to a topic. Every question must carry a
  * well-formed, validated correct answer before it can be published or added
- * to an assessment — the answer-validation gate the spec insists on (§14).
+ * to an assessment, the answer-validation gate the spec insists on (§14).
  */
 #[ORM\Entity]
 #[ORM\Table(name: 'questions')]

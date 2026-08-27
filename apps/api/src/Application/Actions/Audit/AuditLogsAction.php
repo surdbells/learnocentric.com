@@ -14,7 +14,7 @@ use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 
 /**
- * GET /backend/audit-logs — platform audit trail (super admin only).
+ * GET /backend/audit-logs, platform audit trail (super admin only).
  *
  * The AuditLog rows are written across the app (logins, role/content/score edits,
  * exports, settings changes); this surfaces them read-only with the actor and

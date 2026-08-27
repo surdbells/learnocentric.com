@@ -16,7 +16,7 @@ use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 
 /**
- * GET /curriculum/map — the curriculum coverage map: topics grouped by subject
+ * GET /curriculum/map, the curriculum coverage map: topics grouped by subject
  * (optionally scoped to a class + term), each carrying delivery-pack, assessment,
  * question-bank and portfolio readiness so gaps in the curriculum are visible at
  * a glance. A topic counts as "ready" once it has a published pack + assessment.

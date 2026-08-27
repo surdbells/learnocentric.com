@@ -13,7 +13,7 @@ use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 
 /**
- * /backend/platform/settings — platform-wide configuration for the super admin:
+ * /backend/platform/settings, platform-wide configuration for the super admin:
  * general, self-registration policy, feature flags, security policy and
  * integration toggles. Stored as one JSON row; secrets are never kept here.
  */

@@ -13,7 +13,7 @@ use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 
 /**
- * /backend/catalog/subjects — the platform subject catalogue. Any authenticated
+ * /backend/catalog/subjects, the platform subject catalogue. Any authenticated
  * user may read it (schools pick from it, packages scope to it); only the super
  * admin may create, edit or retire catalogue subjects.
  */

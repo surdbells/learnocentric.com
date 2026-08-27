@@ -26,7 +26,7 @@ class ContentResource
     // Who the resource is intended for (spec §17 governance).
     public const AUDIENCES = ['learner', 'teacher', 'school_admin', 'platform'];
 
-    // Publication state — only "published" resources are delivered to learners.
+    // Publication state, only "published" resources are delivered to learners.
     public const VISIBILITIES = ['draft', 'internal', 'published'];
 
     // Licence review / takedown lifecycle.

@@ -21,7 +21,7 @@ use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Throwable;
 
-/** /backend/assessment/worksheets — topic-linked worksheets (staff), lifecycle-governed. */
+/** /backend/assessment/worksheets, topic-linked worksheets (staff), lifecycle-governed. */
 final class WorksheetsAction
 {
     use ResolvesInstitution;

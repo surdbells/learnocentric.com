@@ -12,7 +12,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 
-/** POST /backend/auth/password — change own password (verify current, set new). */
+/** POST /backend/auth/password, change own password (verify current, set new). */
 final class ChangePasswordAction
 {
     public function __construct(

@@ -40,7 +40,7 @@ final class ReportsAction
     ) {
     }
 
-    /** GET /platform/reports/templates — the report types that can be generated. */
+    /** GET /platform/reports/templates, the report types that can be generated. */
     public function templates(Request $request, Response $response): Response
     {
         if (($g = $this->guard($request, $response)) !== null) {
@@ -53,7 +53,7 @@ final class ReportsAction
         return Json::write($response, ['data' => $rows]);
     }
 
-    /** GET /platform/reports — history of generated reports (newest first). */
+    /** GET /platform/reports, history of generated reports (newest first). */
     public function list(Request $request, Response $response): Response
     {
         if (($g = $this->guard($request, $response)) !== null) {
@@ -63,7 +63,7 @@ final class ReportsAction
         return Json::write($response, ['data' => array_map(static fn (Report $r) => $r->toArray(), $reports), 'meta' => ['total' => count($reports)]]);
     }
 
-    /** POST /platform/reports — generate + persist a report of { type }. */
+    /** POST /platform/reports, generate + persist a report of { type }. */
     public function generate(Request $request, Response $response): Response
     {
         if (($g = $this->guard($request, $response)) !== null) {
@@ -96,7 +96,7 @@ final class ReportsAction
         return Json::write($response, $report->toArray(true), 201);
     }
 
-    /** GET /platform/reports/{id} — the full snapshot incl. rows. */
+    /** GET /platform/reports/{id}, the full snapshot incl. rows. */
     public function show(Request $request, Response $response, array $args): Response
     {
         if (($g = $this->guard($request, $response)) !== null) {
@@ -109,7 +109,7 @@ final class ReportsAction
         return Json::write($response, $report->toArray(true));
     }
 
-    /** GET /platform/reports/{id}/export — download the snapshot as CSV. */
+    /** GET /platform/reports/{id}/export, download the snapshot as CSV. */
     public function export(Request $request, Response $response, array $args): Response
     {
         if (($g = $this->guard($request, $response)) !== null) {
@@ -139,7 +139,7 @@ final class ReportsAction
             ->withHeader('Content-Disposition', 'attachment; filename="' . $slug . '.csv"');
     }
 
-    /** DELETE /platform/reports/{id} — remove a snapshot from the history. */
+    /** DELETE /platform/reports/{id}, remove a snapshot from the history. */
     public function delete(Request $request, Response $response, array $args): Response
     {
         if (($g = $this->guard($request, $response)) !== null) {
@@ -175,7 +175,7 @@ final class ReportsAction
             ['Subjects', (int) $this->em->getRepository(\App\Domain\Entity\Subject::class)->count([])],
             ['Published assessments', (int) $this->em->getRepository(Assessment::class)->count(['approvalStatus' => Lifecycle::PUBLISHED])],
             ['Graded attempts', (int) $graded['c']],
-            ['Average score (%)', $avg ?? '—'],
+            ['Average score (%)', $avg ?? '-'],
             ['Monthly revenue (₦)', $mrr],
         ];
 
@@ -183,7 +183,7 @@ final class ReportsAction
             'summary' => [
                 ['label' => 'Institutions', 'value' => (int) $this->em->getRepository(Institution::class)->count([])],
                 ['label' => 'Users', 'value' => (int) $this->em->getRepository(User::class)->count([])],
-                ['label' => 'Avg score', 'value' => $avg === null ? '—' : $avg . '%'],
+                ['label' => 'Avg score', 'value' => $avg === null ? '-' : $avg . '%'],
                 ['label' => 'MRR', 'value' => '₦' . number_format($mrr)],
             ],
             'columns' => ['Metric', 'Value'],
@@ -196,7 +196,7 @@ final class ReportsAction
     {
         $rows = [];
         foreach ($this->em->getRepository(Institution::class)->findAll() as $inst) {
-            $rows[$inst->getId()] = [$inst->getName(), $inst->getStatus(), 0, 0, 0, '—'];
+            $rows[$inst->getId()] = [$inst->getName(), $inst->getStatus(), 0, 0, 0, '-'];
         }
         foreach ($this->groupCount(User::class, 'u', 'u.institution', 'u.institution IS NOT NULL') as $r) {
             if (isset($rows[(int) $r['k']])) {
@@ -217,7 +217,7 @@ final class ReportsAction
         foreach ($attempts as $r) {
             if (isset($rows[(int) $r['k']])) {
                 $rows[(int) $r['k']][4] = (int) $r['c'];
-                $rows[(int) $r['k']][5] = $r['avg'] === null ? '—' : round((float) $r['avg'], 1);
+                $rows[(int) $r['k']][5] = $r['avg'] === null ? '-' : round((float) $r['avg'], 1);
             }
         }
         $out = array_values($rows);

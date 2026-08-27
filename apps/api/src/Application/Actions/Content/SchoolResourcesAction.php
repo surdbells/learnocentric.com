@@ -15,7 +15,7 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Http\Message\UploadedFileInterface;
 
 /**
- * /backend/content/school-resources — teacher/admin resource uploads scoped to
+ * /backend/content/school-resources, teacher/admin resource uploads scoped to
  * their institution. School-owned resources are served to that institution's
  * learners alongside package resources (ContentPackagesAction::myResources).
  */
@@ -36,7 +36,7 @@ final class SchoolResourcesAction
     ) {
     }
 
-    /** GET /content/school-resources — the caller institution's uploaded resources. */
+    /** GET /content/school-resources, the caller institution's uploaded resources. */
     public function list(Request $request, Response $response): Response
     {
         if (($g = $this->staffGuard($request, $response)) !== null) {
@@ -51,7 +51,7 @@ final class SchoolResourcesAction
         return Json::write($response, ['data' => array_map(static fn (ContentResource $r) => $r->toArray(), $rows)]);
     }
 
-    /** POST /content/school-resources — upload a school resource (multipart: file + fields). */
+    /** POST /content/school-resources, upload a school resource (multipart: file + fields). */
     public function create(Request $request, Response $response): Response
     {
         if (($g = $this->staffGuard($request, $response)) !== null) {
@@ -104,7 +104,7 @@ final class SchoolResourcesAction
         return Json::write($response, $resource->toArray(), 201);
     }
 
-    /** DELETE /content/school-resources?id= — remove one of the institution's resources. */
+    /** DELETE /content/school-resources?id=, remove one of the institution's resources. */
     public function delete(Request $request, Response $response): Response
     {
         if (($g = $this->staffGuard($request, $response)) !== null) {

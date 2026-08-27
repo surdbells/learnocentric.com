@@ -36,7 +36,7 @@ final class LearnAction
     {
     }
 
-    /** GET /learn/topics — the student's topics with per-stage progress. */
+    /** GET /learn/topics, the student's topics with per-stage progress. */
     public function topics(Request $request, Response $response): Response
     {
         $student = $this->currentUser($request);
@@ -49,7 +49,7 @@ final class LearnAction
         return Json::write($response, ['data' => $rows, 'meta' => ['total' => count($rows)]]);
     }
 
-    /** GET /learn/profile — the learner profile overview: snapshot + derived achievements. */
+    /** GET /learn/profile, the learner profile overview: snapshot + derived achievements. */
     public function profile(Request $request, Response $response): Response
     {
         $student = $this->currentUser($request);
@@ -78,7 +78,7 @@ final class LearnAction
     }
 
     /**
-     * Achievements DERIVED from real activity (not a stored badge model) — each
+     * Achievements DERIVED from real activity (not a stored badge model), each
      * unlocks at a real threshold, so nothing is fabricated.
      *
      * @return array<int,array{key:string,title:string,detail:string,earned:bool,icon:string}>
@@ -94,7 +94,7 @@ final class LearnAction
         ];
     }
 
-    /** GET /learn/subjects — the learner's subjects with aggregate progress + next topic. */
+    /** GET /learn/subjects, the learner's subjects with aggregate progress + next topic. */
     public function subjects(Request $request, Response $response): Response
     {
         $student = $this->currentUser($request);
@@ -144,7 +144,7 @@ final class LearnAction
     }
 
     /**
-     * GET /learn/subjects/{id} — one subject's whole world for a learner: its
+     * GET /learn/subjects/{id}, one subject's whole world for a learner: its
      * lessons (topic journey), worksheets, quizzes, live classes, resources and
      * feedback, each scoped to this student. Every figure is real activity.
      */
@@ -323,7 +323,7 @@ final class LearnAction
         return $row ? trim($row['firstName'] . ' ' . $row['lastName']) : null;
     }
 
-    /** GET /learn/topics/{id} — the lesson content + stage detail for one topic. */
+    /** GET /learn/topics/{id}, the lesson content + stage detail for one topic. */
     public function lesson(Request $request, Response $response, array $args): Response
     {
         $student = $this->currentUser($request);
@@ -356,7 +356,7 @@ final class LearnAction
         ]);
     }
 
-    /** POST /learn/topics/{id}/complete-lesson — mark the lesson viewed. */
+    /** POST /learn/topics/{id}/complete-lesson, mark the lesson viewed. */
     public function completeLesson(Request $request, Response $response, array $args): Response
     {
         $student = $this->currentUser($request);
@@ -378,7 +378,7 @@ final class LearnAction
         return Json::write($response, $this->summary($topic, $this->stages($topic, $student)));
     }
 
-    /** GET/PUT /learn/topics/{id}/note — the learner's personal notes for a topic. */
+    /** GET/PUT /learn/topics/{id}/note, the learner's personal notes for a topic. */
     public function note(Request $request, Response $response, array $args): Response
     {
         $student = $this->currentUser($request);

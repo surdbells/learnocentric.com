@@ -47,7 +47,7 @@ final class PortfolioAction
         };
     }
 
-    /** GET /assessment/portfolio — staff list of evidence, filterable. */
+    /** GET /assessment/portfolio, staff list of evidence, filterable. */
     private function staffList(Request $request, Response $response): Response
     {
         if (($guard = $this->staffGuard($request, $response)) !== null) {
@@ -88,7 +88,7 @@ final class PortfolioAction
         return Json::write($response, Paginator::paginate($qb, 'p', $query, $sortMap, $mapper));
     }
 
-    /** GET /assessment/portfolio/mine — the current student's evidence. */
+    /** GET /assessment/portfolio/mine, the current student's evidence. */
     public function mine(Request $request, Response $response): Response
     {
         $student = $this->currentUser($request);
@@ -98,7 +98,7 @@ final class PortfolioAction
     }
 
     /**
-     * GET /assessment/portfolio/tasks — the student's task-driven portfolio: every
+     * GET /assessment/portfolio/tasks, the student's task-driven portfolio: every
      * topic that expects evidence (i.e. an assigned task) joined with the student's
      * latest submission, so the UI can show per-task status, brief and rating.
      */
@@ -157,7 +157,7 @@ final class PortfolioAction
         return Json::write($response, ['data' => $rows, 'meta' => ['total' => count($rows)]]);
     }
 
-    /** GET /assessment/portfolio/topics — topics that expect evidence, for the student's classes. */
+    /** GET /assessment/portfolio/topics, topics that expect evidence, for the student's classes. */
     public function topics(Request $request, Response $response): Response
     {
         $student = $this->currentUser($request);
@@ -252,7 +252,7 @@ final class PortfolioAction
         return Json::write($response, ['deleted' => true, 'id' => $entry->getId()]);
     }
 
-    /** POST /assessment/portfolio/{id}/review — staff records a competency rating + feedback. */
+    /** POST /assessment/portfolio/{id}/review, staff records a competency rating + feedback. */
     public function review(Request $request, Response $response, array $args): Response
     {
         if (($guard = $this->staffGuard($request, $response)) !== null) {
@@ -286,11 +286,11 @@ final class PortfolioAction
     }
 
     /**
-     * PUT /assessment/portfolio/tasks — staff assign (or update) the portfolio brief
+     * PUT /assessment/portfolio/tasks, staff assign (or update) the portfolio brief
      * on a topic. A topic with a non-empty brief becomes a portfolio task the topic's
      * learners see and submit evidence against. Unlike editing topic content, this is
      * allowed regardless of the topic's approval status (it's an assignment, not a
-     * content change needing re-approval) — but the task only surfaces to learners
+     * content change needing re-approval), but the task only surfaces to learners
      * once the topic is published.
      */
     public function assignTask(Request $request, Response $response): Response

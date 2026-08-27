@@ -10,7 +10,7 @@ use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Http\Message\UploadedFileInterface;
 
-/** POST /backend/upload — store an uploaded file and return its public URL. */
+/** POST /backend/upload, store an uploaded file and return its public URL. */
 final class UploadAction
 {
     private const MAX_BYTES = 15 * 1024 * 1024; // 15 MB

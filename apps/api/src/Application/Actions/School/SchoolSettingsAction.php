@@ -13,7 +13,7 @@ use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 
 /**
- * /backend/school/settings — the institution's grading policy and safeguarding
+ * /backend/school/settings, the institution's grading policy and safeguarding
  * configuration. Readable by any member of the institution; a school/tutor admin
  * may update it.
  */
@@ -139,7 +139,7 @@ final class SchoolSettingsAction
             }
         }
 
-        // Flat scalar sections — merge each supplied key, cast to the default's type.
+        // Flat scalar sections, merge each supplied key, cast to the default's type.
         foreach (self::FLAT_SECTIONS as $section) {
             if (!is_array($body[$section] ?? null)) {
                 continue;

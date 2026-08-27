@@ -19,7 +19,7 @@ use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 
 /**
- * /backend/messaging — governed direct messaging + school announcements.
+ * /backend/messaging, governed direct messaging + school announcements.
  * Messaging is scoped to a single institution and constrained by role pairs:
  * a student may reach teachers and admins but not other students or parents.
  */
@@ -41,7 +41,7 @@ final class MessagingAction
     ) {
     }
 
-    /** GET /messaging/contacts — everyone the caller may start a conversation with. */
+    /** GET /messaging/contacts, everyone the caller may start a conversation with. */
     public function contacts(Request $request, Response $response): Response
     {
         /** @var User $user */
@@ -64,7 +64,7 @@ final class MessagingAction
         return Json::write($response, array_map(fn (User $u) => $this->contactRow($u), $rows));
     }
 
-    /** GET /messaging/conversations — one row per counterpart with last message + unread. */
+    /** GET /messaging/conversations, one row per counterpart with last message + unread. */
     public function conversations(Request $request, Response $response): Response
     {
         /** @var User $user */
@@ -91,7 +91,7 @@ final class MessagingAction
         return Json::write($response, array_values($threads));
     }
 
-    /** GET /messaging/conversations/{id} — the thread with one user; marks incoming read. */
+    /** GET /messaging/conversations/{id}, the thread with one user; marks incoming read. */
     public function thread(Request $request, Response $response, array $args): Response
     {
         /** @var User $user */
@@ -125,7 +125,7 @@ final class MessagingAction
         ]);
     }
 
-    /** POST /messaging/messages — send {recipient_id, body}. */
+    /** POST /messaging/messages, send {recipient_id, body}. */
     public function send(Request $request, Response $response): Response
     {
         /** @var User $user */
@@ -164,7 +164,7 @@ final class MessagingAction
     private const STAFF = ['school_admin', 'tutor_admin', 'teacher'];
 
     /**
-     * GET /messaging/announcements — staff see the full institution log (with
+     * GET /messaging/announcements, staff see the full institution log (with
      * optional ?audience/?category/?status/?q filters); learners/parents get
      * only sent announcements matching their audience.
      */
@@ -200,7 +200,7 @@ final class MessagingAction
         return Json::write($response, array_map(static fn (Announcement $a) => $a->toArray(), array_values($visible)));
     }
 
-    /** GET /messaging/announcements/stats — Communication-hub KPIs + attention. */
+    /** GET /messaging/announcements/stats, Communication-hub KPIs + attention. */
     public function announcementStats(Request $request, Response $response): Response
     {
         /** @var User $user */
@@ -227,7 +227,7 @@ final class MessagingAction
         ]);
     }
 
-    /** POST /messaging/announcements — create (draft / schedule / send). */
+    /** POST /messaging/announcements, create (draft / schedule / send). */
     public function postAnnouncement(Request $request, Response $response): Response
     {
         /** @var User $user */
@@ -260,7 +260,7 @@ final class MessagingAction
         return Json::write($response, $announcement->toArray(), 201);
     }
 
-    /** PUT /messaging/announcements/{id} — edit a draft (and optionally send it). */
+    /** PUT /messaging/announcements/{id}, edit a draft (and optionally send it). */
     public function updateAnnouncement(Request $request, Response $response, array $args): Response
     {
         /** @var User $user */
@@ -286,7 +286,7 @@ final class MessagingAction
         return Json::write($response, $announcement->toArray());
     }
 
-    /** DELETE /messaging/announcements/{id} — remove a draft/scheduled item. */
+    /** DELETE /messaging/announcements/{id}, remove a draft/scheduled item. */
     public function deleteAnnouncement(Request $request, Response $response, array $args): Response
     {
         /** @var User $user */
@@ -341,7 +341,7 @@ final class MessagingAction
             $a->setScheduledAt($scheduledAt);
             return;
         }
-        // Send now — in-app notifications only. The email / parent-copy channels
+        // Send now, in-app notifications only. The email / parent-copy channels
         // are recorded on the announcement but dispatched by a mail queue (not
         // synchronously per recipient, which would block on the mailer).
         $recipients = $this->resolveRecipients($a);
