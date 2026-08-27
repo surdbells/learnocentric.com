@@ -1,0 +1,68 @@
+<section class="pub-hero" style="padding-bottom:2rem">
+  <div class="pub-wrap pub-center">
+    <span class="pub-eyebrow">Contact us</span>
+    <h1 style="font-size:clamp(2.2rem,4.6vw,3.2rem);font-weight:850">Let's talk about your school</h1>
+    <p class="pub-lead" style="margin-top:1.1rem">Tell us a little about your school and what you're looking for. We'll set up a walkthrough with your own subjects and classes.</p>
+  </div>
+</section>
+
+<section class="pub-section" style="padding-top:1rem">
+  <div class="pub-wrap">
+    <div class="pub-contact-grid">
+      <!-- Form -->
+      <form (ngSubmit)="submit()">
+        <div class="pub-field">
+          <label for="c-name">Your name</label>
+          <input id="c-name" type="text" required [ngModel]="name()" (ngModelChange)="name.set($event)" name="name" placeholder="Jane Doe" />
+        </div>
+        <div class="pub-field">
+          <label for="c-email">Work email</label>
+          <input id="c-email" type="email" required [ngModel]="from()" (ngModelChange)="from.set($event)" name="email" placeholder="jane@school.edu" />
+        </div>
+        <div class="pub-field">
+          <label for="c-school">School / organisation</label>
+          <input id="c-school" type="text" [ngModel]="school()" (ngModelChange)="school.set($event)" name="school" placeholder="Greenfield College" />
+        </div>
+        <div class="pub-field">
+          <label for="c-role">Your role</label>
+          <select id="c-role" [ngModel]="role()" (ngModelChange)="role.set($event)" name="role">
+            <option>School administrator</option>
+            <option>Head / principal</option>
+            <option>Teacher / academic staff</option>
+            <option>Parent / guardian</option>
+            <option>Learner</option>
+            <option>Other</option>
+          </select>
+        </div>
+        <div class="pub-field">
+          <label for="c-msg">How can we help?</label>
+          <textarea id="c-msg" rows="4" [ngModel]="message()" (ngModelChange)="message.set($event)" name="message" placeholder="We're a secondary school of ~400 learners looking to bring assessment and reporting online…"></textarea>
+        </div>
+        <button type="submit" class="pub-btn pub-btn-primary pub-btn-lg">
+          <span class="material-symbols-outlined" style="font-size:19px">send</span> Send message
+        </button>
+        <p style="color:var(--pub-mut);font-size:.85rem;margin-top:.8rem">This opens your email app with the details filled in — or write to us directly at <a [href]="'mailto:' + email" style="color:var(--pub-brand-d);font-weight:600">{{ email }}</a>.</p>
+      </form>
+
+      <!-- Info -->
+      <aside class="pub-contact-info">
+        <div class="row-ic">
+          <span class="material-symbols-outlined">mail</span>
+          <div><strong>Email us</strong><br><a [href]="'mailto:' + email" style="color:var(--pub-brand-d)">{{ email }}</a></div>
+        </div>
+        <div class="row-ic">
+          <span class="material-symbols-outlined">schedule</span>
+          <div><strong>Response time</strong><br>We usually reply within one business day.</div>
+        </div>
+        <div class="row-ic">
+          <span class="material-symbols-outlined">event_available</span>
+          <div><strong>What to expect</strong><br>A short call to understand your school, then a demo set up with your own subjects and classes.</div>
+        </div>
+        <div class="row-ic" style="margin-bottom:0">
+          <span class="material-symbols-outlined">login</span>
+          <div><strong>Already a customer?</strong><br><a routerLink="/login" style="color:var(--pub-brand-d)">Sign in to your school</a></div>
+        </div>
+      </aside>
+    </div>
+  </div>
+</section>

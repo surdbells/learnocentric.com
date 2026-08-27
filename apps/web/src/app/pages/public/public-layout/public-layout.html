@@ -1,0 +1,71 @@
+<div class="pub">
+  <header class="pub-header">
+    <div class="pub-wrap">
+      <a class="pub-brand" routerLink="/">
+        <img src="/images/logo/brain.png" alt="" />
+        <span>Learnocentric</span>
+      </a>
+      <nav class="pub-navlinks">
+        <a routerLink="/features" routerLinkActive="active">Features</a>
+        <a routerLink="/pricing" routerLinkActive="active">Pricing</a>
+        <a routerLink="/about" routerLinkActive="active">About</a>
+        <a routerLink="/contact" routerLinkActive="active">Contact</a>
+      </nav>
+      <div class="pub-header-cta">
+        <a class="pub-btn pub-btn-ghost" routerLink="/login">Sign in</a>
+        <a class="pub-btn pub-btn-primary" routerLink="/contact">Get started</a>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <router-outlet />
+  </main>
+
+  <!-- Shared closing CTA -->
+  <section class="pub-section-tight">
+    <div class="pub-wrap">
+      <div class="pub-cta-band">
+        <h2>Give every learner a clear path — and every school the full picture.</h2>
+        <p>See Learnocentric with your own curriculum and classes. Book a walkthrough, or sign in if you already have an account.</p>
+        <div class="pub-hero-cta">
+          <a class="pub-btn pub-btn-lg pub-btn-white" routerLink="/contact">Request a demo</a>
+          <a class="pub-btn pub-btn-lg pub-btn-outline-white" routerLink="/login">Sign in</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="pub-footer">
+    <div class="pub-wrap">
+      <div class="pub-footer-grid">
+        <div class="pub-footer-brand">
+          <a class="pub-brand" routerLink="/"><img src="/images/logo/brain.png" alt="" /><span>Learnocentric</span></a>
+          <p>The complete learning platform for schools — curriculum, assessment, live classes and analytics in one place.</p>
+        </div>
+        <div>
+          <h4>Product</h4>
+          <a routerLink="/features">Features</a>
+          <a routerLink="/pricing">Pricing</a>
+          <a routerLink="/features">For schools</a>
+          <a routerLink="/features">For learners</a>
+        </div>
+        <div>
+          <h4>Company</h4>
+          <a routerLink="/about">About</a>
+          <a routerLink="/contact">Contact</a>
+          <a routerLink="/contact">Request a demo</a>
+        </div>
+        <div>
+          <h4>Account</h4>
+          <a routerLink="/login">Sign in</a>
+          <a routerLink="/contact">Get started</a>
+        </div>
+      </div>
+      <div class="pub-footer-bottom">
+        <span>© {{ year }} Learnocentric. All rights reserved.</span>
+        <span>Built for schools, teachers, learners and families.</span>
+      </div>
+    </div>
+  </footer>
+</div>

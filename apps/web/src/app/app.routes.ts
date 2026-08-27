@@ -1,5 +1,11 @@
 import { Routes } from '@angular/router';
 import {SignIn} from './pages/authentication/sign-in/sign-in';
+import {PublicLayout} from './pages/public/public-layout/public-layout';
+import {PublicHome} from './pages/public/home/home';
+import {PublicFeatures} from './pages/public/features/features';
+import {PublicPricing} from './pages/public/pricing/pricing';
+import {PublicAbout} from './pages/public/about/about';
+import {PublicContact} from './pages/public/contact/contact';
 import {Dashboard} from './pages/dashboard/dashboard';
 import {Notifications} from './pages/dashboard/notifications/notifications';
 import {Students} from "./pages/dashboard/admin/student/students/students";
@@ -92,12 +98,19 @@ import {Announcements} from './pages/dashboard/announcements/announcements';
 import {AnnouncementCompose} from './pages/dashboard/announcements/announcement-compose/announcement-compose';
 
 export const routes: Routes = [
+  // Public marketing site
   {
     path: "",
+    component: PublicLayout,
     children: [
-      { path: "", component: SignIn },
+      { path: "", component: PublicHome },
+      { path: "features", component: PublicFeatures },
+      { path: "pricing", component: PublicPricing },
+      { path: "about", component: PublicAbout },
+      { path: "contact", component: PublicContact },
     ]
   },
+  { path: "login", component: SignIn },
 
   {
     path: "notifications",

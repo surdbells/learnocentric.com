@@ -573,3 +573,5 @@ html, .offcanvas-body {
 .action-row:hover { color: var(--brand-600, #2ea339); }
 .action-ic { width: 34px; height: 34px; border-radius: 9px; display: inline-flex; align-items: center; justify-content: center; flex: 0 0 auto; }
 .action-ic .material-symbols-outlined { font-size: 19px; }
+
+@import 'styles/public';
