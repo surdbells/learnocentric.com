@@ -103,14 +103,14 @@ export const routes: Routes = [
     path: "",
     component: PublicLayout,
     children: [
-      { path: "", component: PublicHome },
-      { path: "features", component: PublicFeatures },
-      { path: "pricing", component: PublicPricing },
-      { path: "about", component: PublicAbout },
-      { path: "contact", component: PublicContact },
+      { path: "", component: PublicHome, title: "Learn-O'Centric | School Management System" },
+      { path: "features", component: PublicFeatures, title: "Features | Learn-O'Centric" },
+      { path: "pricing", component: PublicPricing, title: "Pricing | Learn-O'Centric" },
+      { path: "about", component: PublicAbout, title: "About | Learn-O'Centric" },
+      { path: "contact", component: PublicContact, title: "Contact | Learn-O'Centric" },
     ]
   },
-  { path: "login", component: SignIn },
+  { path: "login", component: SignIn, title: "Sign in | Learn-O'Centric" },
 
   {
     path: "notifications",
