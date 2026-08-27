@@ -1,7 +1,7 @@
 <div class="pub">
   <header class="pub-header">
     <div class="pub-wrap">
-      <a class="pub-brand" routerLink="/">
+      <a class="pub-brand" routerLink="/" (click)="closeMenu()">
         <img class="pub-logo-img" src="/images/logo/logoblack.png" alt="Learn-O'Centric" />
       </a>
       <nav class="pub-navlinks">
@@ -14,7 +14,24 @@
         <a class="pub-btn pub-btn-ghost" routerLink="/login">Sign in</a>
         <a class="pub-btn pub-btn-primary" routerLink="/contact">Get started</a>
       </div>
+      <button type="button" class="pub-burger" (click)="toggleMenu()"
+              [attr.aria-expanded]="menuOpen()" aria-controls="pub-mobile-menu"
+              [attr.aria-label]="menuOpen() ? 'Close menu' : 'Open menu'">
+        <span class="material-symbols-outlined">{{ menuOpen() ? 'close' : 'menu' }}</span>
+      </button>
     </div>
+
+    <!-- Mobile navigation drawer -->
+    <nav id="pub-mobile-menu" class="pub-mobile" [class.open]="menuOpen()">
+      <a routerLink="/features" routerLinkActive="active" (click)="closeMenu()">Features</a>
+      <a routerLink="/pricing" routerLinkActive="active" (click)="closeMenu()">Pricing</a>
+      <a routerLink="/about" routerLinkActive="active" (click)="closeMenu()">About</a>
+      <a routerLink="/contact" routerLinkActive="active" (click)="closeMenu()">Contact</a>
+      <div class="pub-mobile-cta">
+        <a class="pub-btn pub-btn-ghost" routerLink="/login" (click)="closeMenu()">Sign in</a>
+        <a class="pub-btn pub-btn-primary" routerLink="/contact" (click)="closeMenu()">Get started</a>
+      </div>
+    </nav>
   </header>
 
   <main>
