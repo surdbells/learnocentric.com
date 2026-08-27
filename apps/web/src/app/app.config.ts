@@ -1,7 +1,8 @@
 import { APP_INITIALIZER, ApplicationConfig, isDevMode, provideBrowserGlobalErrorListeners, provideZonelessChangeDetection } from '@angular/core';
-import { provideRouter } from '@angular/router';
+import { provideRouter, TitleStrategy } from '@angular/router';
 
 import { routes } from './app.routes';
+import { AppTitleStrategy } from './common/title-strategy';
 import { provideClientHydration, withEventReplay } from '@angular/platform-browser';
 import { provideToastr } from 'ngx-toastr';
 import { provideAnimations } from '@angular/platform-browser/animations';
@@ -31,6 +32,7 @@ export const appConfig: ApplicationConfig = {
     provideBrowserGlobalErrorListeners(),
     provideZonelessChangeDetection(),
     provideRouter(routes),
+    { provide: TitleStrategy, useClass: AppTitleStrategy },
     provideClientHydration(withEventReplay()),
     provideToastr(),
     provideAnimations(),
