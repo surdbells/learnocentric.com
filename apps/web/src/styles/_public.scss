@@ -20,6 +20,8 @@
 .pub-header .pub-wrap { display: flex; align-items: center; gap: 1.5rem; height: 68px; }
 .pub-brand { display: inline-flex; align-items: center; gap: .55rem; font-weight: 800; font-size: 1.16rem; color: var(--pub-ink); }
 .pub-brand img { height: 30px; width: auto; }
+.pub-brand .pub-logo-img { height: 26px; width: auto; display: block; }
+.pub-brand .pub-logo-footer { height: 24px; }
 .pub-navlinks { display: flex; align-items: center; gap: .35rem; margin-left: 1rem; }
 .pub-navlinks a { color: var(--pub-mut); font-weight: 600; font-size: .94rem; padding: .5rem .8rem; border-radius: 9px; transition: color .15s, background .15s; }
 .pub-navlinks a:hover, .pub-navlinks a.active { color: var(--pub-ink); background: var(--pub-soft); }
