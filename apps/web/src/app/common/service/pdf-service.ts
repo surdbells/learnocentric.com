@@ -61,26 +61,77 @@ export class PdfService {
         // Cleanup
         document.body.removeChild(container);
 
-        const imgData = canvas.toDataURL('image/png');
+        this.canvasToA4Pdf(canvas, fileName);
+    }
 
+    /**
+     * Render a self-contained HTML string to a paginated A4 PDF and download it.
+     * The markup is laid out off-screen at A4 width (96dpi), captured with
+     * html2canvas, then split across pages. Used to generate branded documents
+     * (worksheet / portfolio task templates) without embedding hidden markup in
+     * every component. Styling must be inline on the markup (html2canvas reads
+     * computed styles only).
+     */
+    async generateHtmlStringPdf(fileName: string, html: string, widthPx = 794): Promise<void> {
+        const container = document.createElement('div');
+        container.setAttribute('data-bs-theme', 'light');
+        container.style.position = 'fixed';
+        container.style.left = '-9999px';
+        container.style.top = '0';
+        container.style.width = `${widthPx}px`; // ~210mm at 96dpi
+        container.style.backgroundColor = '#ffffff';
+        container.style.color = '#000000';
+        container.innerHTML = html;
+        document.body.appendChild(container);
+
+        try {
+            await this.waitForImages(container);
+            const canvas = await html2canvas(container, {
+                scale: 2, // crisp text / lines
+                backgroundColor: '#ffffff',
+                useCORS: true,
+                windowWidth: widthPx,
+            });
+            this.canvasToA4Pdf(canvas, fileName);
+        } finally {
+            document.body.removeChild(container);
+        }
+    }
+
+    /** Resolve once every <img> inside the root has loaded (or failed), so the capture isn't blank. */
+    private waitForImages(root: HTMLElement): Promise<unknown> {
+        const imgs = Array.from(root.querySelectorAll('img'));
+        return Promise.all(
+            imgs.map(img =>
+                img.complete && img.naturalWidth > 0
+                    ? Promise.resolve()
+                    : new Promise<void>(resolve => {
+                          img.addEventListener('load', () => resolve(), { once: true });
+                          img.addEventListener('error', () => resolve(), { once: true });
+                      })
+            )
+        );
+    }
+
+    /** Split a tall canvas across A4 pages and save it. */
+    private canvasToA4Pdf(canvas: HTMLCanvasElement, fileName: string): void {
+        const imgData = canvas.toDataURL('image/png');
         const pdf = new jsPDF('p', 'mm', 'a4');
         const imgWidth = 210; // A4 width in mm
         const pageHeight = 297; // A4 height in mm
         // Scale the captured canvas to the page width and derive the true height so
-        // long reports keep their full aspect ratio instead of being clipped.
+        // long documents keep their full aspect ratio instead of being clipped.
         const imgHeight = (canvas.height * imgWidth) / canvas.width;
 
         let heightLeft = imgHeight;
         let position = 0;
 
-        // First page.
         pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
         heightLeft -= pageHeight;
 
-        // Additional pages: shift the same tall image up by one page each time until
-        // the remaining content fits within a single page.
+        // Additional pages: shift the same tall image up by one page each time.
         while (heightLeft > 0) {
-            position -= pageHeight; // move the image up by one page
+            position -= pageHeight;
             pdf.addPage();
             pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
             heightLeft -= pageHeight;
