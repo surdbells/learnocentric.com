@@ -6,9 +6,9 @@ import {PageHeader} from '../../../../../common/layout/page-header/page-header';
 import {FileUpload, UploadedFile} from '../../../../../common/file-upload/file-upload';
 import {ApiService} from '../../../../../common/service/api.service';
 import {Icon} from '../../../../../common/icon/icon';
-import {RichEditor} from '../../../../../common/rich-editor/rich-editor';
 import {RichText} from '../../../../../common/rich-editor/rich-text';
 import {KpiItem, KpiStrip, TabBar, TabItem} from '../../../../../common/ui';
+import {AssessmentTemplateService} from '../../../../../common/service/assessment-template';
 
 const RATING_COLOR: Record<string, string> = {emerging: 'secondary', developing: 'info', proficient: 'primary', mastery: 'success'};
 /** Competency rating → number of filled stars (out of 4). */
@@ -17,17 +17,19 @@ const RATING_STARS: Record<string, number> = {emerging: 1, developing: 2, profic
 @Component({
   selector: 'app-my-portfolio',
   standalone: true,
-  imports: [RichText, RichEditor, Icon, PageHeader, ReactiveFormsModule, DatePipe, FileUpload, KpiStrip, TabBar],
+  imports: [RichText, Icon, PageHeader, ReactiveFormsModule, DatePipe, FileUpload, KpiStrip, TabBar],
   templateUrl: './my-portfolio.html',
   styleUrl: './my-portfolio.css',
 })
 export class MyPortfolio {
   private readonly api = inject(ApiService);
   private readonly toast = inject(ToastrService);
+  private readonly tpl = inject(AssessmentTemplateService);
 
   mode = signal<'list' | 'add'>('list');
   loading = signal(false);
   busy = signal(false);
+  templateBusy = signal(false);
   tasks = signal<any[]>([]);
   activeTab = signal<string>('all');
   /** The task the add-form is submitting evidence against. */
@@ -35,11 +37,11 @@ export class MyPortfolio {
 
   readonly stars = [1, 2, 3, 4];
 
+  // Portfolio tasks are completed on the downloaded template and re-uploaded,
+  // so the only submission input is the finished file.
   form = new FormGroup({
     topicId: new FormControl<number | null>(null, {validators: [Validators.required]}),
-    title: new FormControl('', {nonNullable: true, validators: [Validators.required]}),
-    description: new FormControl('', {nonNullable: true, validators: [Validators.required]}),
-    evidenceUrl: new FormControl(''),
+    evidenceUrl: new FormControl('', {nonNullable: true, validators: [Validators.required]}),
   });
 
   readonly kpis = computed<KpiItem[]>(() => {
@@ -92,14 +94,29 @@ export class MyPortfolio {
     this.mode.set('add');
   }
 
+  /** Generate and download the branded portfolio task sheet from the task's content. */
+  downloadTemplate(): void {
+    const task = this.activeTask();
+    if (!task) return;
+    this.templateBusy.set(true);
+    this.tpl.downloadPortfolioTemplate({
+      title: task.title,
+      subject: task.subject,
+      portfolio_evidence_expected: task.brief,
+      portfolio_task: task.portfolio_task,
+    })
+      .catch(() => this.toast.error('Could not generate the template'))
+      .finally(() => this.templateBusy.set(false));
+  }
+
   submit(): void {
-    if (this.form.invalid) { this.toast.error('A title and description are required'); return; }
+    if (this.form.invalid) { this.toast.error('Upload your completed portfolio task before submitting'); return; }
     const v = this.form.value;
     this.busy.set(true);
     this.api.post<any>('/backend/assessment/portfolio', {
-      topic_id: v.topicId, title: v.title, description: v.description, evidence_url: v.evidenceUrl,
+      topic_id: v.topicId, evidence_url: v.evidenceUrl,
     }).subscribe({
-      next: () => { this.toast.success('Evidence submitted'); this.busy.set(false); this.backToList(); },
+      next: () => { this.toast.success('Portfolio task submitted'); this.busy.set(false); this.backToList(); },
       error: (e) => { this.toast.error(e?.error?.error || 'Submit failed'); this.busy.set(false); },
     });
   }
