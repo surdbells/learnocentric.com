@@ -49,53 +49,7 @@
 
 <!-- DO -->
 @if (mode() === 'do' && current(); as w) {
-  @if (w.response_mode === 'template_upload') {
-  <div class="card border-0 shadow-sm">
-    <div class="card-body">
-      <h5 class="fw-semibold mb-1">{{ w.title }}</h5>
-      <div class="text-body-secondary small mb-3">{{ w.topic }} · {{ w.total_marks }} mark(s)@if (w.due_date) { · due {{ w.due_date }} }</div>
-      @if (w.instructions) { <div class="alert alert-light border">{{ w.instructions }}</div> }
-
-      <ol class="small text-body-secondary mb-3 ps-3">
-        <li>Download the worksheet template.</li>
-        <li>Complete it offline (print it, or fill it in digitally).</li>
-        <li>Upload your finished file and submit.</li>
-      </ol>
-
-      <button type="button" class="btn btn-outline-primary d-inline-flex align-items-center gap-1 mb-3" [disabled]="templateBusy()" (click)="downloadTemplate()">
-        <app-icon name="download" [size]="16" /> {{ templateBusy() ? 'Preparing…' : 'Download template' }}
-      </button>
-
-      @if (isGraded(w)) {
-        <div class="alert alert-success">
-          You scored <b>{{ w.submission.score }}/{{ w.total_marks }}</b>
-          @if (w.submission.feedback) { <div class="small mt-1">Teacher feedback: “{{ w.submission.feedback }}”</div> }
-          @if (w.submission.graded_at) { <div class="small text-body-secondary mt-1">Graded {{ w.submission.graded_at | date:'medium' }}</div> }
-        </div>
-        @if (w.submission.attachment_url) {
-          <a class="btn btn-sm btn-outline-secondary d-inline-flex align-items-center gap-1" [href]="w.submission.attachment_url" [attr.download]="downloadName(w.submission.attachment_url)" title="Save your submitted work">
-            <app-icon name="download" [size]="16" /> Download your submitted file
-          </a>
-        }
-        <div><button type="button" class="btn btn-primary mt-4" (click)="backToList()">Back to my worksheets</button></div>
-      } @else {
-        <label class="form-label">Upload your completed worksheet</label>
-        <app-file-upload
-          [value]="attachmentUrl() || null"
-          label="Upload your completed template (PDF, image or document)"
-          (uploaded)="onFileUploaded($event)"
-          (cleared)="onFileCleared()"
-        />
-        <div class="d-flex gap-2 mt-3">
-          <button type="button" class="btn btn-primary" [disabled]="busy() || !attachmentUrl()" (click)="submit()">
-            {{ w.submission ? 'Update submission' : 'Submit worksheet' }}
-          </button>
-          <button type="button" class="btn btn-light" [disabled]="busy()" (click)="backToList()">Back</button>
-        </div>
-      }
-    </div>
-  </div>
-  } @else if (w.question_count > 0) {
+  @if (w.question_count > 0) {
     <app-worksheet-solver [worksheetId]="w.id" (done)="backToList()" />
   } @else {
   <div class="card border-0 shadow-sm">

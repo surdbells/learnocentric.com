@@ -189,21 +189,14 @@ final class PortfolioAction
         $student = $this->currentUser($request);
         $body = (array) $request->getParsedBody();
         $topic = $this->em->getRepository(Topic::class)->find((int) ($body['topic_id'] ?? 0));
-        if ($topic === null) {
-            return Json::error($response, 'Choose a valid portfolio task.', 422);
+        $title = trim((string) ($body['title'] ?? ''));
+        $description = trim((string) ($body['description'] ?? ''));
+        if ($topic === null || $title === '' || $description === '') {
+            return Json::error($response, 'A topic, a title and a description are required.', 422);
         }
-        // Portfolio tasks are completed on the downloaded template and re-uploaded,
-        // so the submission is the finished file; there is no free-form entry. The
-        // NOT NULL title/description default from the task when not supplied.
-        $evidenceUrl = trim((string) ($body['evidence_url'] ?? ''));
-        if ($evidenceUrl === '') {
-            return Json::error($response, 'Upload your completed portfolio task file before submitting.', 422);
-        }
-        $title = trim((string) ($body['title'] ?? '')) ?: $topic->getTitle();
-        $description = trim((string) ($body['description'] ?? '')) ?: 'Completed portfolio task uploaded.';
 
         $entry = new PortfolioEntry($topic, $student, $title, $description);
-        $entry->setEvidenceUrl($evidenceUrl);
+        $entry->setEvidenceUrl(!empty($body['evidence_url']) ? (string) $body['evidence_url'] : null);
         $entry->setStatus(PortfolioEntry::SUBMITTED);
         $entry->setSubmittedAt(new DateTimeImmutable());
         $this->em->persist($entry);
