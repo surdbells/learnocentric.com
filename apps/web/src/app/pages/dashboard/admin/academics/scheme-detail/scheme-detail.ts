@@ -1,4 +1,4 @@
-import {Component, computed, inject, signal} from '@angular/core';
+import {Component, computed, inject, input, signal} from '@angular/core';
 import {FormsModule} from '@angular/forms';
 import {ToastrService} from 'ngx-toastr';
 import {PageHeader} from '../../../../../common/layout/page-header/page-header';
@@ -17,6 +17,9 @@ const STATUS_TONE: Record<string, Tone> = {draft: 'secondary', review: 'info', a
   styleUrl: './scheme-detail.css',
 })
 export class SchemeDetail {
+  /** Hidden page header when hosted inside the Subjects & Curriculum hub. */
+  readonly embedded = input<boolean>(false);
+
   private readonly api = inject(ApiService);
   private readonly toast = inject(ToastrService);
 
