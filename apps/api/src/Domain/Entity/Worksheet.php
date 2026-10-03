@@ -22,7 +22,6 @@ class Worksheet implements LifecycleAware
     use TimestampsTrait;
 
     public const TRACKS = ['academic', 'competency'];
-    public const RESPONSE_MODES = ['solver', 'template_upload'];
 
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -50,19 +49,6 @@ class Worksheet implements LifecycleAware
     #[ORM\Column(name: 'attachment_url', length: 500, nullable: true)]
     private ?string $attachmentUrl = null;
 
-    /**
-     * How learners respond. 'solver' = structured on-screen questions (auto-graded
-     * where possible). 'template_upload' = download the generated worksheet
-     * template, complete it offline, then re-upload the finished file (no
-     * free-form on-screen input).
-     */
-    #[ORM\Column(name: 'response_mode', length: 20, options: ['default' => 'solver'])]
-    private string $responseMode = 'solver';
-
-    /** Worked-example block rendered on the generated template (question / solution / answer). */
-    #[ORM\Column(name: 'worked_example', type: Types::TEXT, nullable: true)]
-    private ?string $workedExample = null;
-
     #[ORM\Column(name: 'total_marks', type: Types::SMALLINT, options: ['default' => 10])]
     private int $totalMarks = 10;
 
@@ -87,13 +73,8 @@ class Worksheet implements LifecycleAware
     public function setTitle(string $v): void { $this->title = $v; }
     public function getTrack(): string { return $this->track; }
     public function setTrack(string $v): void { $this->track = in_array($v, self::TRACKS, true) ? $v : 'academic'; }
-    public function getInstructions(): ?string { return $this->instructions; }
     public function setInstructions(?string $v): void { $this->instructions = $v; }
     public function setAttachmentUrl(?string $v): void { $this->attachmentUrl = \App\Service\Storage\FilePath::toPath($v); }
-    public function getResponseMode(): string { return $this->responseMode; }
-    public function setResponseMode(string $v): void { $this->responseMode = in_array($v, self::RESPONSE_MODES, true) ? $v : 'solver'; }
-    public function getWorkedExample(): ?string { return $this->workedExample; }
-    public function setWorkedExample(?string $v): void { $this->workedExample = $v; }
     public function getTotalMarks(): int { return $this->totalMarks; }
     public function setTotalMarks(int $v): void { $this->totalMarks = max(1, $v); }
     public function getDueDate(): ?\DateTimeImmutable { return $this->dueDate; }
@@ -121,8 +102,6 @@ class Worksheet implements LifecycleAware
             'track' => $this->track,
             'instructions' => $this->instructions,
             'attachment_url' => \App\Service\Storage\FilePath::toUrl($this->attachmentUrl),
-            'response_mode' => $this->responseMode,
-            'worked_example' => $this->workedExample,
             'total_marks' => $this->totalMarks,
             'due_date' => $this->dueDate?->format('Y-m-d'),
             'approval_status' => $this->approvalStatus,
