@@ -1,4 +1,4 @@
-import {Component, computed, inject, input, signal} from '@angular/core';
+import {Component, computed, inject, signal} from '@angular/core';
 import {RouterLink} from '@angular/router';
 import {ToastrService} from 'ngx-toastr';
 import {forkJoin, of} from 'rxjs';
@@ -20,9 +20,6 @@ const STATUS_TONE: Record<string, Tone> = {'Good': 'success', 'Monitor': 'info',
   styleUrl: './school-report.css',
 })
 export class SchoolReport {
-  /** Hidden page header when hosted inside a hub. */
-  readonly embedded = input<boolean>(false);
-
   private readonly api = inject(ApiService);
   private readonly auth = inject(AuthService);
   private readonly toast = inject(ToastrService);

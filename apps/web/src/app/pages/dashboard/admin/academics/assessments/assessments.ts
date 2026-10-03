@@ -1,4 +1,4 @@
-import {Component, computed, inject, input, signal, ViewChild} from '@angular/core';
+import {Component, computed, inject, signal, ViewChild} from '@angular/core';
 import {FormsModule} from '@angular/forms';
 import {ToastrService} from 'ngx-toastr';
 import {PageHeader} from '../../../../../common/layout/page-header/page-header';
@@ -26,9 +26,6 @@ const APPROVER_ROLES = ['academic_lead', 'school_admin', 'tutor_admin', 'super_a
   styleUrl: './assessments.css',
 })
 export class Assessments {
-  /** Hidden page header when hosted inside a hub. */
-  readonly embedded = input<boolean>(false);
-
   @ViewChild(DataGrid) grid!: DataGrid;
 
   private readonly api = inject(ApiService);

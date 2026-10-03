@@ -1,4 +1,4 @@
-import {Component, inject, input, signal} from '@angular/core';
+import {Component, inject, signal} from '@angular/core';
 import {DatePipe} from '@angular/common';
 import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {ToastrService} from 'ngx-toastr';
@@ -17,9 +17,6 @@ const TYPE_COLOR: Record<string, string> = {praise: 'success', correction: 'warn
   styleUrl: './insights.css',
 })
 export class Insights {
-  /** Hidden page header when hosted inside a hub. */
-  readonly embedded = input<boolean>(false);
-
   private readonly api = inject(ApiService);
   private readonly toast = inject(ToastrService);
 

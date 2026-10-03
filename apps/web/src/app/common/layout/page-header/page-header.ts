@@ -14,8 +14,6 @@ export class PageHeader {
 
   icon = input<string>('');
   action = input<string>('');
-  /** When hosted inside a tabbed hub, collapse to just the projected actions (title/icon/breadcrumb hidden). */
-  embedded = input<boolean>(false);
 
   /** Readable breadcrumb trail derived from the URL (no dead links). */
   readonly crumbs = computed<string[]>(() => {

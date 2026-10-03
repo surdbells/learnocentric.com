@@ -1,4 +1,4 @@
-import {Component, computed, inject, input, signal} from '@angular/core';
+import {Component, computed, inject, signal} from '@angular/core';
 import {DatePipe} from '@angular/common';
 import {FormsModule} from '@angular/forms';
 import {Router} from '@angular/router';
@@ -26,9 +26,6 @@ const STATUS_TONE: Record<string, string> = {sent: 'success', scheduled: 'primar
   styleUrl: './announcements.css',
 })
 export class Announcements {
-  /** Hidden page header when hosted inside a hub. */
-  readonly embedded = input<boolean>(false);
-
   private readonly api = inject(ApiService);
   private readonly toast = inject(ToastrService);
   private readonly auth = inject(AuthService);

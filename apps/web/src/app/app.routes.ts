@@ -20,9 +20,6 @@ import {SchoolClasses} from "./pages/dashboard/admin/academics/school-classes/sc
 import {ClassesLearners} from "./pages/dashboard/admin/academics/classes-learners/classes-learners";
 import {ClassesHub} from "./pages/dashboard/admin/academics/classes-hub/classes-hub";
 import {SubjectsCurriculumHub} from "./pages/dashboard/admin/academics/subjects-curriculum-hub/subjects-curriculum-hub";
-import {AssessmentsGradebooksHub} from "./pages/dashboard/admin/academics/assessments-gradebooks-hub/assessments-gradebooks-hub";
-import {ReportsHub} from "./pages/dashboard/admin/academics/reports-hub/reports-hub";
-import {CommunicationHub} from "./pages/dashboard/admin/communication-hub/communication-hub";
 import {Subjects} from "./pages/dashboard/admin/academics/subjects/subjects";
 import {Topics} from "./pages/dashboard/admin/academics/topics/topics";
 import {LessonContent} from "./pages/dashboard/admin/academics/lesson-content/lesson-content";
@@ -135,9 +132,6 @@ export const routes: Routes = [
       { path: "calendar", component: Calendar },
       { path: "classes-learners", component: ClassesHub },
       { path: "subjects-curriculum", component: SubjectsCurriculumHub },
-      { path: "assessments-gradebooks", component: AssessmentsGradebooksHub },
-      { path: "reports", component: ReportsHub },
-      { path: "communication-hub", component: CommunicationHub },
       { path: "students", component: Students },
       { path: "enrollments", component: Enrollment },
       { path: "students/new", component: NewStudent },

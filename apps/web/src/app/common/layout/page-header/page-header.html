@@ -1,34 +1,31 @@
-<!-- Page header. When embedded in a hub, only the projected actions render. -->
-<div class="row align-items-center" [class.mb-7]="!embedded()" [class.mb-3]="embedded()">
-    @if (!embedded()) {
-        <div class="col-auto">
-            <!-- Avatar -->
-            <div class="avatar avatar-xl rounded text-success">
-                <app-icon [name]="icon()" [size]="28" />
-            </div>
+<!-- Page header -->
+<div class="row align-items-center mb-7">
+    <div class="col-auto">
+        <!-- Avatar -->
+        <div class="avatar avatar-xl rounded text-success">
+            <app-icon [name]="icon()" [size]="28" />
         </div>
-        <div class="col">
-            <!-- Breadcrumb -->
-            @if (crumbs().length > 1) {
-                <nav aria-label="breadcrumb">
-                    <ol class="breadcrumb mb-1 small">
-                        @for (crumb of crumbs(); track $index; let last = $last) {
-                            @if (last) {
-                                <li class="breadcrumb-item active" aria-current="page">{{ crumb }}</li>
-                            } @else {
-                                <li class="breadcrumb-item text-body-secondary">{{ crumb }}</li>
-                            }
+    </div>
+    <div class="col">
+        <!-- Breadcrumb -->
+        @if (crumbs().length > 1) {
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-1 small">
+                    @for (crumb of crumbs(); track $index; let last = $last) {
+                        @if (last) {
+                            <li class="breadcrumb-item active" aria-current="page">{{ crumb }}</li>
+                        } @else {
+                            <li class="breadcrumb-item text-body-secondary">{{ crumb }}</li>
                         }
-                    </ol>
-                </nav>
-            }
+                    }
+                </ol>
+            </nav>
+        }
 
-            <!-- Heading -->
-            <h1 class="fs-4 mb-0">{{action()}}</h1>
-        </div>
-    }
-    <div [class.col-12]="!embedded()" [class.col-sm-auto]="!embedded()" [class.mt-4]="!embedded()" [class.mt-sm-0]="!embedded()"
-         [class.col]="embedded()" [class.text-end]="embedded()">
+        <!-- Heading -->
+        <h1 class="fs-4 mb-0">{{action()}}</h1>
+    </div>
+    <div class="col-12 col-sm-auto mt-4 mt-sm-0">
         <ng-content></ng-content>
     </div>
 </div>
