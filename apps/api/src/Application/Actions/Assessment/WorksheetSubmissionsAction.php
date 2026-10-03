@@ -80,6 +80,28 @@ final class WorksheetSubmissionsAction
             return Json::error($response, 'This worksheet has already been graded and cannot be resubmitted.', 409);
         }
 
+        // Template-upload worksheet: the learner downloads the generated template,
+        // completes it offline and re-uploads the finished file. No on-screen
+        // answers; the teacher grades the uploaded file manually.
+        if ($worksheet->getResponseMode() === 'template_upload') {
+            $attachment = trim((string) ($body['attachment_url'] ?? ''));
+            if ($attachment === '') {
+                return Json::error($response, 'Upload your completed worksheet file before submitting.', 422);
+            }
+            if ($submission === null) {
+                $submission = new WorksheetSubmission($worksheet, $student);
+                $this->em->persist($submission);
+            }
+            $submission->setResponseText(null);
+            $submission->setAttachmentUrl($attachment);
+            $submission->setStatus(WorksheetSubmission::SUBMITTED);
+            $submission->setSubmittedAt(new DateTimeImmutable());
+            $this->em->flush();
+            $this->audit->log('worksheet.submit', $student, 'WorksheetSubmission', (string) $submission->getId(), null, ['worksheet_id' => $worksheet->getId(), 'mode' => 'template_upload']);
+
+            return Json::write($response, $this->solvePayload($worksheet, $submission));
+        }
+
         // Structured (per-question) worksheet: capture responses + hybrid auto-grade.
         if ($questions !== []) {
             if ($submission === null) {
@@ -557,6 +579,8 @@ final class WorksheetSubmissionsAction
             'status' => $submission?->getStatus() ?? 'not_started',
             'score' => $submission?->getScore(),
             'feedback' => $submission?->getFeedback(),
+            'attachment_url' => $submission !== null ? ($submission->toArray()['attachment_url'] ?? null) : null,
+            'response_text' => $submission !== null ? ($submission->toArray()['response_text'] ?? null) : null,
             'submitted_at' => $submission?->getSubmittedAt()?->format(DATE_ATOM),
             'graded_at' => $submission?->getGradedAt()?->format(DATE_ATOM),
             'progress' => [
