@@ -50,19 +50,31 @@
 
 </app-learno-offset>
 
-<app-page-header icon="local_library" action="Enrollments">
-
-  <app-learno-modal [modalId]="'add_enrollment'" [modalAction]="'New Enrollment'" >
-    <app-enrollment-form
-      modalForm
-      [classes]="classes()"
-      [students]="students()"
-      [select]="selectedEnrollment()"
-      (submitted)="handleSuccessSubmit($event)"
-    />
-  </app-learno-modal>
-<!--  <app-learno-button text="Add Student" (clicked)="clickedHandler()" />-->
-</app-page-header>
+@if (!embedded()) {
+  <app-page-header icon="local_library" action="Enrollments">
+    <app-learno-modal [modalId]="'add_enrollment'" [modalAction]="'New Enrollment'" >
+      <app-enrollment-form
+        modalForm
+        [classes]="classes()"
+        [students]="students()"
+        [select]="selectedEnrollment()"
+        (submitted)="handleSuccessSubmit($event)"
+      />
+    </app-learno-modal>
+  </app-page-header>
+} @else {
+  <div class="d-flex justify-content-end mb-3">
+    <app-learno-modal [modalId]="'add_enrollment'" [modalAction]="'New Enrollment'" >
+      <app-enrollment-form
+        modalForm
+        [classes]="classes()"
+        [students]="students()"
+        [select]="selectedEnrollment()"
+        (submitted)="handleSuccessSubmit($event)"
+      />
+    </app-learno-modal>
+  </div>
+}
 
 <!-- Page content -->
 <div class="row">
