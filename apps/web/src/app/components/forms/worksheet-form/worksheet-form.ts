@@ -27,11 +27,16 @@ export class WorksheetForm {
     title: new FormControl('', {nonNullable: true, validators: [Validators.required]}),
     topicId: new FormControl<number | null>(null, {validators: [Validators.required]}),
     track: new FormControl('academic', {nonNullable: true}),
+    responseMode: new FormControl('solver', {nonNullable: true}),
     totalMarks: new FormControl(10, {nonNullable: true}),
     dueDate: new FormControl(''),
     instructions: new FormControl(''),
+    workedExample: new FormControl(''),
     attachmentUrl: new FormControl(''),
   });
+
+  /** Signal mirror of the response-mode control, to toggle template-only fields in the view. */
+  readonly responseMode = signal<string>('solver');
 
   /** Subject filter for the topic list, for teachers who teach more than one subject. */
   readonly subjectFilter = signal<string>('');
@@ -46,19 +51,30 @@ export class WorksheetForm {
   onFileCleared(): void { this.form.get('attachmentUrl')!.setValue(''); }
 
   constructor() {
+    // Keep the responseMode signal in sync with the control for the view toggle.
+    this.form.get('responseMode')!.valueChanges.subscribe(v => this.responseMode.set(v ?? 'solver'));
+
     effect(() => {
       const s = this.select();
-      if (!s || !s['id']) { this.form.reset({track: 'academic', totalMarks: 10}); this.isEdit.set(false); return; }
-      this.form.reset({track: 'academic', totalMarks: 10});
+      if (!s || !s['id']) {
+        this.form.reset({track: 'academic', responseMode: 'solver', totalMarks: 10});
+        this.responseMode.set('solver');
+        this.isEdit.set(false);
+        return;
+      }
+      this.form.reset({track: 'academic', responseMode: 'solver', totalMarks: 10});
       this.form.patchValue({
         title: s['title'] ?? '',
         topicId: s['topic_id'] ?? null,
         track: s['track'] ?? 'academic',
+        responseMode: s['response_mode'] ?? 'solver',
         totalMarks: s['total_marks'] ?? 10,
         dueDate: s['due_date'] ?? '',
         instructions: s['instructions'] ?? '',
+        workedExample: s['worked_example'] ?? '',
         attachmentUrl: s['attachment_url'] ?? '',
       });
+      this.responseMode.set(s['response_mode'] ?? 'solver');
       this.isEdit.set(true);
     });
   }
@@ -73,9 +89,11 @@ export class WorksheetForm {
       title: v.title,
       topic_id: v.topicId,
       track: v.track,
+      response_mode: v.responseMode,
       total_marks: v.totalMarks,
       due_date: v.dueDate || null,
       instructions: v.instructions,
+      worked_example: v.workedExample,
       attachment_url: v.attachmentUrl || null,
     };
     this.isLoading.set(true);
