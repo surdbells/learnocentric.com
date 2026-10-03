@@ -23,6 +23,12 @@ import {SubjectsCurriculumHub} from "./pages/dashboard/admin/academics/subjects-
 import {AssessmentsGradebooksHub} from "./pages/dashboard/admin/academics/assessments-gradebooks-hub/assessments-gradebooks-hub";
 import {ReportsHub} from "./pages/dashboard/admin/academics/reports-hub/reports-hub";
 import {CommunicationHub} from "./pages/dashboard/admin/communication-hub/communication-hub";
+import {ResourcesHub} from "./pages/dashboard/resources-hub/resources-hub";
+import {TeacherClassesHub} from "./pages/dashboard/teacher/classes-hub/classes-hub";
+import {TeacherCurriculumHub} from "./pages/dashboard/teacher/curriculum-hub/curriculum-hub";
+import {TeacherAssessmentsHub} from "./pages/dashboard/teacher/assessments-hub/assessments-hub";
+import {TeacherFeedbackHub} from "./pages/dashboard/teacher/feedback-hub/feedback-hub";
+import {TeacherSettingsHub} from "./pages/dashboard/teacher/settings-hub/settings-hub";
 import {Subjects} from "./pages/dashboard/admin/academics/subjects/subjects";
 import {Topics} from "./pages/dashboard/admin/academics/topics/topics";
 import {LessonContent} from "./pages/dashboard/admin/academics/lesson-content/lesson-content";
@@ -138,6 +144,7 @@ export const routes: Routes = [
       { path: "assessments-gradebooks", component: AssessmentsGradebooksHub },
       { path: "reports", component: ReportsHub },
       { path: "communication-hub", component: CommunicationHub },
+      { path: "resources-hub", component: ResourcesHub },
       { path: "students", component: Students },
       { path: "enrollments", component: Enrollment },
       { path: "students/new", component: NewStudent },
@@ -290,6 +297,14 @@ export const routes: Routes = [
       { path: "classes", component: MyClasses },
       { path: "feedback", component: FeedbackCompose },
       { path: "ask-tutor", component: TutorInbox },
+      { path: "my-classes", component: TeacherClassesHub },
+      { path: "subjects-curriculum", component: TeacherCurriculumHub },
+      { path: "assessments-gradebooks", component: TeacherAssessmentsHub },
+      { path: "feedback-questions", component: TeacherFeedbackHub },
+      { path: "reports", component: ReportsHub },
+      { path: "resources-hub", component: ResourcesHub },
+      { path: "communication-hub", component: CommunicationHub },
+      { path: "settings-hub", component: TeacherSettingsHub },
       {
         path: "academics",
         component: Academics,
