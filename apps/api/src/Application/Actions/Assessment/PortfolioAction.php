@@ -142,7 +142,6 @@ final class PortfolioAction
                 'subject' => $topic->getSubject()->getName(),
                 'week_number' => $ta['week_number'],
                 'brief' => $ta['portfolio_evidence_expected'],
-                'portfolio_task' => $ta['portfolio_task'],
                 'objective' => $ta['objective'],
                 'competency_built' => $ta['competency_built'],
                 'status' => $status,
@@ -318,9 +317,6 @@ final class PortfolioAction
         if (array_key_exists('competency_built', $body)) {
             $topic->setCompetencyBuilt($body['competency_built'] !== '' ? (string) $body['competency_built'] : null);
         }
-        if (array_key_exists('portfolio_task', $body)) {
-            $topic->setPortfolioTask($this->normalizePortfolioTask($body['portfolio_task']));
-        }
         $this->em->flush();
         $this->audit->log('portfolio.assign_task', $user, 'Topic', (string) $topic->getId(), null, ['brief' => $brief]);
 
@@ -331,59 +327,10 @@ final class PortfolioAction
             'status' => $topic->getApprovalStatus(),
             'published' => $topic->getApprovalStatus() === Lifecycle::PUBLISHED,
             'portfolio_evidence_expected' => $topic->getPortfolioEvidenceExpected(),
-            'portfolio_task' => $topic->getPortfolioTask(),
         ]);
     }
 
     // --- helpers ---
-
-    /**
-     * Sanitize the structured portfolio-task template content into a stable
-     * shape: { aim, sub_aim, mission: [{label, detail}], evidence: [string],
-     * rubric: [{criterion, standard}] }. Returns null when nothing meaningful
-     * was supplied, so an empty payload clears the stored task.
-     */
-    private function normalizePortfolioTask(mixed $raw): ?array
-    {
-        if (!is_array($raw)) {
-            return null;
-        }
-        $str = static fn ($v): string => trim((string) ($v ?? ''));
-        $list = static fn ($v): array => is_array($v) ? $v : [];
-
-        $mission = [];
-        foreach ($list($raw['mission'] ?? null) as $m) {
-            $item = ['label' => $str(is_array($m) ? ($m['label'] ?? '') : ''), 'detail' => $str(is_array($m) ? ($m['detail'] ?? '') : '')];
-            if ($item['label'] !== '' || $item['detail'] !== '') {
-                $mission[] = $item;
-            }
-        }
-        $evidence = [];
-        foreach ($list($raw['evidence'] ?? null) as $e) {
-            $val = $str(is_array($e) ? ($e['caption'] ?? '') : $e);
-            if ($val !== '') {
-                $evidence[] = $val;
-            }
-        }
-        $rubric = [];
-        foreach ($list($raw['rubric'] ?? null) as $r) {
-            $row = ['criterion' => $str(is_array($r) ? ($r['criterion'] ?? '') : ''), 'standard' => $str(is_array($r) ? ($r['standard'] ?? '') : '')];
-            if ($row['criterion'] !== '' || $row['standard'] !== '') {
-                $rubric[] = $row;
-            }
-        }
-
-        $task = [
-            'aim' => $str($raw['aim'] ?? ''),
-            'sub_aim' => $str($raw['sub_aim'] ?? ''),
-            'mission' => $mission,
-            'evidence' => $evidence,
-            'rubric' => $rubric,
-        ];
-
-        $empty = $task['aim'] === '' && $task['sub_aim'] === '' && !$mission && !$evidence && !$rubric;
-        return $empty ? null : $task;
-    }
 
     private function currentUser(Request $request): User
     {

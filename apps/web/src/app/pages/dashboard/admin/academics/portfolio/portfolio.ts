@@ -42,13 +42,6 @@ export class Portfolio {
   taskBusy = signal(false);
   readonly selectedTopic = computed(() => this.topics().find((t) => t.id === this.taskTopicId()) ?? null);
 
-  // Structured portfolio-task template content (populates the generated task sheet).
-  taskAim = signal<string>('');
-  taskSubAim = signal<string>('');
-  taskMission = signal<{ label: string; detail: string }[]>([]);
-  taskEvidence = signal<{ caption: string }[]>([]);
-  taskRubric = signal<{ criterion: string; standard: string }[]>([]);
-
   readonly ratings = RATINGS;
 
   columns: GridColumn[] = [
@@ -76,46 +69,11 @@ export class Portfolio {
     });
   }
 
-  private defaultMission(): { label: string; detail: string }[] {
-    return [
-      {label: '1 MODEL', detail: ''}, {label: '2 SOLVE', detail: ''},
-      {label: '3 DESIGN', detail: ''}, {label: '4 EXPLAIN', detail: ''},
-    ];
-  }
-  private defaultEvidence(): { caption: string }[] {
-    return [{caption: ''}, {caption: ''}, {caption: ''}];
-  }
-  private defaultRubric(): { criterion: string; standard: string }[] {
-    return [
-      {criterion: 'Knowledge', standard: ''}, {criterion: 'Skill', standard: ''},
-      {criterion: 'Real-life application', standard: ''}, {criterion: 'Communication', standard: ''},
-      {criterion: 'Collaboration', standard: ''},
-    ];
-  }
-
-  /** Load structured template content from a topic, falling back to canonical defaults. */
-  private loadTaskTemplate(t: any | null): void {
-    const pt = t?.portfolio_task ?? null;
-    this.taskAim.set(pt?.aim ?? '');
-    this.taskSubAim.set(pt?.sub_aim ?? '');
-    this.taskMission.set(pt?.mission?.length ? pt.mission.map((m: any) => ({label: m.label ?? '', detail: m.detail ?? ''})) : this.defaultMission());
-    this.taskEvidence.set(pt?.evidence?.length ? pt.evidence.map((e: any) => ({caption: typeof e === 'string' ? e : (e?.caption ?? '')})) : this.defaultEvidence());
-    this.taskRubric.set(pt?.rubric?.length ? pt.rubric.map((r: any) => ({criterion: r.criterion ?? '', standard: r.standard ?? ''})) : this.defaultRubric());
-  }
-
-  addMission(): void { this.taskMission.update(a => [...a, {label: '', detail: ''}]); }
-  removeMission(i: number): void { this.taskMission.update(a => a.filter((_, idx) => idx !== i)); }
-  addEvidence(): void { this.taskEvidence.update(a => [...a, {caption: ''}]); }
-  removeEvidence(i: number): void { this.taskEvidence.update(a => a.filter((_, idx) => idx !== i)); }
-  addRubric(): void { this.taskRubric.update(a => [...a, {criterion: '', standard: ''}]); }
-  removeRubric(i: number): void { this.taskRubric.update(a => a.filter((_, idx) => idx !== i)); }
-
   /** Open the "New portfolio task" composer. */
   onNewTask(): void {
     this.taskTopicId.set(null);
     this.taskBrief.set('');
     this.taskCompetency.set('');
-    this.loadTaskTemplate(null);
     const el = document.getElementById('portfolio_task');
     if (el && typeof bootstrap !== 'undefined') bootstrap.Modal.getOrCreateInstance(el).show();
   }
@@ -126,7 +84,6 @@ export class Portfolio {
     const t = this.selectedTopic();
     this.taskBrief.set(t?.portfolio_evidence_expected ?? '');
     this.taskCompetency.set(t?.competency_built ?? '');
-    this.loadTaskTemplate(t);
   }
 
   submitTask(): void {
@@ -138,13 +95,6 @@ export class Portfolio {
       topic_id: id,
       portfolio_evidence_expected: this.taskBrief().trim(),
       competency_built: this.taskCompetency().trim(),
-      portfolio_task: {
-        aim: this.taskAim().trim(),
-        sub_aim: this.taskSubAim().trim(),
-        mission: this.taskMission().filter(m => m.label.trim() || m.detail.trim()),
-        evidence: this.taskEvidence().filter(e => e.caption.trim()),
-        rubric: this.taskRubric().filter(r => r.criterion.trim() || r.standard.trim()),
-      },
     }).subscribe({
       next: (res) => {
         this.toast.success(res?.published
