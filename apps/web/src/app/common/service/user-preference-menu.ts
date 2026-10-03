@@ -35,24 +35,11 @@ export class UserPreferenceMenu {
 
     { name: "Live Classes", icon: "video", link: "/admin/academics/live-classes", module: "live_classes" },
 
-    { name: "Assessments & Gradebooks", icon: "grading", link: "admin/assessments-gradebooks",
-      children: [
-        { name: "Assessments", link: "/admin/academics/assessments", module: "assessments" },
-        { name: "Question Bank", link: "/admin/academics/question-bank", module: "assessments" },
-        { name: "Worksheets", link: "/admin/academics/worksheets", module: "worksheets" },
-        { name: "Portfolio", link: "/admin/academics/portfolio", module: "portfolio" },
-        { name: "Gradebook", link: "/admin/academics/gradebook", module: "assessments" },
-      ]
-    },
+    // Tabbed hub: Assessments, Question Bank, Worksheets, Portfolio, Gradebook.
+    { name: "Assessments & Gradebooks", icon: "grading", link: "/admin/assessments-gradebooks", module: "assessments" },
 
-    { name: "Reports & Report Cards", icon: "insights", link: "admin/reports",
-      children: [
-        { name: "Insights", link: "/admin/academics/insights" },
-        { name: "Analytics", link: "/admin/academics/analytics", module: "analytics" },
-        { name: "School Report", link: "/admin/academics/school-report", module: "analytics" },
-        { name: "Report Cards", link: "/admin/academics/report-cards", module: "analytics" },
-      ]
-    },
+    // Tabbed hub: Insights, Analytics, School Report, Report Cards.
+    { name: "Reports & Report Cards", icon: "insights", link: "/admin/reports" },
 
     { name: "Interventions", icon: "monitoring", link: "/admin/academics/interventions", module: "interventions" },
 
@@ -63,12 +50,8 @@ export class UserPreferenceMenu {
       ]
     },
 
-    { name: "Communication", icon: "forum", link: "admin/communication",
-      children: [
-        { name: "Messages", link: "/admin/communication/messages" },
-        { name: "Announcements", link: "/admin/communication/announcements" },
-      ]
-    },
+    // Tabbed hub: Messages, Announcements.
+    { name: "Communication", icon: "forum", link: "/admin/communication-hub" },
 
     { name: "Calendar", icon: "calendar_month", link: "/admin/calendar" },
 

@@ -1,5 +1,5 @@
 <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
-  <app-page-header icon="monitoring" action="Reports & Analytics"></app-page-header>
+  <app-page-header [embedded]="embedded()" icon="monitoring" action="Reports & Analytics"></app-page-header>
   <div class="d-flex gap-2">
     <button type="button" class="btn btn-sm btn-outline-secondary" [disabled]="exporting()" (click)="exportCsv()">
       <app-icon name="download" [size]="16" /> Export CSV

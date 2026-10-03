@@ -1,4 +1,4 @@
-import {Component, computed, inject, signal} from '@angular/core';
+import {Component, computed, inject, input, signal} from '@angular/core';
 import {ToastrService} from 'ngx-toastr';
 import {PageHeader} from '../../../../../common/layout/page-header/page-header';
 import {ApiService} from '../../../../../common/service/api.service';
@@ -18,6 +18,9 @@ const MASTERY_TONE: Record<string, Tone> = {Strong: 'success', Good: 'primary', 
   styleUrl: './analytics.css',
 })
 export class Analytics {
+  /** Hidden page header when hosted inside a hub. */
+  readonly embedded = input<boolean>(false);
+
   private readonly api = inject(ApiService);
   private readonly toast = inject(ToastrService);
 
