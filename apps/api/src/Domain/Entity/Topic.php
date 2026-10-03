@@ -76,6 +76,15 @@ class Topic implements LifecycleAware
     #[ORM\Column(name: 'portfolio_evidence_expected', type: Types::TEXT, nullable: true)]
     private ?string $portfolioEvidenceExpected = null;
 
+    /**
+     * Structured portfolio-task template content used to generate the branded
+     * task sheet: { aim, sub_aim, mission: [{label, detail}], evidence: [string],
+     * rubric: [{criterion, standard}] }. The plain-text brief stays in
+     * portfolioEvidenceExpected.
+     */
+    #[ORM\Column(name: 'portfolio_task', type: Types::JSON, nullable: true)]
+    private ?array $portfolioTask = null;
+
     #[ORM\Column(name: 'approval_status', length: 20, options: ['default' => Lifecycle::DRAFT])]
     private string $approvalStatus = Lifecycle::DRAFT;
 
@@ -101,6 +110,8 @@ class Topic implements LifecycleAware
     public function setCompetencyBuilt(?string $v): void { $this->competencyBuilt = $v; }
     public function getPortfolioEvidenceExpected(): ?string { return $this->portfolioEvidenceExpected; }
     public function setPortfolioEvidenceExpected(?string $v): void { $this->portfolioEvidenceExpected = $v; }
+    public function getPortfolioTask(): ?array { return $this->portfolioTask; }
+    public function setPortfolioTask(?array $v): void { $this->portfolioTask = $v; }
     public function getApprovalStatus(): string { return $this->approvalStatus; }
     public function setApprovalStatus(string $v): void { $this->approvalStatus = $v; }
 
@@ -131,6 +142,7 @@ class Topic implements LifecycleAware
             'workplace_relevance' => $this->workplaceRelevance,
             'competency_built' => $this->competencyBuilt,
             'portfolio_evidence_expected' => $this->portfolioEvidenceExpected,
+            'portfolio_task' => $this->portfolioTask,
             'approval_status' => $this->approvalStatus,
         ];
     }
