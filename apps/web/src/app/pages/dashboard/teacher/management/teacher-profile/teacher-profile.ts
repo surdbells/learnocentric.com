@@ -1,4 +1,4 @@
-import { Component, input } from '@angular/core';
+import { Component } from '@angular/core';
 import {PageHeader} from '../../../../../common/layout/page-header/page-header';
 import {ProfileForm} from '../../../../../components/forms/profile-form/profile-form';
 
@@ -12,8 +12,5 @@ import {ProfileForm} from '../../../../../components/forms/profile-form/profile-
   styleUrl: './teacher-profile.css'
 })
 export class TeacherProfile {
-  /** Hidden page header when hosted inside a teacher hub. */
-  readonly embedded = input<boolean>(false);
-
 
 }

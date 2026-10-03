@@ -1,4 +1,4 @@
-import {Component, computed, inject, signal, PLATFORM_ID, input } from '@angular/core';
+import {Component, computed, inject, signal, PLATFORM_ID} from '@angular/core';
 import {DatePipe, isPlatformBrowser} from '@angular/common';
 import {FormsModule} from '@angular/forms';
 import {DomSanitizer, SafeResourceUrl} from '@angular/platform-browser';
@@ -16,9 +16,6 @@ import {RichText} from '../../../../common/rich-editor/rich-text';
   styleUrl: './resource-viewer.css',
 })
 export class ResourceViewer {
-  /** Hidden page header when hosted inside a teacher hub. */
-  readonly embedded = input<boolean>(false);
-
   private readonly api = inject(ApiService);
   private readonly toast = inject(ToastrService);
   private readonly sanitizer = inject(DomSanitizer);

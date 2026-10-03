@@ -1,4 +1,4 @@
-import {Component, inject, OnInit, signal, input } from '@angular/core';
+import {Component, inject, OnInit, signal} from '@angular/core';
 import {FormsModule} from '@angular/forms';
 import {RouterLink} from '@angular/router';
 import {DatePipe} from '@angular/common';
@@ -21,9 +21,6 @@ import {ToastrService} from 'ngx-toastr';
   styleUrl: './settings.css',
 })
 export class TeacherSettings implements OnInit {
-  /** Hidden page header when hosted inside a teacher hub. */
-  readonly embedded = input<boolean>(false);
-
   private api = inject(ApiService);
   private toast = inject(ToastrService);
 

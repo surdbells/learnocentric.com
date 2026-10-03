@@ -1,4 +1,4 @@
-import {Component, computed, inject, signal, input } from '@angular/core';
+import {Component, computed, inject, signal} from '@angular/core';
 import {FormsModule} from '@angular/forms';
 import {ToastrService} from 'ngx-toastr';
 import {PageHeader} from '../../../../common/layout/page-header/page-header';
@@ -21,9 +21,6 @@ interface FocusArea { label: string; score: number; on: boolean; }
   styleUrl: './feedback-compose.css',
 })
 export class FeedbackCompose {
-  /** Hidden page header when hosted inside a teacher hub. */
-  readonly embedded = input<boolean>(false);
-
   private api = inject(ApiService);
   private toast = inject(ToastrService);
 
