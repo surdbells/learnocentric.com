@@ -48,7 +48,6 @@ const MAP: Record<string, any> = {
   shield: Shield, layers: Layers, monitor: Monitor, download: Download, groups: Users,
   alarm: AlarmClock, edit_square: SquarePen, verified_user: ShieldCheck, health_and_safety: ShieldCheck,
   circle_check: CircleCheck, group_add: UserPlus, audiotrack: Music, image: Image,
-  school_setup: ClipboardCheck, rate_review: SquarePen,
 };
 
 @Component({
