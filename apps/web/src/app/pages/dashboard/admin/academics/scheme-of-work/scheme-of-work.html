@@ -1,6 +1,12 @@
-<app-page-header icon="calendar_month" action="Scheme of Work">
-  <app-learno-button text="Add Week" icon="add" data-bs-toggle="modal" data-bs-target="#add_week" (clicked)="onAdd()"/>
-</app-page-header>
+@if (!embedded()) {
+  <app-page-header icon="calendar_month" action="Scheme of Work">
+    <app-learno-button text="Add Week" icon="add" data-bs-toggle="modal" data-bs-target="#add_week" (clicked)="onAdd()"/>
+  </app-page-header>
+} @else {
+  <div class="d-flex justify-content-end mb-3">
+    <app-learno-button text="Add Week" icon="add" data-bs-toggle="modal" data-bs-target="#add_week" (clicked)="onAdd()"/>
+  </div>
+}
 
 <app-learno-modal [modalId]="'add_week'" [modalAction]="selectScheme() ? 'Edit Week' : 'Add Week'" [showBtn]="false">
   <app-scheme-form

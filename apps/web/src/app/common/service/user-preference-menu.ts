@@ -29,18 +29,9 @@ export class UserPreferenceMenu {
 
     { name: "Teachers & Staff", icon: "supervisor_account", link: "/admin/teachers" },
 
-    { name: "Subjects & Curriculum", icon: "subject", link: "admin/subjects-curriculum",
-      children: [
-        { name: "Subjects", link: "/admin/academics/subjects" },
-        { name: "Topics", link: "/admin/academics/topics" },
-        { name: "Lesson Content", link: "/admin/academics/lesson-content" },
-        { name: "Delivery Pack", link: "/admin/academics/delivery-pack" },
-        { name: "Scheme of Work", link: "/admin/academics/scheme-of-work" },
-        { name: "Scheme Coverage", link: "/admin/academics/scheme-coverage" },
-        { name: "Curriculum Map", link: "/admin/academics/curriculum-map" },
-        { name: "Approval Queue", link: "/admin/academics/approval-queue" },
-      ]
-    },
+    // Tabbed hub: Subjects, Topics, Lesson Content, Delivery Pack, Scheme of
+    // Work, Scheme Coverage, Curriculum Map and Approval Queue on one page.
+    { name: "Subjects & Curriculum", icon: "subject", link: "/admin/subjects-curriculum" },
 
     { name: "Live Classes", icon: "video", link: "/admin/academics/live-classes", module: "live_classes" },
 

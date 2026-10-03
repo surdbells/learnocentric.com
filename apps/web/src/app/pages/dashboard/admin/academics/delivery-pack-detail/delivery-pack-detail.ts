@@ -1,4 +1,4 @@
-import {Component, computed, inject, signal} from '@angular/core';
+import {Component, computed, inject, input, signal} from '@angular/core';
 import {DatePipe} from '@angular/common';
 import {FormsModule} from '@angular/forms';
 import {ToastrService} from 'ngx-toastr';
@@ -19,6 +19,9 @@ const STATUS_TONE: Record<string, Tone> = {draft: 'secondary', review: 'info', a
   styleUrl: './delivery-pack-detail.css',
 })
 export class DeliveryPackDetail {
+  /** Hidden page header when hosted inside the Subjects & Curriculum hub. */
+  readonly embedded = input<boolean>(false);
+
   private readonly api = inject(ApiService);
   private readonly toast = inject(ToastrService);
 

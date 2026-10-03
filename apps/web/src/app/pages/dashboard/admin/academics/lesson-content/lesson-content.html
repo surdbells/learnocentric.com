@@ -1,8 +1,14 @@
-<app-page-header icon="menu_book" action="Topics & Lesson Content">
-  @if (tab() === 'packs') {
+@if (!embedded()) {
+  <app-page-header icon="menu_book" action="Topics & Lesson Content">
+    @if (tab() === 'packs') {
+      <app-learno-button text="Add Pack" icon="add" data-bs-toggle="modal" data-bs-target="#add_pack" (clicked)="onAdd()"/>
+    }
+  </app-page-header>
+} @else if (tab() === 'packs') {
+  <div class="d-flex justify-content-end mb-3">
     <app-learno-button text="Add Pack" icon="add" data-bs-toggle="modal" data-bs-target="#add_pack" (clicked)="onAdd()"/>
-  }
-</app-page-header>
+  </div>
+}
 
 <app-tab-bar class="d-block mb-3" [tabs]="tabs" [(active)]="tab" />
 

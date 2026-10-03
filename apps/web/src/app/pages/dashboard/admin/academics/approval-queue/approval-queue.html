@@ -1,4 +1,4 @@
-<app-page-header icon="verified" action="Approval Queue"></app-page-header>
+@if (!embedded()) { <app-page-header icon="verified" action="Approval Queue"></app-page-header> }
 
 @if (loading()) {
   <div class="text-body-secondary p-4">Loading the approval queue…</div>
