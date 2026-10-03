@@ -1,0 +1,9 @@
+<app-page-header icon="library_books" action="Resources"></app-page-header>
+
+<app-tab-bar class="d-block mb-3" [tabs]="tabs" [active]="tab()" (activeChange)="tab.set($event)" />
+
+@if (tab() === 'library') {
+  <app-resources [embedded]="true" />
+} @else if (tab() === 'viewer') {
+  <app-resource-viewer [embedded]="true" />
+}

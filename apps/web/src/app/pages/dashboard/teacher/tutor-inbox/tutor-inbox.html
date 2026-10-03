@@ -1,4 +1,4 @@
-<app-page-header icon="support_agent" action="Tutor Questions"></app-page-header>
+<app-page-header [embedded]="embedded()" icon="support_agent" action="Tutor Questions"></app-page-header>
 <p class="text-body-secondary mb-4">Questions your learners have asked. Answer them to close the loop and notify the learner.</p>
 
 @if (loading()) {

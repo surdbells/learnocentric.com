@@ -43,12 +43,8 @@ export class UserPreferenceMenu {
 
     { name: "Interventions", icon: "monitoring", link: "/admin/academics/interventions", module: "interventions" },
 
-    { name: "Resources", icon: "library_books", link: "admin/resources",
-      children: [
-        { name: "Resources", link: "/admin/academics/resources" },
-        { name: "Resource Viewer", link: "/admin/academics/resource-viewer" },
-      ]
-    },
+    // Tabbed hub: Resources, Resource Viewer.
+    { name: "Resources", icon: "library_books", link: "/admin/resources-hub" },
 
     // Tabbed hub: Messages, Announcements.
     { name: "Communication", icon: "forum", link: "/admin/communication-hub" },
@@ -166,78 +162,18 @@ export class UserPreferenceMenu {
   teacher: IMenu[] = [
     { name: "Dashboard", icon: "dashboard", link: "/teacher/main" },
 
-    { name: "My Classes", icon: "group", link: "teacher/my-classes",
-      children: [
-        { name: "Classes", link: "/teacher/classes" },
-        { name: "Learners", link: "/teacher/main/students" },
-      ]
-    },
-
-    { name: "Subjects & Curriculum", icon: "subject", link: "teacher/subjects-curriculum",
-      children: [
-        { name: "Topics", link: "/teacher/academics/topics" },
-        { name: "Lesson Content", link: "/teacher/academics/lesson-content" },
-        { name: "Delivery Pack", link: "/teacher/academics/delivery-pack" },
-        { name: "Scheme of Work", link: "/teacher/academics/scheme-of-work" },
-        { name: "Scheme Coverage", link: "/teacher/academics/scheme-coverage" },
-        { name: "Curriculum Map", link: "/teacher/academics/curriculum-map" },
-        { name: "Approval Queue", link: "/teacher/academics/approval-queue" },
-      ]
-    },
-
-    { name: "Assessments & Gradebooks", icon: "grading", link: "teacher/assessments-gradebooks",
-      children: [
-        { name: "Assessments", link: "/teacher/academics/assessments", module: "assessments" },
-        { name: "Question Bank", link: "/teacher/academics/question-bank", module: "assessments" },
-        { name: "Worksheets", link: "/teacher/academics/worksheets", module: "worksheets" },
-        { name: "Portfolio", link: "/teacher/academics/portfolio", module: "portfolio" },
-        { name: "Assignments & Submissions", link: "/teacher/academics/submissions" },
-        { name: "Gradebook", link: "/teacher/academics/gradebook", module: "assessments" },
-      ]
-    },
-
+    // Tabbed hubs, mirroring the admin consolidation.
+    { name: "My Classes", icon: "group", link: "/teacher/my-classes" },
+    { name: "Subjects & Curriculum", icon: "subject", link: "/teacher/subjects-curriculum" },
+    { name: "Assessments & Gradebooks", icon: "grading", link: "/teacher/assessments-gradebooks" },
     { name: "Live Classes", icon: "video", link: "/teacher/academics/live-classes", module: "live_classes" },
-
-    { name: "Feedback & Questions", icon: "rate_review", link: "teacher/feedback-questions",
-      children: [
-        { name: "Give Feedback", link: "/teacher/feedback" },
-        { name: "Tutor Questions", link: "/teacher/ask-tutor" },
-      ]
-    },
-
-    { name: "Reports & Analytics", icon: "insights", link: "teacher/reports",
-      children: [
-        { name: "Insights", link: "/teacher/academics/insights" },
-        { name: "Analytics", link: "/teacher/academics/analytics", module: "analytics" },
-        { name: "School Report", link: "/teacher/academics/school-report", module: "analytics" },
-        { name: "Report Cards", link: "/teacher/academics/report-cards", module: "analytics" },
-      ]
-    },
-
+    { name: "Feedback & Questions", icon: "rate_review", link: "/teacher/feedback-questions" },
+    { name: "Reports & Analytics", icon: "insights", link: "/teacher/reports" },
     { name: "Interventions", icon: "monitoring", link: "/teacher/academics/interventions", module: "interventions" },
-
     { name: "Safeguarding", icon: "health_and_safety", link: "/teacher/academics/safeguarding", module: "safeguarding" },
-
-    { name: "Resources", icon: "library_books", link: "teacher/resources",
-      children: [
-        { name: "Resources", link: "/teacher/academics/resources" },
-        { name: "Resource Viewer", link: "/teacher/academics/resource-viewer" },
-      ]
-    },
-
-    { name: "Communication", icon: "forum", link: "teacher/communication",
-      children: [
-        { name: "Messages", link: "/teacher/communication/messages" },
-        { name: "Announcements", link: "/teacher/communication/announcements" },
-      ]
-    },
-
-    { name: "Settings", icon: "settings", link: "teacher/settings-group",
-      children: [
-        { name: "Profile", link: "/teacher/management/profile" },
-        { name: "Settings", link: "/teacher/settings" },
-      ]
-    },
+    { name: "Resources", icon: "library_books", link: "/teacher/resources-hub" },
+    { name: "Communication", icon: "forum", link: "/teacher/communication-hub" },
+    { name: "Settings", icon: "settings", link: "/teacher/settings-hub" },
   ]
 
   // Flat learner sidebar, no group categories; every item is a direct icon + link.

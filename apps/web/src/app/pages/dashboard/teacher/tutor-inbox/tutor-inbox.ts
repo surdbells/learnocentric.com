@@ -1,4 +1,4 @@
-import {Component, computed, inject, signal} from '@angular/core';
+import {Component, computed, inject, signal, input } from '@angular/core';
 import {DatePipe} from '@angular/common';
 import {FormsModule} from '@angular/forms';
 import {ToastrService} from 'ngx-toastr';
@@ -19,6 +19,9 @@ import {ApiService} from '../../../../common/service/api.service';
   styleUrl: './tutor-inbox.css',
 })
 export class TutorInbox {
+  /** Hidden page header when hosted inside a teacher hub. */
+  readonly embedded = input<boolean>(false);
+
   private readonly api = inject(ApiService);
   private readonly toast = inject(ToastrService);
 

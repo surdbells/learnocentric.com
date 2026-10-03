@@ -1,4 +1,4 @@
-import {Component, computed, inject, signal} from '@angular/core';
+import {Component, computed, inject, signal, input } from '@angular/core';
 import {DatePipe} from '@angular/common';
 import {FormsModule} from '@angular/forms';
 import {RouterLink} from '@angular/router';
@@ -25,6 +25,9 @@ import {KpiStrip, KpiItem, DonutChart, DonutSegment} from '../../../../../common
   styleUrl: './my-classes.css',
 })
 export class MyClasses {
+  /** Hidden page header when hosted inside a teacher hub. */
+  readonly embedded = input<boolean>(false);
+
   private api = inject(ApiService);
   private toast = inject(ToastrService);
 

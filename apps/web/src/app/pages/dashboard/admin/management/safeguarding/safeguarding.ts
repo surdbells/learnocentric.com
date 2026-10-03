@@ -1,4 +1,4 @@
-import {Component, computed, inject, signal, ViewChild} from '@angular/core';
+import {Component, computed, inject, signal, ViewChild, input } from '@angular/core';
 import {DatePipe} from '@angular/common';
 import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {FormsModule} from '@angular/forms';
@@ -28,6 +28,9 @@ const CATEGORIES = ['welfare', 'bullying', 'abuse', 'attendance', 'mental_health
   styleUrl: './safeguarding.css',
 })
 export class Safeguarding {
+  /** Hidden page header when hosted inside a teacher hub. */
+  readonly embedded = input<boolean>(false);
+
   @ViewChild(DataGrid) grid!: DataGrid;
 
   private readonly api = inject(ApiService);

@@ -1,4 +1,4 @@
-import {Component, computed, inject, signal} from '@angular/core';
+import {Component, computed, inject, signal, input } from '@angular/core';
 import {DatePipe} from '@angular/common';
 import {FormsModule} from '@angular/forms';
 import {RouterLink} from '@angular/router';
@@ -22,6 +22,9 @@ import {KpiStrip, KpiItem, TabBar, TabItem, DonutChart, DonutSegment} from '../.
   styleUrl: './submissions-inbox.css',
 })
 export class SubmissionsInbox {
+  /** Hidden page header when hosted inside a teacher hub. */
+  readonly embedded = input<boolean>(false);
+
   private readonly api = inject(ApiService);
   private readonly auth = inject(AuthService);
   private readonly toast = inject(ToastrService);

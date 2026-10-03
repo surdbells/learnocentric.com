@@ -1,4 +1,4 @@
-<app-page-header icon="library_books" action="Learning Resources">
+<app-page-header [embedded]="embedded()" icon="library_books" action="Learning Resources">
   @if (isStaff()) {
     <button type="button" class="btn btn-success d-inline-flex align-items-center gap-1" data-bs-toggle="modal" data-bs-target="#upload_resource">
       <app-icon name="upload" [size]="18" /> Upload Resource

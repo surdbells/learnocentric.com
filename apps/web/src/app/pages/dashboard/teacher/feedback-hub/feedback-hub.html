@@ -1,0 +1,9 @@
+<app-page-header icon="rate_review" action="Feedback & Questions"></app-page-header>
+
+<app-tab-bar class="d-block mb-3" [tabs]="tabs" [active]="tab()" (activeChange)="tab.set($event)" />
+
+@if (tab() === 'feedback') {
+  <app-feedback-compose [embedded]="true" />
+} @else if (tab() === 'questions') {
+  <app-tutor-inbox [embedded]="true" />
+}

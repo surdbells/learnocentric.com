@@ -1,4 +1,4 @@
-import {Component, computed, OnInit, signal, ViewChild} from '@angular/core';
+import {Component, computed, OnInit, signal, ViewChild, input } from '@angular/core';
 import {DataTable} from '../../../../../components/data-table/data-table';
 import {DataTableNumbering} from '../../../../../components/data-table-numbering/data-table-numbering';
 import {PageHeader} from '../../../../../common/layout/page-header/page-header';
@@ -27,6 +27,9 @@ import {KpiItem, KpiStrip, TabBar, TabItem} from '../../../../../common/ui';
   styleUrl: './student.css'
 })
 export class Student implements OnInit {
+  /** Hidden page header when hosted inside a teacher hub. */
+  readonly embedded = input<boolean>(false);
+
 
   isLoading = signal(false);
   students = signal<any[]>([]);
