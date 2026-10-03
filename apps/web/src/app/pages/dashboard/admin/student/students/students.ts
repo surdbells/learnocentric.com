@@ -1,4 +1,4 @@
-import {Component, computed, inject, input, OnInit, signal, ViewChild} from '@angular/core';
+import {Component, computed, inject, OnInit, signal, ViewChild} from '@angular/core';
 import {RouterLink} from '@angular/router';
 import {PageHeader} from '../../../../../common/layout/page-header/page-header';
 import {LearnoModal} from '../../../../../components/learno-modal/learno-modal';
@@ -18,9 +18,6 @@ declare const bootstrap: any;
   styleUrl: './students.css',
 })
 export class Students implements OnInit {
-  /** When hosted inside the Classes & Learners hub, hide this component's own page header. */
-  readonly embedded = input<boolean>(false);
-
   @ViewChild(DataGrid) grid!: DataGrid;
   private readonly api = inject(ApiService);
 

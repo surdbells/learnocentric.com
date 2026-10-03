@@ -18,7 +18,6 @@ import {Safeguarding} from "./pages/dashboard/admin/management/safeguarding/safe
 import {SchoolSettings} from "./pages/dashboard/admin/management/school-settings/school-settings";
 import {SchoolClasses} from "./pages/dashboard/admin/academics/school-classes/school-classes";
 import {ClassesLearners} from "./pages/dashboard/admin/academics/classes-learners/classes-learners";
-import {ClassesHub} from "./pages/dashboard/admin/academics/classes-hub/classes-hub";
 import {Subjects} from "./pages/dashboard/admin/academics/subjects/subjects";
 import {Topics} from "./pages/dashboard/admin/academics/topics/topics";
 import {LessonContent} from "./pages/dashboard/admin/academics/lesson-content/lesson-content";
@@ -129,7 +128,6 @@ export const routes: Routes = [
     children: [
       { path: "setup", component: SchoolSetup },
       { path: "calendar", component: Calendar },
-      { path: "classes-learners", component: ClassesHub },
       { path: "students", component: Students },
       { path: "enrollments", component: Enrollment },
       { path: "students/new", component: NewStudent },

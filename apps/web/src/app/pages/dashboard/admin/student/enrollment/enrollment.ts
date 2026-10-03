@@ -1,4 +1,4 @@
-import {Component, computed, ElementRef, input, OnInit, signal, ViewChild} from '@angular/core';
+import {Component, computed, ElementRef, OnInit, signal, ViewChild} from '@angular/core';
 import {DataTable} from "../../../../../components/data-table/data-table";
 import {DataTableNumbering} from "../../../../../components/data-table-numbering/data-table-numbering";
 import {LearnoButton} from "../../../../../common/learno-button/learno-button";
@@ -43,8 +43,6 @@ export interface IEnrollmentStoreProp {
   styleUrl: './enrollment.css'
 })
 export class Enrollment implements OnInit {
-  /** When hosted inside the Classes & Learners hub, hide this component's own page header. */
-  readonly embedded = input<boolean>(false);
 
   isLoading = signal(false);
   enrollments = signal<any[]>([]);

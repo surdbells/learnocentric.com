@@ -24,8 +24,16 @@ export class UserPreferenceMenu {
 
     { name: "School Setup", icon: "school_setup", link: "/admin/setup" },
 
-    // Tabbed hub: Classes & Learners + Students + Enrollment on one page.
-    { name: "Classes & Learners", icon: "group", link: "/admin/classes-learners" },
+    // Students + Enrolment + Classes fold in here; the tabbed hub lands in a
+    // later phase, so for now they are grouped to keep every page reachable.
+    { name: "Classes & Learners", icon: "group", link: "admin/classes-learners",
+      children: [
+        { name: "Classes & Learners", link: "/admin/academics/classes-learners" },
+        { name: "Classes", link: "/admin/academics/classes" },
+        { name: "Students", link: "/admin/students" },
+        { name: "Enrollment", link: "/admin/enrollments" },
+      ]
+    },
 
     { name: "Teachers & Staff", icon: "supervisor_account", link: "/admin/teachers" },
 
