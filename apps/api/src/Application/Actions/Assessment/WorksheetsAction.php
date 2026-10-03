@@ -182,6 +182,8 @@ final class WorksheetsAction
     private function applyFields(Worksheet $w, array $body): void
     {
         if (isset($body['track'])) { $w->setTrack((string) $body['track']); }
+        if (isset($body['response_mode'])) { $w->setResponseMode((string) $body['response_mode']); }
+        if (array_key_exists('worked_example', $body)) { $w->setWorkedExample($body['worked_example'] !== '' ? (string) $body['worked_example'] : null); }
         if (array_key_exists('instructions', $body)) { $w->setInstructions($body['instructions'] !== '' ? (string) $body['instructions'] : null); }
         if (array_key_exists('attachment_url', $body)) { $w->setAttachmentUrl($body['attachment_url'] !== '' ? (string) $body['attachment_url'] : null); }
         if (isset($body['total_marks'])) { $w->setTotalMarks((int) $body['total_marks']); }
