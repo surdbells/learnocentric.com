@@ -1,4 +1,4 @@
-import {Component, computed, inject, signal, ViewChild} from '@angular/core';
+import {Component, computed, inject, input, signal, ViewChild} from '@angular/core';
 import {DatePipe} from '@angular/common';
 import {FormsModule} from '@angular/forms';
 import {ToastrService} from 'ngx-toastr';
@@ -23,6 +23,9 @@ const RATINGS = ['emerging', 'developing', 'proficient', 'mastery'];
   styleUrl: './portfolio.css',
 })
 export class Portfolio {
+  /** Hidden page header when hosted inside a hub. */
+  readonly embedded = input<boolean>(false);
+
   @ViewChild(DataGrid) grid!: DataGrid;
 
   private readonly api = inject(ApiService);

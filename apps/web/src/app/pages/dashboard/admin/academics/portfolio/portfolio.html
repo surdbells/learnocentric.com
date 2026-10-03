@@ -1,4 +1,4 @@
-<app-page-header icon="folder_special" action="Portfolio Evidence">
+<app-page-header [embedded]="embedded()" icon="folder_special" action="Portfolio Evidence">
   <button type="button" class="btn btn-primary btn-sm d-inline-flex align-items-center gap-1" (click)="onNewTask()">
     <app-icon name="add" [size]="18" /> New portfolio task
   </button>

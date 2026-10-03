@@ -1,4 +1,4 @@
-import {Component, computed, inject, signal} from '@angular/core';
+import {Component, computed, inject, input, signal} from '@angular/core';
 import {DatePipe} from '@angular/common';
 import {FormsModule} from '@angular/forms';
 import {ToastrService} from 'ngx-toastr';
@@ -15,6 +15,9 @@ import {Icon} from '../../../../../common/icon/icon';
   styleUrl: './report-cards.css',
 })
 export class ReportCards {
+  /** Hidden page header when hosted inside a hub. */
+  readonly embedded = input<boolean>(false);
+
   private readonly api = inject(ApiService);
   private readonly pdf = inject(PdfService);
   private readonly toast = inject(ToastrService);

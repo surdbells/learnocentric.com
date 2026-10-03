@@ -1,4 +1,4 @@
-import {Component, inject, signal} from '@angular/core';
+import {Component, inject, input, signal} from '@angular/core';
 import {DatePipe} from '@angular/common';
 import {FormsModule} from '@angular/forms';
 import {RouterLink} from '@angular/router';
@@ -21,6 +21,9 @@ import {Icon} from '../../../common/icon/icon';
   styleUrl: './messages.css',
 })
 export class Messages {
+  /** Hidden page header when hosted inside a hub. */
+  readonly embedded = input<boolean>(false);
+
   private readonly api = inject(ApiService);
   private readonly toast = inject(ToastrService);
   private readonly auth = inject(AuthService);
