@@ -1,4 +1,4 @@
-import {Component, computed, inject, signal} from '@angular/core';
+import {Component, computed, inject, input, signal} from '@angular/core';
 import {FormsModule} from '@angular/forms';
 import {RouterLink} from '@angular/router';
 import {ToastrService} from 'ngx-toastr';
@@ -28,6 +28,9 @@ declare const bootstrap: any;
   styleUrl: './classes-learners.css',
 })
 export class ClassesLearners {
+  /** When hosted inside the Classes & Learners hub, hide this component's own page header. */
+  readonly embedded = input<boolean>(false);
+
   private readonly api = inject(ApiService);
   private readonly toast = inject(ToastrService);
   private readonly auth = inject(AuthService);
