@@ -1,5 +1,5 @@
-<app-page-header icon="supervisor_account" action="Teachers & Staff">
-  <app-learno-button routerLink="/admin/teachers/new" text="Add Staff" icon="add" />
+<app-page-header icon="supervisor_account" action="Teachers">
+  <app-learno-button routerLink="/admin/teachers/new" text="Add Teacher" icon="add" />
 </app-page-header>
 
 <app-learno-modal [modalId]="'edit_teacher'" modalAction="Edit Teacher" [showBtn]="false">
@@ -16,6 +16,6 @@
   [filters]="filterDefs"
   [actions]="['edit', 'delete']"
   searchPlaceholder="Search teachers…"
-  emptyMessage="No staff yet. Click “Add Staff” to add one."
+  emptyMessage="No teachers yet. Click “Add Teacher” to add one."
   (edit)="onEdit($event)"
 />
