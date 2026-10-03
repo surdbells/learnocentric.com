@@ -1,4 +1,4 @@
-import {Component, computed, inject, input, signal, ViewChild} from '@angular/core';
+import {Component, computed, inject, signal, ViewChild} from '@angular/core';
 import {DatePipe} from '@angular/common';
 import {ToastrService} from 'ngx-toastr';
 import {PageHeader} from '../../../../../common/layout/page-header/page-header';
@@ -26,9 +26,6 @@ const APPROVER_ROLES = ['academic_lead', 'school_admin', 'tutor_admin', 'super_a
   styleUrl: './lesson-content.css',
 })
 export class LessonContent {
-  /** Hidden page header when hosted inside the Subjects & Curriculum hub. */
-  readonly embedded = input<boolean>(false);
-
   @ViewChild(DataGrid) grid!: DataGrid;
 
   /** Topics authoring is now a tab on this page (PDF review T1). */

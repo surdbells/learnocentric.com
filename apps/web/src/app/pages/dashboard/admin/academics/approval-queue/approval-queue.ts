@@ -1,4 +1,4 @@
-import {Component, computed, inject, input, signal, PLATFORM_ID} from '@angular/core';
+import {Component, computed, inject, signal, PLATFORM_ID} from '@angular/core';
 import {DatePipe, isPlatformBrowser} from '@angular/common';
 import {ToastrService} from 'ngx-toastr';
 import {PageHeader} from '../../../../../common/layout/page-header/page-header';
@@ -67,9 +67,6 @@ const TYPE_META: Record<string, {label: string; icon: string}> = {
   styleUrl: './approval-queue.css',
 })
 export class ApprovalQueue {
-  /** Hidden page header when hosted inside the Subjects & Curriculum hub. */
-  readonly embedded = input<boolean>(false);
-
   private readonly api = inject(ApiService);
   private readonly toast = inject(ToastrService);
   private readonly platformId = inject(PLATFORM_ID);

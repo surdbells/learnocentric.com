@@ -1,4 +1,4 @@
-import {Component, computed, inject, input, signal, ViewChild} from '@angular/core';
+import {Component, computed, inject, signal, ViewChild} from '@angular/core';
 import {PageHeader} from '../../../../../common/layout/page-header/page-header';
 import {LearnoModal} from '../../../../../components/learno-modal/learno-modal';
 import {LearnoButton} from '../../../../../common/learno-button/learno-button';
@@ -16,9 +16,6 @@ declare const bootstrap: any;
   styleUrl: './scheme-of-work.css',
 })
 export class SchemeOfWork {
-  /** Hidden page header when hosted inside the Subjects & Curriculum hub. */
-  readonly embedded = input<boolean>(false);
-
   @ViewChild(DataGrid) grid!: DataGrid;
 
   private readonly api = inject(ApiService);

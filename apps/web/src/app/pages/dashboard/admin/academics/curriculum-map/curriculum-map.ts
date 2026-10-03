@@ -1,4 +1,4 @@
-import {Component, computed, inject, input, signal} from '@angular/core';
+import {Component, computed, inject, signal} from '@angular/core';
 import {FormsModule} from '@angular/forms';
 import {ToastrService} from 'ngx-toastr';
 import {PageHeader} from '../../../../../common/layout/page-header/page-header';
@@ -14,9 +14,6 @@ import {KpiItem, KpiStrip, StatRing} from '../../../../../common/ui';
   styleUrl: './curriculum-map.css',
 })
 export class CurriculumMap {
-  /** Hidden page header when hosted inside the Subjects & Curriculum hub. */
-  readonly embedded = input<boolean>(false);
-
   private readonly api = inject(ApiService);
   private readonly toast = inject(ToastrService);
 

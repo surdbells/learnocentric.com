@@ -1,4 +1,4 @@
-import {Component, computed, inject, input, signal} from '@angular/core';
+import {Component, computed, inject, signal} from '@angular/core';
 import {ToastrService} from 'ngx-toastr';
 import {PageHeader} from '../../../../../common/layout/page-header/page-header';
 import {Icon} from '../../../../../common/icon/icon';
@@ -19,9 +19,6 @@ import {KpiItem, KpiStrip, TabBar, TabItem} from '../../../../../common/ui';
   styleUrl: './subjects.css',
 })
 export class Subjects {
-  /** Hidden page header when hosted inside the Subjects & Curriculum hub. */
-  readonly embedded = input<boolean>(false);
-
   private readonly api = inject(ApiService);
   private readonly toast = inject(ToastrService);
 
