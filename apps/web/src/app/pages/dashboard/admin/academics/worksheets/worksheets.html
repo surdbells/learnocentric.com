@@ -50,7 +50,7 @@
                 </div>
                 <span class="small text-body-secondary">{{ sub.submitted_at | date:'medium' }}</span>
               </div>
-              @if (w.response_mode !== 'template_upload' && wsQuestionCount() > 0) {
+              @if (wsQuestionCount() > 0) {
                 <!-- Structured worksheet: per-question marking -->
                 <div class="d-flex align-items-center justify-content-between gap-2">
                   <span class="small text-body-secondary">Score <b>{{ sub.score ?? '-' }}/{{ w.total_marks }}</b></span>
@@ -96,16 +96,9 @@
                   }
                 }
               } @else {
-                <!-- Free-form or template-upload worksheet: overall grade -->
-                @if (w.response_mode === 'template_upload') {
-                  <div class="small text-body-secondary mb-1">Learner uploaded their completed template.</div>
-                }
+                <!-- Free-form worksheet: overall grade -->
                 @if (sub.response_text) { <app-rich-text class="small d-block mb-2" [value]="sub.response_text" /> }
-                @if (sub.attachment_url) {
-                  <a class="small" [href]="sub.attachment_url" target="_blank" rel="noopener">{{ w.response_mode === 'template_upload' ? 'View uploaded worksheet' : 'View attachment' }}</a>
-                } @else if (w.response_mode === 'template_upload') {
-                  <span class="small text-warning-emphasis">No file uploaded.</span>
-                }
+                @if (sub.attachment_url) { <a class="small" [href]="sub.attachment_url" target="_blank" rel="noopener">View attachment</a> }
 
                 <div class="row g-2 align-items-end mt-1">
                   <div class="col-auto" style="width:7rem">
