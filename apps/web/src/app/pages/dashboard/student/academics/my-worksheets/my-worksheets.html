@@ -63,7 +63,7 @@
       </ol>
 
       <button type="button" class="btn btn-outline-primary d-inline-flex align-items-center gap-1 mb-3" [disabled]="templateBusy()" (click)="downloadTemplate()">
-        <app-icon name="download" [size]="16" /> {{ templateBusy() ? 'Preparing…' : 'Download template' }}
+        <app-icon name="download" [size]="16" /> {{ templateBusy() ? 'Preparing…' : 'Download Workbook' }}
       </button>
 
       @if (isGraded(w)) {
