@@ -104,7 +104,7 @@
       </ol>
 
       <button type="button" class="btn btn-outline-primary d-inline-flex align-items-center gap-1 mb-4" [disabled]="templateBusy()" (click)="downloadTemplate()">
-        <app-icon name="download" [size]="16" /> {{ templateBusy() ? 'Preparing…' : 'Download task sheet' }}
+        <app-icon name="download" [size]="16" /> {{ templateBusy() ? 'Preparing…' : 'Download Workbook' }}
       </button>
 
       <form [formGroup]="form" (ngSubmit)="submit()">
