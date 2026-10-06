@@ -66,6 +66,84 @@
           (cleared)="onFileCleared()"
         />
       </div>
+
+      <!-- Questions & sections builder -->
+      <div class="col-lg-12">
+        <hr class="my-2"/>
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-1">
+          <label class="form-label fw-semibold mb-0">Questions &amp; sections</label>
+          <div class="d-flex gap-2">
+            @if (!sections().length) {
+              <button type="button" class="btn btn-sm btn-light" (click)="addStandardSections()">
+                <app-icon name="add" [size]="14"/> A / B / C sections
+              </button>
+            }
+            <button type="button" class="btn btn-sm btn-light" (click)="addSection()">
+              <app-icon name="add" [size]="14"/> Add section
+            </button>
+          </div>
+        </div>
+        <p class="small text-muted mb-3">
+          @if (responseMode() === 'template_upload') {
+            Sections and questions become the sections on the generated worksheet (learners fill them offline).
+          } @else {
+            Sections and questions become the on-screen solver; objective types are auto-graded.
+          }
+          @if (hasQuestions()) { <span class="ms-1">Marks from questions: <b>{{ marksTotal() }}</b> (overrides Total marks above).</span> }
+        </p>
+
+        @for (s of sections(); track $index; let si = $index) {
+          <div class="border rounded-3 p-3 mb-3">
+            <div class="d-flex align-items-center gap-2 mb-2">
+              <input type="text" class="form-control form-control-sm" placeholder="Section label, e.g. B. Your turn"
+                     [(ngModel)]="s.label" [ngModelOptions]="{standalone: true}"/>
+              <button type="button" class="btn btn-sm btn-link text-danger p-0" title="Remove section" (click)="removeSection(si)">
+                <app-icon name="delete" [size]="16"/>
+              </button>
+            </div>
+
+            @for (q of s.questions; track $index; let qi = $index) {
+              <div class="rounded-3 bg-body-tertiary p-2 mb-2">
+                <div class="d-flex align-items-start gap-2">
+                  <span class="small text-body-secondary pt-2">{{ qi + 1 }}.</span>
+                  <textarea class="form-control form-control-sm" rows="2" placeholder="Question prompt"
+                            [(ngModel)]="q.prompt" [ngModelOptions]="{standalone: true}"></textarea>
+                  <button type="button" class="btn btn-sm btn-link text-danger p-0 pt-2" title="Remove question" (click)="removeQuestion(si, qi)">
+                    <app-icon name="delete" [size]="15"/>
+                  </button>
+                </div>
+                <div class="row g-2 mt-1 ms-3">
+                  <div class="col-sm-4">
+                    <select class="form-select form-select-sm" [(ngModel)]="q.type" [ngModelOptions]="{standalone: true}">
+                      @for (t of questionTypes; track t.value) { <option [value]="t.value">{{ t.label }}</option> }
+                    </select>
+                  </div>
+                  <div class="col-sm-3">
+                    <input type="number" min="1" class="form-control form-control-sm" placeholder="Marks"
+                           [(ngModel)]="q.marks" [ngModelOptions]="{standalone: true}"/>
+                  </div>
+                  @if (isAuto(q.type)) {
+                    <div class="col-sm-5">
+                      <input type="text" class="form-control form-control-sm" placeholder="Correct answer (for auto-grading)"
+                             [(ngModel)]="q.correctAnswer" [ngModelOptions]="{standalone: true}"/>
+                    </div>
+                  }
+                  @if (q.type === 'mcq') {
+                    <div class="col-12">
+                      <textarea class="form-control form-control-sm" rows="2" placeholder="Options, one per line"
+                                [(ngModel)]="q.options" [ngModelOptions]="{standalone: true}"></textarea>
+                    </div>
+                  }
+                </div>
+              </div>
+            }
+
+            <button type="button" class="btn btn-sm btn-outline-secondary" (click)="addQuestion(si)">
+              <app-icon name="add" [size]="14"/> Add question
+            </button>
+          </div>
+        }
+      </div>
     </div>
   </div>
   <div class="modal-footer">
