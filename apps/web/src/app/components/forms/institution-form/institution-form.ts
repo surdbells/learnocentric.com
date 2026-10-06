@@ -90,8 +90,8 @@ export class InstitutionForm implements OnInit {
         primaryColor: s['primary_color'],
         // secondaryColor: s['secondary'],
         address: s['address'],
-        adminFirstName: s['admins'][0]['first_name'],
-        adminLastName: s['admins'][0]['last_name'],
+        adminFirstName: s['admins']?.[0]?.['first_name'] ?? s['admin_contact']?.['first_name'] ?? '',
+        adminLastName: s['admins']?.[0]?.['last_name'] ?? s['admin_contact']?.['last_name'] ?? '',
         // logoUrl: s['logo_url'],
       })
 

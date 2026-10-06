@@ -39,6 +39,7 @@ use App\Application\Actions\Live\LiveClassesAction;
 use App\Application\Actions\Notification\NotificationsAction;
 use App\Application\Actions\Institution\ListInstitutionsAction;
 use App\Application\Actions\Institution\OnboardInstitutionAction;
+use App\Application\Actions\Institution\UpdateInstitutionAction;
 use App\Application\Actions\School\ClassesAction;
 use App\Application\Actions\School\ClassesLearnersAction;
 use App\Application\Actions\School\OnboardingAction;
@@ -88,6 +89,7 @@ return static function (App $app): void {
 
             $auth->get('/admin/institutions', ListInstitutionsAction::class);
             $auth->get('/admin/institutions/{id:[0-9]+}', GetInstitutionAction::class);
+            $auth->put('/admin/institutions/{id:[0-9]+}', UpdateInstitutionAction::class);
             $auth->post('/admin/onboard', OnboardInstitutionAction::class);
 
             // Roles & permissions (school admin: custom roles + grants)

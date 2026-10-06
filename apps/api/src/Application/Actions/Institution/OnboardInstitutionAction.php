@@ -33,30 +33,42 @@ final class OnboardInstitutionAction
         $actor = $request->getAttribute('user');
         $body = (array) $request->getParsedBody();
 
-        $name = trim((string) ($body['name'] ?? $body['school_name'] ?? ''));
+        // Accept both the SPA's camelCase payload and snake_case.
+        $name = trim((string) ($body['name'] ?? $body['institutionName'] ?? $body['school_name'] ?? ''));
         if ($name === '') {
             return Json::error($response, "Field 'name' is required.", 422);
         }
 
+        $email = trim((string) ($body['admin_email'] ?? $body['adminEmail'] ?? ''));
+        $password = (string) ($body['admin_password'] ?? $body['adminPassword'] ?? '');
+        $firstName = trim((string) ($body['admin_first_name'] ?? $body['adminFirstName'] ?? '')) ?: 'School';
+        $lastName = trim((string) ($body['admin_last_name'] ?? $body['adminLastName'] ?? '')) ?: 'Admin';
+        $phone = trim((string) ($body['phone'] ?? ''));
+        $primaryColor = trim((string) ($body['primaryColor'] ?? $body['primary_color'] ?? ''));
+
         $institution = new Institution($name);
-        $institution->setType((string) ($body['type'] ?? 'school'));
-        $institution->setAddress($body['address'] ?? null);
+        $institution->setType(InstitutionFields::normalizeType($body['type'] ?? $body['institutionType'] ?? 'school'));
+        $institution->setAddress(($body['address'] ?? '') !== '' ? (string) $body['address'] : null);
         $institution->setLogoUrl($body['logo_url'] ?? $body['logoUrl'] ?? null);
-        if (isset($body['admin_contact']) && is_array($body['admin_contact'])) {
-            $institution->setAdminContact($body['admin_contact']);
+        if ($primaryColor !== '') {
+            $institution->setBranding(['primary_color' => $primaryColor]);
+        }
+        $institution->setAdminContact(InstitutionFields::adminContact($email, $phone, $firstName, $lastName, $body['admin_contact'] ?? null));
+        if (($pkg = InstitutionFields::firstPackageId($body)) !== null) {
+            $institution->setAssignedPackageId($pkg);
         }
         $this->em->persist($institution);
         $this->em->flush();
 
         $adminUser = null;
         // Optionally create the first school admin.
-        if (!empty($body['admin_email']) && !empty($body['admin_password'])) {
+        if ($email !== '' && $password !== '') {
             try {
                 $adminUser = $this->auth->register([
-                    'email' => (string) $body['admin_email'],
-                    'password' => (string) $body['admin_password'],
-                    'firstName' => (string) ($body['admin_first_name'] ?? 'School'),
-                    'lastName' => (string) ($body['admin_last_name'] ?? 'Admin'),
+                    'email' => $email,
+                    'password' => $password,
+                    'firstName' => $firstName,
+                    'lastName' => $lastName,
                     'role' => 'school_admin',
                     'institutionId' => $institution->getId(),
                 ]);
