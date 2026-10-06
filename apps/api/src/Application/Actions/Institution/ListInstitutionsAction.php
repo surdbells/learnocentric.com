@@ -19,7 +19,10 @@ final class ListInstitutionsAction
 
     public function __invoke(Request $request, Response $response): Response
     {
-        $institutions = $this->em->getRepository(Institution::class)->findBy([], ['id' => 'ASC']);
+        // Archived institutions are soft-deleted; hide them from the roster.
+        $institutions = $this->em->createQueryBuilder()->select('i')->from(Institution::class, 'i')
+            ->where('i.status != :archived')->setParameter('archived', 'archived')
+            ->orderBy('i.id', 'ASC')->getQuery()->getResult();
 
         return Json::write($response, array_map(static fn (Institution $i) => $i->toArray(), $institutions));
     }

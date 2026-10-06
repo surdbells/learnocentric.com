@@ -31,6 +31,7 @@ use App\Application\Actions\Curriculum\DeliveryPacksAction;
 use App\Application\Actions\Curriculum\ReviewQueueAction;
 use App\Application\Actions\Curriculum\TopicsAction;
 use App\Application\Actions\HealthAction;
+use App\Application\Actions\Institution\DeleteInstitutionAction;
 use App\Application\Actions\Institution\GetInstitutionAction;
 use App\Application\Actions\Learn\AskTutorAction;
 use App\Application\Actions\Learn\LearnAction;
@@ -90,6 +91,7 @@ return static function (App $app): void {
             $auth->get('/admin/institutions', ListInstitutionsAction::class);
             $auth->get('/admin/institutions/{id:[0-9]+}', GetInstitutionAction::class);
             $auth->put('/admin/institutions/{id:[0-9]+}', UpdateInstitutionAction::class);
+            $auth->delete('/admin/institutions/{id:[0-9]+}', DeleteInstitutionAction::class);
             $auth->post('/admin/onboard', OnboardInstitutionAction::class);
 
             // Roles & permissions (school admin: custom roles + grants)
