@@ -50,8 +50,11 @@
 
               @if(shouldShowLogoorIcon()){
                 <td style="width: 0px" class="py-1">
-                  <div class="logo" style="width: 40px; height: 40px;">
-                    <img [src]="row['logoUrl']" alt="logo" class="img-fluid rounded-circle" />
+                  <div class="dt-logo">
+                    <span class="dt-logo-fallback">{{ (row['name'] || row['title'] || '?').toString().charAt(0).toUpperCase() }}</span>
+                    @if (row['logoUrl']) {
+                      <img [src]="row['logoUrl']" alt="logo" (error)="$any($event.target).style.display='none'" />
+                    }
                   </div>
                 </td>
               }

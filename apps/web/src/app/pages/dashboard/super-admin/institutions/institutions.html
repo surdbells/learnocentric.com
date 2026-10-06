@@ -4,8 +4,14 @@
       <div class="card-body">
         <div class="row align-items-center justify-content-between mb-4">
           <div class="col-auto">
-            <div class="avatar avatar-xl">
-                <img [src]="selectedInstitution()['logo_url']" alt="logo" class="img-fluid rounded-circle" />
+            <div class="avatar avatar-xl rounded-circle overflow-hidden d-inline-flex align-items-center justify-content-center"
+                 style="background:var(--brand-50,#eefaf0);color:var(--brand-700,#1e8a2e)">
+              @if (selectedInstitution()?.['logo_url']) {
+                <img [src]="selectedInstitution()['logo_url']" alt="logo" class="w-100 h-100" style="object-fit:cover"
+                     (error)="$any($event.target).style.display='none'" />
+              } @else {
+                <span class="fw-bold" style="font-size:1.6rem">{{ (selectedInstitution()?.['name'] || '?').toString().charAt(0).toUpperCase() }}</span>
+              }
             </div>
           </div>
         </div>
