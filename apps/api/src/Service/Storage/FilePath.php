@@ -13,6 +13,19 @@ namespace App\Service\Storage;
  */
 final class FilePath
 {
+    /**
+     * Absolute base the browser uses to reach the API (e.g. https://api.example.com).
+     * Set once at bootstrap. When the SPA and API share an origin (dev proxy) this
+     * stays empty and served URLs are relative; in production the SPA is a separate
+     * origin, so file URLs must be absolute or an <img> would hit the SPA host.
+     */
+    private static string $baseUrl = '';
+
+    public static function configure(string $baseUrl): void
+    {
+        self::$baseUrl = rtrim($baseUrl, '/');
+    }
+
     /** Convert any incoming reference to the bare storage path we persist. */
     public static function toPath(?string $value): ?string
     {
@@ -58,9 +71,9 @@ final class FilePath
         }
         // Already a served route.
         if (str_starts_with($v, '/backend/files')) {
-            return $v;
+            return self::$baseUrl . $v;
         }
-        return '/backend/files?p=' . ltrim($v, '/');
+        return self::$baseUrl . '/backend/files?p=' . ltrim($v, '/');
     }
 
     private static function clean(string $path): ?string
