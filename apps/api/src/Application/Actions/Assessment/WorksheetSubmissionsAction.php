@@ -252,6 +252,22 @@ final class WorksheetSubmissionsAction
         return Json::write($response, ['ok' => true, 'count' => $pos, 'total_marks' => $total]);
     }
 
+    /** GET /assessment/worksheets/{id}/questions, staff fetch the worksheet's questions (with answers) for authoring. */
+    public function getQuestions(Request $request, Response $response, array $args): Response
+    {
+        if (($guard = $this->staffGuard($request, $response)) !== null) {
+            return $guard;
+        }
+        $worksheet = $this->em->getRepository(Worksheet::class)->find((int) $args['id']);
+        if ($worksheet === null || !$this->canActWithin($request, $worksheet->getTopic()->getSubject()->getInstitution())) {
+            return Json::error($response, 'Worksheet not found.', 404);
+        }
+        $qs = $this->em->getRepository(WorksheetQuestion::class)
+            ->findBy(['worksheet' => $worksheet], ['sectionPosition' => 'ASC', 'position' => 'ASC']);
+
+        return Json::write($response, ['data' => array_map(static fn (WorksheetQuestion $q) => $q->toArray(), $qs)]);
+    }
+
     /** GET /assessment/worksheets/{id}/submission, the current student's own submission. */
     public function mine(Request $request, Response $response, array $args): Response
     {

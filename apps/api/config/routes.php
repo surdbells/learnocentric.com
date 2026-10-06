@@ -190,6 +190,7 @@ return static function (App $app): void {
             $auth->get('/assessment/worksheets/{id:[0-9]+}/history', WorksheetsAction::class . ':history');
             $auth->get('/assessment/worksheets/{id:[0-9]+}/solve', WorksheetSubmissionsAction::class . ':solve');
             $auth->post('/assessment/worksheets/{id:[0-9]+}/save', WorksheetSubmissionsAction::class . ':save');
+            $auth->get('/assessment/worksheets/{id:[0-9]+}/questions', WorksheetSubmissionsAction::class . ':getQuestions');
             $auth->post('/assessment/worksheets/{id:[0-9]+}/questions', WorksheetSubmissionsAction::class . ':setQuestions');
             $auth->post('/assessment/worksheets/{id:[0-9]+}/submit', WorksheetSubmissionsAction::class . ':submit');
             $auth->get('/assessment/worksheets/{id:[0-9]+}/submission', WorksheetSubmissionsAction::class . ':mine');
