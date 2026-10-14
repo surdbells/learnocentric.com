@@ -33,6 +33,8 @@ export class FeedbackCompose {
   /** The chosen learner's submissions, so the teacher can see the work they're feeding back on. */
   submissions = signal<any[]>([]);
   selectedKey = signal<string>('');
+  /** Note shown when the form has been seeded from the learner's tracked activity. */
+  autoNote = signal<string>('');
   readonly selectedSubmission = computed<any | null>(() =>
     this.submissions().find(s => `${s.type}-${s.id}` === this.selectedKey()) ?? null);
 
@@ -78,11 +80,40 @@ export class FeedbackCompose {
     this.studentId.set(id);
     this.selectedKey.set('');
     this.submissions.set([]);
+    this.autoNote.set('');
+    // Clear the authored fields so each learner starts from their own signals.
+    this.strengths.set(''); this.practiceNeeded.set(''); this.commonError.set('');
+    this.score.set(null);
+    this.focus.set(this.focus().map(f => ({...f, score: 70, on: true})));
     if (!id) return;
     this.api.get<any>(`/backend/assessment/submissions/by-learner?student_id=${id}`).subscribe({
       next: (r) => this.submissions.set(r?.data ?? []),
       error: () => {},
     });
+    // Auto-generate the feedback signals from the learner's own graded work
+    // (PDF review NOTE). The teacher then overrides or adds to these.
+    this.api.get<any>(`/backend/assessment/feedback/suggest?student_id=${id}`).subscribe({
+      next: (s) => this.applySuggestions(s),
+      error: () => {},
+    });
+  }
+
+  /** Seed the focus bars and strength/practice notes from tracked activity. */
+  private applySuggestions(s: any): void {
+    if (!s?.has_data) {
+      this.autoNote.set('No graded activity yet for this learner — write the feedback from scratch.');
+      return;
+    }
+    const acc = s.accuracy ?? 70;
+    this.focus.set(this.focus().map(f => ({...f, score: acc})));
+    if (this.score() == null) this.score.set(acc);
+    if (s.strongest && !this.strengths().trim()) {
+      this.strengths.set(`Strong on ${s.strongest.topic} (${s.strongest.accuracy}% correct).`);
+    }
+    if (s.weakest && !this.practiceNeeded().trim()) {
+      this.practiceNeeded.set(`Needs more practice on ${s.weakest.topic} (${s.weakest.accuracy}% correct).`);
+    }
+    this.autoNote.set(`Auto-filled from ${s.graded_assessments} graded assessment(s): ${acc}% accuracy across ${s.answered} answers. Override or add anything below.`);
   }
 
   /** Pick a specific submission to view + pre-fill the feedback context. */

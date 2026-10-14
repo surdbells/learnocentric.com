@@ -8,6 +8,8 @@ use App\Application\Actions\School\ResolvesInstitution;
 use App\Application\Support\Json;
 use App\Application\Support\ListQuery;
 use App\Application\Support\Paginator;
+use App\Domain\Entity\AssessmentAttempt;
+use App\Domain\Entity\AttemptAnswer;
 use App\Domain\Entity\FeedbackNote;
 use App\Domain\Entity\Topic;
 use App\Domain\Entity\User;
@@ -37,6 +39,77 @@ final class FeedbackAction
             return $this->create($request, $response);
         }
         return $this->staffList($request, $response);
+    }
+
+    /**
+     * GET /assessment/feedback/suggest?student_id=, auto-generated feedback
+     * signals from the learner's own graded work (PDF review NOTE). The teacher
+     * uses these as a starting point and overrides/adds — nothing is invented:
+     * every number comes from the learner's graded assessment answers.
+     */
+    public function suggest(Request $request, Response $response): Response
+    {
+        if (($guard = $this->staffGuard($request, $response)) !== null) {
+            return $guard;
+        }
+        $studentId = (int) ($request->getQueryParams()['student_id'] ?? 0);
+        $student = $this->em->getRepository(User::class)->find($studentId);
+        if ($student === null || !$this->canActWithin($request, $student->getInstitution())) {
+            return Json::error($response, 'A valid learner is required.', 422);
+        }
+
+        /** @var AttemptAnswer[] $answers */
+        $answers = $this->em->createQueryBuilder()->select('aa', 'q', 't')
+            ->from(AttemptAnswer::class, 'aa')
+            ->join('aa.attempt', 'at')->join('aa.question', 'q')->join('q.topic', 't')
+            ->where('at.student = :sid')->andWhere('at.status = :g')
+            ->setParameter('sid', $studentId)->setParameter('g', AssessmentAttempt::GRADED)
+            ->getQuery()->getResult();
+
+        $total = 0;
+        $correct = 0;
+        $byTopic = [];
+        foreach ($answers as $a) {
+            $isCorrect = $a->isCorrect();
+            if ($isCorrect === null) {
+                continue; // not graded
+            }
+            $total++;
+            $correct += $isCorrect ? 1 : 0;
+            $topic = $a->getQuestion()->getTopic();
+            $tid = (int) $topic->getId();
+            $byTopic[$tid] ??= ['topic' => $topic->getTitle(), 'total' => 0, 'correct' => 0];
+            $byTopic[$tid]['total']++;
+            $byTopic[$tid]['correct'] += $isCorrect ? 1 : 0;
+        }
+
+        $accuracy = $total > 0 ? (int) round($correct / $total * 100) : null;
+
+        // Rank topics with enough answers to be meaningful.
+        $ranked = [];
+        foreach ($byTopic as $t) {
+            if ($t['total'] < 2) {
+                continue;
+            }
+            $ranked[] = ['topic' => $t['topic'], 'accuracy' => (int) round($t['correct'] / $t['total'] * 100)];
+        }
+        usort($ranked, static fn ($x, $y) => $y['accuracy'] <=> $x['accuracy']);
+        $strongest = $ranked[0] ?? null;
+        $weakest = count($ranked) > 1 ? $ranked[array_key_last($ranked)] : null;
+
+        $attempts = (int) $this->em->createQueryBuilder()->select('COUNT(at.id)')->from(AssessmentAttempt::class, 'at')
+            ->where('at.student = :sid')->andWhere('at.status = :g')
+            ->setParameter('sid', $studentId)->setParameter('g', AssessmentAttempt::GRADED)
+            ->getQuery()->getSingleScalarResult();
+
+        return Json::write($response, [
+            'has_data' => $total > 0,
+            'accuracy' => $accuracy,
+            'answered' => $total,
+            'graded_assessments' => $attempts,
+            'strongest' => $strongest,
+            'weakest' => $weakest,
+        ]);
     }
 
     /** GET /assessment/feedback, staff list (filter by student_id / type). */

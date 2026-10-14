@@ -214,6 +214,7 @@ return static function (App $app): void {
             // Feedback + misconception loop
             $auth->map(['GET', 'POST'], '/assessment/feedback', FeedbackAction::class);
             $auth->get('/assessment/feedback/mine', FeedbackAction::class . ':mine');
+            $auth->get('/assessment/feedback/suggest', FeedbackAction::class . ':suggest');
             $auth->post('/assessment/feedback/{id:[0-9]+}/acknowledge', FeedbackAction::class . ':acknowledge');
             $auth->get('/assessment/insights', InsightsAction::class);
 
