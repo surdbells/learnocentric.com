@@ -37,6 +37,11 @@ export class Portfolio {
   busy = signal(false);
   subjects = signal<any[]>([]);
 
+  // Portfolio generation is hidden for now (PDF review item 10): learners upload
+  // their own portfolio instead of downloading a generated task sheet. Flip this
+  // to re-enable the task-sheet builder + download when the format is sorted.
+  readonly showSheetBuilder = false;
+
   // New portfolio task (assign an evidence brief to a topic)
   topics = signal<any[]>([]);
   taskTopicId = signal<number | null>(null);

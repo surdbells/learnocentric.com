@@ -39,6 +39,7 @@
     <input type="text" class="form-control mb-4" placeholder="e.g. Financial literacy"
            [ngModel]="taskCompetency()" (ngModelChange)="taskCompetency.set($event)"/>
 
+    @if (showSheetBuilder) {
     <hr class="my-3"/>
     <p class="form-label small fw-semibold mb-1">Task sheet content</p>
     <p class="text-body-secondary small mb-3">
@@ -96,6 +97,7 @@
                [(ngModel)]="r.standard" [ngModelOptions]="{standalone: true}"/></div>
         <div class="col-1 text-end"><button type="button" class="btn btn-sm btn-link text-danger p-0" (click)="removeRubric($index)"><app-icon name="delete" [size]="15"/></button></div>
       </div>
+    }
     }
 
     <div class="d-flex justify-content-end gap-2 mt-4">
