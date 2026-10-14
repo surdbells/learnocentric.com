@@ -56,8 +56,19 @@ export class FeedbackCompose {
   ]);
 
   constructor() {
-    this.api.get<any>('/backend/assessment/gradebook/students').subscribe({
-      next: (r) => this.students.set((r?.data ?? []).map((x: any) => ({id: x.student_id, name: x.student}))),
+    // Load the full learner roster, not just learners who already have graded
+    // work — a teacher must be able to give feedback to any of their students,
+    // even before any assessment is marked (PDF review item 14).
+    this.api.get<any>('/backend/school/students').subscribe({
+      next: (r) => {
+        const rows = Array.isArray(r) ? r : (r?.data ?? []);
+        this.students.set(
+          rows
+            .map((x: any) => ({id: x.id, name: `${x.first_name ?? ''} ${x.last_name ?? ''}`.trim()}))
+            .filter((x: {id: number; name: string}) => x.id && x.name)
+            .sort((a: {name: string}, b: {name: string}) => a.name.localeCompare(b.name)),
+        );
+      },
       error: () => this.toast.error('Could not load the learner list'),
     });
   }
