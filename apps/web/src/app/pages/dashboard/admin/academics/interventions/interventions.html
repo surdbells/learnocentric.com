@@ -51,11 +51,15 @@
                       <div class="small text-body-secondary text-end">{{ i.progress }}%</div>
                     </td>
                     <td class="text-end text-nowrap">
-                      <button type="button" class="btn btn-sm btn-outline-secondary" (click)="onEdit(i)" title="Edit"><app-icon name="edit" [size]="15" /></button>
+                      @if (canEdit(i)) {
+                        <button type="button" class="btn btn-sm btn-outline-secondary" (click)="onEdit(i)" title="Edit"><app-icon name="edit" [size]="15" /></button>
+                      }
                       @if (i.status !== 'resolved') {
                         <button type="button" class="btn btn-sm btn-outline-success ms-1" (click)="resolve(i)" title="Mark resolved"><app-icon name="check" [size]="15" /></button>
                       }
-                      <button type="button" class="btn btn-sm btn-outline-danger ms-1" (click)="remove(i)" title="Delete"><app-icon name="delete" [size]="15" /></button>
+                      @if (canDelete(i)) {
+                        <button type="button" class="btn btn-sm btn-outline-danger ms-1" (click)="remove(i)" title="Delete"><app-icon name="delete" [size]="15" /></button>
+                      }
                     </td>
                   </tr>
                 }

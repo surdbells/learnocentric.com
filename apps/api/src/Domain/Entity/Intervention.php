@@ -89,6 +89,7 @@ class Intervention
     public function setSubject(?Subject $v): void { $this->subject = $v; }
     public function getTopic(): ?Topic { return $this->topic; }
     public function setTopic(?Topic $v): void { $this->topic = $v; }
+    public function getRaisedBy(): ?User { return $this->raisedBy; }
     public function setRaisedBy(?User $v): void { $this->raisedBy = $v; }
     public function getAssignedTo(): ?User { return $this->assignedTo; }
     public function setAssignedTo(?User $v): void { $this->assignedTo = $v; }
@@ -119,6 +120,8 @@ class Intervention
             'topic_id' => $this->topic?->getId(),
             'topic' => $this->topic?->getTitle(),
             'raised_by' => $this->raisedBy ? $this->raisedBy->getFirstName() . ' ' . $this->raisedBy->getLastName() : null,
+            'raised_by_id' => $this->raisedBy?->getId(),
+            'raised_by_role' => $this->raisedBy?->getRole()->getCode(),
             'assigned_to_id' => $this->assignedTo?->getId(),
             'assigned_to' => $this->assignedTo ? $this->assignedTo->getFirstName() . ' ' . $this->assignedTo->getLastName() : null,
             'reason' => $this->reason,

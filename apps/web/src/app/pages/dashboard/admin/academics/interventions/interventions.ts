@@ -8,7 +8,10 @@ import {LearnoButton} from '../../../../../common/learno-button/learno-button';
 import {InterventionForm} from '../../../../../components/forms/intervention-form/intervention-form';
 import {Icon} from '../../../../../common/icon/icon';
 import {ApiService} from '../../../../../common/service/api.service';
+import {AuthService} from '../../../../../common/auth/auth.service';
 import {KpiStrip, KpiItem, DonutChart, DonutSegment, BarList, BarItem} from '../../../../../common/ui';
+
+const ADMIN_ROLES = ['academic_lead', 'school_admin', 'tutor_admin', 'super_admin'];
 
 declare const bootstrap: any;
 
@@ -34,6 +37,25 @@ const TONES = ['primary', 'success', 'warning', 'info', 'danger', 'secondary'];
 export class Interventions {
   private readonly api = inject(ApiService);
   private readonly toast = inject(ToastrService);
+  private readonly auth = inject(AuthService);
+
+  readonly isAdmin = computed(() => ADMIN_ROLES.includes(this.auth.getAuthSession()?.user?.role ?? ''));
+  private readonly myId = computed(() => this.auth.getAuthSession()?.user?.id ?? null);
+
+  /**
+   * Edit rights (PDF review item 12): admins can edit any intervention; a teacher
+   * can edit only an intervention they raised themselves. Teachers can still
+   * resolve an admin-sent one, but not rewrite it.
+   */
+  canEdit(row: any): boolean {
+    if (this.isAdmin()) return true;
+    return row?.raised_by_role === 'teacher' && Number(row?.raised_by_id) === Number(this.myId());
+  }
+
+  /** Teacher-raised interventions are undeletable; admin-raised ones only by an admin. */
+  canDelete(row: any): boolean {
+    return this.isAdmin() && row?.raised_by_role !== 'teacher';
+  }
 
   loading = signal(true);
   board = signal<any>(null);

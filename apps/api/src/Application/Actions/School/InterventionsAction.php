@@ -24,6 +24,9 @@ final class InterventionsAction
     use ResolvesInstitution;
 
     private const STAFF = ['teacher', 'academic_lead', 'school_admin', 'tutor_admin', 'super_admin'];
+    // Admin-level roles for intervention governance (PDF review item 12). Teachers
+    // are the only non-admin staff here.
+    private const ADMIN_ROLES = ['academic_lead', 'school_admin', 'tutor_admin', 'super_admin'];
 
     public function __construct(
         private readonly EntityManagerInterface $em,
@@ -95,13 +98,19 @@ final class InterventionsAction
             return Json::error($response, 'Describe the concern or weak area.', 422);
         }
 
+        /** @var User $creator */
+        $creator = $request->getAttribute('user');
         $intervention = new Intervention($student, $reason);
-        $intervention->setRaisedBy($request->getAttribute('user'));
+        $intervention->setRaisedBy($creator);
         $intervention->setStatus(Intervention::OPEN);
         $this->applyFields($intervention, $body);
         $this->em->persist($intervention);
 
         $this->notifyAssignee($intervention, 'New intervention assigned');
+        // When a teacher raises an intervention, keep the admins in the loop.
+        if ($creator->getRole()->getCode() === 'teacher') {
+            $this->notifyAdmins($intervention, $creator);
+        }
         $this->em->flush();
         $this->audit->log('intervention.create', $request->getAttribute('user'), 'Intervention', (string) $intervention->getId(), null, $intervention->toArray());
 
@@ -118,12 +127,18 @@ final class InterventionsAction
         if ($intervention === null || !$this->canActWithin($request, $intervention->getStudent()->getInstitution())) {
             return Json::error($response, 'Intervention not found.', 404);
         }
+        /** @var User $user */
+        $user = $request->getAttribute('user');
         $before = $intervention->toArray();
         $priorAssignee = $intervention->getAssignedTo()?->getId();
 
-        if (isset($body['reason']) && trim((string) $body['reason']) !== '') {
-            $intervention->setReason((string) $body['reason']);
-        }
+        // Who may change what (PDF review item 12): any staff may resolve and
+        // record progress/outcome for accountability. Only an admin, or the
+        // teacher who raised it, may edit the substance (reason + structure).
+        // So teachers can resolve an admin-sent intervention but not rewrite it.
+        $canEditFully = $this->isAdmin($user)
+            || ($this->isTeacherCreated($intervention) && $intervention->getRaisedBy()?->getId() === $user->getId());
+
         if (isset($body['status'])) {
             $intervention->setStatus((string) $body['status']);
             if ($intervention->getStatus() === Intervention::RESOLVED && $intervention->getResolvedAt() === null) {
@@ -136,7 +151,18 @@ final class InterventionsAction
         if (array_key_exists('outcome', $body)) {
             $intervention->setOutcome($body['outcome'] !== '' ? (string) $body['outcome'] : null);
         }
-        $this->applyFields($intervention, $body);
+        if (array_key_exists('progress', $body)) {
+            $intervention->setProgress((int) $body['progress']);
+        }
+
+        if ($canEditFully) {
+            if (isset($body['reason']) && trim((string) $body['reason']) !== '') {
+                $intervention->setReason((string) $body['reason']);
+            }
+            $this->applyFields($intervention, $body);
+        } elseif ($this->hasSubstantiveEdit($body)) {
+            return Json::error($response, 'You can mark this intervention resolved, but only an admin or the teacher who raised it can edit its details.', 403);
+        }
 
         // Notify a newly-assigned staff member.
         if ($intervention->getAssignedTo() !== null && $intervention->getAssignedTo()->getId() !== $priorAssignee) {
@@ -153,10 +179,21 @@ final class InterventionsAction
         if (($guard = $this->staffGuard($request, $response)) !== null) {
             return $guard;
         }
+        /** @var User $user */
+        $user = $request->getAttribute('user');
         $id = (int) ($request->getQueryParams()['id'] ?? 0);
         $intervention = $this->em->getRepository(Intervention::class)->find($id);
         if ($intervention === null || !$this->canActWithin($request, $intervention->getStudent()->getInstitution())) {
             return Json::error($response, 'Intervention not found.', 404);
+        }
+        // Teacher-raised interventions are a permanent accountability record — no
+        // one deletes them. Admin-raised ones can only be deleted by an admin,
+        // never by a teacher (PDF review item 12).
+        if ($this->isTeacherCreated($intervention)) {
+            return Json::error($response, "A teacher-raised intervention can't be deleted — mark it resolved instead.", 403);
+        }
+        if (!$this->isAdmin($user)) {
+            return Json::error($response, 'Only an admin can delete this intervention. You can mark it resolved.', 403);
         }
         $this->em->remove($intervention);
         $this->em->flush();
@@ -174,10 +211,17 @@ final class InterventionsAction
         if (empty($ids)) {
             return Json::error($response, 'No ids provided.', 422);
         }
+        /** @var User $user */
+        $user = $request->getAttribute('user');
         $count = 0;
         foreach ($this->em->getRepository(Intervention::class)->findBy(['id' => $ids]) as $intervention) {
             if (!$this->canActWithin($request, $intervention->getStudent()->getInstitution())) {
                 continue; // skip records outside the caller's institution
+            }
+            // Same rules as single delete: teacher-raised are undeletable; only
+            // admins may delete admin-raised ones.
+            if ($this->isTeacherCreated($intervention) || !$this->isAdmin($user)) {
+                continue;
             }
             $this->em->remove($intervention);
             $count++;
@@ -304,6 +348,56 @@ final class InterventionsAction
             $out[] = ['label' => $label, 'value' => $value];
         }
         return $out;
+    }
+
+    private function isAdmin(User $user): bool
+    {
+        return in_array($user->getRole()->getCode(), self::ADMIN_ROLES, true);
+    }
+
+    /** True when the intervention was raised by a teacher (not an admin/system). */
+    private function isTeacherCreated(Intervention $intervention): bool
+    {
+        return $intervention->getRaisedBy()?->getRole()->getCode() === 'teacher';
+    }
+
+    /** True when the body tries to change anything beyond resolve/progress/outcome. */
+    private function hasSubstantiveEdit(array $body): bool
+    {
+        foreach (['reason', 'subject_id', 'topic_id', 'assigned_to_id', 'due_date', 'priority', 'type'] as $field) {
+            if (array_key_exists($field, $body)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /** Notify the institution's admins that a teacher raised an intervention. */
+    private function notifyAdmins(Intervention $intervention, User $creator): void
+    {
+        $institution = $intervention->getStudent()->getInstitution();
+        if ($institution === null) {
+            return;
+        }
+        $admins = $this->em->createQueryBuilder()->select('u')->from(User::class, 'u')->join('u.role', 'r')
+            ->where('u.institution = :inst')->andWhere('r.code IN (:roles)')
+            ->setParameter('inst', $institution)->setParameter('roles', ['school_admin', 'tutor_admin'])
+            ->getQuery()->getResult();
+        $student = $intervention->getStudent()->getFirstName() . ' ' . $intervention->getStudent()->getLastName();
+        $who = $creator->getFirstName() . ' ' . $creator->getLastName();
+        foreach ($admins as $admin) {
+            /** @var User $admin */
+            if ($admin->getId() === $creator->getId()) {
+                continue;
+            }
+            $this->notify->notify(
+                $admin,
+                'intervention',
+                "{$who} raised an intervention for {$student}",
+                $intervention->getReason(),
+                '/admin/academics/interventions',
+            );
+        }
     }
 
     private function notifyAssignee(Intervention $intervention, string $title): void
