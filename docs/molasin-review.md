@@ -12,7 +12,7 @@ Items from the client review (Oct 2026). ☐ open · ◐ in progress · ☑ done
 - ☐ **8** Clarify the purpose of these features (needs discussion).
 - ☑ **9** Student couldn't see the lesson note + YouTube link because a learner sees a lesson only when BOTH the topic and the delivery pack are Published (both start as Draft) — not a render bug (YouTube renders fine). Added clear publish-state UX: a "Student view: Visible/Hidden" column and a banner in the pack lifecycle spelling out exactly what's unpublished (the pack, the topic, or both) and how to fix it. Backend now returns topic_approval_status + student_visible. (Video cap already raised to 200 MB.)
 - ☐ **10** Portfolio task download formatting broken; prefer uploading a portfolio for now.
-- ☐ **11** Resources tab: must download to view; opening navigates to "Assessment Gradebook".
+- ☑ **11** Resources tab. (a) "Open" passed no resource id, so the viewer opened unselected and users fell back to downloading. Now Open/View carry the id and the viewer auto-selects and renders it in-app (PDF/image/video/audio/YouTube inline; others open in a new tab — never a forced download). (b) "navigates to Assessment Gradebook" is not reproducible in the current code — Open routes correctly to the resource viewer for every role (admin/academy/teacher), so it appears already fixed; the id-based deep link makes the flow robust.
 - ☐ **12** Interventions: teachers shouldn't edit/delete admin-sent ones (resolve only); teacher-created ones notify admin; neither can delete.
 - ☐ **13** Add class/subject label to Calendar activities.
 - ☐ **14** Teacher can't select a learner to give feedback.

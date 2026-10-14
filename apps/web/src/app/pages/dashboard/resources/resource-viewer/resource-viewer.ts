@@ -2,6 +2,7 @@ import {Component, computed, inject, signal, PLATFORM_ID, input } from '@angular
 import {DatePipe, isPlatformBrowser} from '@angular/common';
 import {FormsModule} from '@angular/forms';
 import {DomSanitizer, SafeResourceUrl} from '@angular/platform-browser';
+import {ActivatedRoute} from '@angular/router';
 import {ToastrService} from 'ngx-toastr';
 import {PageHeader} from '../../../../common/layout/page-header/page-header';
 import {ApiService} from '../../../../common/service/api.service';
@@ -23,6 +24,7 @@ export class ResourceViewer {
   private readonly toast = inject(ToastrService);
   private readonly sanitizer = inject(DomSanitizer);
   private readonly platformId = inject(PLATFORM_ID);
+  private readonly route = inject(ActivatedRoute);
 
   loading = signal(true);
   resources = signal<any[]>([]);
@@ -67,8 +69,18 @@ export class ResourceViewer {
   });
 
   constructor() {
+    // When opened from a resource card we get its id, so jump straight to it
+    // and render it inline instead of making the user pick again (PDF review 11).
+    const requestedId = Number(this.route.snapshot.queryParamMap.get('id')) || null;
     this.api.get<any>('/backend/content/my-resources').subscribe({
-      next: (res) => { this.resources.set(res?.resources ?? []); this.loading.set(false); },
+      next: (res) => {
+        this.resources.set(res?.resources ?? []);
+        this.loading.set(false);
+        if (requestedId && this.resources().some((r) => r.id === requestedId)) {
+          this.selectedId.set(requestedId);
+          this.onSelect();
+        }
+      },
       error: () => { this.loading.set(false); this.toast.error('Could not load your resources'); },
     });
   }

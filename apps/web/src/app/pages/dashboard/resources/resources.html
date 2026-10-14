@@ -132,7 +132,7 @@
                     <span class="badge bg-{{ typeColor(r.contentType) }}-subtle text-{{ typeColor(r.contentType) }} text-capitalize mb-1">{{ r.contentType }}</span>
                     <div class="fw-semibold small">{{ r.title }}</div>
                     <div class="text-body-secondary small">{{ r.subjectArea || 'General' }}@if (r.file_size) { · {{ fileSizeLabel(r.file_size) }} }</div>
-                    @if (r.file_url) { <a class="btn btn-sm btn-outline-primary mt-2" [routerLink]="[viewerRoot(), 'academics', 'resource-viewer']">Open</a> }
+                    @if (r.file_url) { <a class="btn btn-sm btn-outline-primary mt-2" [routerLink]="[viewerRoot(), 'academics', 'resource-viewer']" [queryParams]="{id: r.id}">Open</a> }
                   </div>
                 </div>
               </div>
@@ -163,7 +163,7 @@
                     <td class="text-body-secondary">{{ r.created_at | date:'mediumDate' }}</td>
                     <td class="text-end text-body-secondary">{{ fileSizeLabel(r.file_size) }}</td>
                     <td class="text-end">
-                      @if (r.file_url) { <a class="btn btn-sm btn-outline-secondary" [routerLink]="[viewerRoot(), 'academics', 'resource-viewer']">View</a> }
+                      @if (r.file_url) { <a class="btn btn-sm btn-outline-secondary" [routerLink]="[viewerRoot(), 'academics', 'resource-viewer']" [queryParams]="{id: r.id}">View</a> }
                     </td>
                   </tr>
                 }
