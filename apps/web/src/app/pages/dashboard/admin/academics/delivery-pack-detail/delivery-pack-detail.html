@@ -82,7 +82,14 @@
       <div class="col-lg-6">
         <div class="card border-0 shadow-sm h-100"><div class="card-body">
           <h6 class="fw-semibold mb-2"><app-icon name="description" [size]="16" class="text-body-secondary me-1" /> Teacher guide</h6>
-          <app-rich-text [value]="pack().teacher_guide" />
+          @if (teacherGuideIsFile()) {
+            <div class="ratio ratio-4x3 rounded overflow-hidden border">
+              <iframe [src]="teacherGuideUrl()" title="Teacher guide"></iframe>
+            </div>
+            <div class="form-text">View-only — not offered as a download.</div>
+          } @else {
+            <app-rich-text [value]="pack().teacher_guide" />
+          }
         </div></div>
       </div>
     }

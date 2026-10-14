@@ -49,6 +49,11 @@ export class DeliveryPackForm {
     this.media.set(this.media().map((m, idx) => idx === i ? {url: file.url, name: m.name || file.name} : m));
   }
 
+  /** The teacher guide is an uploaded PDF (PDF review item 5); store its path. */
+  onTeacherGuideUploaded(file: UploadedFile): void {
+    this.form.get('teacherGuide')!.setValue(file.url);
+  }
+
   constructor() {
     effect(() => {
       const s = this.select();

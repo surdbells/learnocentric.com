@@ -1,6 +1,7 @@
 import {Component, computed, inject, input, signal} from '@angular/core';
 import {DatePipe} from '@angular/common';
 import {FormsModule} from '@angular/forms';
+import {DomSanitizer, SafeResourceUrl} from '@angular/platform-browser';
 import {ToastrService} from 'ngx-toastr';
 import {PageHeader} from '../../../../../common/layout/page-header/page-header';
 import {ApiService} from '../../../../../common/service/api.service';
@@ -24,8 +25,26 @@ export class DeliveryPackDetail {
 
   private readonly api = inject(ApiService);
   private readonly toast = inject(ToastrService);
+  private readonly sanitizer = inject(DomSanitizer);
 
   readonly statusTones = STATUS_TONE;
+
+  /**
+   * The teacher guide is now an uploaded PDF (PDF review item 5a). Detect an
+   * uploaded file (vs legacy rich-text HTML) so it renders in a view-only PDF
+   * frame rather than as escaped text.
+   */
+  readonly teacherGuideIsFile = computed<boolean>(() => {
+    const v = (this.pack()?.teacher_guide ?? '') as string;
+    return !!v && (/\/backend\/files/i.test(v) || /\.pdf($|\?|#)/i.test(v));
+  });
+
+  /** View-only PDF URL for the guide (toolbar hidden to discourage download). */
+  readonly teacherGuideUrl = computed<SafeResourceUrl | null>(() => {
+    if (!this.teacherGuideIsFile()) return null;
+    const v = this.pack().teacher_guide as string;
+    return this.sanitizer.bypassSecurityTrustResourceUrl(v + '#toolbar=0&navpanes=0');
+  });
   readonly materialKeys = [
     {key: 'teacher_guide', label: 'Teacher guide', icon: 'description'},
     {key: 'learner_note', label: 'Learner note', icon: 'menu_book'},

@@ -62,8 +62,16 @@
 
       <div class="col-lg-12 mb-2"><span class="badge bg-secondary-subtle text-secondary">Staff (not shown to students)</span></div>
       <div class="col-lg-12 mb-3">
-        <label class="form-label" for="dp_guide">Teacher guide</label>
-        <app-rich-editor formControlName="teacherGuide" placeholder="How to deliver this lesson…" />
+        <label class="form-label d-block">Teacher guide (PDF)</label>
+        <app-file-upload
+          [value]="form.get('teacherGuide')?.value || null"
+          accept="application/pdf,.pdf"
+          [maxSizeMb]="50"
+          label="Upload the teacher guide as a PDF"
+          hint="Teachers read this in-app; it isn't shown to students and isn't offered as a download."
+          (uploaded)="onTeacherGuideUploaded($event)"
+          (cleared)="form.get('teacherGuide')?.setValue('')"
+        />
       </div>
       <!-- Parent wording is on hold at the client's request (PDF review item 5);
            the field and backend column remain so it can be re-enabled later. -->
