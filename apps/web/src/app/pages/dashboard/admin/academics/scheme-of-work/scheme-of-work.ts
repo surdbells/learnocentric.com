@@ -4,6 +4,7 @@ import {LearnoModal} from '../../../../../components/learno-modal/learno-modal';
 import {LearnoButton} from '../../../../../common/learno-button/learno-button';
 import {DataGrid, GridColumn, GridFilter} from '../../../../../components/data-grid/data-grid';
 import {SchemeForm} from '../../../../../components/forms/scheme-form/scheme-form';
+import {Icon} from '../../../../../common/icon/icon';
 import {ApiService} from '../../../../../common/service/api.service';
 
 declare const bootstrap: any;
@@ -11,7 +12,7 @@ declare const bootstrap: any;
 @Component({
   selector: 'app-scheme-of-work',
   standalone: true,
-  imports: [PageHeader, LearnoModal, SchemeForm, LearnoButton, DataGrid],
+  imports: [PageHeader, LearnoModal, SchemeForm, LearnoButton, DataGrid, Icon],
   templateUrl: './scheme-of-work.html',
   styleUrl: './scheme-of-work.css',
 })

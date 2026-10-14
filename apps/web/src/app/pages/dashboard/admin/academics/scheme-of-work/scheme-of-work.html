@@ -8,6 +8,13 @@
   </div>
 }
 
+<div class="card border-0 shadow-sm mb-4"><div class="card-body d-flex gap-2 py-3 align-items-start">
+  <app-icon name="info" [size]="18" class="text-success flex-shrink-0 mt-1" />
+  <div class="small text-body-secondary">
+    <span class="fw-semibold text-body">What this is for.</span> The Scheme of Work is your term-by-term teaching plan: for each class, set which topic is taught in which week. It keeps teaching on schedule and aligned across teachers, and it feeds Scheme Coverage and the Curriculum Map.
+  </div>
+</div></div>
+
 <app-learno-modal [modalId]="'add_week'" [modalAction]="selectScheme() ? 'Edit Week' : 'Add Week'" [showBtn]="false">
   <app-scheme-form
     modalForm
