@@ -41,7 +41,7 @@
               <div class="fs-6 fw-bold mb-2">{{ c.topic || c.subject }}</div>
               @if (c.objective) {
                 <div class="text-body-secondary small">Objective</div>
-                <div class="small">{{ c.objective }}</div>
+                <div class="small">{{ c.objective | stripHtml }}</div>
               } @else { <div class="text-body-secondary small">{{ c.subject }} · keep going with your current topic.</div> }
             } @else { <div class="text-body-secondary small">No lesson scheduled.</div> }
           </div></div>

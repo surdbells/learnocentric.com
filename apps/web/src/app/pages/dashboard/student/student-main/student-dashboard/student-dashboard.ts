@@ -5,13 +5,14 @@ import {AuthService} from '../../../../../common/auth/auth.service';
 import {ApiService} from '../../../../../common/service/api.service';
 import {Icon} from '../../../../../common/icon/icon';
 import {StatRing} from '../../../../../common/ui';
+import {StripHtmlPipe} from '../../../../../common/pipes/strip-html.pipe';
 
 interface ProgressTile { label: string; value: string; sub: string; pct: number; icon: string; tone: string; }
 
 @Component({
   selector: 'app-student-dashboard',
   standalone: true,
-  imports: [Icon, RouterLink, DatePipe, StatRing],
+  imports: [Icon, RouterLink, DatePipe, StatRing, StripHtmlPipe],
   templateUrl: './student-dashboard.html',
   styleUrl: './student-dashboard.css',
 })

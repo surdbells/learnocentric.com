@@ -6,6 +6,7 @@ import {Icon} from '../../../../../common/icon/icon';
 import {ApiService} from '../../../../../common/service/api.service';
 import {SkeletonLoader} from '../../../../../common/skeleton-loader/skeleton-loader';
 import {StatRing, TabBar, TabItem, StatusBadge, Tone} from '../../../../../common/ui';
+import {StripHtmlPipe} from '../../../../../common/pipes/strip-html.pipe';
 
 /**
  * Learner Subject Hub, one subject's whole world in a single place: lessons
@@ -15,7 +16,7 @@ import {StatRing, TabBar, TabItem, StatusBadge, Tone} from '../../../../../commo
 @Component({
   selector: 'app-subject-hub',
   standalone: true,
-  imports: [Icon, RouterLink, SkeletonLoader, StatRing, TabBar, StatusBadge, DatePipe],
+  imports: [Icon, RouterLink, SkeletonLoader, StatRing, TabBar, StatusBadge, DatePipe, StripHtmlPipe],
   templateUrl: './subject-hub.html',
   styleUrl: './subject-hub.css',
 })

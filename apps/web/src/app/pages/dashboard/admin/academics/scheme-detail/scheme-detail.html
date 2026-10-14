@@ -74,7 +74,7 @@
             <td>
               @if (w.topic) {
                 <div class="fw-medium">{{ w.topic }}</div>
-                @if (w.objective) { <div class="text-body-secondary small">{{ w.objective }}</div> }
+                @if (w.objective) { <div class="text-body-secondary small">{{ w.objective | stripHtml }}</div> }
               } @else {
                 <span class="text-body-secondary fst-italic">No topic set</span>
               }

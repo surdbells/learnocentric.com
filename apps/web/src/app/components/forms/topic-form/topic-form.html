@@ -16,11 +16,13 @@
           }
         </select>
       </div>
-      <div class="col-lg-12">
-        <div learnoInput class="mb-3" [label]="'Learning objective'" [inputType]="'text'" [id]="'t_obj'" [formControlName]="'objective'"></div>
+      <div class="col-lg-12 mb-3">
+        <label class="form-label" for="t_obj">Learning objective</label>
+        <app-rich-editor formControlName="objective" placeholder="List the lesson's objectives — use bullets or numbering…" />
       </div>
-      <div class="col-lg-6">
-        <div learnoInput class="mb-3" [label]="'Real-life relevance'" [inputType]="'text'" [id]="'t_rl'" [formControlName]="'realLifeRelevance'"></div>
+      <div class="col-lg-12 mb-3">
+        <label class="form-label" for="t_rl">Real-life relevance</label>
+        <app-rich-editor formControlName="realLifeRelevance" placeholder="Why this matters in the real world — bullets welcome…" />
       </div>
       <div class="col-lg-6">
         <div learnoInput class="mb-3" [label]="'Competency built'" [inputType]="'text'" [id]="'t_cb'" [formControlName]="'competencyBuilt'"></div>

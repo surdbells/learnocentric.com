@@ -33,10 +33,10 @@
             {{ topic().subject }}@if (topic().class_label) { · {{ topic().class_label }} }@if (topic().week_number) { · Week {{ topic().week_number }} } · v{{ pack().version }}
           </div>
           @if (topic().objective) {
-            <div class="mb-2"><span class="fw-medium small text-body-secondary">Objective</span><div>{{ topic().objective }}</div></div>
+            <div class="mb-2"><span class="fw-medium small text-body-secondary">Objective</span><app-rich-text [value]="topic().objective" /></div>
           }
           @if (topic().real_life_relevance) {
-            <div><span class="fw-medium small text-body-secondary">Real-life relevance</span><div>{{ topic().real_life_relevance }}</div></div>
+            <div><span class="fw-medium small text-body-secondary">Real-life relevance</span><app-rich-text [value]="topic().real_life_relevance" /></div>
           }
         </div>
       </div>

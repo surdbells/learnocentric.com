@@ -73,7 +73,7 @@
                 <span class="hub-week">W{{ l.week_number }}</span>
                 <div class="min-w-0">
                   <div class="hub-row-title">{{ l.title }}</div>
-                  @if (l.objective) { <div class="hub-row-meta text-truncate">{{ l.objective }}</div> }
+                  @if (l.objective) { <div class="hub-row-meta text-truncate">{{ l.objective | stripHtml }}</div> }
                 </div>
               </div>
               <div class="hub-row-end">

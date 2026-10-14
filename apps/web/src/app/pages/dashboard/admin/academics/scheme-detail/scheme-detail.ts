@@ -6,13 +6,14 @@ import {ApiService} from '../../../../../common/service/api.service';
 import {Icon} from '../../../../../common/icon/icon';
 import {KpiItem, KpiStrip, StatRing, StatusBadge} from '../../../../../common/ui';
 import {Tone} from '../../../../../common/ui/ui-types';
+import {StripHtmlPipe} from '../../../../../common/pipes/strip-html.pipe';
 
 const STATUS_TONE: Record<string, Tone> = {draft: 'secondary', review: 'info', approved: 'primary', published: 'success', archived: 'secondary'};
 
 @Component({
   selector: 'app-scheme-detail',
   standalone: true,
-  imports: [PageHeader, Icon, FormsModule, KpiStrip, StatRing, StatusBadge],
+  imports: [PageHeader, Icon, FormsModule, KpiStrip, StatRing, StatusBadge, StripHtmlPipe],
   templateUrl: './scheme-detail.html',
   styleUrl: './scheme-detail.css',
 })

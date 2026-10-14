@@ -278,7 +278,7 @@
               <div class="text-body-secondary small">The written lesson for this topic isn't published yet, you can still work through the stages.</div>
             } @else {
               @if (l.objective) {
-                <div class="mb-4"><div class="tab-label">Objective</div><p class="mb-0">{{ l.objective }}</p></div>
+                <div class="mb-4"><div class="tab-label">Objective</div><app-rich-text [value]="l.objective" /></div>
               }
               @if (l.lesson?.learner_note) {
                 <div class="mb-4"><div class="tab-label">Lesson</div><app-rich-text [value]="l.lesson.learner_note" /></div>
@@ -287,7 +287,7 @@
                 <div class="mb-4"><div class="tab-label">Worked examples</div><app-rich-text [value]="l.lesson.worked_examples" /></div>
               }
               @if (l.real_life_relevance) {
-                <div class="lv-why"><app-icon name="lightbulb" [size]="18" class="text-warning" /><div><b>Why it matters:</b> {{ l.real_life_relevance }}</div></div>
+                <div class="lv-why"><app-icon name="lightbulb" [size]="18" class="text-warning" /><div><b>Why it matters:</b> <app-rich-text [value]="l.real_life_relevance" /></div></div>
               }
             }
           }

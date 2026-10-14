@@ -2,13 +2,14 @@ import {Component, effect, EventEmitter, inject, input, Output, signal} from '@a
 import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {LearnoInput} from '../../../common/learno-input/learno-input';
 import {LearnoButton} from '../../../common/learno-button/learno-button';
+import {RichEditor} from '../../../common/rich-editor/rich-editor';
 import {ApiService} from '../../../common/service/api.service';
 import {ToastrService} from 'ngx-toastr';
 
 @Component({
   selector: 'app-topic-form',
   standalone: true,
-  imports: [ReactiveFormsModule, LearnoInput, LearnoButton],
+  imports: [ReactiveFormsModule, LearnoInput, LearnoButton, RichEditor],
   templateUrl: './topic-form.html',
 })
 export class TopicForm {
