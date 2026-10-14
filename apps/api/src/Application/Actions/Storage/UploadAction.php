@@ -13,7 +13,10 @@ use Psr\Http\Message\UploadedFileInterface;
 /** POST /backend/upload, store an uploaded file and return its public URL. */
 final class UploadAction
 {
-    private const MAX_BYTES = 15 * 1024 * 1024; // 15 MB
+    // App-level cap. The real limit is whichever is smaller of this and the web
+    // server's client_max_body_size / PHP post_max_size / upload_max_filesize.
+    private const MAX_BYTES = 200 * 1024 * 1024; // 200 MB
+    private const MAX_MB = 200;
     private const ALLOWED_EXT = [
         'jpg', 'jpeg', 'png', 'gif', 'webp', 'heic',
         'pdf', 'doc', 'docx', 'ppt', 'pptx', 'xls', 'xlsx', 'csv', 'txt',
@@ -36,13 +39,13 @@ final class UploadAction
             return Json::error($response, 'No file provided (expected form field "file").', 422);
         }
         if ($file->getError() === UPLOAD_ERR_INI_SIZE || $file->getError() === UPLOAD_ERR_FORM_SIZE) {
-            return Json::error($response, 'That file is too large. The limit is 15 MB.', 413);
+            return Json::error($response, 'That file is too large. The limit is ' . self::MAX_MB . ' MB.', 413);
         }
         if ($file->getError() !== UPLOAD_ERR_OK) {
             return Json::error($response, 'File upload failed.', 400);
         }
         if (($file->getSize() ?? 0) > self::MAX_BYTES) {
-            return Json::error($response, 'That file is too large. The limit is 15 MB.', 413);
+            return Json::error($response, 'That file is too large. The limit is ' . self::MAX_MB . ' MB.', 413);
         }
 
         $ext = strtolower(pathinfo((string) $file->getClientFilename(), PATHINFO_EXTENSION));

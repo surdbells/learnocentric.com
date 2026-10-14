@@ -39,6 +39,8 @@
                          [ngModel]="m.url" (ngModelChange)="setMediaUrl($index, $event)" [ngModelOptions]="{standalone: true}"/>
                   <app-file-upload
                     [value]="m.url || null"
+                    [maxSizeMb]="200"
+                    hint="Up to 200 MB. For longer videos, paste a YouTube or Vimeo link above — no size limit."
                     label="…or upload video / audio / PDF / image"
                     (uploaded)="onMediaUploaded($index, $event)"
                     (cleared)="setMediaUrl($index, '')"

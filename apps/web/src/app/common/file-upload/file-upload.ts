@@ -1,4 +1,4 @@
-import {Component, EventEmitter, inject, input, Output, signal} from '@angular/core';
+import {Component, computed, EventEmitter, inject, input, Output, signal} from '@angular/core';
 import {HttpClient, HttpEventType} from '@angular/common/http';
 import {ToastrService} from 'ngx-toastr';
 import {Icon} from '../icon/icon';
@@ -32,7 +32,11 @@ export class FileUpload {
   value = input<string | null>(null);
   label = input<string>('Upload a file');
   accept = input<string>('image/*,application/pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.csv,.txt,video/*,audio/*');
-  hint = input<string>('Images, documents, audio or video, up to 15 MB.');
+  /** Max upload size in MB. Callers that accept video should raise this (server limits still apply). */
+  maxSizeMb = input<number>(15);
+  hint = input<string>('');
+  /** Shown under the control; falls back to a sensible default that reflects the size limit. */
+  readonly hintText = computed(() => this.hint() || `Images, documents, audio or video, up to ${this.maxSizeMb()} MB.`);
 
   @Output() uploaded = new EventEmitter<UploadedFile>();
   @Output() cleared = new EventEmitter<void>();
@@ -53,8 +57,8 @@ export class FileUpload {
     const input = event.target as HTMLInputElement;
     const file = input.files?.[0];
     if (!file) return;
-    if (file.size > 15 * 1024 * 1024) {
-      this.toast.error('That file is larger than 15 MB.');
+    if (file.size > this.maxSizeMb() * 1024 * 1024) {
+      this.toast.error(`That file is larger than ${this.maxSizeMb()} MB.`);
       input.value = '';
       return;
     }
