@@ -34,7 +34,24 @@
         <h5 class="fw-semibold mb-0">{{ p.topic }}</h5>
         <span class="badge bg-{{ statusColor(p.status) }}-subtle text-{{ statusColor(p.status) }} text-capitalize px-3 py-2">{{ p.status }}</span>
       </div>
-      <p class="text-body-secondary small mb-4">{{ p.subject }} · v{{ p.version }}</p>
+      <p class="text-body-secondary small mb-3">{{ p.subject }} · v{{ p.version }}</p>
+
+      @if (p.student_visible) {
+        <div class="alert alert-success d-flex align-items-start gap-2 py-2 px-3 small mb-4">
+          <app-icon name="visibility" [size]="16" />
+          <div>Students can see this lesson.</div>
+        </div>
+      } @else if (p.status !== 'published') {
+        <div class="alert alert-warning d-flex align-items-start gap-2 py-2 px-3 small mb-4">
+          <app-icon name="visibility_off" [size]="16" />
+          <div>Hidden from students. This pack is {{ titleCase(p.status) }} — move it to Published below so learners can see it.</div>
+        </div>
+      } @else {
+        <div class="alert alert-warning d-flex align-items-start gap-2 py-2 px-3 small mb-4">
+          <app-icon name="visibility_off" [size]="16" />
+          <div>This pack is published, but its topic “{{ p.topic }}” isn't, so students still can't see the lesson. Publish the topic on the Topics tab.</div>
+        </div>
+      }
 
       @if (p.learner_note) {
         <div class="mb-3"><div class="small text-uppercase fw-semibold text-body-secondary">Lesson note</div><app-rich-text class="small d-block" [value]="p.learner_note" /></div>

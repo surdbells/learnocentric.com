@@ -8,6 +8,7 @@ import {DataGrid, GridColumn, GridFilter} from '../../../../../components/data-g
 import {DeliveryPackForm} from '../../../../../components/forms/delivery-pack-form/delivery-pack-form';
 import {RichText} from '../../../../../common/rich-editor/rich-text';
 import {TabBar, TabItem} from '../../../../../common/ui';
+import {Icon} from '../../../../../common/icon/icon';
 import {Topics} from '../topics/topics';
 import {ApiService} from '../../../../../common/service/api.service';
 import {AuthService} from '../../../../../common/auth/auth.service';
@@ -21,7 +22,7 @@ const APPROVER_ROLES = ['academic_lead', 'school_admin', 'tutor_admin', 'super_a
 @Component({
   selector: 'app-lesson-content',
   standalone: true,
-  imports: [PageHeader, LearnoModal, LearnoButton, DataGrid, DeliveryPackForm, DatePipe, RichText, TabBar, Topics],
+  imports: [PageHeader, LearnoModal, LearnoButton, DataGrid, DeliveryPackForm, DatePipe, RichText, TabBar, Icon, Topics],
   templateUrl: './lesson-content.html',
   styleUrl: './lesson-content.css',
 })
@@ -59,7 +60,12 @@ export class LessonContent {
     {key: 'subject', label: 'Subject'},
     {key: 'version', label: 'Version'},
     {key: 'status', label: 'Status', type: 'badge', badge: (v) => ({text: this.titleCase(v), color: STATUS_COLOR[v] ?? 'secondary'})},
+    {key: 'student_visible', label: 'Student view', type: 'badge', badge: (v) => v ? {text: 'Visible', color: 'success'} : {text: 'Hidden', color: 'secondary'}},
   ];
+
+  // A learner sees a lesson only when BOTH its topic and its pack are published
+  // (PDF review item 9). The lifecycle modal spells out exactly what's missing,
+  // and the list carries a "Student view" badge from student_visible.
 
   readonly filterDefs = computed<GridFilter[]>(() => [
     {key: 'status', label: 'Status', options: [

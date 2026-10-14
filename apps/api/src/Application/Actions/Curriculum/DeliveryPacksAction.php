@@ -241,6 +241,11 @@ final class DeliveryPacksAction
     {
         return $pack->toArray() + [
             'subject' => $pack->getTopic()->getSubject()->getName(),
+            // A learner sees a lesson only when BOTH the topic and the pack are
+            // published, so expose the topic's state for a clear visibility hint.
+            'topic_approval_status' => $pack->getTopic()->getApprovalStatus(),
+            'student_visible' => $pack->getStatus() === Lifecycle::PUBLISHED
+                && $pack->getTopic()->getApprovalStatus() === Lifecycle::PUBLISHED,
             'next_states' => Lifecycle::nextStates($pack->getStatus()),
             'version_count' => $this->em->getRepository(ContentVersion::class)->count(['entityType' => 'TopicDeliveryPack', 'entityId' => $pack->getId()]),
         ];
