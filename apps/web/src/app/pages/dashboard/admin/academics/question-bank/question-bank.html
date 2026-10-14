@@ -10,7 +10,7 @@
 <!-- Bulk upload -->
 <app-learno-modal [modalId]="'bulk_upload'" [modalAction]="'Bulk upload questions'" [showBtn]="false">
   <div modalForm>
-    <p class="text-body-secondary small">Import many questions from a CSV. Columns: <code>stem, type, option_a…d, correct, marks, difficulty, explanation</code> (optional <code>topic_id</code> per row).</p>
+    <p class="text-body-secondary small">Import many questions from an Excel (.xlsx) or CSV file. Download the template, fill it in, and upload it back. Columns: <code>stem, type, option_a…d, correct, marks, difficulty, explanation</code> (optional <code>topic_id</code> per row).</p>
 
     <div class="row g-3 mb-3">
       <div class="col-md-6">
@@ -22,11 +22,11 @@
       </div>
       <div class="col-md-6 d-flex align-items-end gap-2">
         <label class="btn btn-outline-secondary mb-0">
-          <app-icon name="upload_file" [size]="16" /> Choose CSV
-          <input type="file" accept=".csv,text/csv" hidden (change)="onBulkFile($event)" />
+          <app-icon name="upload_file" [size]="16" /> Choose file
+          <input type="file" accept=".csv,.xlsx,.xls,text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel" hidden (change)="onBulkFile($event)" />
         </label>
         <button type="button" class="btn btn-link text-decoration-none px-0" (click)="downloadTemplate()">
-          <app-icon name="download" [size]="16" /> Template
+          <app-icon name="download" [size]="16" /> Excel template
         </button>
       </div>
     </div>

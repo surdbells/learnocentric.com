@@ -111,12 +111,28 @@ export class QuestionBank {
     this.open('bulk_upload');
   }
 
-  onBulkFile(event: Event): void {
-    const file = (event.target as HTMLInputElement)?.files?.[0];
+  async onBulkFile(event: Event): Promise<void> {
+    const input = event.target as HTMLInputElement;
+    const file = input?.files?.[0];
     if (!file) return;
-    const reader = new FileReader();
-    reader.onload = () => { this.bulkText.set(String(reader.result ?? '')); this.parseBulk(); };
-    reader.readAsText(file);
+    const name = file.name.toLowerCase();
+    try {
+      if (name.endsWith('.xlsx') || name.endsWith('.xls')) {
+        // Excel is binary; parse the first sheet to CSV with SheetJS (lazy-loaded).
+        const XLSX = await import('xlsx');
+        const wb = XLSX.read(await file.arrayBuffer(), {type: 'array'});
+        const sheet = wb.Sheets[wb.SheetNames[0]];
+        this.bulkText.set(sheet ? XLSX.utils.sheet_to_csv(sheet) : '');
+      } else {
+        this.bulkText.set(await file.text());
+      }
+      this.parseBulk();
+    } catch {
+      this.bulkParsed.set([]);
+      this.bulkParseError.set('Could not read that file. Upload a .csv or .xlsx spreadsheet.');
+    }
+    // Reset so re-selecting the same file fires change again.
+    if (input) input.value = '';
   }
 
   /** Parse the pasted/uploaded CSV into a questions payload, with a live preview. */
@@ -175,21 +191,20 @@ export class QuestionBank {
     });
   }
 
-  downloadTemplate(): void {
-    const header = 'stem,type,option_a,option_b,option_c,option_d,correct,marks,difficulty,explanation';
-    const example = '"What is 12 ÷ 4?",mcq,2,3,4,6,c,1,moderate,"Divide 12 by 4."';
-    const tf = '"The HCF of two primes is 1.",true_false,,,,,true,1,moderate,';
-    const num = '"Write 2005 in figures.",numeric,,,,,2005,1,easy,';
-    this.downloadBlob([header, example, tf, num].join('\n'), 'question-bank-template.csv');
-  }
-
-  private downloadBlob(text: string, filename: string): void {
+  /** Download a real Excel (.xlsx) template so it matches the upload the import accepts. */
+  async downloadTemplate(): Promise<void> {
     if (typeof window === 'undefined') return;
-    const blob = new Blob([text], {type: 'text/csv'});
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url; a.download = filename; a.click();
-    URL.revokeObjectURL(url);
+    const rows = [
+      ['stem', 'type', 'option_a', 'option_b', 'option_c', 'option_d', 'correct', 'marks', 'difficulty', 'explanation'],
+      ['What is 12 ÷ 4?', 'mcq', '2', '3', '4', '6', 'c', '1', 'moderate', 'Divide 12 by 4.'],
+      ['The HCF of two primes is 1.', 'true_false', '', '', '', '', 'true', '1', 'moderate', ''],
+      ['Write 2005 in figures.', 'numeric', '', '', '', '', '2005', '1', 'easy', ''],
+    ];
+    const XLSX = await import('xlsx');
+    const ws = XLSX.utils.aoa_to_sheet(rows);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Questions');
+    XLSX.writeFile(wb, 'question-bank-template.xlsx');
   }
 
   /** Minimal RFC-4180-ish CSV parser (handles quoted fields with commas + newlines). */
