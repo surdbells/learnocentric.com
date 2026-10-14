@@ -42,7 +42,7 @@ export class InstitutionForm implements OnInit {
     address: new FormControl('', { nonNullable: true }),
     phone: new FormControl('', { nonNullable: true }),
     logoUrl: new FormControl('', { nonNullable: true }),
-    primaryColor: new FormControl('', { nonNullable: true }),
+    primaryColor: new FormControl('#39c645', { nonNullable: true }),
     packageIds: new FormControl<string[]>([]),
     isActive: new FormControl<boolean>(true, { nonNullable: true })
   });
@@ -87,7 +87,7 @@ export class InstitutionForm implements OnInit {
         adminEmail: s['email'],
         phone: s['phone'],
         logoUrl: s['logo_url'],
-        primaryColor: s['primary_color'],
+        primaryColor: s['primary_color'] || '#39c645',
         // secondaryColor: s['secondary'],
         address: s['address'],
         adminFirstName: s['admins']?.[0]?.['first_name'] ?? s['admin_contact']?.['first_name'] ?? '',

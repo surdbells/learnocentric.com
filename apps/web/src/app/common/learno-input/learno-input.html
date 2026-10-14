@@ -3,8 +3,9 @@
     class="form-control"
     id="{{id()}}"
     type="{{inputType()}}"
+    [value]="value()"
     (input)="onInput($event)"
+    (change)="onInput($event)"
     (blur)="onBlur()"
-    [disabled]="disabled() || cvaDisabled"
+    [disabled]="disabled() || cvaDisabled()"
 />
-

@@ -1,5 +1,5 @@
-import {Component, input, forwardRef, OnInit, inject, ElementRef} from '@angular/core';
-import {ReactiveFormsModule, ControlValueAccessor, NG_VALUE_ACCESSOR, FormGroupDirective} from "@angular/forms";
+import {Component, input, forwardRef, signal} from '@angular/core';
+import {ReactiveFormsModule, ControlValueAccessor, NG_VALUE_ACCESSOR} from "@angular/forms";
 
 @Component({
   selector: '[learnoInput]',
@@ -17,40 +17,25 @@ import {ReactiveFormsModule, ControlValueAccessor, NG_VALUE_ACCESSOR, FormGroupD
     }
   ]
 })
-export class LearnoInput implements ControlValueAccessor, OnInit {
+export class LearnoInput implements ControlValueAccessor {
     id = input.required<string>();
     label = input.required<string>();
     inputType = input.required<string>();
     formControlName = input.required<string>();
     disabled = input<boolean>(false);
 
-    private parentForm = inject(FormGroupDirective, { optional: true });
-    private elementRef = inject(ElementRef);
+    // The value is bound declaratively in the template ([value]="value()"), so
+    // Angular's renderer owns the native input. This is hydration-safe — unlike
+    // an imperative querySelector().value write, which can target a detached node
+    // after SSR hydration or a view re-render.
+    value = signal<string>('');
+    cvaDisabled = signal<boolean>(false);
+
     private onChange = (value: any) => {};
     private onTouched = () => {};
-    private inputElement: HTMLInputElement | null = null;
-    // Tracks disabled state set via Angular forms API (CVA)
-    cvaDisabled = false;
-
-    ngOnInit() {
-        this.inputElement = this.elementRef.nativeElement.querySelector('input');
-        if (this.parentForm && this.formControlName() && this.inputElement) {
-            const control = this.parentForm.form.get(this.formControlName());
-            if (control) {
-                // Subscribe to form control value changes
-                control.valueChanges.subscribe(value => {
-                    if (this.inputElement && this.inputElement.value !== value) {
-                        this.inputElement.value = value || '';
-                    }
-                });
-            }
-        }
-    }
 
     writeValue(value: any): void {
-        if (this.inputElement) {
-            this.inputElement.value = value || '';
-        }
+        this.value.set(value ?? '');
     }
 
     registerOnChange(fn: any): void {
@@ -62,14 +47,12 @@ export class LearnoInput implements ControlValueAccessor, OnInit {
     }
 
     setDisabledState(isDisabled: boolean): void {
-        this.cvaDisabled = isDisabled;
-        if (this.inputElement) {
-            this.inputElement.disabled = isDisabled || this.disabled();
-        }
+        this.cvaDisabled.set(isDisabled);
     }
 
     onInput(event: Event): void {
         const value = (event.target as HTMLInputElement).value;
+        this.value.set(value);
         this.onChange(value);
     }
 

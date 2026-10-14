@@ -2,7 +2,7 @@
 
 Items from the client review (Oct 2026). ☐ open · ◐ in progress · ☑ done.
 
-- ☐ **1** School onboarding: logo didn't show after upload; brand colour reverts to default.
+- ☑ **1** School onboarding: logo didn't show after upload (fixed by cross-origin + absolute-URL + initials fallback); brand colour reverts to default (fixed: `learnoInput` now binds `[value]` declaratively — hydration-safe — and the colour defaults to brand green `#39c645`).
 - ☐ **2** After selecting a staff member for a role, the selected name isn't shown.
 - ☐ **3** Rich-text editor for Lesson Objectives (bullets/numbering).
 - ☐ **4** After clicking Lesson Content, Topics still shows.
