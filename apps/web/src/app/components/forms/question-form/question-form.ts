@@ -30,7 +30,7 @@ export class QuestionForm {
   isEdit = signal(false);
   isLoading = signal(false);
   type = signal('mcq');
-  @Output() submitted = new EventEmitter<{ success: boolean }>();
+  @Output() submitted = new EventEmitter<{ success: boolean; question?: any }>();
 
   private readonly api = inject(ApiService);
   private readonly toast = inject(ToastrService);
@@ -201,9 +201,12 @@ export class QuestionForm {
       : this.api.post('/backend/assessment/questions', body);
 
     req.subscribe({
-      next: () => {
-        this.toast.success(this.isEdit() ? 'Question updated' : 'Question created (draft)');
-        this.submitted.emit({success: true});
+      next: (res: any) => {
+        const wasEdit = this.isEdit();
+        this.toast.success(wasEdit ? 'Question updated' : 'Question created (draft)');
+        this.submitted.emit({success: true, question: res});
+        // Clear the form after creating so the next open starts blank.
+        if (!wasEdit) this.reset();
       },
       error: (e) => {
         this.toast.error(e?.error?.error || 'Failed to save question');

@@ -69,7 +69,7 @@
         <div class="form-text mb-3">Pulled from this assessment's topic (or subject). Only answer-validated questions qualify.</div>
 
         <!-- Or add a single question manually -->
-        <div class="d-flex gap-2 mb-4">
+        <div class="d-flex gap-2 mb-3">
           <select class="form-select form-select-sm" [ngModel]="pickId()" (ngModelChange)="pickId.set($event)" [ngModelOptions]="{standalone: true}">
             <option [ngValue]="null" disabled>…or add one manually</option>
             @for (q of available(); track q.id) {
@@ -77,6 +77,14 @@
             }
           </select>
           <button type="button" class="btn btn-sm btn-outline-primary text-nowrap" [disabled]="!pickId() || busy()" (click)="attach()">Add</button>
+        </div>
+
+        <!-- Author a brand-new question without leaving the builder (PDF review item 6) -->
+        <div class="mb-4">
+          <button type="button" class="btn btn-sm btn-primary" [disabled]="busy()" (click)="openNewQuestion()">
+            <app-icon name="add" [size]="16" /> Create new question
+          </button>
+          <div class="form-text">Creates it in the question bank and adds it here in one step.</div>
         </div>
       }
 
@@ -125,6 +133,11 @@
       <div class="text-body-secondary small">Loading…</div>
     }
   </div>
+</app-learno-modal>
+
+<!-- Inline question authoring, stacked over the builder (PDF review item 6) -->
+<app-learno-modal [modalId]="'new_question'" [modalAction]="'New question'" [showBtn]="false">
+  <app-question-form modalForm [topics]="topics()" (submitted)="onQuestionCreated($event)" />
 </app-learno-modal>
 
 <app-data-grid

@@ -6,6 +6,7 @@ import {LearnoModal} from '../../../../../components/learno-modal/learno-modal';
 import {LearnoButton} from '../../../../../common/learno-button/learno-button';
 import {DataGrid, GridColumn, GridFilter} from '../../../../../components/data-grid/data-grid';
 import {AssessmentForm} from '../../../../../components/forms/assessment-form/assessment-form';
+import {QuestionForm} from '../../../../../components/forms/question-form/question-form';
 import {ApiService} from '../../../../../common/service/api.service';
 import {AuthService} from '../../../../../common/auth/auth.service';
 import {Icon} from '../../../../../common/icon/icon';
@@ -21,7 +22,7 @@ const APPROVER_ROLES = ['academic_lead', 'school_admin', 'tutor_admin', 'super_a
 @Component({
   selector: 'app-assessments',
   standalone: true,
-  imports: [Icon, PageHeader, LearnoModal, LearnoButton, DataGrid, AssessmentForm, FormsModule],
+  imports: [Icon, PageHeader, LearnoModal, LearnoButton, DataGrid, AssessmentForm, QuestionForm, FormsModule],
   templateUrl: './assessments.html',
   styleUrl: './assessments.css',
 })
@@ -157,6 +158,43 @@ export class Assessments {
         this.busy.set(false);
       },
       error: (e) => { this.toast.error(e?.error?.error || 'Could not add question'); this.busy.set(false); },
+    });
+  }
+
+  /** Open the inline "new question" modal from within the builder (PDF review item 6). */
+  openNewQuestion(): void { this.open('new_question'); }
+
+  /**
+   * A question was authored inline in the builder. Create → validate → attach it
+   * to the open assessment so authors never leave the builder to go to the bank.
+   * If the answer doesn't pass validation it stays in the bank as a draft.
+   */
+  onQuestionCreated(ev: { success: boolean; question?: any }): void {
+    const a = this.builder();
+    const q = ev?.question;
+    if (!ev?.success || !q?.id || !a) { this.close('new_question'); return; }
+    this.busy.set(true);
+    this.api.post<any>(`/backend/assessment/questions/${q.id}/validate`, {}).subscribe({
+      next: () => {
+        this.api.post<any>(`/backend/assessment/assessments/${a.id}/questions`, {question_id: q.id}).subscribe({
+          next: (detail) => {
+            this.builder.set(detail);
+            this.loadAvailable(detail);
+            this.grid?.refresh();
+            this.busy.set(false);
+            this.close('new_question');
+            this.toast.success('Question created and added to this assessment');
+          },
+          error: (e) => { this.busy.set(false); this.toast.error(e?.error?.error || 'Created, but could not add it'); },
+        });
+      },
+      error: (e) => {
+        // Saved to the bank, but the answer isn't complete enough to attach yet.
+        this.busy.set(false);
+        this.loadAvailable(a);
+        this.close('new_question');
+        this.toast.warning(e?.error?.error || 'Saved to the question bank as a draft. Complete its answer, then add it.');
+      },
     });
   }
 
