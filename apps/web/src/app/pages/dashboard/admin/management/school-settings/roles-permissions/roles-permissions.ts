@@ -151,6 +151,13 @@ export class RolesPermissions {
     });
   }
 
+  /** Comma-separated assigned staff names, capped so the cell stays compact. */
+  assignedNames(role: any): string {
+    const names = (role?.assigned_users ?? []).map((u: any) => u?.name).filter(Boolean);
+    if (names.length <= 3) return names.join(', ');
+    return names.slice(0, 3).join(', ') + ` +${names.length - 3} more`;
+  }
+
   levelTone(level: string): string {
     if (/Full/.test(level)) return 'success';
     if (/High/.test(level)) return 'primary';

@@ -31,7 +31,12 @@
                 <div class="fw-medium">{{ r.name }}</div>
                 @if (r.description) { <div class="small text-body-secondary">{{ r.description }}</div> }
               </td>
-              <td class="text-center">{{ r.users_assigned }}</td>
+              <td class="text-center">
+                <div class="fw-semibold">{{ r.users_assigned }}</div>
+                @if (r.assigned_users?.length) {
+                  <div class="small text-body-secondary mt-1 lh-sm">{{ assignedNames(r) }}</div>
+                }
+              </td>
               <td><span class="badge bg-secondary-subtle text-secondary">{{ r.access_scope }}</span></td>
               <td><span class="badge bg-{{ levelTone(r.permission_level) }}-subtle text-{{ levelTone(r.permission_level) }}">{{ r.permission_level }}</span></td>
               <td>

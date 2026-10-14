@@ -3,7 +3,7 @@
 Items from the client review (Oct 2026). ☐ open · ◐ in progress · ☑ done.
 
 - ☑ **1** School onboarding: logo didn't show after upload (fixed by cross-origin + absolute-URL + initials fallback); brand colour reverts to default (fixed: `learnoInput` now binds `[value]` declaratively — hydration-safe — and the colour defaults to brand green `#39c645`).
-- ☐ **2** After selecting a staff member for a role, the selected name isn't shown.
+- ☑ **2** After selecting a teacher/user for a role, the staff name wasn't shown. The assign dropdown does show the picked name; the real gap was the Roles table showing only a count. Now shows each role's assigned staff names (capped "+N more"), and the count/names are scoped to the school (system-role counts were previously global, leaking other schools' staff).
 - ☐ **3** Rich-text editor for Lesson Objectives (bullets/numbering).
 - ☐ **4** After clicking Lesson Content, Topics still shows.
 - ☐ **5** Teacher's guide should be PDF, not downloadable; editor slow to paste; (Parent wording on hold).

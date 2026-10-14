@@ -51,6 +51,24 @@ final class RolesAction
         }
         $roles = $qb->getQuery()->getResult();
 
+        // Institution-scoped map of staff per role, so both the count and the
+        // names reflect THIS school only. System roles are shared across schools,
+        // so a global count would leak (and miscount) other schools' staff.
+        $usersByRole = [];
+        if ($institution !== null) {
+            $staff = $this->em->createQueryBuilder()->select('u', 'r')->from(User::class, 'u')->join('u.role', 'r')
+                ->where('u.institution = :inst')->setParameter('inst', $institution)
+                ->orderBy('u.firstName', 'ASC')->addOrderBy('u.lastName', 'ASC')
+                ->getQuery()->getResult();
+            foreach ($staff as $u) {
+                /** @var User $u */
+                $usersByRole[$u->getRole()->getId()][] = [
+                    'id' => $u->getId(),
+                    'name' => trim($u->getFirstName() . ' ' . $u->getLastName()),
+                ];
+            }
+        }
+
         $rows = [];
         $customCount = 0;
         foreach ($roles as $role) {
@@ -59,13 +77,19 @@ final class RolesAction
             foreach ($this->em->getRepository(RolePermission::class)->findBy(['role' => $role]) as $rp) {
                 $grants[$rp->getPermissionCode()] = $rp->toArray();
             }
-            $usersAssigned = (int) $this->em->getRepository(User::class)->count(['role' => $role]);
+            $assignedUsers = $institution !== null
+                ? ($usersByRole[$role->getId()] ?? [])
+                : [];
+            $usersAssigned = $institution !== null
+                ? count($assignedUsers)
+                : (int) $this->em->getRepository(User::class)->count(['role' => $role]);
             $editable = !$role->isSystem() && $institution !== null && $role->getInstitution()?->getId() === $institution->getId();
             if (!$role->isSystem()) {
                 $customCount++;
             }
             $rows[] = $role->toArray() + [
                 'users_assigned' => $usersAssigned,
+                'assigned_users' => $assignedUsers,
                 'editable' => $editable,
                 // Permissions stay read-only for system roles, but staff can still be
                 // assigned to school-scoped staff roles (e.g. Academic Lead), not just
