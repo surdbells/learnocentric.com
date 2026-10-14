@@ -5,7 +5,7 @@ Items from the client review (Oct 2026). ☐ open · ◐ in progress · ☑ done
 - ☑ **1** School onboarding: logo didn't show after upload (fixed by cross-origin + absolute-URL + initials fallback); brand colour reverts to default (fixed: `learnoInput` now binds `[value]` declaratively — hydration-safe — and the colour defaults to brand green `#39c645`).
 - ☑ **2** After selecting a teacher/user for a role, the staff name wasn't shown. The assign dropdown does show the picked name; the real gap was the Roles table showing only a count. Now shows each role's assigned staff names (capped "+N more"), and the count/names are scoped to the school (system-role counts were previously global, leaking other schools' staff).
 - ☑ **3** Rich-text editor for Lesson Objectives. Learning objective + Real-life relevance now use the Quill editor (bullets, numbering, bold, maths). Full views render via `app-rich-text`; inline/truncated previews strip HTML via a new `stripHtml` pipe. Competency built stays a plain input (short phrase).
-- ☐ **4** After clicking Lesson Content, Topics still shows.
+- ☑ **4** Clicking Lesson Content showed Topics: the page's internal tab bar defaulted to Topics. Now opens on Lesson content. When embedded in the Subjects & Curriculum hub (which has its own Topics + Lesson Content tabs) the redundant internal tab bar is hidden, removing the double-nesting.
 - ☐ **5** Teacher's guide should be PDF, not downloadable; editor slow to paste; (Parent wording on hold).
 - ☐ **6** Assessment / Question Bank / Portfolio create+upload in one window (not separate pages).
 - ☐ **7** Bulk Question Bank upload unclear; template downloads as Excel but import asks for CSV.

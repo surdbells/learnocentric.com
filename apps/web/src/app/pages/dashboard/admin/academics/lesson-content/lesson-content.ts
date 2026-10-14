@@ -31,8 +31,12 @@ export class LessonContent {
 
   @ViewChild(DataGrid) grid!: DataGrid;
 
-  /** Topics authoring is now a tab on this page (PDF review T1). */
-  tab = signal<string>('topics');
+  /**
+   * Topics authoring is also reachable here as a tab, but the page opens on
+   * Lesson content — clicking "Lesson Content" should show lesson content, not
+   * topics (PDF review item 4).
+   */
+  tab = signal<string>('packs');
   readonly tabs: TabItem[] = [{key: 'topics', label: 'Topics'}, {key: 'packs', label: 'Lesson content'}];
 
   private readonly api = inject(ApiService);

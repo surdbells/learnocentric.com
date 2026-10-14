@@ -10,9 +10,13 @@
   </div>
 }
 
-<app-tab-bar class="d-block mb-3" [tabs]="tabs" [(active)]="tab" />
+<!-- When embedded in the Subjects & Curriculum hub, that hub already has its
+     own Topics and Lesson Content tabs, so the internal tab bar is redundant. -->
+@if (!embedded()) {
+  <app-tab-bar class="d-block mb-3" [tabs]="tabs" [(active)]="tab" />
+}
 
-@if (tab() === 'topics') {
+@if (!embedded() && tab() === 'topics') {
   <app-topics [embedded]="true" />
 }
 
