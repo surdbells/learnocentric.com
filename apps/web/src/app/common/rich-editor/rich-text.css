@@ -1,4 +1,7 @@
-:host { display: block; }
+/* ViewEncapsulation.None (see rich-text.ts): these rules must reach the
+   [innerHTML]-injected content, which emulated encapsulation can't style.
+   Every rule is scoped under .rich-text so it stays contained in practice. */
+app-rich-text { display: block; }
 
 .rich-text {
   line-height: 1.6;
@@ -19,5 +22,12 @@
   border-radius: 8px;
   overflow-x: auto;
 }
-.rich-text ul, .rich-text ol { padding-left: 1.4rem; margin: 0.4rem 0; }
+.rich-text ul { padding-left: 1.4rem; margin: 0.4rem 0; list-style-type: disc; }
+.rich-text ol { padding-left: 1.4rem; margin: 0.4rem 0; list-style-type: decimal; }
+/* ngx-quill stores clean semantic HTML (<ul>/<ol><li>), so markers render
+   natively above. These cover any legacy content saved with Quill's editor
+   markup (data-list on <ol>, plus the editor-only .ql-ui marker span). */
+.rich-text ol li[data-list="bullet"] { list-style-type: disc; }
+.rich-text ol li[data-list="ordered"] { list-style-type: decimal; }
+.rich-text .ql-ui { display: none; }
 .rich-text .ql-formula { font-size: 1.05em; }

@@ -42,6 +42,29 @@ export class RichEditor implements ControlValueAccessor {
     this.onChange(html);
   }
 
+  /**
+   * Pasting content copied from Word / Google Docs / the web is slow because
+   * Quill keeps every foreign inline style, font and class, then has to render
+   * and re-serialise all of it. Strip pasted formatting down to the formats our
+   * toolbar actually supports: the paste is fast and the stored HTML stays clean.
+   */
+  onEditorCreated(quill: any): void {
+    const allowed = new Set([
+      'bold', 'italic', 'underline', 'script',
+      'list', 'indent', 'blockquote', 'code-block', 'code', 'link', 'formula',
+    ]);
+    quill?.clipboard?.addMatcher(Node.ELEMENT_NODE, (_node: unknown, delta: any) => {
+      for (const op of delta?.ops ?? []) {
+        if (!op.attributes) continue;
+        for (const key of Object.keys(op.attributes)) {
+          if (!allowed.has(key)) delete op.attributes[key];
+        }
+        if (Object.keys(op.attributes).length === 0) delete op.attributes;
+      }
+      return delta;
+    });
+  }
+
   // ControlValueAccessor
   writeValue(v: string | null): void { this.value.set(v ?? ''); }
   registerOnChange(fn: (v: string) => void): void { this.onChange = fn; }

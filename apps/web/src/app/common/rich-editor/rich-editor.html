@@ -4,6 +4,7 @@
     format="html"
     [ngModel]="value()"
     [ngModelOptions]="{standalone: true}"
+    (onEditorCreated)="onEditorCreated($event)"
     (onContentChanged)="onContentChanged($event)"
     (onBlur)="onTouched()"
     [placeholder]="placeholder()"

@@ -60,15 +60,13 @@
         <app-rich-editor formControlName="workedExamples" placeholder="Show worked examples, with maths as needed…" />
       </div>
 
-      <div class="col-lg-12 mb-2"><span class="badge bg-secondary-subtle text-secondary">Staff / parent (not shown to students)</span></div>
-      <div class="col-lg-6 mb-3">
+      <div class="col-lg-12 mb-2"><span class="badge bg-secondary-subtle text-secondary">Staff (not shown to students)</span></div>
+      <div class="col-lg-12 mb-3">
         <label class="form-label" for="dp_guide">Teacher guide</label>
         <app-rich-editor formControlName="teacherGuide" placeholder="How to deliver this lesson…" />
       </div>
-      <div class="col-lg-6 mb-3">
-        <label class="form-label" for="dp_parent">Parent wording</label>
-        <app-rich-editor formControlName="parentWording" placeholder="Plain-language note for parents…" />
-      </div>
+      <!-- Parent wording is on hold at the client's request (PDF review item 5);
+           the field and backend column remain so it can be re-enabled later. -->
     </div>
   </div>
   <div class="modal-footer">

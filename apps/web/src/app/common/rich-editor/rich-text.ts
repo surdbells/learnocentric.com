@@ -1,4 +1,4 @@
-import {Component, computed, input} from '@angular/core';
+import {Component, computed, input, ViewEncapsulation} from '@angular/core';
 
 /**
  * Renders rich-text content produced by RichEditor (HTML with KaTeX-rendered
@@ -12,6 +12,8 @@ import {Component, computed, input} from '@angular/core';
   imports: [],
   template: `<div class="rich-text ql-editor-view" [innerHTML]="safeHtml()"></div>`,
   styleUrl: './rich-text.css',
+  // Styles must reach the [innerHTML] content; emulated encapsulation can't.
+  encapsulation: ViewEncapsulation.None,
 })
 export class RichText {
   /** HTML (or legacy plain text) to display. */
