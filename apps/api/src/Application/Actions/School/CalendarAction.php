@@ -30,10 +30,10 @@ final class CalendarAction
     {
         $inst = $this->resolveInstitution($request, $this->em);
 
-        // Live classes (scheduled).
+        // Live classes (scheduled). The class is optional, so left-join it.
         $lcQb = $this->em->createQueryBuilder()
-            ->select('lc.title AS title, s.name AS subject, lc.scheduledAt AS at, lc.status AS status')
-            ->from(LiveClass::class, 'lc')->join('lc.subject', 's')
+            ->select('lc.title AS title, s.name AS subject, cl.level AS class_level, cl.arm AS class_arm, lc.scheduledAt AS at, lc.status AS status')
+            ->from(LiveClass::class, 'lc')->join('lc.subject', 's')->leftJoin('lc.schoolClass', 'cl')
             ->orderBy('lc.scheduledAt', 'ASC');
         if ($inst !== null) {
             $lcQb->andWhere('s.institution = :inst')->setParameter('inst', $inst);
@@ -41,8 +41,8 @@ final class CalendarAction
 
         // Worksheet due dates.
         $wsQb = $this->em->createQueryBuilder()
-            ->select('w.title AS title, s.name AS subject, w.dueDate AS at')
-            ->from(Worksheet::class, 'w')->join('w.topic', 't')->join('t.subject', 's')
+            ->select('w.title AS title, s.name AS subject, cl.level AS class_level, cl.arm AS class_arm, w.dueDate AS at')
+            ->from(Worksheet::class, 'w')->join('w.topic', 't')->join('t.subject', 's')->leftJoin('w.schoolClass', 'cl')
             ->where('w.dueDate IS NOT NULL')
             ->orderBy('w.dueDate', 'ASC');
         if ($inst !== null) {
@@ -58,6 +58,7 @@ final class CalendarAction
                 'datetime' => $at->format(DATE_ATOM),
                 'title' => $r['title'],
                 'subject' => $r['subject'],
+                'class_label' => $this->classLabel($r),
                 'type' => 'live_class',
                 'status' => $r['status'],
             ];
@@ -70,6 +71,7 @@ final class CalendarAction
                 'datetime' => $at->format('Y-m-d'),
                 'title' => $r['title'],
                 'subject' => $r['subject'],
+                'class_label' => $this->classLabel($r),
                 'type' => 'worksheet_due',
                 'status' => null,
             ];
@@ -86,5 +88,12 @@ final class CalendarAction
         ];
 
         return Json::write($response, ['events' => $events, 'stats' => $stats]);
+    }
+
+    /** Build a class label (e.g. "JSS 1 A") from the joined level/arm, or null. */
+    private function classLabel(array $row): ?string
+    {
+        $label = trim(((string) ($row['class_level'] ?? '')) . ' ' . ((string) ($row['class_arm'] ?? '')));
+        return $label !== '' ? $label : null;
     }
 }

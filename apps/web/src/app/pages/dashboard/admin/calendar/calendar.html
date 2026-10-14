@@ -40,9 +40,12 @@
         <div class="cal-cell" [class.cal-out]="!d.inMonth" [class.cal-today]="d.isToday">
           <div class="cal-daynum">{{ d.day }}</div>
           @for (e of d.items.slice(0, 3); track $index) {
-            <div class="cal-chip cal-chip-{{ typeColor(e.type) }}" [title]="e.title + ' · ' + typeLabel(e.type)">
+            <div class="cal-chip cal-chip-{{ typeColor(e.type) }}" [title]="e.title + ' · ' + typeLabel(e.type) + (e.subject ? ' · ' + e.subject : '') + (e.class_label ? ' · ' + e.class_label : '')">
               <span class="cal-dot bg-{{ typeColor(e.type) }}"></span>
               <span class="cal-chip-text">{{ e.title }}</span>
+              @if (e.subject || e.class_label) {
+                <span class="cal-chip-meta">{{ e.class_label || e.subject }}</span>
+              }
             </div>
           }
           @if (d.items.length > 3) {
@@ -71,7 +74,7 @@
               <div class="cal-wevent border-start border-3 border-{{ typeColor(e.type) }}">
                 @if (e.type === 'live_class') { <div class="small fw-semibold">{{ e.datetime | date:'h:mm a' }}</div> }
                 <div class="small fw-medium">{{ e.title }}</div>
-                <div class="text-body-secondary" style="font-size:.72rem">{{ typeLabel(e.type) }}</div>
+                <div class="text-body-secondary" style="font-size:.72rem">{{ typeLabel(e.type) }}@if (e.subject) { · {{ e.subject }} }@if (e.class_label) { · {{ e.class_label }} }</div>
               </div>
             }
           }
@@ -98,7 +101,7 @@
                 </span>
                 <div class="flex-grow-1">
                   <div class="fw-medium">{{ e.title }}</div>
-                  <div class="small text-body-secondary">{{ typeLabel(e.type) }} · {{ e.subject }}</div>
+                  <div class="small text-body-secondary">{{ typeLabel(e.type) }}@if (e.subject) { · {{ e.subject }} }@if (e.class_label) { · {{ e.class_label }} }</div>
                 </div>
                 @if (e.type === 'live_class') {
                   <span class="small text-body-secondary text-nowrap">{{ e.datetime | date:'h:mm a' }}</span>

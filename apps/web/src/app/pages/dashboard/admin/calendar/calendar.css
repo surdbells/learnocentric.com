@@ -21,6 +21,7 @@
 }
 .cal-chip{display:flex;align-items:center;gap:5px;padding:1px 5px;border-radius:6px;background:var(--bs-tertiary-bg);cursor:default}
 .cal-chip-text{font-size:.72rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.35}
+.cal-chip-meta{font-size:.6rem;opacity:.65;margin-left:auto;white-space:nowrap;flex:none}
 .cal-dot{width:7px;height:7px;border-radius:50%;flex:none}
 .cal-chip-danger{background:rgba(var(--bs-danger-rgb),.10)}
 .cal-chip-warning{background:rgba(var(--bs-warning-rgb),.12)}
@@ -37,6 +38,7 @@
 @media (max-width:820px){
   .cal-cell{min-height:78px}
   .cal-chip-text{display:none}
+  .cal-chip-meta{display:none}
   .cal-week{grid-template-columns:1fr;gap:.4rem}
   .cal-weekcol{display:grid;grid-template-columns:64px 1fr}
   .cal-weekhead{border-bottom:0;border-right:1px solid var(--bs-border-color);display:flex;flex-direction:column;justify-content:center}
