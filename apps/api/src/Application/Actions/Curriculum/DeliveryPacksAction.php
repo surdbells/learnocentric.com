@@ -239,13 +239,23 @@ final class DeliveryPacksAction
 
     private function row(TopicDeliveryPack $pack): array
     {
+        $topic = $pack->getTopic();
+        $class = $topic->getSchoolClass();
+        // If the topic targets a class, a learner can only see it when enrolled
+        // there — so published content with an empty class reaches nobody.
+        $classLearners = $class !== null
+            ? (int) $this->em->getRepository(\App\Domain\Entity\Enrollment::class)->count(['schoolClass' => $class])
+            : null;
+
         return $pack->toArray() + [
-            'subject' => $pack->getTopic()->getSubject()->getName(),
+            'subject' => $topic->getSubject()->getName(),
             // A learner sees a lesson only when BOTH the topic and the pack are
             // published, so expose the topic's state for a clear visibility hint.
-            'topic_approval_status' => $pack->getTopic()->getApprovalStatus(),
+            'topic_approval_status' => $topic->getApprovalStatus(),
+            'topic_class_label' => $class?->getLabel(),
+            'topic_class_learners' => $classLearners,
             'student_visible' => $pack->getStatus() === Lifecycle::PUBLISHED
-                && $pack->getTopic()->getApprovalStatus() === Lifecycle::PUBLISHED,
+                && $topic->getApprovalStatus() === Lifecycle::PUBLISHED,
             'next_states' => Lifecycle::nextStates($pack->getStatus()),
             'version_count' => $this->em->getRepository(ContentVersion::class)->count(['entityType' => 'TopicDeliveryPack', 'entityId' => $pack->getId()]),
         ];

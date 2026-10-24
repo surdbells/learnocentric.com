@@ -37,10 +37,17 @@
       <p class="text-body-secondary small mb-3">{{ p.subject }} · v{{ p.version }}</p>
 
       @if (p.student_visible) {
-        <div class="alert alert-success d-flex align-items-start gap-2 py-2 px-3 small mb-4">
-          <app-icon name="visibility" [size]="16" />
-          <div>Students can see this lesson.</div>
-        </div>
+        @if (p.topic_class_label && p.topic_class_learners === 0) {
+          <div class="alert alert-warning d-flex align-items-start gap-2 py-2 px-3 small mb-4">
+            <app-icon name="visibility_off" [size]="16" />
+            <div>Published for <strong>{{ p.topic_class_label }}</strong>, but no learners are enrolled in that class yet — so no one can see it. Enrol learners in {{ p.topic_class_label }} on Classes &amp; Learners.</div>
+          </div>
+        } @else {
+          <div class="alert alert-success d-flex align-items-start gap-2 py-2 px-3 small mb-4">
+            <app-icon name="visibility" [size]="16" />
+            <div>Students can see this lesson.@if (p.topic_class_label) { Shown to <strong>{{ p.topic_class_label }}</strong>.} @else { Shown to every class taking {{ p.subject }}.}</div>
+          </div>
+        }
       } @else if (p.status !== 'published') {
         <div class="alert alert-warning d-flex align-items-start gap-2 py-2 px-3 small mb-4">
           <app-icon name="visibility_off" [size]="16" />
