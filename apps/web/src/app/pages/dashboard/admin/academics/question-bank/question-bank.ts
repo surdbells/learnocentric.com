@@ -19,6 +19,37 @@ const TYPE_LABEL: Record<string, string> = {mcq: 'Multiple choice', true_false: 
 const ACTION_LABEL: Record<string, string> = {review: 'Submit for review', approved: 'Approve', published: 'Publish', archived: 'Archive', draft: 'Return to draft'};
 const APPROVER_ROLES = ['academic_lead', 'school_admin', 'tutor_admin', 'super_admin'];
 
+// Bulk-upload column aliases: logical field -> accepted header names (lowercased),
+// so the client's agreed sheet (Question, Option A, Correct Answer…) imports as-is.
+const BULK_ALIASES: Record<string, string[]> = {
+  stem: ['stem', 'question'],
+  type: ['type', 'question type'],
+  option_a: ['option_a', 'option a'],
+  option_b: ['option_b', 'option b'],
+  option_c: ['option_c', 'option c'],
+  option_d: ['option_d', 'option d'],
+  correct: ['correct', 'correct answer'],
+  marks: ['marks'],
+  difficulty: ['difficulty', 'difficulty level'],
+  explanation: ['explanation'],
+  misconception_tag: ['misconception_tag', 'misconception tag'],
+  common_wrong_answer: ['common_wrong_answer', 'common wrong answer'],
+  topic_id: ['topic_id'],
+};
+const BULK_TYPE_MAP: Record<string, string> = {
+  'mcq': 'mcq', 'multiple choice': 'mcq', 'multiple-choice': 'mcq',
+  'multi': 'multi', 'multi-select': 'multi', 'multiple select': 'multi', 'multiple-select': 'multi',
+  'true_false': 'true_false', 'true/false': 'true_false', 'true or false': 'true_false', 'true false': 'true_false',
+  'short': 'short', 'short answer': 'short',
+  'numeric': 'numeric', 'number': 'numeric',
+};
+const BULK_DIFF_MAP: Record<string, string> = {
+  'foundational': 'foundational', 'foundation': 'foundational', 'easy': 'foundational',
+  'moderate': 'moderate', 'medium': 'moderate',
+  'challenging': 'challenging', 'hard': 'challenging',
+  'extension': 'extension',
+};
+
 @Component({
   selector: 'app-question-bank',
   standalone: true,
@@ -141,20 +172,27 @@ export class QuestionBank {
     const rows = this.parseCsv(this.bulkText());
     if (rows.length < 2) { this.bulkParsed.set([]); this.bulkParseError.set('Add a header row plus at least one question row.'); return; }
     const header = rows[0].map(h => h.trim().toLowerCase());
-    const col = (name: string) => header.indexOf(name);
-    const iStem = col('stem');
-    if (iStem < 0) { this.bulkParsed.set([]); this.bulkParseError.set('The CSV must include a "stem" column.'); return; }
+    // Resolve a logical field to its column index via its accepted aliases.
+    const idx = (field: string) => {
+      for (const alias of (BULK_ALIASES[field] ?? [field])) { const i = header.indexOf(alias); if (i >= 0) return i; }
+      return -1;
+    };
+    const iStem = idx('stem');
+    if (iStem < 0) { this.bulkParsed.set([]); this.bulkParseError.set('The sheet must include a "Question" (or "stem") column.'); return; }
 
     const out: any[] = [];
     for (let r = 1; r < rows.length; r++) {
       const row = rows[r];
       if (!row.length || row.every(c => !c.trim())) continue;
-      const get = (n: string) => { const i = col(n); return i >= 0 ? (row[i] ?? '').trim() : ''; };
+      const get = (field: string) => { const i = idx(field); return i >= 0 ? (row[i] ?? '').trim() : ''; };
       const stem = (row[iStem] ?? '').trim();
       if (!stem) continue;
-      const type = (get('type') || 'mcq').toLowerCase();
-      const q: any = {stem, type, marks: Number(get('marks')) || 1, difficulty: get('difficulty') || 'moderate'};
+      const type = BULK_TYPE_MAP[(get('type') || 'mcq').toLowerCase()] ?? 'mcq';
+      const diffRaw = get('difficulty').toLowerCase();
+      const q: any = {stem, type, marks: Number(get('marks')) || 1, difficulty: BULK_DIFF_MAP[diffRaw] ?? 'moderate'};
       if (get('explanation')) q.explanation = get('explanation');
+      if (get('misconception_tag')) q.misconception_tag = get('misconception_tag');
+      if (get('common_wrong_answer')) q.common_wrong_answer = get('common_wrong_answer');
       if (get('topic_id')) q.topic_id = Number(get('topic_id'));
 
       if (type === 'mcq' || type === 'multi') {
@@ -195,10 +233,10 @@ export class QuestionBank {
   async downloadTemplate(): Promise<void> {
     if (typeof window === 'undefined') return;
     const rows = [
-      ['stem', 'type', 'option_a', 'option_b', 'option_c', 'option_d', 'correct', 'marks', 'difficulty', 'explanation'],
-      ['What is 12 ÷ 4?', 'mcq', '2', '3', '4', '6', 'c', '1', 'moderate', 'Divide 12 by 4.'],
-      ['The HCF of two primes is 1.', 'true_false', '', '', '', '', 'true', '1', 'moderate', ''],
-      ['Write 2005 in figures.', 'numeric', '', '', '', '', '2005', '1', 'easy', ''],
+      ['Question', 'Question Type', 'Option A', 'Option B', 'Option C', 'Option D', 'Correct Answer', 'Marks', 'Difficulty Level', 'Explanation', 'Common Wrong Answer', 'Misconception Tag'],
+      ['What is 1/2 + 1/2?', 'Multiple Choice', '1/4', '1', '2/4', '1/2', 'B', '1', 'Foundation', 'Add the numerators over the common denominator.', '2/4', 'adds numerator and denominator'],
+      ['The HCF of two prime numbers is 1.', 'True/False', '', '', '', '', 'True', '1', 'Moderate', 'Primes share no factor except 1.', '', ''],
+      ['Write 2005 in figures.', 'Numeric', '', '', '', '', '2005', '1', 'Foundation', '', '', ''],
     ];
     const XLSX = await import('xlsx');
     const ws = XLSX.utils.aoa_to_sheet(rows);

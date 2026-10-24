@@ -10,7 +10,7 @@
 <!-- Bulk upload -->
 <app-learno-modal [modalId]="'bulk_upload'" [modalAction]="'Bulk upload questions'" [showBtn]="false">
   <div modalForm>
-    <p class="text-body-secondary small">Import many questions from an Excel (.xlsx) or CSV file. Download the template, fill it in, and upload it back. Columns: <code>stem, type, option_a…d, correct, marks, difficulty, explanation</code> (optional <code>topic_id</code> per row).</p>
+    <p class="text-body-secondary small">Import many questions from an Excel (.xlsx) or CSV file. Download the template, fill it in, and upload it back. Columns: <code>Question, Question Type, Option A–D, Correct Answer, Marks, Difficulty Level, Explanation, Common Wrong Answer, Misconception Tag</code> (optional <code>topic_id</code> per row). The Common Wrong Answer + Misconception Tag feed misconception tracking. Extra columns in your sheet are ignored.</p>
 
     <div class="row g-3 mb-3">
       <div class="col-md-6">
@@ -32,7 +32,7 @@
     </div>
 
     <label class="form-label" for="bulk_csv">Or paste CSV</label>
-    <textarea id="bulk_csv" class="form-control font-monospace small" rows="6" placeholder="stem,type,option_a,option_b,option_c,option_d,correct,marks,difficulty,explanation&#10;&quot;What is 12 ÷ 4?&quot;,mcq,2,3,4,6,c,1,moderate,"
+    <textarea id="bulk_csv" class="form-control font-monospace small" rows="6" placeholder="Question,Question Type,Option A,Option B,Option C,Option D,Correct Answer,Marks,Difficulty Level,Explanation,Common Wrong Answer,Misconception Tag&#10;&quot;What is 1/2 + 1/2?&quot;,Multiple Choice,1/4,1,2/4,1/2,B,1,Foundation,,2/4,adds numerator and denominator"
               [ngModel]="bulkText()" (ngModelChange)="bulkText.set($event); parseBulk()"></textarea>
 
     @if (bulkParseError()) { <div class="text-danger small mt-2">{{ bulkParseError() }}</div> }

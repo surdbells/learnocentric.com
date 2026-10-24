@@ -308,6 +308,7 @@ final class QuestionsAction
         }
         if (array_key_exists('explanation', $body)) { $q->setExplanation($body['explanation'] !== '' ? (string) $body['explanation'] : null); }
         if (array_key_exists('misconception_tag', $body)) { $q->setMisconceptionTag($body['misconception_tag'] !== '' && $body['misconception_tag'] !== null ? (string) $body['misconception_tag'] : null); }
+        if (array_key_exists('common_wrong_answer', $body)) { $q->setCommonWrongAnswer($body['common_wrong_answer'] !== '' && $body['common_wrong_answer'] !== null ? (string) $body['common_wrong_answer'] : null); }
         if (isset($body['marks'])) { $q->setMarks((int) $body['marks']); }
     }
 

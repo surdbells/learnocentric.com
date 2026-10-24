@@ -48,6 +48,10 @@ class Question implements LifecycleAware
     #[ORM\Column(name: 'misconception_tag', length: 120, nullable: true)]
     private ?string $misconceptionTag = null;
 
+    /** The frequent wrong answer that signals the misconception, from bulk import. */
+    #[ORM\Column(name: 'common_wrong_answer', length: 255, nullable: true)]
+    private ?string $commonWrongAnswer = null;
+
     #[ORM\Column(type: Types::TEXT)]
     private string $stem;
 
@@ -88,6 +92,8 @@ class Question implements LifecycleAware
     public function setDifficulty(string $v): void { $this->difficulty = in_array($v, self::DIFFICULTIES, true) ? $v : 'moderate'; }
     public function getMisconceptionTag(): ?string { return $this->misconceptionTag; }
     public function setMisconceptionTag(?string $v): void { $this->misconceptionTag = $v !== null && trim($v) !== '' ? trim($v) : null; }
+    public function getCommonWrongAnswer(): ?string { return $this->commonWrongAnswer; }
+    public function setCommonWrongAnswer(?string $v): void { $this->commonWrongAnswer = $v !== null && trim($v) !== '' ? trim($v) : null; }
     public function getStem(): string { return $this->stem; }
     public function setStem(string $v): void { $this->stem = $v; }
     public function getOptions(): ?array { return $this->options; }
@@ -184,6 +190,7 @@ class Question implements LifecycleAware
             'track' => $this->track,
             'difficulty' => $this->difficulty,
             'misconception_tag' => $this->misconceptionTag,
+            'common_wrong_answer' => $this->commonWrongAnswer,
             'stem' => $this->stem,
             'options' => $this->options,
             'correct_answer' => $this->correctAnswer,
