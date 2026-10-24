@@ -53,8 +53,8 @@ export class Topics {
   columns: GridColumn[] = [
     {key: 'title', label: 'Topic', sortable: true},
     {key: 'subject', label: 'Subject'},
+    {key: 'class_label', label: 'Class', type: 'badge', badge: (v) => v ? {text: v, color: 'info'} : {text: 'All classes', color: 'secondary'}},
     {key: 'week_number', label: 'Week', sortable: true},
-    {key: 'version_count', label: 'Versions'},
     {key: 'approval_status', label: 'Status', type: 'badge', badge: (v) => ({text: this.titleCase(v), color: STATUS_COLOR[v] ?? 'secondary'})},
   ];
 

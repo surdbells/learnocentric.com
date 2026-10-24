@@ -194,8 +194,11 @@ final class TopicsAction
         if (array_key_exists('core_theory', $body)) { $topic->setCoreTheory($body['core_theory'] !== '' ? (string) $body['core_theory'] : null); }
         if (array_key_exists('real_life_relevance', $body)) { $topic->setRealLifeRelevance($body['real_life_relevance'] !== '' ? (string) $body['real_life_relevance'] : null); }
         if (array_key_exists('competency_built', $body)) { $topic->setCompetencyBuilt($body['competency_built'] !== '' ? (string) $body['competency_built'] : null); }
-        if (!empty($body['class_id'])) {
-            $topic->setSchoolClass($this->em->getRepository(SchoolClass::class)->find((int) $body['class_id']));
+        if (array_key_exists('class_id', $body)) {
+            // Empty = all classes (schoolClass NULL); a value scopes it to that class.
+            $topic->setSchoolClass(!empty($body['class_id'])
+                ? $this->em->getRepository(SchoolClass::class)->find((int) $body['class_id'])
+                : null);
         }
         if (!empty($body['term_id'])) {
             $topic->setTerm($this->em->getRepository(Term::class)->find((int) $body['term_id']));

@@ -18,6 +18,8 @@ export class TopicForm {
 
   isEdit = signal(false);
   isLoading = signal(false);
+  /** Classes to scope the topic to, or "all classes". */
+  classes = signal<{ id: number; label: string }[]>([]);
   @Output() submitted = new EventEmitter<{ success: boolean }>();
 
   private readonly api = inject(ApiService);
@@ -26,6 +28,7 @@ export class TopicForm {
   form = new FormGroup({
     title: new FormControl('', {nonNullable: true, validators: [Validators.required]}),
     subjectId: new FormControl<number | null>(null, {validators: [Validators.required]}),
+    classId: new FormControl<number | null>(null),
     weekNumber: new FormControl<number | null>(null),
     objective: new FormControl(''),
     realLifeRelevance: new FormControl(''),
@@ -33,6 +36,13 @@ export class TopicForm {
   });
 
   constructor() {
+    this.api.get<any>('/backend/school/classes').subscribe({
+      next: (r) => {
+        const rows = Array.isArray(r) ? r : (r?.data ?? []);
+        this.classes.set(rows.map((c: any) => ({id: c.id, label: c.label || c.name})).filter((c: any) => c.id && c.label));
+      },
+    });
+
     effect(() => {
       const s = this.select();
       if (!s || !s['id']) { this.form.reset(); this.isEdit.set(false); return; }
@@ -40,6 +50,7 @@ export class TopicForm {
       this.form.patchValue({
         title: s['title'] ?? '',
         subjectId: s['subject_id'] ?? null,
+        classId: s['class_id'] ?? null,
         weekNumber: s['week_number'] ?? null,
         objective: s['objective'] ?? '',
         realLifeRelevance: s['real_life_relevance'] ?? '',
@@ -59,6 +70,7 @@ export class TopicForm {
     const body: any = {
       title: v.title,
       subject_id: v.subjectId,
+      class_id: v.classId ?? '',
       week_number: v.weekNumber,
       objective: v.objective,
       real_life_relevance: v.realLifeRelevance,
