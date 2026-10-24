@@ -45,6 +45,11 @@ export class Topics {
 
   readonly isApprover = computed(() => APPROVER_ROLES.includes(this.auth.getAuthSession()?.user?.role ?? ''));
 
+  // Approved/published topics are locked (PDF review R2-3): editable only in
+  // draft/review; teachers can't delete approved ones, only admins can.
+  readonly canEditTopic = (row: any): boolean => ['draft', 'review'].includes(row?.approval_status);
+  readonly canDeleteTopic = (row: any): boolean => this.isApprover() || ['draft', 'review'].includes(row?.approval_status);
+
   columns: GridColumn[] = [
     {key: 'title', label: 'Topic', sortable: true},
     {key: 'subject', label: 'Subject'},

@@ -102,12 +102,12 @@
                       <app-icon name="visibility" />
                     </button>
                   }
-                  @if (actions.includes('edit')) {
+                  @if (actions.includes('edit') && (!canEditRow || canEditRow(row))) {
                     <button type="button" class="btn btn-sm btn-icon" title="Edit" (click)="edit.emit(row)">
                       <app-icon name="edit" />
                     </button>
                   }
-                  @if (actions.includes('delete')) {
+                  @if (actions.includes('delete') && (!canDeleteRow || canDeleteRow(row))) {
                     <button type="button" class="btn btn-sm btn-icon text-danger" title="Delete" (click)="onDelete(row)">
                       <app-icon name="delete" />
                     </button>

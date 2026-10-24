@@ -87,6 +87,8 @@
   [columns]="columns"
   [filters]="filterDefs()"
   [actions]="['view', 'edit', 'delete']"
+  [canEditRow]="canEditTopic"
+  [canDeleteRow]="canDeleteTopic"
   searchPlaceholder="Search topics…"
   emptyMessage="No topics yet. Click “Add Topic” to create a draft."
   (view)="onView($event)"

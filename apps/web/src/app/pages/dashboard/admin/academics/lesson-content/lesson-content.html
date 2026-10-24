@@ -96,6 +96,8 @@
   [columns]="columns"
   [filters]="filterDefs()"
   [actions]="['view', 'edit', 'delete']"
+  [canEditRow]="canEditPack"
+  [canDeleteRow]="canDeletePack"
   searchPlaceholder="Search by topic…"
   emptyMessage="No lesson packs yet. Click “Add Pack” to author one."
   (view)="onView($event)"

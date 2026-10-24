@@ -55,6 +55,11 @@ export class LessonContent {
 
   readonly availableTopics = computed(() => this.topics().filter((t) => !this.packedTopicIds().has(t.id)));
 
+  // Approved/published packs are locked (PDF review R2-3): nobody edits them in
+  // place, and teachers can't delete them either — only admins can.
+  readonly canEditPack = (row: any): boolean => ['draft', 'review'].includes(row?.status);
+  readonly canDeletePack = (row: any): boolean => this.isApprover() || ['draft', 'review'].includes(row?.status);
+
   columns: GridColumn[] = [
     {key: 'topic', label: 'Topic', sortable: false},
     {key: 'subject', label: 'Subject'},

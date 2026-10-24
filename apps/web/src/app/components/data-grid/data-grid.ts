@@ -42,6 +42,9 @@ export class DataGrid implements OnInit {
   @Input({required: true}) columns: GridColumn[] = [];
   @Input() filters: GridFilter[] = [];
   @Input() actions: Array<'view' | 'edit' | 'delete'> = ['edit', 'delete'];
+  /** Optional per-row gates — hide edit/delete on rows that fail the predicate. */
+  @Input() canEditRow?: (row: any) => boolean;
+  @Input() canDeleteRow?: (row: any) => boolean;
   @Input() selectable = true;
   @Input() searchable = true;
   @Input() searchPlaceholder = 'Search…';
