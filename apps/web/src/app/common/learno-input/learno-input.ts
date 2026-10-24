@@ -23,6 +23,8 @@ export class LearnoInput implements ControlValueAccessor {
     inputType = input.required<string>();
     formControlName = input.required<string>();
     disabled = input<boolean>(false);
+    /** Example/placeholder text so users know what input to give. */
+    placeholder = input<string>('');
 
     // The value is bound declaratively in the template ([value]="value()"), so
     // Angular's renderer owns the native input. This is hydration-safe — unlike

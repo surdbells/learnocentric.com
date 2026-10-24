@@ -110,6 +110,7 @@ final class ClassesAction
 
         $arm = ($body['section'] ?? $body['arm'] ?? null);
         $class = new SchoolClass($institution, $level, $arm !== '' ? $arm : null);
+        $this->applyClassTeacher($class, $body, $institution);
         $this->em->persist($class);
         $this->em->flush();
 
@@ -129,6 +130,7 @@ final class ClassesAction
         if (!empty($body['gradeLevel'])) { $class->setLevel((string) $body['gradeLevel']); }
         if (array_key_exists('section', $body)) { $class->setArm($body['section'] !== '' ? (string) $body['section'] : null); }
         if (!empty($body['status'])) { $class->setStatus((string) $body['status']); }
+        $this->applyClassTeacher($class, $body, $class->getInstitution());
         $this->em->flush();
 
         $this->audit->log('class.update', $request->getAttribute('user'), 'SchoolClass', (string) $class->getId(), $before, $class->toArray());
@@ -155,5 +157,25 @@ final class ClassesAction
     public function row(SchoolClass $c): array
     {
         return $c->toArray() + ['name' => $c->getLabel(), 'grade_level' => $c->getLevel()];
+    }
+
+    /**
+     * Assign (or clear) the class teacher from classTeacherId in the body. Only a
+     * staff member in the same institution may be set; absent key = no change.
+     */
+    private function applyClassTeacher(SchoolClass $class, array $body, Institution $institution): void
+    {
+        if (!array_key_exists('classTeacherId', $body)) {
+            return;
+        }
+        $tid = (int) ($body['classTeacherId'] ?? 0);
+        if ($tid <= 0) {
+            $class->setClassTeacher(null);
+            return;
+        }
+        $teacher = $this->em->getRepository(User::class)->find($tid);
+        if ($teacher !== null && $teacher->getInstitution()?->getId() === $institution->getId()) {
+            $class->setClassTeacher($teacher);
+        }
     }
 }

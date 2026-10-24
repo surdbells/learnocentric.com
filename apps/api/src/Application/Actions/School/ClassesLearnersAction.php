@@ -177,8 +177,12 @@ final class ClassesLearnersAction
 
     private function classTeacher(SchoolClass $class): ?string
     {
-        $ta = $this->em->getRepository(TeacherAssignment::class)->findOneBy(['schoolClass' => $class]);
-        $t = $ta?->getTeacher();
+        // The explicit class (homeroom) teacher wins; fall back to any teacher
+        // assigned to teach the class, for classes set up before this existed.
+        $t = $class->getClassTeacher();
+        if ($t === null) {
+            $t = $this->em->getRepository(TeacherAssignment::class)->findOneBy(['schoolClass' => $class])?->getTeacher();
+        }
         return $t ? trim($t->getFirstName() . ' ' . $t->getLastName()) : null;
     }
 

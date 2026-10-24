@@ -1,0 +1,13 @@
+# Molasin Tutoring — second review tracker
+
+Items from the client's SECOND review (Oct 2026). ☐ open · ◐ in progress · ☑ done.
+
+- ☑ **R2-1** Class teacher assignment added. The class form now has a Class teacher picker (loads teachers); backend accepts `classTeacherId` on create/update. Fixed ClassesLearners to show the explicit class teacher (it read a TeacherAssignment before, so an assigned class teacher never appeared). Verified: JSS 1 A → Grace Uche shows on the card + overview.
+- ☑ **R2-2** Class naming hints. `learnoInput` now supports a placeholder; the class form uses clear labels + examples ("Level e.g. JSS 1", "Arm e.g. A"), a live name preview, and — key fix — Level is now a text field (was number-only, so "JSS 1" couldn't be typed). Dropped the ignored "Class name"/"Academic Year" fields that caused the "12 Mathematics" confusion.
+- ☐ **R2-3** Approved admin content must be read-only for teachers/students (an approved pack still asks the teacher to upload the Teacher's Guide).
+- ☐ **R2-4** Admin/teacher need to assign content to a specific class (backend has Topic.schoolClass; add a class selector in the topic form).
+- ☐ **R2-5** "Published but student can't see it" — approve≠publish, topic+pack both need publishing, and the assigned class had 0 learners enrolled. Extend the visibility guidance.
+- ☐ **R2-6** Bulk QBank upload rejects the real/agreed sheet ("must include stem") — accept the agreed column names.
+- ☐ **R2-7** Template missing misconception data — add Misconception Tag + Common Wrong Answer (trimmed-but-agreed set) and capture them.
+
+Decisions: QBank template = **trimmed set** (only fields the system uses) but accept the agreed column names as aliases. Work top-to-bottom, verify against the running app, commit per item, push to deploy.

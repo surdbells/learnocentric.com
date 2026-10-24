@@ -1,11 +1,27 @@
 <form (submit)="!isEdit() ? onSubmit(): onEdit()" [formGroup]="form" >
-  <div class="modal-body" data-select2-id="83">
-    <div class="row" data-select2-id="82">
+  <div class="modal-body">
+    <div class="row">
 
-      <div learnoInput class="mb-4" [label]="'Class name'" [inputType]="'text'" [id]="'name'" [formControlName]="'name'" ></div>
-      <div learnoInput class="mb-4" [label]="'Grade Level'" [inputType]="'number'" [id]="'gradeLevel'" [formControlName]="'gradeLevel'"></div>
-      <div learnoInput class="mb-4" [label]="'Section'" [inputType]="'text'" [id]="'section'" [formControlName]="'section'"></div>
-      <div learnoInput class="mb-4" [label]="'Academic Year'" [inputType]="'text'" [id]="'academicYear'" [formControlName]="'academicYear'"></div>
+      <div class="col-md-6">
+        <div learnoInput class="mb-3" [label]="'Level'" [inputType]="'text'" [id]="'gradeLevel'" [formControlName]="'gradeLevel'" [placeholder]="'e.g. JSS 1, SS 2, Primary 4'"></div>
+      </div>
+      <div class="col-md-6">
+        <div learnoInput class="mb-3" [label]="'Arm / Section (optional)'" [inputType]="'text'" [id]="'section'" [formControlName]="'section'" [placeholder]="'e.g. A, B, Gold'"></div>
+      </div>
+
+      <div class="col-md-12 mb-3">
+        <label class="form-label" for="classTeacherId">Class teacher (optional)</label>
+        <select id="classTeacherId" class="form-select" formControlName="classTeacherId">
+          <option [ngValue]="null">No class teacher</option>
+          @for (t of teachers(); track t.id) { <option [ngValue]="t.id">{{ t.name }}</option> }
+        </select>
+      </div>
+
+      <div class="col-12">
+        <div class="alert alert-light border small mb-0">
+          The class will be named from the level and arm — e.g. <strong>{{ previewName || 'JSS 1 A' }}</strong>. Use the arm for streams like A/B or Gold/Silver, not a subject.
+        </div>
+      </div>
 
     </div>
   </div>
