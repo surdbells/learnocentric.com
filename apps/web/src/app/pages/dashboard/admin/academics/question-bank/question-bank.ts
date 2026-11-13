@@ -8,7 +8,7 @@ import {LearnoButton} from '../../../../../common/learno-button/learno-button';
 import {DataGrid, GridColumn, GridFilter} from '../../../../../components/data-grid/data-grid';
 import {QuestionForm} from '../../../../../components/forms/question-form/question-form';
 import {ApiService} from '../../../../../common/service/api.service';
-import {AuthService} from '../../../../../common/auth/auth.service';
+import {LifecyclePanel, LifecycleStep, lifecycleDone} from '../../../../../common/ui/lifecycle-panel';
 import {Icon} from '../../../../../common/icon/icon';
 
 declare const bootstrap: any;
@@ -16,8 +16,6 @@ declare const bootstrap: any;
 const STATUS_COLOR: Record<string, string> = {draft: 'secondary', review: 'warning', approved: 'info', published: 'success', archived: 'dark'};
 const DIFF_COLOR: Record<string, string> = {foundational: 'success', moderate: 'info', challenging: 'warning', extension: 'danger'};
 const TYPE_LABEL: Record<string, string> = {mcq: 'Multiple choice', multi: 'Multiple answer', true_false: 'True / False', short: 'Short answer', numeric: 'Numeric'};
-const ACTION_LABEL: Record<string, string> = {review: 'Submit for review', approved: 'Approve', published: 'Publish', archived: 'Archive', draft: 'Return to draft'};
-const APPROVER_ROLES = ['academic_lead', 'school_admin', 'tutor_admin', 'super_admin'];
 
 // Bulk-upload column aliases: logical field -> accepted headings. Headings are compared
 // with case, spaces and punctuation removed, so "Correct Answer", "correct_answer" and
@@ -72,7 +70,7 @@ function bulkOptionIndex(heading: string): number {
 @Component({
   selector: 'app-question-bank',
   standalone: true,
-  imports: [Icon, PageHeader, LearnoModal, LearnoButton, DataGrid, QuestionForm, DatePipe, FormsModule],
+  imports: [Icon, PageHeader, LearnoModal, LearnoButton, DataGrid, QuestionForm, DatePipe, FormsModule, LifecyclePanel],
   templateUrl: './question-bank.html',
   styleUrl: './question-bank.css',
 })
@@ -84,7 +82,6 @@ export class QuestionBank {
 
   private readonly api = inject(ApiService);
   private readonly toast = inject(ToastrService);
-  private readonly auth = inject(AuthService);
 
   selectQuestion = signal<any | null>(null);
   lifecycleQuestion = signal<any | null>(null);
@@ -94,7 +91,6 @@ export class QuestionBank {
   validating = signal(false);
   topics = signal<any[]>([]);
 
-  readonly isApprover = computed(() => APPROVER_ROLES.includes(this.auth.getAuthSession()?.user?.role ?? ''));
 
   columns: GridColumn[] = [
     {key: 'stem', label: 'Question', sortable: true},
@@ -128,16 +124,6 @@ export class QuestionBank {
       {label: 'Foundational', value: 'foundational'}, {label: 'Moderate', value: 'moderate'},
       {label: 'Challenging', value: 'challenging'}, {label: 'Extension', value: 'extension'}]},
   ]);
-
-  readonly availableActions = computed(() => {
-    const q = this.lifecycleQuestion();
-    if (!q) return [];
-    return (q.next_states ?? []).map((to: string) => ({
-      to,
-      label: ACTION_LABEL[to] ?? this.titleCase(to),
-      enabled: this.canDo(q, to),
-    }));
-  });
 
   // --- Bulk upload ---
   bulkTopicId = signal<number | null>(null);
@@ -389,6 +375,12 @@ export class QuestionBank {
   }
 
   onEdit(row: any): void {
+    // A locked question opens in its lifecycle view, which says why and what would unlock it.
+    if (row?.lifecycle && !row.lifecycle.can_edit) {
+      this.toast.info(row.lifecycle.edit_reason || 'This question cannot be edited right now.', 'Locked', {timeOut: 9000});
+      this.onView(row);
+      return;
+    }
     this.selectQuestion.set(row);
     this.open('add_question');
   }
@@ -425,22 +417,20 @@ export class QuestionBank {
     });
   }
 
-  transition(to: string): void {
-    const q = this.lifecycleQuestion();
-    if (!q) return;
+  /** Carry out a step chosen in the lifecycle panel (the server has already said it is allowed). */
+  transition(step: LifecycleStep): void {
+    const item = this.lifecycleQuestion();
+    if (!item) return;
     this.transitioning.set(true);
-    this.api.post<any>(`/backend/assessment/questions/${q.id}/transition`, {to}).subscribe({
+    this.api.post<any>(`/backend/assessment/questions/${item.id}/transition`, {to: step.to, note: step.note ?? null}).subscribe({
       next: (res) => {
-        this.toast.success(`Question ${res?.action ?? 'updated'}`);
-        this.lifecycleQuestion.set(res?.question ?? {...q, approval_status: res?.status, next_states: res?.next});
-        this.loadHistory(q.id);
+        this.toast.success(lifecycleDone(res?.status, 'question'));
+        this.lifecycleQuestion.set(res?.question ?? item);
+        this.loadHistory(item.id);
         this.grid?.refresh();
         this.transitioning.set(false);
       },
-      error: (e) => {
-        this.toast.error(e?.error?.error || 'Transition failed');
-        this.transitioning.set(false);
-      },
+      error: (e) => { this.toast.error(e?.error?.error || 'That step could not be completed'); this.transitioning.set(false); },
     });
   }
 
@@ -450,12 +440,6 @@ export class QuestionBank {
       next: (h) => { this.history.set(h ?? []); this.historyLoading.set(false); },
       error: () => this.historyLoading.set(false),
     });
-  }
-
-  canDo(q: any, to: string): boolean {
-    if (q.approval_status === 'draft' && to === 'review') return true; // authors may submit
-    if ((to === 'approved' || to === 'published') && !q.answer_validated) return false; // the gate
-    return this.isApprover();
   }
 
   statusColor(s: string): string { return STATUS_COLOR[s] ?? 'secondary'; }

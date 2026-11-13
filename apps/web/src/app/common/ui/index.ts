@@ -24,3 +24,5 @@ export {StatRing} from './stat-ring';
 export {StatusBadge} from './status-badge';
 export {AvatarCell} from './avatar-cell';
 export {TermSwitcher} from './term-switcher';
+export {LifecyclePanel, lifecycleDone} from './lifecycle-panel';
+export type {LifecycleGuidance, LifecycleStep} from './lifecycle-panel';

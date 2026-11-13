@@ -28,13 +28,29 @@
   />
 </app-learno-modal>
 
+<!-- Status: where a week stands and the steps to submit, approve or publish it -->
+<app-learno-modal [modalId]="'scheme_status'" [modalAction]="'Week status'" [showBtn]="false">
+  <div modalForm>
+    @if (manage(); as s) {
+      <div class="d-flex align-items-start justify-content-between flex-wrap gap-2 mb-1">
+        <h5 class="fw-semibold mb-0">Week {{ s.week_number }}{{ s.topic ? ' · ' + s.topic : '' }}</h5>
+        <span class="badge bg-{{ statusColor(s.status) }}-subtle text-{{ statusColor(s.status) }} px-3 py-2">{{ s.lifecycle?.status_label || s.status }}</span>
+      </div>
+      <p class="text-body-secondary small mb-3">{{ s.class_label }} · {{ s.subject }}</p>
+      @if (s.objective) { <p class="small mb-4">{{ s.objective }}</p> }
+      <app-lifecycle-panel [life]="s.lifecycle" [nextStates]="s.next_states" [busy]="busy()" (step)="transition($event)" />
+    }
+  </div>
+</app-learno-modal>
+
 <app-data-grid
   endpoint="/backend/school/scheme-of-work"
   [termScoped]="true"
   [columns]="columns"
   [filters]="filterDefs()"
-  [actions]="['edit', 'delete']"
+  [actions]="['view', 'edit', 'delete']"
   searchPlaceholder="Search objectives…"
   emptyMessage="No scheme yet. Click “Add Week” to plan the term."
+  (view)="onView($event)"
   (edit)="onEdit($event)"
 />

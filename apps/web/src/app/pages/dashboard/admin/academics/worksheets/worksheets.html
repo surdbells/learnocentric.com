@@ -13,22 +13,12 @@
     @if (manage(); as w) {
       <div class="d-flex align-items-start justify-content-between flex-wrap gap-2 mb-1">
         <h5 class="fw-semibold mb-0">{{ w.title }}</h5>
-        <span class="badge bg-{{ statusColor(w.approval_status) }}-subtle text-{{ statusColor(w.approval_status) }} text-capitalize px-3 py-2">{{ w.approval_status }}</span>
+        <span class="badge bg-{{ statusColor(w.approval_status) }}-subtle text-{{ statusColor(w.approval_status) }} px-3 py-2">{{ w.lifecycle?.status_label || titleCase(w.approval_status) }}</span>
       </div>
       <p class="text-body-secondary small mb-4">{{ w.topic }} · {{ w.total_marks }} mark(s){{ w.due_date ? ' · due ' + w.due_date : '' }}</p>
 
       <!-- Lifecycle -->
-      <label class="form-label text-uppercase small fw-semibold text-body-secondary">Move to</label>
-      @if (availableActions().length) {
-        <div class="d-flex flex-wrap gap-2 mb-4">
-          @for (a of availableActions(); track a.to) {
-            <button type="button" class="btn btn-sm" [class.btn-primary]="a.to !== 'archived'" [class.btn-outline-danger]="a.to === 'archived'"
-                    [disabled]="!a.enabled || busy()" (click)="transition(a.to)">{{ a.label }}</button>
-          }
-        </div>
-      } @else {
-        <div class="text-body-secondary small mb-4">No further transitions from this state.</div>
-      }
+      <app-lifecycle-panel class="mb-4" [life]="w.lifecycle" [nextStates]="w.next_states" [busy]="busy()" (step)="transition($event)" />
 
       <!-- Submissions -->
       <div class="d-flex align-items-center justify-content-between mb-2">

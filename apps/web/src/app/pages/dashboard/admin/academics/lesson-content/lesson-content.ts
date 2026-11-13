@@ -11,18 +11,18 @@ import {TabBar, TabItem} from '../../../../../common/ui';
 import {Icon} from '../../../../../common/icon/icon';
 import {Topics} from '../topics/topics';
 import {ApiService} from '../../../../../common/service/api.service';
+import {LifecyclePanel, LifecycleStep, lifecycleDone} from '../../../../../common/ui/lifecycle-panel';
 import {AuthService} from '../../../../../common/auth/auth.service';
 
 declare const bootstrap: any;
 
 const STATUS_COLOR: Record<string, string> = {draft: 'secondary', review: 'warning', approved: 'info', published: 'success', archived: 'dark'};
-const ACTION_LABEL: Record<string, string> = {review: 'Submit for review', approved: 'Approve', published: 'Publish', archived: 'Archive', draft: 'Return to draft'};
 const APPROVER_ROLES = ['academic_lead', 'school_admin', 'tutor_admin', 'super_admin'];
 
 @Component({
   selector: 'app-lesson-content',
   standalone: true,
-  imports: [PageHeader, LearnoModal, LearnoButton, DataGrid, DeliveryPackForm, DatePipe, RichText, TabBar, Icon, Topics],
+  imports: [PageHeader, LearnoModal, LearnoButton, DataGrid, DeliveryPackForm, DatePipe, RichText, TabBar, Icon, Topics, LifecyclePanel],
   templateUrl: './lesson-content.html',
   styleUrl: './lesson-content.css',
 })
@@ -55,9 +55,8 @@ export class LessonContent {
 
   readonly availableTopics = computed(() => this.topics().filter((t) => !this.packedTopicIds().has(t.id)));
 
-  // Approved/published packs are locked (PDF review R2-3): nobody edits them in
-  // place, and teachers can't delete them either — only admins can.
-  readonly canEditPack = (row: any): boolean => ['draft', 'review'].includes(row?.status);
+  // Approved/published packs are locked (PDF review R2-3). Editing one explains the
+  // lock instead of hiding the button; teachers can't delete them, only admins can.
   readonly canDeletePack = (row: any): boolean => this.isApprover() || ['draft', 'review'].includes(row?.status);
 
   columns: GridColumn[] = [
@@ -78,12 +77,6 @@ export class LessonContent {
       {label: 'Published', value: 'published'}, {label: 'Archived', value: 'archived'}]},
   ]);
 
-  readonly availableActions = computed(() => {
-    const p = this.lifecyclePack();
-    if (!p) return [];
-    return (p.next_states ?? []).map((to: string) => ({to, label: ACTION_LABEL[to] ?? this.titleCase(to), enabled: this.canDo(p, to)}));
-  });
-
   constructor() {
     this.api.get<any>('/backend/curriculum/topics').subscribe({next: (r) => this.topics.set(Array.isArray(r) ? r : (r?.data ?? []))});
     this.reloadPacked();
@@ -101,6 +94,12 @@ export class LessonContent {
   onAdd(): void { this.selectPack.set(null); }
 
   onEdit(row: any): void {
+    // A locked lesson pack opens in its lifecycle view, which says why and what would unlock it.
+    if (row?.lifecycle && !row.lifecycle.can_edit) {
+      this.toast.info(row.lifecycle.edit_reason || 'This lesson pack cannot be edited right now.', 'Locked', {timeOut: 9000});
+      this.onView(row);
+      return;
+    }
     this.selectPack.set(row);
     this.open('add_pack');
   }
@@ -124,25 +123,21 @@ export class LessonContent {
     this.api.get<any[]>(`/backend/curriculum/delivery-packs/${id}/history`).subscribe({next: (h) => this.history.set(h ?? [])});
   }
 
-  transition(to: string): void {
-    const p = this.lifecyclePack();
-    if (!p) return;
+  /** Carry out a step chosen in the lifecycle panel (the server has already said it is allowed). */
+  transition(step: LifecycleStep): void {
+    const item = this.lifecyclePack();
+    if (!item) return;
     this.transitioning.set(true);
-    this.api.post<any>(`/backend/curriculum/delivery-packs/${p.id}/transition`, {to}).subscribe({
+    this.api.post<any>(`/backend/curriculum/delivery-packs/${item.id}/transition`, {to: step.to, note: step.note ?? null}).subscribe({
       next: (res) => {
-        this.toast.success(`Pack ${res?.action ?? 'updated'}`);
-        this.lifecyclePack.set(res?.pack ?? {...p, status: res?.status, next_states: res?.next});
-        this.loadHistory(p.id);
+        this.toast.success(lifecycleDone(res?.status, 'lesson pack'));
+        this.lifecyclePack.set(res?.pack ?? item);
+        this.loadHistory(item.id);
         this.grid?.refresh();
         this.transitioning.set(false);
       },
-      error: (e) => { this.toast.error(e?.error?.error || 'Transition failed'); this.transitioning.set(false); },
+      error: (e) => { this.toast.error(e?.error?.error || 'That step could not be completed'); this.transitioning.set(false); },
     });
-  }
-
-  canDo(p: any, to: string): boolean {
-    if (p.status === 'draft' && to === 'review') return true;
-    return this.isApprover();
   }
 
   statusColor(s: string): string { return STATUS_COLOR[s] ?? 'secondary'; }

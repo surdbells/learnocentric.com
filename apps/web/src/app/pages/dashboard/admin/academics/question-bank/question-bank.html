@@ -111,9 +111,7 @@
     @if (lifecycleQuestion(); as q) {
       <div class="d-flex align-items-start justify-content-between flex-wrap gap-2 mb-1">
         <h6 class="fw-semibold mb-0 pe-3">{{ q.stem }}</h6>
-        <span class="badge bg-{{ statusColor(q.approval_status) }}-subtle text-{{ statusColor(q.approval_status) }} text-capitalize px-3 py-2">
-          {{ q.approval_status }}
-        </span>
+        <span class="badge bg-{{ statusColor(q.approval_status) }}-subtle text-{{ statusColor(q.approval_status) }} px-3 py-2">{{ q.lifecycle?.status_label || titleCase(q.approval_status) }}</span>
       </div>
       <p class="text-body-secondary small mb-4">{{ q.topic }} · {{ q.type }} · {{ q.marks }} mark(s) · v{{ q.version_count || 0 }}</p>
 
@@ -134,25 +132,7 @@
       </div>
 
       <div class="mb-4">
-        <label class="form-label text-uppercase small fw-semibold text-body-secondary">Move to</label>
-        @if (availableActions().length) {
-          <div class="d-flex flex-wrap gap-2">
-            @for (a of availableActions(); track a.to) {
-              <button type="button" class="btn btn-sm"
-                      [class.btn-primary]="a.to !== 'archived'"
-                      [class.btn-outline-danger]="a.to === 'archived'"
-                      [disabled]="!a.enabled || transitioning()"
-                      (click)="transition(a.to)">
-                {{ a.label }}
-              </button>
-            }
-          </div>
-          @if (!q.answer_validated) {
-            <div class="form-text">Validate the answer before this question can be approved or published.</div>
-          }
-        } @else {
-          <div class="text-body-secondary small">No further transitions available from this state.</div>
-        }
+        <app-lifecycle-panel [life]="q.lifecycle" [nextStates]="q.next_states" [busy]="transitioning()" (step)="transition($event)" />
       </div>
 
       <label class="form-label text-uppercase small fw-semibold text-body-secondary">History</label>

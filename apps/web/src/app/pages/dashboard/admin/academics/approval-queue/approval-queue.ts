@@ -100,7 +100,7 @@ export class ApprovalQueue {
     const oldest = it.length ? it.reduce((a, b) => a.updated_at < b.updated_at ? a : b) : null;
     return [
       {label: 'Awaiting approval', value: it.filter(x => x.status !== 'approved').length, icon: 'inbox', tone: it.some(x => x.status !== 'approved') ? 'warning' : 'success'},
-      {label: 'Content types', value: new Set(it.map(x => x.type)).size, icon: 'layers', tone: 'info'},
+      {label: 'Approved, not published', value: it.filter(x => x.status === 'approved').length, icon: 'layers', tone: it.some(x => x.status === 'approved') ? 'info' : 'secondary'},
       {label: 'Assessments', value: it.filter(x => x.type === 'Assessment' || x.type === 'Question').length, icon: 'quiz', tone: 'primary'},
       {label: 'Oldest waiting', value: oldest ? this.waited(oldest.updated_at) : '-', icon: 'schedule', tone: 'secondary'},
     ];

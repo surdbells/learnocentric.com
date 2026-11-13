@@ -24,32 +24,12 @@
     @if (lifecycleTopic(); as t) {
       <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-1">
         <h5 class="fw-semibold mb-0">{{ t.title }}</h5>
-        <span class="badge bg-{{ statusColor(t.approval_status) }}-subtle text-{{ statusColor(t.approval_status) }} text-capitalize px-3 py-2">
-          {{ t.approval_status }}
-        </span>
+        <span class="badge bg-{{ statusColor(t.approval_status) }}-subtle text-{{ statusColor(t.approval_status) }} px-3 py-2">{{ t.lifecycle?.status_label || titleCase(t.approval_status) }}</span>
       </div>
       <p class="text-body-secondary small mb-4">{{ t.subject }} · Week {{ t.week_number || '-' }} · v{{ t.version_count || 0 }}</p>
 
       <div class="mb-4">
-        <label class="form-label text-uppercase small fw-semibold text-body-secondary">Move to</label>
-        @if (availableActions().length) {
-          <div class="d-flex flex-wrap gap-2">
-            @for (a of availableActions(); track a.to) {
-              <button type="button" class="btn btn-sm"
-                      [class.btn-primary]="a.to !== 'archived'"
-                      [class.btn-outline-danger]="a.to === 'archived'"
-                      [disabled]="!a.enabled || transitioning()"
-                      (click)="transition(a.to)">
-                {{ a.label }}
-              </button>
-            }
-          </div>
-          @if (!isApprover()) {
-            <div class="form-text">Approving, publishing and archiving are limited to academic leads and admins.</div>
-          }
-        } @else {
-          <div class="text-body-secondary small">No further transitions available from this state.</div>
-        }
+        <app-lifecycle-panel [life]="t.lifecycle" [nextStates]="t.next_states" [busy]="transitioning()" (step)="transition($event)" />
       </div>
 
       <label class="form-label text-uppercase small fw-semibold text-body-secondary">History</label>
@@ -88,7 +68,6 @@
   [columns]="columns"
   [filters]="filterDefs()"
   [actions]="['view', 'edit', 'delete']"
-  [canEditRow]="canEditTopic"
   [canDeleteRow]="canDeleteTopic"
   searchPlaceholder="Search topics…"
   emptyMessage="No topics yet. Click “Add Topic” to create a draft."

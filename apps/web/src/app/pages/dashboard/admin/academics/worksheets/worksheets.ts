@@ -8,20 +8,18 @@ import {LearnoButton} from '../../../../../common/learno-button/learno-button';
 import {DataGrid, GridColumn, GridFilter} from '../../../../../components/data-grid/data-grid';
 import {WorksheetForm} from '../../../../../components/forms/worksheet-form/worksheet-form';
 import {ApiService} from '../../../../../common/service/api.service';
-import {AuthService} from '../../../../../common/auth/auth.service';
+import {LifecyclePanel, LifecycleStep, lifecycleDone} from '../../../../../common/ui/lifecycle-panel';
 import {RichText} from '../../../../../common/rich-editor/rich-text';
 import {Icon} from '../../../../../common/icon/icon';
 
 declare const bootstrap: any;
 
 const STATUS_COLOR: Record<string, string> = {draft: 'secondary', review: 'warning', approved: 'info', published: 'success', archived: 'dark'};
-const ACTION_LABEL: Record<string, string> = {review: 'Submit for review', approved: 'Approve', published: 'Publish', archived: 'Archive', draft: 'Return to draft'};
-const APPROVER_ROLES = ['academic_lead', 'school_admin', 'tutor_admin', 'super_admin'];
 
 @Component({
   selector: 'app-worksheets',
   standalone: true,
-  imports: [RichText, PageHeader, LearnoModal, LearnoButton, DataGrid, WorksheetForm, FormsModule, DatePipe, Icon],
+  imports: [RichText, PageHeader, LearnoModal, LearnoButton, DataGrid, WorksheetForm, FormsModule, DatePipe, Icon, LifecyclePanel],
   templateUrl: './worksheets.html',
   styleUrl: './worksheets.css',
 })
@@ -33,7 +31,6 @@ export class Worksheets {
 
   private readonly api = inject(ApiService);
   private readonly toast = inject(ToastrService);
-  private readonly auth = inject(AuthService);
 
   selectWorksheet = signal<any | null>(null);
   manage = signal<any | null>(null);
@@ -52,7 +49,6 @@ export class Worksheets {
   markFeedback = signal('');
   markBusy = signal(false);
 
-  readonly isApprover = computed(() => APPROVER_ROLES.includes(this.auth.getAuthSession()?.user?.role ?? ''));
 
   columns: GridColumn[] = [
     {key: 'title', label: 'Worksheet', sortable: true},
@@ -69,12 +65,6 @@ export class Worksheets {
     {key: 'track', label: 'Track', options: [{label: 'Academic', value: 'academic'}, {label: 'Competency', value: 'competency'}]},
   ]);
 
-  readonly availableActions = computed(() => {
-    const w = this.manage();
-    if (!w) return [];
-    return (w.next_states ?? []).map((to: string) => ({to, label: ACTION_LABEL[to] ?? this.titleCase(to), enabled: this.canDo(w, to)}));
-  });
-
   constructor() {
     this.api.get<any>('/backend/curriculum/topics').subscribe({next: (r) => this.topics.set(Array.isArray(r) ? r : (r?.data ?? []))});
   }
@@ -82,6 +72,12 @@ export class Worksheets {
   onAdd(): void { this.selectWorksheet.set(null); }
 
   onEdit(row: any): void {
+    // A locked worksheet opens in its lifecycle view, which says why and what would unlock it.
+    if (row?.lifecycle && !row.lifecycle.can_edit) {
+      this.toast.info(row.lifecycle.edit_reason || 'This worksheet cannot be edited right now.', 'Locked', {timeOut: 9000});
+      this.onView(row);
+      return;
+    }
     this.selectWorksheet.set(row);
     this.open('add_worksheet');
   }
@@ -184,25 +180,21 @@ export class Worksheets {
     });
   }
 
-  transition(to: string): void {
-    const w = this.manage();
-    if (!w) return;
+  /** Carry out a step chosen in the lifecycle panel (the server has already said it is allowed). */
+  transition(step: LifecycleStep): void {
+    const item = this.manage();
+    if (!item) return;
     this.busy.set(true);
-    this.api.post<any>(`/backend/assessment/worksheets/${w.id}/transition`, {to}).subscribe({
+    this.api.post<any>(`/backend/assessment/worksheets/${item.id}/transition`, {to: step.to, note: step.note ?? null}).subscribe({
       next: (res) => {
-        this.toast.success(`Worksheet ${res?.action ?? 'updated'}`);
-        this.manage.set(res?.worksheet ?? w);
-        this.loadHistory(w.id);
+        this.toast.success(lifecycleDone(res?.status, 'worksheet'));
+        this.manage.set(res?.worksheet ?? item);
+        this.loadHistory(item.id);
         this.grid?.refresh();
         this.busy.set(false);
       },
-      error: (e) => { this.toast.error(e?.error?.error || 'Transition failed'); this.busy.set(false); },
+      error: (e) => { this.toast.error(e?.error?.error || 'That step could not be completed'); this.busy.set(false); },
     });
-  }
-
-  canDo(w: any, to: string): boolean {
-    if (w.approval_status === 'draft' && to === 'review') return true;
-    return this.isApprover();
   }
 
   statusColor(s: string): string { return STATUS_COLOR[s] ?? 'secondary'; }

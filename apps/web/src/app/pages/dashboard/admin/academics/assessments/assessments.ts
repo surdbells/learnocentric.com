@@ -16,6 +16,7 @@ declare const bootstrap: any;
 const STATUS_COLOR: Record<string, string> = {draft: 'secondary', review: 'warning', approved: 'info', published: 'success', archived: 'dark'};
 const MODERATION_COLOR: Record<string, string> = {pending: 'secondary', reviewed: 'info', approved: 'success', flagged: 'danger', returned: 'warning'};
 const MODERATION_STATUSES = ['pending', 'reviewed', 'approved', 'flagged', 'returned'];
+const PLAIN_LABEL: Record<string, string> = {review: 'Submit for review', approved: 'Approve', published: 'Publish', archived: 'Archive', draft: 'Return to draft'};
 /** What to tell the person once a step has gone through, by the status the assessment ended in. */
 const DONE_MESSAGE: Record<string, string> = {
   review: 'Submitted for review. The approvers have been notified.',
@@ -56,7 +57,9 @@ export class Assessments {
   /** The server's account of what this viewer may do with the open assessment, and why not. */
   readonly life = computed<any | null>(() => this.builder()?.lifecycle ?? null);
   readonly editable = computed(() => this.life() ? !!this.life().can_edit : ['draft', 'review'].includes(this.builder()?.approval_status));
-  readonly actions = computed<any[]>(() => this.life()?.actions ?? []);
+  readonly actions = computed<any[]>(() => this.life()?.actions
+    // An API that has not been updated sends no guidance: list the steps plainly and let it decide.
+    ?? (this.builder()?.next_states ?? []).map((to: string) => ({to, action: to, label: PLAIN_LABEL[to] ?? to, allowed: true})));
   readonly blockedActions = computed<any[]>(() => this.actions().filter((x) => !x.allowed && x.reason));
   /** The question being corrected from inside the builder. */
   fixing = signal<any | null>(null);

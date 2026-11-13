@@ -32,7 +32,7 @@
     @if (lifecyclePack(); as p) {
       <div class="d-flex align-items-start justify-content-between flex-wrap gap-2 mb-1">
         <h5 class="fw-semibold mb-0">{{ p.topic }}</h5>
-        <span class="badge bg-{{ statusColor(p.status) }}-subtle text-{{ statusColor(p.status) }} text-capitalize px-3 py-2">{{ p.status }}</span>
+        <span class="badge bg-{{ statusColor(p.status) }}-subtle text-{{ statusColor(p.status) }} px-3 py-2">{{ p.lifecycle?.status_label || titleCase(p.status) }}</span>
       </div>
       <p class="text-body-secondary small mb-3">{{ p.subject }} · v{{ p.version }}</p>
 
@@ -64,17 +64,7 @@
         <div class="mb-3"><div class="small text-uppercase fw-semibold text-body-secondary">Lesson note</div><app-rich-text class="small d-block" [value]="p.learner_note" /></div>
       }
 
-      <label class="form-label text-uppercase small fw-semibold text-body-secondary">Move to</label>
-      @if (availableActions().length) {
-        <div class="d-flex flex-wrap gap-2 mb-4">
-          @for (a of availableActions(); track a.to) {
-            <button type="button" class="btn btn-sm" [class.btn-primary]="a.to !== 'archived'" [class.btn-outline-danger]="a.to === 'archived'"
-                    [disabled]="!a.enabled || transitioning()" (click)="transition(a.to)">{{ a.label }}</button>
-          }
-        </div>
-      } @else {
-        <div class="text-body-secondary small mb-4">No further transitions from this state.</div>
-      }
+      <app-lifecycle-panel class="mb-4" [life]="p.lifecycle" [nextStates]="p.next_states" [busy]="transitioning()" (step)="transition($event)" />
 
       <label class="form-label text-uppercase small fw-semibold text-body-secondary">History</label>
       @if (history().length) {
@@ -104,7 +94,6 @@
   [columns]="columns"
   [filters]="filterDefs()"
   [actions]="['view', 'edit', 'delete']"
-  [canEditRow]="canEditPack"
   [canDeleteRow]="canDeletePack"
   searchPlaceholder="Search by topic…"
   emptyMessage="No lesson packs yet. Click “Add Pack” to author one."
