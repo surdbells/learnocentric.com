@@ -129,6 +129,9 @@ MAIL_FROM_NAME=LearnoCentric
 # Both must be set for live classes to connect; blank disables live video.
 AGORA_APP_ID=
 AGORA_APP_CERTIFICATE=
+# Paystack billing. With no secret key, payments are refused outside APP_ENV=dev.
+# In the Paystack dashboard set the webhook URL to https://api.YOUR_DOMAIN/backend/billing/webhook
+# so subscriptions activate even if the payer closes the tab before returning.
 PAYSTACK_SECRET_KEY=
 PAYSTACK_PUBLIC_KEY=
 PAYSTACK_CALLBACK_URL=https://YOUR_DOMAIN/billing/callback

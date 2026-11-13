@@ -1,5 +1,6 @@
 import {Component, inject, signal} from '@angular/core';
 import {DatePipe, DecimalPipe} from '@angular/common';
+import {ActivatedRoute, Router} from '@angular/router';
 import {ToastrService} from 'ngx-toastr';
 import {PageHeader} from '../../../../../common/layout/page-header/page-header';
 import {ApiService} from '../../../../../common/service/api.service';
@@ -28,7 +29,30 @@ export class Billing {
   pendingRef = signal<string | null>(null);
   pendingPlan = signal<string | null>(null);
 
+  private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
+
   constructor() {
+    // Returning from Paystack checkout (via /billing/callback): confirm the payment first.
+    const q = this.route.snapshot.queryParamMap;
+    const ref = q.get('reference') || q.get('trxref');
+    if (ref) {
+      this.confirmReturn(ref);
+    } else {
+      this.load();
+    }
+  }
+
+  private confirmReturn(ref: string): void {
+    this.loading.set(true);
+    this.api.post<any>('/backend/billing/verify', {reference: ref}).subscribe({
+      next: () => { this.toast.success('Payment confirmed, subscription updated'); this.afterReturn(); },
+      error: (e) => { this.toast.error(e?.error?.error || 'We could not confirm that payment yet'); this.afterReturn(); },
+    });
+  }
+
+  private afterReturn(): void {
+    this.router.navigate([], {relativeTo: this.route, queryParams: {}, replaceUrl: true});
     this.load();
   }
 

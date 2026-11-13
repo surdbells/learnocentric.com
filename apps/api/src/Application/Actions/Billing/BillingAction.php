@@ -35,6 +35,7 @@ final class BillingAction
         private readonly AuditLogger $audit,
         private readonly PaystackClient $paystack,
         private readonly \App\Service\NotificationService $notify,
+        private readonly \App\Service\PlatformSettings $settings,
     ) {
     }
 
@@ -69,6 +70,9 @@ final class BillingAction
         $institution = $this->resolveInstitution($request, $this->em);
         if ($institution === null) {
             return Json::error($response, 'No institution in scope.', 422);
+        }
+        if (($unavailable = $this->paymentsUnavailable($response)) !== null) {
+            return $unavailable;
         }
         $body = (array) $request->getParsedBody();
         $plan = $this->em->getRepository(SubscriptionPlan::class)->find((int) ($body['plan_id'] ?? 0));
@@ -127,45 +131,116 @@ final class BillingAction
         if ($txn->getStatus() === BillingTransaction::SUCCESS) {
             return Json::write($response, ['transaction' => $txn->toArray(), 'subscription' => $this->currentSubscription($txn->getInstitution())?->toArray()]);
         }
+        if (($unavailable = $this->paymentsUnavailable($response)) !== null) {
+            return $unavailable;
+        }
 
-        $paid = false;
-        $channel = 'test';
         if ($this->paystack->isConfigured()) {
             try {
                 $data = $this->paystack->verifyTransaction($reference);
-                $paid = ($data['status'] ?? '') === 'success';
-                $channel = $data['channel'] ?? 'card';
             } catch (Throwable $e) {
                 return Json::error($response, 'Verification failed: ' . $e->getMessage(), 502);
             }
         } else {
-            // Test mode: no gateway, so treat the confirm click as a successful payment.
-            $paid = true;
+            // Dev-only test mode (paymentsUnavailable() refuses this outside APP_ENV=dev).
+            $data = ['status' => 'success', 'amount' => $txn->getAmountKobo(), 'currency' => 'NGN', 'channel' => 'test', 'reference' => $reference];
         }
 
-        if (!$paid) {
+        $error = $this->complete($txn, $data, $request->getAttribute('user'));
+        if ($error !== null) {
+            return Json::error($response, $error, 402);
+        }
+
+        return Json::write($response, ['transaction' => $txn->toArray(), 'subscription' => $this->currentSubscription($txn->getInstitution())?->toArray()]);
+    }
+
+    /**
+     * POST /billing/webhook (public), Paystack's server-to-server notification.
+     * Activates the subscription on charge.success even if the payer never comes
+     * back to the app. The body is authenticated by its HMAC-SHA512 signature.
+     */
+    public function webhook(Request $request, Response $response): Response
+    {
+        $body = $request->getBody();
+        $body->rewind();
+        $raw = $body->getContents();
+        if (!$this->paystack->isSignatureValid($raw, $request->getHeaderLine('x-paystack-signature'))) {
+            return Json::error($response, 'Invalid signature.', 401);
+        }
+
+        $event = json_decode($raw, true);
+        if (($event['event'] ?? '') === 'charge.success') {
+            $data = is_array($event['data'] ?? null) ? $event['data'] : [];
+            $txn = $this->em->getRepository(BillingTransaction::class)->findOneBy(['reference' => (string) ($data['reference'] ?? '')]);
+            if ($txn !== null && $txn->getStatus() !== BillingTransaction::SUCCESS) {
+                $this->complete($txn, $data, null);
+            }
+        }
+
+        // Always 200 for an authentic event so Paystack stops retrying.
+        return Json::write($response, ['received' => true]);
+    }
+
+    /**
+     * Mark a transaction paid and activate the subscription, after checking the
+     * gateway really reports a successful charge for at least the plan price in
+     * naira. Idempotent. Returns an error message, or null on success.
+     */
+    private function complete(BillingTransaction $txn, array $data, ?User $actor): ?string
+    {
+        if ($txn->getStatus() === BillingTransaction::SUCCESS) {
+            return null;
+        }
+        $ok = ($data['status'] ?? '') === 'success'
+            && (int) ($data['amount'] ?? 0) >= $txn->getAmountKobo()
+            && strtoupper((string) ($data['currency'] ?? 'NGN')) === 'NGN';
+        if (!$ok) {
             $txn->setStatus(BillingTransaction::FAILED);
             $this->em->flush();
-            return Json::error($response, 'Payment was not completed.', 402);
+            $this->audit->log('billing.failed', $actor, 'BillingTransaction', (string) $txn->getId(), null, [
+                'reference' => $txn->getReference(), 'gateway_status' => $data['status'] ?? null,
+                'amount' => $data['amount'] ?? null, 'expected' => $txn->getAmountKobo(),
+            ]);
+            return 'Payment was not completed for the full amount.';
         }
 
         $txn->setStatus(BillingTransaction::SUCCESS);
-        $txn->setChannel($channel);
+        $txn->setChannel((string) ($data['channel'] ?? 'card'));
         $txn->setPaidAt(new DateTimeImmutable());
         $sub = $this->activate($txn->getInstitution(), $txn->getPlan());
-        /** @var User $actor */
-        $actor = $request->getAttribute('user');
-        $this->notify->notify(
-            $actor,
-            'billing',
-            'Payment received, ' . $txn->getPlan()->getName() . ' plan',
-            'We received your payment of ₦' . number_format($txn->getAmountKobo() / 100) . '. Your subscription is active until ' . $sub->getPeriodEnd()->format('j M Y') . '.',
-            '/admin/management/billing',
-        );
-        $this->em->flush();
-        $this->audit->log('billing.paid', $request->getAttribute('user'), 'BillingTransaction', (string) $txn->getId(), null, ['reference' => $reference, 'channel' => $channel]);
 
-        return Json::write($response, ['transaction' => $txn->toArray(), 'subscription' => $sub->toArray()]);
+        $recipient = $actor ?? $txn->getInitiatedBy();
+        if ($recipient !== null) {
+            $root = $recipient->getRole()->effectiveCode() === 'tutor_admin' ? '/academy' : '/admin';
+            $this->notify->notify(
+                $recipient,
+                'billing',
+                'Payment received, ' . $txn->getPlan()->getName() . ' plan',
+                'We received your payment of ₦' . number_format($txn->getAmountKobo() / 100) . '. Your subscription is active until ' . $sub->getPeriodEnd()->format('j M Y') . '.',
+                $root . '/management/billing',
+            );
+        }
+        $this->em->flush();
+        $this->audit->log('billing.paid', $actor, 'BillingTransaction', (string) $txn->getId(), null, ['reference' => $txn->getReference(), 'channel' => $data['channel'] ?? null]);
+
+        return null;
+    }
+
+    /**
+     * Payments can't be taken when the platform switched them off, or when no
+     * Paystack key is set outside local development (which used to activate
+     * subscriptions for free in production).
+     */
+    private function paymentsUnavailable(Response $response): ?Response
+    {
+        if (!$this->settings->bool('integrations.payments_enabled')) {
+            return Json::error($response, 'Online payments are currently switched off. Please contact support.', 503);
+        }
+        $env = strtolower((string) ($_ENV['APP_ENV'] ?? $_SERVER['APP_ENV'] ?? getenv('APP_ENV') ?: 'prod'));
+        if (!$this->paystack->isConfigured() && $env !== 'dev') {
+            return Json::error($response, 'Payments are not configured yet. Please contact support.', 503);
+        }
+        return null;
     }
 
     /** GET /billing/transactions, invoice history for the institution. */

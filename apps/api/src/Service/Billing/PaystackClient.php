@@ -28,6 +28,15 @@ class PaystackClient
         return $this->secretKey !== '';
     }
 
+    /** Paystack signs webhook bodies with HMAC-SHA512 of the raw body using the secret key. */
+    public function isSignatureValid(string $rawBody, string $signature): bool
+    {
+        if (!$this->isConfigured() || $signature === '') {
+            return false;
+        }
+        return hash_equals(hash_hmac('sha512', $rawBody, $this->secretKey), strtolower(trim($signature)));
+    }
+
     /**
      * Initialize a transaction. Returns Paystack's `data` (authorization_url, access_code, reference).
      *

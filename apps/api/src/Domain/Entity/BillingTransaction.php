@@ -64,6 +64,7 @@ class BillingTransaction
     public function getId(): ?int { return $this->id; }
     public function getInstitution(): Institution { return $this->institution; }
     public function getPlan(): SubscriptionPlan { return $this->plan; }
+    public function getInitiatedBy(): ?User { return $this->initiatedBy; }
     public function setInitiatedBy(?User $v): void { $this->initiatedBy = $v; }
     public function getReference(): string { return $this->reference; }
     public function getAmountKobo(): int { return $this->amountKobo; }

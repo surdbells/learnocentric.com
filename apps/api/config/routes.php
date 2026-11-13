@@ -77,6 +77,8 @@ return static function (App $app): void {
         $group->post('/auth/login', LoginAction::class);
         $group->post('/auth/register', RegisterAction::class);
         $group->get('/auth/join/{code:[A-Za-z0-9]{4,16}}', RegisterAction::class . ':lookup');
+        // Paystack server-to-server notification (authenticated by its signature, not a login).
+        $group->post('/billing/webhook', BillingAction::class . ':webhook');
         // Public file serving (unguessable paths). Uses ?p= so the request URL
         // has no static-file extension in its path (the PHP dev server would
         // otherwise intercept e.g. .png before the app runs); works in prod too.
