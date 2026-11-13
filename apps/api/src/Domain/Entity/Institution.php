@@ -91,6 +91,24 @@ class Institution
     public function setLogoUrl(?string $logoUrl): void { $this->logoUrl = \App\Service\Storage\FilePath::toPath($logoUrl); }
     public function getBranding(): ?array { return $this->branding; }
     public function setBranding(?array $branding): void { $this->branding = $branding; }
+
+    /** The school's brand colour. Stored as branding.primary_color ("color" was a second, older key). */
+    public function getBrandColor(): ?string
+    {
+        $c = $this->branding['primary_color'] ?? $this->branding['color'] ?? null;
+
+        return is_string($c) && $c !== '' ? $c : null;
+    }
+
+    public function setBrandColor(?string $color): void
+    {
+        $branding = $this->branding ?? [];
+        unset($branding['color'], $branding['primary_color']);
+        if ($color !== null && preg_match('/^#[0-9a-fA-F]{3,8}$/', trim($color))) {
+            $branding['primary_color'] = strtolower(trim($color));
+        }
+        $this->branding = $branding !== [] ? $branding : null;
+    }
     public function getAdminContact(): ?array { return $this->adminContact; }
     public function setAdminContact(?array $adminContact): void { $this->adminContact = $adminContact; }
     public function getStatus(): string { return $this->status; }
@@ -138,6 +156,8 @@ class Institution
             'address' => $this->address,
             'logo_url' => \App\Service\Storage\FilePath::toUrl($this->logoUrl),
             'branding' => $this->branding,
+            'brand_color' => $this->getBrandColor(),
+            'primary_color' => $this->getBrandColor(),
             'admin_contact' => $this->adminContact,
             'settings' => $this->settings,
             'subscription_id' => $this->subscriptionId,

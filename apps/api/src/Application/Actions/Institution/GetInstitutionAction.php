@@ -39,6 +39,9 @@ final class GetInstitutionAction
                 'type' => $institution->getType(),
                 'logo_url' => $institution->toArray()['logo_url'],
                 'branding' => $institution->getBranding(),
+                'brand_color' => $institution->getBrandColor(),
+                // What the school calls its portal (Settings → Branding); shown in place of the name.
+                'portal_name' => trim((string) ($institution->getSettings()['branding']['portal_name'] ?? '')) ?: null,
                 'status' => $institution->getStatus(),
             ]);
         }

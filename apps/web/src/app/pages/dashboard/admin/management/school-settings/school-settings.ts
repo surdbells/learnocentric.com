@@ -55,6 +55,9 @@ export class SchoolSettings {
   // grading (academic policies tab)
   passMark = signal(50);
   bands = signal<Band[]>([]);
+  // opt-in blended grade (grading.weighting; read by the gradebook)
+  weightOn = signal(false);
+  weightPercent = signal(20);
   // safeguarding (privacy tab)
   safeguarding = signal({lead_name: '', lead_email: '', lead_phone: '', policy_note: ''});
 
@@ -92,6 +95,8 @@ export class SchoolSettings {
         this.settings.set(settings ?? {});
         this.passMark.set(settings?.grading?.pass_mark ?? 50);
         this.bands.set(settings?.grading?.bands ?? []);
+        this.weightOn.set(!!settings?.grading?.weighting?.portfolio_into_academic);
+        this.weightPercent.set(settings?.grading?.weighting?.portfolio_percent || 20);
         this.safeguarding.set({...this.safeguarding(), ...(settings?.safeguarding ?? {})});
         const k = dash?.stats ?? {};
         this.counts.set({
@@ -146,7 +151,7 @@ export class SchoolSettings {
       {label: 'Academic Defaults', done: has(s?.academic?.naming_convention)},
       {label: 'Localization', done: has(s?.localization?.timezone)},
       {label: 'Branding', done: has(s?.branding?.portal_name) || has(p?.brand_color)},
-      {label: 'Notification Defaults', done: true, configured: true},
+      {label: 'Notification Defaults', done: s?.notifications?.email_alerts !== undefined, configured: true},
       {label: 'Grading Policy', done: (this.bands()?.length ?? 0) > 0, configured: true},
       {label: 'Safeguarding', done: has(this.safeguarding().lead_name), configured: true},
     ];
@@ -180,7 +185,7 @@ export class SchoolSettings {
       admin_contact: this.profile()?.admin_contact ?? {},
     };
     const settingsPayload = {
-      grading: {pass_mark: this.passMark(), bands},
+      grading: {pass_mark: this.passMark(), bands, weighting: {portfolio_into_academic: this.weightOn(), portfolio_percent: this.weightOn() ? this.weightPercent() : 0}},
       safeguarding: this.safeguarding(),
       academic: s?.academic ?? {},
       localization: s?.localization ?? {},

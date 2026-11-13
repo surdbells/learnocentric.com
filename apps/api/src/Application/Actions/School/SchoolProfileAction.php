@@ -70,14 +70,7 @@ final class SchoolProfileAction
             $institution->setLogoUrl($this->nullableStr($body['logo_url']));
         }
         if (array_key_exists('brand_color', $body)) {
-            $branding = $institution->getBranding() ?? [];
-            $color = $this->nullableStr($body['brand_color']);
-            if ($color === null) {
-                unset($branding['color']);
-            } else {
-                $branding['color'] = $color;
-            }
-            $institution->setBranding($branding !== [] ? $branding : null);
+            $institution->setBrandColor($this->nullableStr($body['brand_color']));
         }
         if (is_array($body['admin_contact'] ?? null)) {
             $c = $body['admin_contact'];

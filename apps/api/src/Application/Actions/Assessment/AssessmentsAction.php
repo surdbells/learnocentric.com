@@ -119,6 +119,12 @@ final class AssessmentsAction
 
         $a = new Assessment($subject, $title);
         $a->setApprovalStatus(Lifecycle::DRAFT);
+        // New assessments start from the school's pass mark (Settings → Academic
+        // Policies) unless the author sets one.
+        $schoolPass = $subject->getInstitution()->getSettings()['grading']['pass_mark'] ?? null;
+        if (!isset($body['pass_mark']) && is_numeric($schoolPass)) {
+            $a->setPassMark(max(0, min(100, (int) $schoolPass)));
+        }
         $this->applyFields($a, $body);
         $this->em->persist($a);
         $this->em->flush();

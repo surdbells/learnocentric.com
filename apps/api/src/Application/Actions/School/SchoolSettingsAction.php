@@ -127,6 +127,16 @@ final class SchoolSettingsAction
                     $current['grading']['bands'] = $bands;
                 }
             }
+            // Opt-in blended grade: the gradebook reads this, but nothing could set it.
+            if (is_array($g['weighting'] ?? null)) {
+                $w = $g['weighting'];
+                $on = filter_var($w['portfolio_into_academic'] ?? false, FILTER_VALIDATE_BOOLEAN);
+                $percent = max(0, min(100, (int) ($w['portfolio_percent'] ?? 0)));
+                $current['grading']['weighting'] = [
+                    'portfolio_into_academic' => $on && $percent > 0,
+                    'portfolio_percent' => $percent,
+                ];
+            }
         }
 
         // Safeguarding.

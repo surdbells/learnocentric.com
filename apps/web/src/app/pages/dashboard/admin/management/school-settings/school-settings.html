@@ -78,6 +78,7 @@
                 <option value="year_based">Year-based (e.g. Year 7)</option>
               </select>
               <div class="small text-body-secondary">Grading scale is configured under <a role="button" class="link-success" (click)="tab.set('academic')">Academic Policies</a>.</div>
+              <div class="small text-body-secondary mt-3"><app-icon name="edit_note" [size]="14" /> Kept on record for your school. These choices don't change how the app behaves yet.</div>
             </div></div>
           </div>
 
@@ -104,6 +105,7 @@
                 <option value="fr">French</option>
                 <option value="ar">Arabic</option>
               </select>
+              <div class="small text-body-secondary mt-3"><app-icon name="edit_note" [size]="14" /> Kept on record for your school. These choices don't change how the app behaves yet.</div>
             </div></div>
           </div>
 
@@ -118,6 +120,7 @@
               </div>
               <label class="form-label small mb-1">Portal Name</label>
               <input class="form-control form-control-sm" [ngModel]="sec('branding','portal_name')" (ngModelChange)="setSec('branding','portal_name',$event)" placeholder="Learno School Portal" />
+              <div class="small text-body-secondary mt-3">Your portal name and colour appear in the top bar for everyone at your school.</div>
             </div></div>
           </div>
 
@@ -125,11 +128,9 @@
           <div class="col-md-6">
             <div class="card border-0 shadow-sm h-100"><div class="card-body">
               <div class="fw-semibold mb-3"><app-icon name="notifications" [size]="18" class="text-success" /> Notification Defaults</div>
-              <div class="setting-row"><div><div class="fw-medium">Email Alerts</div><div class="small text-body-secondary">System and security alerts via email</div></div>
+              <div class="setting-row"><div><div class="fw-medium">Email Alerts</div><div class="small text-body-secondary">Switch off to stop notification emails to everyone at your school</div></div>
                 <label class="switch"><input type="checkbox" [checked]="sec('notifications','email_alerts')" (change)="toggleSec('notifications','email_alerts')" /><span></span></label></div>
-              <div class="setting-row"><div><div class="fw-medium">Report Notifications</div><div class="small text-body-secondary">When reports are generated</div></div>
-                <label class="switch"><input type="checkbox" [checked]="sec('notifications','report_notifications')" (change)="toggleSec('notifications','report_notifications')" /><span></span></label></div>
-              <div class="setting-row border-0"><div><div class="fw-medium">Parent Communication</div><div class="small text-body-secondary">Default notifications for parents/guardians</div></div>
+              <div class="setting-row border-0"><div><div class="fw-medium">Parent Communication</div><div class="small text-body-secondary">Allow announcements to be copied to learners' parents</div></div>
                 <label class="switch"><input type="checkbox" [checked]="sec('notifications','parent_communication')" (change)="toggleSec('notifications','parent_communication')" /><span></span></label></div>
             </div></div>
           </div>
@@ -155,6 +156,7 @@
                 <option value="single">Single Approval</option>
                 <option value="none">No Approval Required</option>
               </select>
+              <div class="small text-body-secondary mt-3"><app-icon name="edit_note" [size]="14" /> Kept on record for your school. These choices don't change how the app behaves yet.</div>
             </div></div>
           </div>
         </div>
@@ -166,9 +168,10 @@
         <div class="card border-0 shadow-sm"><div class="card-body">
           <h5 class="fw-semibold mb-1">Grading policy</h5>
           <p class="text-body-secondary mb-4">The pass mark and grade bands used across reports.</p>
-          <div class="mb-4" style="max-width: 220px;">
+          <div class="mb-4" style="max-width: 320px;">
             <label class="form-label" for="pass">Pass mark (%)</label>
             <input id="pass" type="number" min="0" max="100" class="form-control" [ngModel]="passMark()" (ngModelChange)="passMark.set(+$event)" />
+            <div class="form-text">New assessments start with this pass mark; authors can change it per assessment.</div>
           </div>
           <label class="form-label">Grade bands</label>
           <div class="d-flex flex-column gap-2">
@@ -183,6 +186,21 @@
             }
           </div>
           <button type="button" class="btn btn-sm btn-outline-secondary mt-3" (click)="addBand()">+ Add band</button>
+
+          <hr class="my-4" />
+          <h6 class="fw-semibold mb-1">Blended grade (optional)</h6>
+          <p class="text-body-secondary small mb-3">By default academic scores and portfolio scores are reported separately. Switch this on to also show a blended grade in the gradebook, with portfolio work counting for the share you set.</p>
+          <div class="form-check form-switch mb-3">
+            <input class="form-check-input" type="checkbox" id="w_on" [ngModel]="weightOn()" (ngModelChange)="weightOn.set($event)" />
+            <label class="form-check-label" for="w_on">Count portfolio work towards a blended grade</label>
+          </div>
+          @if (weightOn()) {
+            <div style="max-width: 320px;">
+              <label class="form-label" for="w_pct">Portfolio share of the blended grade (%)</label>
+              <input id="w_pct" type="number" min="1" max="100" class="form-control" [ngModel]="weightPercent()" (ngModelChange)="weightPercent.set(+$event)" />
+              <div class="form-text">Academic work makes up the remaining {{ 100 - (weightPercent() || 0) }}%.</div>
+            </div>
+          }
         </div></div>
       }
 

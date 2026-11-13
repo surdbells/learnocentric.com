@@ -178,3 +178,29 @@
 .tb-search-item-title { font-size: 0.88rem; font-weight: 600; color: var(--bs-body-color); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .tb-search-item-sub { font-size: 0.76rem; color: var(--bs-secondary-color); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .tb-search-item-type { font-size: 0.68rem; color: var(--bs-secondary-color); text-transform: uppercase; letter-spacing: 0.04em; flex: 0 0 auto; }
+
+/* School chip: portal name + brand colour from the school's own settings */
+.tb-school {
+  align-items: center;
+  gap: .4rem;
+  max-width: 220px;
+  margin-right: .35rem;
+  padding: .3rem .7rem;
+  border-radius: 999px;
+  border: 1px solid var(--bs-border-color);
+  font-size: .82rem;
+  font-weight: 600;
+  color: var(--bs-body-color);
+}
+.tb-school-dot {
+  flex: none;
+  width: .6rem;
+  height: .6rem;
+  border-radius: 50%;
+  background: var(--brand-600);
+}
+.tb-school-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

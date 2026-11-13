@@ -52,6 +52,13 @@
 
   <!-- Right: preferences + user -->
   <div class="tb-right">
+    <!-- The school's own portal name and brand colour (Settings → Branding). -->
+    @if (institution(); as inst) {
+      <span class="tb-school d-none d-lg-inline-flex" [title]="inst.name">
+        <span class="tb-school-dot" [style.background]="inst.brand_color || null"></span>
+        <span class="tb-school-name">{{ inst.portal_name || inst.name }}</span>
+      </span>
+    }
     <app-term-switcher class="d-none d-md-inline-flex me-1" />
 
     <button type="button" class="tb-icon-btn" (click)="toggleTheme()"

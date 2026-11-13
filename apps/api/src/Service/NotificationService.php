@@ -60,6 +60,10 @@ final class NotificationService
         if ($user->getEmail() === '' || !$this->emailAvailable() || !$this->wantsEmail($user)) {
             return false;
         }
+        // The school can switch email alerts off for all of its people (Settings → Notification Defaults).
+        if (($user->getInstitution()?->getSettings()['notifications']['email_alerts'] ?? true) === false) {
+            return false;
+        }
         try {
             return $this->mailer->send(
                 ['address' => $user->getEmail(), 'name' => trim($user->getFirstName() . ' ' . $user->getLastName())],

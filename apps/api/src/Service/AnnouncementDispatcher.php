@@ -151,7 +151,9 @@ class AnnouncementDispatcher
             /** @var User $u */
             $byId[$u->getId()] = $u;
         }
-        if ($a->wantsParentCopy()) {
+        // "Parent communication" in the school's notification defaults is the master switch for parent copies.
+        $parentsAllowed = ($a->getInstitution()->getSettings()['notifications']['parent_communication'] ?? true) !== false;
+        if ($a->wantsParentCopy() && $parentsAllowed) {
             $learners = array_values(array_filter($byId, static fn (User $u) => $u->getRole()->effectiveCode() === 'student'));
             if ($learners !== []) {
                 $links = $this->em->createQueryBuilder()->select('l', 'g')->from(GuardianLink::class, 'l')->join('l.guardian', 'g')

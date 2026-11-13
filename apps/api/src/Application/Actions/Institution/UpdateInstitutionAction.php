@@ -52,7 +52,7 @@ final class UpdateInstitutionAction
 
         $primaryColor = trim((string) ($body['primaryColor'] ?? $body['primary_color'] ?? ''));
         if ($primaryColor !== '') {
-            $institution->setBranding(array_merge($institution->getBranding() ?? [], ['primary_color' => $primaryColor]));
+            $institution->setBrandColor($primaryColor);
         }
 
         $email = trim((string) ($body['admin_email'] ?? $body['adminEmail'] ?? ''));
