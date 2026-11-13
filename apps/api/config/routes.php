@@ -128,6 +128,10 @@ return static function (App $app): void {
             // Platform subject catalogue (super-admin owned; read by all for selection)
             $auth->map(['GET', 'POST', 'PUT', 'DELETE'], '/catalog/subjects', CatalogSubjectsAction::class);
             $auth->post('/school/learners', OnboardingAction::class . ':createLearner');
+            $auth->get('/school/guardians/parents', \App\Application\Actions\School\GuardiansAction::class . ':parents');
+            $auth->get('/school/guardians', \App\Application\Actions\School\GuardiansAction::class . ':list');
+            $auth->post('/school/guardians', \App\Application\Actions\School\GuardiansAction::class . ':create');
+            $auth->delete('/school/guardians', \App\Application\Actions\School\GuardiansAction::class . ':delete');
             $auth->post('/school/staff', OnboardingAction::class . ':createStaff');
             $auth->get('/school/classes-learners', ClassesLearnersAction::class . ':hub');
             $auth->get('/school/classes/{id:[0-9]+}/roster', ClassesLearnersAction::class . ':roster');

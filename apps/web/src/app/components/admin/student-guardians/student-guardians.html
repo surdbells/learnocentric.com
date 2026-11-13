@@ -1,0 +1,69 @@
+<div class="border rounded-3 p-3" (keydown.enter)="$event.preventDefault()">
+  <div class="d-flex align-items-center justify-content-between mb-2">
+    <div class="fw-semibold"><app-icon name="supervisor_account" [size]="18" class="text-success" /> Parents &amp; guardians</div>
+    @if (!adding()) {
+      <button type="button" class="btn btn-sm btn-outline-success" (click)="openAdd()"><app-icon name="person_add" [size]="15" /> Link a guardian</button>
+    }
+  </div>
+
+  @if (loading()) {
+    <div class="small text-body-secondary">Loading…</div>
+  } @else {
+    @for (g of links(); track g.id) {
+      <div class="d-flex align-items-center justify-content-between gap-2 py-2 border-top">
+        <div class="min-w-0">
+          <div class="fw-medium text-truncate">{{ g.name }} <span class="badge bg-secondary-subtle text-secondary text-capitalize ms-1">{{ g.relationship }}</span></div>
+          <div class="small text-body-secondary text-truncate">{{ g.email }}@if (g.phone) { · {{ g.phone }} }</div>
+        </div>
+        <button type="button" class="btn btn-sm btn-outline-danger" (click)="unlink(g)" [attr.aria-label]="'Unlink ' + g.name"><app-icon name="delete" [size]="15" /></button>
+      </div>
+    } @empty {
+      @if (!adding()) {
+        <div class="small text-body-secondary">No guardian is linked yet, so no parent can see this learner in the parent portal.</div>
+      }
+    }
+  }
+
+  @if (adding()) {
+    <div class="border-top pt-3 mt-2">
+      <div class="btn-group btn-group-sm mb-3" role="group" aria-label="How to add the guardian">
+        <button type="button" class="btn" [class.btn-success]="mode() === 'existing'" [class.btn-outline-success]="mode() !== 'existing'" [disabled]="!parents().length" (click)="mode.set('existing')">Existing parent account</button>
+        <button type="button" class="btn" [class.btn-success]="mode() === 'new'" [class.btn-outline-success]="mode() !== 'new'" (click)="mode.set('new')">New parent account</button>
+      </div>
+
+      <div class="row g-2">
+        @if (mode() === 'existing') {
+          <div class="col-md-8">
+            <label class="form-label small mb-1" for="sg_pick">Parent account</label>
+            <select id="sg_pick" class="form-select form-select-sm" [ngModel]="pickId()" (ngModelChange)="pickId.set($event)" [ngModelOptions]="{standalone: true}">
+              <option value="">Choose…</option>
+              @for (p of parents(); track p.id) { <option [value]="'' + p.id">{{ p.name }} ({{ p.email }})</option> }
+            </select>
+          </div>
+        } @else {
+          <div class="col-md-6"><label class="form-label small mb-1" for="sg_first">First name</label>
+            <input id="sg_first" class="form-control form-control-sm" [ngModel]="firstName()" (ngModelChange)="firstName.set($event)" [ngModelOptions]="{standalone: true}" /></div>
+          <div class="col-md-6"><label class="form-label small mb-1" for="sg_last">Last name</label>
+            <input id="sg_last" class="form-control form-control-sm" [ngModel]="lastName()" (ngModelChange)="lastName.set($event)" [ngModelOptions]="{standalone: true}" /></div>
+          <div class="col-md-6"><label class="form-label small mb-1" for="sg_email">Email</label>
+            <input id="sg_email" type="email" class="form-control form-control-sm" [ngModel]="email()" (ngModelChange)="email.set($event)" [ngModelOptions]="{standalone: true}" /></div>
+          <div class="col-md-6"><label class="form-label small mb-1" for="sg_phone">Phone (optional)</label>
+            <input id="sg_phone" class="form-control form-control-sm" [ngModel]="phone()" (ngModelChange)="phone.set($event)" [ngModelOptions]="{standalone: true}" /></div>
+          <div class="col-md-8"><label class="form-label small mb-1" for="sg_pw">Temporary password</label>
+            <input id="sg_pw" type="text" class="form-control form-control-sm" autocomplete="off" [ngModel]="password()" (ngModelChange)="password.set($event)" [ngModelOptions]="{standalone: true}" />
+            <div class="form-text">Share it with the guardian; they can change it after signing in. If this email already has a parent account here, it is linked and no password is needed.</div></div>
+        }
+        <div class="col-md-4">
+          <label class="form-label small mb-1" for="sg_rel">Relationship</label>
+          <select id="sg_rel" class="form-select form-select-sm text-capitalize" [ngModel]="relationship()" (ngModelChange)="relationship.set($event)" [ngModelOptions]="{standalone: true}">
+            @for (r of relationships; track r) { <option [value]="r">{{ r }}</option> }
+          </select>
+        </div>
+      </div>
+      <div class="d-flex justify-content-end gap-2 mt-3">
+        <button type="button" class="btn btn-sm btn-light" (click)="adding.set(false)">Cancel</button>
+        <button type="button" class="btn btn-sm btn-success" [disabled]="busy()" (click)="link()">Link guardian</button>
+      </div>
+    </div>
+  }
+</div>

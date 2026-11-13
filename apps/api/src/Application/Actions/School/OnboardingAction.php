@@ -80,10 +80,14 @@ final class OnboardingAction
             $this->em->persist(new Enrollment($user, $class));
         }
 
-        $this->em->flush();
-        $this->audit->log('learner.onboard', $request->getAttribute('user'), 'User', (string) $user->getId(), null, ['class_id' => $class?->getId()]);
+        // If the guardian's email already has a parent account in this school, link it now.
+        $guardian = is_array($body['guardian'] ?? null) ? $body['guardian'] : [];
+        $guardianLinked = GuardiansAction::autoLink($this->em, $this->auth, $user, $guardian['email'] ?? null, $guardian['relationship'] ?? null);
 
-        return Json::write($response, ['user' => $user->toArray(), 'class_id' => $class?->getId()], 201);
+        $this->em->flush();
+        $this->audit->log('learner.onboard', $request->getAttribute('user'), 'User', (string) $user->getId(), null, ['class_id' => $class?->getId(), 'guardian_linked' => $guardianLinked]);
+
+        return Json::write($response, ['user' => $user->toArray(), 'class_id' => $class?->getId(), 'guardian_linked' => $guardianLinked], 201);
     }
 
     /** POST /school/staff, create a staff member with role + optional class/subject assignment. */
