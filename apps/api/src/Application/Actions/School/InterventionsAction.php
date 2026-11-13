@@ -395,7 +395,7 @@ final class InterventionsAction
                 'intervention',
                 "{$who} raised an intervention for {$student}",
                 $intervention->getReason(),
-                AppApplicationSupportPortal::link($admin, '/academics/interventions'),
+                \App\Application\Support\Portal::link($admin, '/academics/interventions'),
             );
         }
     }
@@ -406,7 +406,7 @@ final class InterventionsAction
         if ($assignee === null) {
             return;
         }
-        $link = AppApplicationSupportPortal::link($assignee, '/academics/interventions');
+        $link = \App\Application\Support\Portal::link($assignee, '/academics/interventions');
         $this->notify->notify(
             $assignee,
             'intervention',

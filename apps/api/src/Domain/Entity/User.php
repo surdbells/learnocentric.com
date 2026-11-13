@@ -67,6 +67,10 @@ class User
     #[ORM\Column(name: 'last_login', type: Types::DATETIME_IMMUTABLE, nullable: true)]
     private ?DateTimeImmutable $lastLogin = null;
 
+    /** Home/contact address the user entered on their own profile. Private: never in list payloads. */
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    private ?string $address = null;
+
     /** TOTP secret, encrypted at rest (TotpService); set during enrolment, kept while enabled. */
     #[ORM\Column(name: 'totp_secret', type: Types::TEXT, nullable: true)]
     private ?string $totpSecret = null;
@@ -144,6 +148,15 @@ class User
     public function getLastLogin(): ?DateTimeImmutable { return $this->lastLogin; }
     public function markLoggedIn(): void { $this->lastLogin = new DateTimeImmutable(); }
     public function getCreatedAt(): DateTimeImmutable { return $this->createdAt; }
+
+    public function getAddress(): ?string { return $this->address; }
+    public function setAddress(?string $v): void { $this->address = ($v === null || trim($v) === '') ? null : trim($v); }
+
+    /** The user's own view of their account: public shape plus private fields. */
+    public function toOwnArray(): array
+    {
+        return $this->toArray() + ['address' => $this->address];
+    }
 
     // --- two-factor (TOTP) ---
     public function getTotpSecret(): ?string { return $this->totpSecret; }

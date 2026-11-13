@@ -34,6 +34,7 @@ final class ContentPackagesAction
     {
         return match (strtoupper($request->getMethod())) {
             'POST' => $this->create($request, $response),
+            'PUT' => $this->update($request, $response),
             'DELETE' => $this->delete($request, $response),
             default => $this->list($response),
         };
@@ -165,6 +166,67 @@ final class ContentPackagesAction
         $this->audit->log('content_package.create', $request->getAttribute('user'), 'ContentPackage', (string) $package->getId(), null, $package->toArray());
 
         return Json::write($response, $package->toArray(true), 201);
+    }
+
+    /** PUT /content/packages, edit a package {id, ...fields}; only the fields sent are changed. */
+    private function update(Request $request, Response $response): Response
+    {
+        if (($g = $this->guard($request, $response)) !== null) {
+            return $g;
+        }
+        $body = (array) $request->getParsedBody();
+        $package = $this->em->getRepository(ContentPackage::class)->find((int) ($body['id'] ?? 0));
+        if ($package === null) {
+            return Json::error($response, 'Package not found.', 404);
+        }
+        $before = $package->toArray();
+        if (array_key_exists('name', $body)) {
+            $name = trim((string) $body['name']);
+            if ($name === '') {
+                return Json::error($response, 'A package name is required.', 422);
+            }
+            $package->setName($name);
+        }
+        if (!empty($body['type'])) {
+            $package->setPackageType((string) $body['type']);
+        }
+        if (array_key_exists('description', $body)) {
+            $package->setDescription($this->str($body['description']));
+        }
+        if (array_key_exists('subjectArea', $body)) {
+            $package->setSubjectArea($this->str($body['subjectArea']));
+        }
+        if (array_key_exists('catalog_subject_id', $body)) {
+            $catalog = !empty($body['catalog_subject_id'])
+                ? $this->em->getRepository(CatalogSubject::class)->find((int) $body['catalog_subject_id'])
+                : null;
+            $package->setCatalogSubject($catalog);
+            if ($catalog !== null && $package->toArray()['subjectArea'] === null) {
+                $package->setSubjectArea($catalog->getName());
+            }
+        }
+        if (array_key_exists('gradeLevel', $body)) {
+            $package->setGradeLevel($this->str($body['gradeLevel']));
+        }
+        if (array_key_exists('price', $body)) {
+            $package->setPriceKobo((int) round(((float) $body['price']) * 100));
+        }
+        if (array_key_exists('durationMonths', $body)) {
+            $package->setDurationMonths($body['durationMonths'] !== null && $body['durationMonths'] !== '' ? (int) $body['durationMonths'] : null);
+        }
+        if (array_key_exists('isActive', $body)) {
+            $package->setIsActive((bool) $body['isActive']);
+        }
+        if (array_key_exists('contentIds', $body) && is_array($body['contentIds'])) {
+            $package->clearResources();
+            foreach ($this->resolveResources($body['contentIds']) as $resource) {
+                $package->addResource($resource);
+            }
+        }
+        $this->em->flush();
+        $this->audit->log('content_package.update', $request->getAttribute('user'), 'ContentPackage', (string) $package->getId(), $before, $package->toArray());
+
+        return Json::write($response, $package->toArray(true));
     }
 
     private function delete(Request $request, Response $response): Response

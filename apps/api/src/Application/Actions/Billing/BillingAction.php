@@ -216,7 +216,7 @@ final class BillingAction
                 'billing',
                 'Payment received, ' . $txn->getPlan()->getName() . ' plan',
                 'We received your payment of ₦' . number_format($txn->getAmountKobo() / 100) . '. Your subscription is active until ' . $sub->getPeriodEnd()->format('j M Y') . '.',
-                AppApplicationSupportPortal::link($recipient, '/management/billing'),
+                \App\Application\Support\Portal::link($recipient, '/management/billing'),
             );
         }
         $this->em->flush();

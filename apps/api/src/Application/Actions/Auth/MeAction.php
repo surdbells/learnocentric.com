@@ -28,7 +28,7 @@ final class MeAction
         $user = $request->getAttribute('user');
 
         return Json::write($response, [
-            'user' => $user->toArray(),
+            'user' => $user->toOwnArray(),
             'permissions' => $this->permissions->grantsFor($user->getRole()),
             // Custom roles only: module => granted actions, enforced server-side
             // (RequirePermissionMiddleware); the client hides menu entries without "view".

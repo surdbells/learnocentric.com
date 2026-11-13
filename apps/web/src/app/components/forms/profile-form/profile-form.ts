@@ -64,8 +64,13 @@ export class ProfileForm implements OnInit{
     this.apiSrv.get("/backend/auth/me")
       .subscribe({
         next: (res) => {
-          this.form.patchValue({ ...res, _email: res?.email }, {emitEvent: false});
-          const existing = res?.profileImageUrl ?? res?.passportUrl ?? res?.avatarUrl ?? '';
+          // /auth/me nests the account under `user`.
+          const u = res?.user ?? res ?? {};
+          this.form.patchValue({
+            _email: u.email ?? '', firstName: u.firstName ?? '', lastName: u.lastName ?? '',
+            phone: u.phone ?? '', address: u.address ?? '', dateOfBirth: u.dateOfBirth ?? '',
+          }, {emitEvent: false});
+          const existing = u.profileImageUrl ?? '';
           if (existing) {
             this.passportPreviewUrl.set(String(existing));
             this.form.get('profileImageUrl')?.setValue(String(existing));
@@ -98,8 +103,11 @@ export class ProfileForm implements OnInit{
         ...this.form.value,
       }).subscribe(
         {
-          next: (res) => {
-            this.toastService.success("updated successfully")
+          next: (res: any) => {
+            // Keep the signed-in session in step (name/photo show in the top bar).
+            const session = this.authSrv.getAuthSession();
+            if (res?.user) this.authSrv.persistLogin({token: session.token ?? undefined, user: {...(session.user ?? {}), ...res.user}});
+            this.toastService.success("Profile updated")
           },
           error: (err) => {
             this.isLoading.set(false);

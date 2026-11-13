@@ -302,7 +302,7 @@ return static function (App $app): void {
             // Content library + packages (super-admin supply chain, licensing/takedown)
             $auth->map(['GET', 'POST', 'PUT', 'DELETE'], '/content/library', ContentLibraryAction::class);
             $auth->get('/content/packages/{id:[0-9]+}', ContentPackagesAction::class . ':show');
-            $auth->map(['GET', 'POST', 'DELETE'], '/content/packages', ContentPackagesAction::class);
+            $auth->map(['GET', 'POST', 'PUT', 'DELETE'], '/content/packages', ContentPackagesAction::class);
             $auth->post('/content/packages/{id:[0-9]+}/transition', ContentPackagesAction::class . ':transition');
             $auth->get('/content/packages/{id:[0-9]+}/history', ContentPackagesAction::class . ':history');
             $auth->post('/content/assign', ContentPackagesAction::class . ':assign');
