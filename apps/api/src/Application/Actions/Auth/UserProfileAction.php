@@ -25,6 +25,7 @@ final class UserProfileAction
         private readonly AuditLogger $audit,
         private readonly \App\Service\PasswordService $passwords,
         private readonly \App\Service\PlatformSettings $settings,
+        private readonly \App\Service\SubmittedWork $work,
     ) {
     }
 
@@ -76,6 +77,10 @@ final class UserProfileAction
     {
         if ($target->getId() === $actor->getId()) {
             return Json::error($response, 'You cannot delete your own account.', 422);
+        }
+        // A learner's handed-in work and marks are never deleted with the account.
+        if (($held = $this->work->refusal($target)) !== null) {
+            return Json::error($response, $held, 409);
         }
         $before = $target->toArray();
         $id = $target->getId();

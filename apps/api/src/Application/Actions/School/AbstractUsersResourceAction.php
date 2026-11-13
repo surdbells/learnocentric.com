@@ -10,6 +10,7 @@ use App\Application\Support\Paginator;
 use App\Domain\Entity\Role;
 use App\Domain\Entity\User;
 use App\Service\AuditLogger;
+use App\Service\SubmittedWork;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
@@ -26,6 +27,7 @@ abstract class AbstractUsersResourceAction
     public function __construct(
         protected readonly EntityManagerInterface $em,
         protected readonly AuditLogger $audit,
+        protected readonly SubmittedWork $work,
     ) {
     }
 
@@ -82,6 +84,10 @@ abstract class AbstractUsersResourceAction
         if (!$this->canManage($actor, $target)) {
             return Json::error($response, 'You are not allowed to delete this user.', 403);
         }
+        // A learner's handed-in work and marks are never deleted with the account.
+        if (($held = $this->work->refusal($target)) !== null) {
+            return Json::error($response, $held, 409);
+        }
 
         $before = $target->toArray();
         $this->em->remove($target);
@@ -104,16 +110,33 @@ abstract class AbstractUsersResourceAction
         $qb = $this->baseQuery($institution)->andWhere('u.id IN (:ids)')->setParameter('ids', $ids);
 
         $count = 0;
+        $kept = 0;
         foreach ($qb->getQuery()->getResult() as $user) {
-            if ($user->getId() !== $actor->getId() && $this->canManage($actor, $user)) {
-                $this->em->remove($user);
-                $count++;
+            if ($user->getId() === $actor->getId() || !$this->canManage($actor, $user)) {
+                continue;
             }
+            if ($this->work->refusal($user) !== null) {
+                $kept++; // has handed in work
+                continue;
+            }
+            $this->em->remove($user);
+            $count++;
         }
         $this->em->flush();
-        $this->audit->log('user.bulk_delete', $actor, 'User', implode(',', $ids), null, ['count' => $count]);
+        $this->audit->log('user.bulk_delete', $actor, 'User', implode(',', $ids), null, ['count' => $count, 'kept' => $kept]);
 
-        return Json::write($response, ['deleted' => $count]);
+        return Json::write($response, [
+            'deleted' => $count,
+            'kept' => $kept,
+            'message' => $kept > 0
+                ? sprintf(
+                    '%d of the selected accounts could not be deleted because the learner%s handed in work. Deactivate %s instead (edit the learner and untick Active).',
+                    $kept,
+                    $kept === 1 ? ' has' : 's have',
+                    $kept === 1 ? 'the account' : 'those accounts',
+                )
+                : null,
+        ]);
     }
 
     private function baseQuery(?object $institution): \Doctrine\ORM\QueryBuilder

@@ -11,6 +11,7 @@ use App\Domain\Entity\PortfolioEntry;
 use App\Domain\Entity\Question;
 use App\Domain\Entity\Subject;
 use App\Domain\Entity\Topic;
+use App\Domain\Entity\User;
 use App\Domain\Entity\Worksheet;
 use App\Domain\Entity\WorksheetQuestion;
 use App\Domain\Entity\WorksheetResponse;
@@ -20,11 +21,11 @@ use Doctrine\ORM\EntityManagerInterface;
 /**
  * Guards learners' handed-in work against deletion.
  *
- * Deleting a worksheet, an assessment, a question, a topic or a subject removes
- * everything beneath it in the database, including the work learners submitted
+ * Deleting a worksheet, an assessment, a question, a topic, a subject or a
+ * learner's account removes everything beneath it in the database, including the work learners submitted
  * and the marks they were given. Once work has been handed in, the item is no
- * longer deleted: it is archived instead, which hides it from learners and keeps
- * the record.
+ * longer deleted: it is archived instead (an account is deactivated), which hides
+ * it from learners and keeps the record.
  *
  * "Handed in" means submitted or marked. A learner's unfinished draft, or an
  * attempt still in progress, does not hold a deletion back.
@@ -97,6 +98,18 @@ final class SubmittedWork
                     ->from(PortfolioEntry::class, 'p')->join('p.topic', 't')
                     ->where('t.subject = :x')->setParameter('x', $item)),
             ], false),
+            $item instanceof User => $this->person($item, [
+                'worksheet submission' => $this->count($this->em->createQueryBuilder()->select('COUNT(s.id)')
+                    ->from(WorksheetSubmission::class, 's')
+                    ->where('s.student = :x')->andWhere('s.status <> :draft')
+                    ->setParameter('x', $item)->setParameter('draft', WorksheetSubmission::DRAFT)),
+                'assessment attempt' => $this->count($this->em->createQueryBuilder()->select('COUNT(a.id)')
+                    ->from(AssessmentAttempt::class, 'a')
+                    ->where('a.student = :x')->andWhere('a.status <> :open')
+                    ->setParameter('x', $item)->setParameter('open', AssessmentAttempt::IN_PROGRESS)),
+                'portfolio entry' => $this->count($this->em->createQueryBuilder()->select('COUNT(p.id)')
+                    ->from(PortfolioEntry::class, 'p')->where('p.student = :x')->setParameter('x', $item)),
+            ]),
             default => null,
         };
     }
@@ -151,11 +164,32 @@ final class SubmittedWork
     }
 
     /**
-     * An item that holds other items (a topic, a subject).
+     * A learner's account. Deleting it would take the learner's own work and
+     * marks with it; deactivating it stops them signing in and keeps the record.
      *
      * @param array<string, int> $counts what kind of work => how many
      */
-    private function container(string $noun, array $counts, bool $canArchive): ?string
+    private function person(User $learner, array $counts): ?string
+    {
+        $list = $this->listOf($counts);
+        if ($list === null) {
+            return null;
+        }
+
+        return sprintf(
+            '%s has handed in work (%s). Deleting the account would delete that work and its marks, so it cannot be deleted. Deactivate the account instead (edit the learner and untick Active): they can no longer sign in and the record is kept.',
+            $learner->displayName(),
+            $list,
+        );
+    }
+
+    /**
+     * "2 worksheet submissions, 1 assessment attempt and 3 portfolio entries",
+     * or null when every count is zero.
+     *
+     * @param array<string, int> $counts
+     */
+    private function listOf(array $counts): ?string
     {
         $parts = [];
         foreach ($counts as $what => $n) {
@@ -168,7 +202,21 @@ final class SubmittedWork
             return null;
         }
         $last = array_pop($parts);
-        $list = $parts === [] ? $last : implode(', ', $parts) . ' and ' . $last;
+
+        return $parts === [] ? $last : implode(', ', $parts) . ' and ' . $last;
+    }
+
+    /**
+     * An item that holds other items (a topic, a subject).
+     *
+     * @param array<string, int> $counts what kind of work => how many
+     */
+    private function container(string $noun, array $counts, bool $canArchive): ?string
+    {
+        $list = $this->listOf($counts);
+        if ($list === null) {
+            return null;
+        }
 
         return sprintf(
             'This %s holds work learners have handed in (%s). Deleting it would delete that work and its marks, so it cannot be deleted.%s',
