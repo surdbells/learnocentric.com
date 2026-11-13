@@ -49,7 +49,7 @@ export class AdminDashboard {
     return [
       {label: 'Total learners', value: s.students, icon: 'group', tone: 'primary', link: `${r}/students`},
       {label: 'Total teachers', value: s.teachers, icon: 'supervisor_account', tone: 'info', link: `${r}/teachers`},
-      {label: 'Total classes', value: s.classes, icon: 'meeting_room', tone: 'success', link: `${b}/classes`},
+      {label: 'Total classes', value: s.classes, icon: 'meeting_room', tone: 'success', link: `${r}/classes-learners`},
       {label: 'Subjects offered', value: s.subjects, icon: 'subject', tone: 'warning', link: `${b}/subjects`},
       {label: 'Pass rate', value: q.pass_rate === null ? '-' : q.pass_rate + '%', sublabel: q.attempts + ' attempts', icon: 'check_circle', tone: 'success'},
       {label: 'Overall performance', value: q.average === null ? '-' : q.average + '%', icon: 'trending_up', tone: q.average >= 70 ? 'success' : q.average >= 50 ? 'warning' : 'danger'},

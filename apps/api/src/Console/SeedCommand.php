@@ -348,6 +348,9 @@ class SeedCommand extends Command
                 $this->em->persist($user);
                 $output->writeln("  + user {$email} ({$roleCode})");
             }
+            // Seeded accounts (the platform owner among them) are trusted, so
+            // they must never be held at sign-in for email confirmation.
+            $user->markEmailVerified();
             $users[$email] = $user;
         }
         $this->em->flush();

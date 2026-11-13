@@ -22,6 +22,5 @@ export {QuickActions} from './quick-actions';
 export {TabBar} from './tab-bar';
 export {StatRing} from './stat-ring';
 export {StatusBadge} from './status-badge';
-export {ProgressCell} from './progress-cell';
 export {AvatarCell} from './avatar-cell';
 export {TermSwitcher} from './term-switcher';

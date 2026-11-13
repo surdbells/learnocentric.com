@@ -29,7 +29,6 @@ function kindOf(i: any): 'school' | 'academy' {
     PageHeader,
     TableSearch,
     LearnoButton,
-    // Loader,
     SkeletonLoader,
     LearnoOffset,
     RouterLink,

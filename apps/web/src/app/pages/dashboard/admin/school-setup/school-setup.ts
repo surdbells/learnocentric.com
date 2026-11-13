@@ -39,7 +39,7 @@ export class SchoolSetup {
       {key: 'learners', label: 'Enrol learners', hint: 'Add your students', done: (st.students ?? 0) > 0, link: `${r}/students`, icon: 'group'},
       {key: 'teachers', label: 'Add teaching staff', hint: 'Onboard teachers', done: (st.teachers ?? 0) > 0, link: `${r}/teachers`, icon: 'supervisor_account'},
       {key: 'subjects', label: 'Choose subjects offered', hint: 'Adopt from the catalogue', done: (st.subjects ?? 0) > 0, link: `${r}/academics/subjects`, icon: 'subject'},
-      {key: 'classes', label: 'Create classes', hint: 'Set up class arms', done: (st.classes ?? 0) > 0, link: `${r}/academics/classes`, icon: 'meeting_room'},
+      {key: 'classes', label: 'Create classes', hint: 'Set up class arms', done: (st.classes ?? 0) > 0, link: `${r}/classes-learners`, icon: 'meeting_room'},
       {key: 'grading', label: 'Set grading policy', hint: 'Pass mark & grade bands', done: (grading.bands ?? []).length > 0, link: `${r}/management/settings`, icon: 'grading'},
       {key: 'safeguarding', label: 'Assign a safeguarding lead', hint: 'Name a designated lead', done: !!(safe.lead_name || safe.lead_email), link: `${r}/management/settings`, icon: 'shield'},
     ];
