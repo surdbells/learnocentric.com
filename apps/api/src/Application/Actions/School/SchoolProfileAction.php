@@ -81,11 +81,15 @@ final class SchoolProfileAction
         }
         if (is_array($body['admin_contact'] ?? null)) {
             $c = $body['admin_contact'];
-            $institution->setAdminContact([
-                'name' => trim((string) ($c['name'] ?? '')),
-                'email' => trim((string) ($c['email'] ?? '')),
-                'phone' => trim((string) ($c['phone'] ?? '')),
-            ]);
+            // Merge over what's stored: onboarding also keeps first_name/last_name
+            // here, and replacing the blob used to wipe them.
+            $contact = $institution->getAdminContact() ?? [];
+            foreach (['name', 'email', 'phone'] as $key) {
+                if (array_key_exists($key, $c)) {
+                    $contact[$key] = trim((string) $c[$key]);
+                }
+            }
+            $institution->setAdminContact($contact);
         }
 
         $this->em->flush();

@@ -37,19 +37,25 @@ final class InstitutionFields
         return $out;
     }
 
-    /** First usable package id from packageIds / package_ids (the entity stores one). */
-    public static function firstPackageId(array $body): ?int
+    /**
+     * The package the form chose. An institution holds one package; the form
+     * sends packageIds as a single id, '' (none), or an array (first id wins).
+     *
+     * @return array{0:bool,1:?int} [was the field sent at all, chosen id or null to unassign]
+     */
+    public static function packageChoice(array $body): array
     {
-        $ids = $body['packageIds'] ?? $body['package_ids'] ?? null;
-        if (!is_array($ids)) {
-            return null;
+        $key = array_key_exists('packageIds', $body) ? 'packageIds' : (array_key_exists('package_ids', $body) ? 'package_ids' : null);
+        if ($key === null) {
+            return [false, null];
         }
-        foreach ($ids as $id) {
+        $raw = $body[$key];
+        foreach (is_array($raw) ? $raw : [$raw] as $id) {
             $n = (int) $id;
             if ($n > 0) {
-                return $n;
+                return [true, $n];
             }
         }
-        return null;
+        return [true, null];
     }
 }

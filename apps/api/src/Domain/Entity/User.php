@@ -196,6 +196,7 @@ class User
             'role' => $this->role->effectiveCode(),
             'role_name' => $this->role->getName(),
             'institutionId' => $this->institution?->getId(),
+            'institutionName' => $this->institution?->getName(),
             'profileImageUrl' => \App\Service\Storage\FilePath::toUrl($this->profileImageUrl),
             'status' => $this->status,
             'two_factor_enabled' => $this->isTwoFactorEnabled(),

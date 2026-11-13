@@ -43,7 +43,8 @@ export class InstitutionForm implements OnInit {
     phone: new FormControl('', { nonNullable: true }),
     logoUrl: new FormControl('', { nonNullable: true }),
     primaryColor: new FormControl('#39c645', { nonNullable: true }),
-    packageIds: new FormControl<string[]>([]),
+    // One package per institution; '' = none. Sent as packageIds: [] | [id].
+    packageIds: new FormControl<any>(''),
     isActive: new FormControl<boolean>(true, { nonNullable: true })
   });
 
@@ -97,21 +98,9 @@ export class InstitutionForm implements OnInit {
 
       this.logoPreviewUrl.set(s['logo_url']);
 
-      const pkgIds: string[] = (() => {
-        const byIds = Array.isArray(s['packageIds']) ? s['packageIds'] : null;
-        const byPackages = Array.isArray(s['packages']) ? s['packages'] : null;
-        const byContentPkgs = Array.isArray(s['contentPackages']) ? s['contentPackages'] : null;
-        const byContents = Array.isArray(s['contents']) ? s['contents'] : null;
-        let ids: any[] = [];
-        if (byIds) ids = byIds;
-        else if (byPackages) ids = byPackages.map((p: any) => p?.id ?? p?.packageId ?? p?.package_id);
-        else if (byContentPkgs) ids = byContentPkgs.map((p: any) => p?.id ?? p?.packageId ?? p?.package_id);
-        else if (byContents) ids = byContents.map((c: any) => c?.packageId ?? c?.id);
-        return (ids || []).filter((v: any) => v !== undefined && v !== null).map((v: any) => String(v));
-      })();
-      if (pkgIds.length) {
-        this.form.patchValue({ packageIds: pkgIds }, { emitEvent: false });
-      }
+      // An institution holds one content package (the API's assigned_package_id).
+      const assigned = (s as any)['assigned_package_id'];
+      this.form.patchValue({ packageIds: assigned ? String(assigned) : '' }, { emitEvent: false });
       const activeRaw = s['is_active'];
       const active = typeof activeRaw === 'boolean' ? activeRaw : (String(activeRaw ?? '').toLowerCase() === 'true' || String(activeRaw) === '1');
       this.form.patchValue({ isActive: active }, { emitEvent: false });
@@ -125,7 +114,7 @@ export class InstitutionForm implements OnInit {
           value: String(p?.id ?? ''),
           label: String(p?.name ?? ''),
         })).filter(o => o.value && o.label);
-        this.packageOptions.set(opts);
+        this.packageOptions.set([{value: '', label: 'No package'}, ...opts]);
       },
       error: (err) => {
         console.error(err);
@@ -157,7 +146,7 @@ export class InstitutionForm implements OnInit {
       logoUrl: val.logoUrl,
       primaryColor: val.primaryColor,
       packageIds: Array.isArray(val.packageIds)
-        ? val.packageIds.map(s => Number(s)).filter(n => !Number.isNaN(n))
+        ? val.packageIds.map((s: any) => Number(s)).filter((n: number) => !Number.isNaN(n))
         : String(val.packageIds || '').toString().split(',').map(s => s.trim()).filter(Boolean).map(s => Number(s)).filter(n => !Number.isNaN(n))
     };
 

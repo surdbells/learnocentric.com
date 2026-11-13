@@ -9,7 +9,7 @@ import {RouterLink, RouterLinkActive, RouterOutlet} from '@angular/router';
   templateUrl: './public-layout.html',
 })
 export class PublicLayout {
-  readonly year = 2026;
+  readonly year = new Date().getFullYear();
 
   /** Mobile nav drawer state (the desktop nav is hidden under 860px). */
   readonly menuOpen = signal(false);

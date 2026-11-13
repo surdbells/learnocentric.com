@@ -146,13 +146,17 @@ export class Portfolio {
       topic_id: id,
       portfolio_evidence_expected: this.taskBrief().trim(),
       competency_built: this.taskCompetency().trim(),
-      portfolio_task: {
-        aim: this.taskAim().trim(),
-        sub_aim: this.taskSubAim().trim(),
-        mission: this.taskMission().filter(m => m.label.trim() || m.detail.trim()),
-        evidence: this.taskEvidence().filter(e => e.caption.trim()),
-        rubric: this.taskRubric().filter(r => r.criterion.trim() || r.standard.trim()),
-      },
+      // The task-sheet builder is hidden, so its untouched default mission /
+      // rubric labels must not be saved as if the teacher had written them.
+      ...(this.showSheetBuilder ? {
+        portfolio_task: {
+          aim: this.taskAim().trim(),
+          sub_aim: this.taskSubAim().trim(),
+          mission: this.taskMission().filter(m => m.label.trim() || m.detail.trim()),
+          evidence: this.taskEvidence().filter(e => e.caption.trim()),
+          rubric: this.taskRubric().filter(r => r.criterion.trim() || r.standard.trim()),
+        },
+      } : {}),
     }).subscribe({
       next: (res) => {
         this.toast.success(res?.published

@@ -89,6 +89,44 @@ class ContentPackage implements LifecycleAware
     public function getPriceKobo(): int { return $this->priceKobo; }
     public function setPriceKobo(int $v): void { $this->priceKobo = max(0, $v); }
     public function setDurationMonths(?int $v): void { $this->durationMonths = $v; }
+    public function getDurationMonths(): ?int { return $this->durationMonths; }
+    public function isActive(): bool { return $this->isActive; }
+
+    /**
+     * When a package assigned at $assignedAt runs out: null if it has no
+     * duration (open-ended) or the assignment date is unknown.
+     */
+    public function expiryFor(?\DateTimeImmutable $assignedAt): ?\DateTimeImmutable
+    {
+        if ($assignedAt === null || $this->durationMonths === null || $this->durationMonths <= 0) {
+            return null;
+        }
+
+        return $assignedAt->modify('+' . $this->durationMonths . ' months');
+    }
+
+    /**
+     * The school-facing summary of an assignment: what it is, what it costs,
+     * and whether its term has run out.
+     *
+     * @return array<string,mixed>
+     */
+    public function assignmentSummary(?\DateTimeImmutable $assignedAt): array
+    {
+        $expires = $this->expiryFor($assignedAt);
+
+        return [
+            'id' => $this->id,
+            'name' => $this->name,
+            'type' => $this->packageType,
+            'description' => $this->description,
+            'price_naira' => $this->priceKobo / 100,
+            'duration_months' => $this->durationMonths,
+            'assigned_at' => $assignedAt?->format(DATE_ATOM),
+            'expires_at' => $expires?->format(DATE_ATOM),
+            'expired' => $expires !== null && $expires < new \DateTimeImmutable(),
+        ];
+    }
     public function setIsActive(bool $v): void { $this->isActive = $v; }
     public function getStatus(): string { return $this->status; }
     public function setStatus(string $v): void { $this->status = $v; }

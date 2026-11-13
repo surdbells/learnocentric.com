@@ -50,6 +50,29 @@ class StorageService
         }
     }
 
+    /**
+     * Remove an uploaded file once the record that owned it is gone, unless
+     * something else still points at it. Never throws: a file that can't be
+     * removed must not undo the delete the user asked for.
+     *
+     * @param callable():bool $stillReferenced
+     */
+    public function deleteOrphan(?string $path, callable $stillReferenced): bool
+    {
+        if ($path === null || $path === '' || preg_match('#^[a-z][a-z0-9+.-]*://#i', $path)) {
+            return false; // nothing stored locally (e.g. an external link)
+        }
+        try {
+            if ($stillReferenced()) {
+                return false;
+            }
+            $this->delete($path);
+            return true;
+        } catch (\Throwable) {
+            return false;
+        }
+    }
+
     public function fileExists(string $path): bool
     {
         return $this->fs->fileExists($path);

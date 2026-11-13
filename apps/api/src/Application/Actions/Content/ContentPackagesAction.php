@@ -73,7 +73,12 @@ final class ContentPackagesAction
         if ($package === null) {
             return Json::error($response, 'Package not found.', 404);
         }
-        $institution->setAssignedPackageId($package->getId());
+        // Re-assigning the package an institution already has renews its term from today.
+        if ($institution->getAssignedPackageId() === $package->getId()) {
+            $institution->renewAssignedPackage();
+        } else {
+            $institution->setAssignedPackageId($package->getId());
+        }
         $this->em->flush();
         $this->audit->log('content_package.assign', $request->getAttribute('user'), 'Institution', (string) $institution->getId(), null, ['package_id' => $package->getId()]);
 
@@ -81,6 +86,7 @@ final class ContentPackagesAction
             'institution_id' => $institution->getId(),
             'assigned_package_id' => $package->getId(),
             'assigned_package' => $package->getName(),
+            'package' => $package->assignmentSummary($institution->getAssignedPackageAt()),
         ]);
     }
 
@@ -99,12 +105,16 @@ final class ContentPackagesAction
         $packageId = $institution?->getAssignedPackageId();
         if ($packageId !== null) {
             $package = $this->em->getRepository(ContentPackage::class)->find($packageId);
-            if ($package !== null && $package->toArray()['isActive']) {
-                $packageInfo = ['id' => $package->getId(), 'name' => $package->getName(), 'description' => $package->toArray()['description']];
-                $resources = array_values(array_filter(
-                    array_map(static fn (ContentResource $r) => $r->toArray(), $package->getResources()->getValues()),
-                    $cleared,
-                ));
+            if ($package !== null && $package->isActive()) {
+                // Includes price/type/duration and whether the assignment's term has run out.
+                $packageInfo = $package->assignmentSummary($institution->getAssignedPackageAt());
+                // An expired package stops serving its resources until it is renewed.
+                if (!$packageInfo['expired']) {
+                    $resources = array_values(array_filter(
+                        array_map(static fn (ContentResource $r) => $r->toArray(), $package->getResources()->getValues()),
+                        $cleared,
+                    ));
+                }
             }
         }
 

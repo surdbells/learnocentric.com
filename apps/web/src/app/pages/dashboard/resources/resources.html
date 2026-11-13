@@ -94,12 +94,17 @@
     <div class="card-body">
       <h5 class="fw-semibold mb-1">{{ package().name }}</h5>
       @if (package().description) { <app-rich-text class="text-body-secondary d-block mb-0" [value]="package().description" /> }
+      @if (package().expired) {
+        <div class="alert alert-warning mt-3 mb-0">This content package's term ended on {{ package().expires_at | date:'mediumDate' }}, so its resources are hidden. Your administrator can ask the platform team to renew it.</div>
+      } @else if (package().expires_at) {
+        <div class="small text-body-secondary mt-2">Available until {{ package().expires_at | date:'mediumDate' }}.</div>
+      }
     </div>
   </div>
   }
 
   @if (!resources().length) {
-    <div class="card border-0 shadow-sm p-5 text-center text-body-secondary">This package has no available resources right now.</div>
+    <div class="card border-0 shadow-sm p-5 text-center text-body-secondary">{{ package()?.expired ? 'No resources are available right now.' : 'This package has no available resources right now.' }}</div>
   } @else {
     <app-kpi-strip class="d-block mb-4" [items]="kpis()" [cols]="4" />
 

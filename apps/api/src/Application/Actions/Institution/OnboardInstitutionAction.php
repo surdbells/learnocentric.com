@@ -59,7 +59,8 @@ final class OnboardInstitutionAction
             $institution->setBranding(['primary_color' => $primaryColor]);
         }
         $institution->setAdminContact(InstitutionFields::adminContact($email, $phone, $firstName, $lastName, $body['admin_contact'] ?? null));
-        if (($pkg = InstitutionFields::firstPackageId($body)) !== null) {
+        [, $pkg] = InstitutionFields::packageChoice($body);
+        if ($pkg !== null) {
             $institution->setAssignedPackageId($pkg);
         }
         $this->em->persist($institution);

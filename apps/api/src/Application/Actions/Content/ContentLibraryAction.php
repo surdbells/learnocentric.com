@@ -130,8 +130,11 @@ final class ContentLibraryAction
         if ($resource === null) {
             return Json::error($response, 'Content not found.', 404);
         }
+        $path = $resource->getFilePath();
         $this->em->remove($resource);
         $this->em->flush();
+        // Don't leave the uploaded file behind on disk.
+        $this->storage->deleteOrphan($path, fn (): bool => $this->em->getRepository(ContentResource::class)->count(['fileUrl' => $path]) > 0);
         $this->audit->log('content.delete', $request->getAttribute('user'), 'ContentResource', (string) ($request->getQueryParams()['id'] ?? ''), null, null);
 
         return Json::write($response, ['deleted' => true]);

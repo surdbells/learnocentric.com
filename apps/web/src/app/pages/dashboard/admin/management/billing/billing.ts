@@ -24,6 +24,8 @@ export class Billing {
   sub = signal<any | null>(null);
   hasAccess = signal(false);
   paystackLive = signal(false);
+  /** The content package the platform assigned to this school: type, price and term. */
+  contentPackage = signal<any | null>(null);
   plans = signal<any[]>([]);
   invoices = signal<any[]>([]);
   pendingRef = signal<string | null>(null);
@@ -63,6 +65,7 @@ export class Billing {
         this.sub.set(res?.subscription ?? null);
         this.hasAccess.set(!!res?.has_access);
         this.paystackLive.set(!!res?.paystack_live);
+        this.contentPackage.set(res?.content_package ?? null);
         this.loading.set(false);
       },
       error: () => this.loading.set(false),

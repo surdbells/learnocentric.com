@@ -22,7 +22,7 @@ final class ListQuery
     public array $filters = [];
     public bool $paginated = false;
 
-    private const MAX_PER_PAGE = 100;
+    private const MAX_PER_PAGE = 200;
 
     /**
      * @param string[] $allowedSorts  sort keys the client may request

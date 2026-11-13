@@ -123,6 +123,9 @@ class ContentResource
     public function setDifficultyLevel(?string $v): void { $this->difficultyLevel = $v; }
     public function setTags(?array $v): void { $this->tags = $v; }
     public function setIsPremium(bool $v): void { $this->isPremium = $v; }
+    /** Stored path of the uploaded file (never a URL), or null for link-only resources. */
+    public function getFilePath(): ?string { return $this->fileUrl; }
+
     public function setFile(?string $url, ?string $name, ?int $size): void
     {
         $this->fileUrl = \App\Service\Storage\FilePath::toPath($url);

@@ -51,10 +51,10 @@ export class FeedbackCompose {
   nextStep = signal('');
 
   focus = signal<FocusArea[]>([
-    {label: 'Accuracy', score: 70, on: true},
-    {label: 'Showing Working', score: 70, on: true},
-    {label: 'Question Interpretation', score: 70, on: true},
-    {label: 'Problem Solving', score: 70, on: true},
+    {label: 'Accuracy', score: 0, on: false},
+    {label: 'Showing Working', score: 0, on: false},
+    {label: 'Question Interpretation', score: 0, on: false},
+    {label: 'Problem Solving', score: 0, on: false},
   ]);
 
   constructor() {
@@ -84,7 +84,7 @@ export class FeedbackCompose {
     // Clear the authored fields so each learner starts from their own signals.
     this.strengths.set(''); this.practiceNeeded.set(''); this.commonError.set('');
     this.score.set(null);
-    this.focus.set(this.focus().map(f => ({...f, score: 70, on: true})));
+    this.focus.set(this.focus().map(f => ({...f, score: 0, on: false}))); // nothing is rated until the teacher (or measured accuracy) sets it
     if (!id) return;
     this.api.get<any>(`/backend/assessment/submissions/by-learner?student_id=${id}`).subscribe({
       next: (r) => this.submissions.set(r?.data ?? []),
@@ -104,9 +104,13 @@ export class FeedbackCompose {
       this.autoNote.set('No graded activity yet for this learner — write the feedback from scratch.');
       return;
     }
-    const acc = s.accuracy ?? 70;
-    this.focus.set(this.focus().map(f => ({...f, score: acc})));
-    if (this.score() == null) this.score.set(acc);
+    // Only Accuracy is something we actually measured; the other areas are the
+    // teacher's judgement and stay unrated (and unsent) until they tick them.
+    const acc = typeof s.accuracy === 'number' ? s.accuracy : null;
+    if (acc !== null) {
+      this.focus.set(this.focus().map(f => f.label === 'Accuracy' ? {...f, score: acc, on: true} : f));
+      if (this.score() == null) this.score.set(acc);
+    }
     if (s.strongest && !this.strengths().trim()) {
       this.strengths.set(`Strong on ${s.strongest.topic} (${s.strongest.accuracy}% correct).`);
     }
@@ -160,6 +164,6 @@ export class FeedbackCompose {
     this.sourceTitle.set(''); this.subject.set(''); this.score.set(null);
     this.strengths.set(''); this.practiceNeeded.set(''); this.commonError.set('');
     this.message.set(''); this.nextStep.set('');
-    this.focus.set(this.focus().map(f => ({...f, score: 70, on: true})));
+    this.focus.set(this.focus().map(f => ({...f, score: 0, on: false}))); // nothing is rated until the teacher (or measured accuracy) sets it
   }
 }

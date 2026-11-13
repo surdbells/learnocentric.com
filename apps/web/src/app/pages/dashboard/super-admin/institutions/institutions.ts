@@ -14,6 +14,12 @@ import { InstitutionForm } from "../../../../components/forms/institution-form/i
 import { FormsModule } from '@angular/forms';
 import {KpiItem, KpiStrip, TabBar, TabItem} from '../../../../common/ui';
 
+/** The API stores academies as "tutoring_academy"; group anything tutoring-like as an academy. */
+function kindOf(i: any): 'school' | 'academy' {
+  const t = String(i?.type ?? '').toLowerCase();
+  return t.includes('academy') || t.includes('tutor') ? 'academy' : 'school';
+}
+
 @Component({
   selector: 'app-super-admin-institutions',
   standalone: true,
@@ -53,7 +59,7 @@ export class SuperAdminInstitutions implements OnInit {
 
   readonly kpis = computed<KpiItem[]>(() => {
     const i = this.institutions();
-    const byType = (t: string) => i.filter(x => x.type === t).length;
+    const byType = (t: string) => i.filter(x => kindOf(x) === t).length;
     const active = i.filter(x => (x.status ?? 'active') === 'active').length;
     return [
       {label: 'Total institutions', value: i.length, icon: 'apartment', tone: 'primary'},
@@ -67,8 +73,8 @@ export class SuperAdminInstitutions implements OnInit {
     const i = this.institutions();
     return [
       {key: 'all', label: 'All', count: i.length},
-      {key: 'school', label: 'Schools', count: i.filter(x => x.type === 'school').length},
-      {key: 'academy', label: 'Academies', count: i.filter(x => x.type === 'academy').length},
+      {key: 'school', label: 'Schools', count: i.filter(x => kindOf(x) === 'school').length},
+      {key: 'academy', label: 'Academies', count: i.filter(x => kindOf(x) === 'academy').length},
     ];
   });
 
@@ -83,7 +89,7 @@ export class SuperAdminInstitutions implements OnInit {
     const term = this.searchTerm().toLowerCase().trim();
     const typeFilter = this.typeTab();
     return this.institutions().filter((i: any) => {
-      if (typeFilter !== 'all' && i.type !== typeFilter) return false;
+      if (typeFilter !== 'all' && kindOf(i) !== typeFilter) return false;
       if (!term) return true;
       const name = (i.name || '').toString().toLowerCase();
       const email = (i.email || '').toString().toLowerCase();

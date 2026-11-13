@@ -40,6 +40,33 @@
     </div>
   </div>
 
+  <!-- Content package assigned by the platform -->
+  @if (contentPackage(); as p) {
+    <div class="card border-0 shadow-sm mb-4">
+      <div class="card-body d-flex align-items-center justify-content-between flex-wrap gap-3">
+        <div>
+          <div class="small text-body-secondary">Content package</div>
+          <h5 class="fw-semibold mb-1">{{ p.name }}
+            <span class="badge bg-secondary-subtle text-secondary ms-1">{{ titleCase((p.type || '').replaceAll('_', ' ')) }}</span>
+            @if (p.expired) { <span class="badge bg-danger-subtle text-danger ms-1">Expired</span> }
+          </h5>
+          <div class="small text-body-secondary">
+            @if (p.price_naira > 0) { ₦{{ p.price_naira | number }} } @else { Included }
+            @if (p.duration_months) { · {{ p.duration_months }}-month term }
+            @if (p.expired) {
+              · ended {{ p.expires_at | date:'mediumDate' }}. Its resources are hidden until the platform renews it.
+            } @else if (p.expires_at) {
+              · access until {{ p.expires_at | date:'mediumDate' }}
+            } @else {
+              · no end date
+            }
+          </div>
+        </div>
+        @if (p.assigned_at) { <div class="small text-body-secondary">Assigned {{ p.assigned_at | date:'mediumDate' }}</div> }
+      </div>
+    </div>
+  }
+
   <!-- Pending payment confirm (test mode) -->
   @if (pendingRef(); as ref) {
     <div class="alert alert-info d-flex align-items-center justify-content-between flex-wrap gap-2">

@@ -65,7 +65,9 @@ final class UpdateInstitutionAction
             );
         }
 
-        if (($pkg = InstitutionFields::firstPackageId($body)) !== null) {
+        // Choosing "No package" really unassigns it (it used to be ignored).
+        [$packageSent, $pkg] = InstitutionFields::packageChoice($body);
+        if ($packageSent) {
             $institution->setAssignedPackageId($pkg);
         }
 

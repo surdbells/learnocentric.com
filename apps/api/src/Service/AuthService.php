@@ -39,6 +39,10 @@ class AuthService
             return null;
         }
 
+        // Upgrade the stored hash if the hashing settings have moved on since it was made.
+        if ($this->passwords->needsRehash($user->getPasswordHash())) {
+            $user->setPasswordHash($this->passwords->hash($password));
+        }
         $user->markLoggedIn();
         $this->em->flush();
 

@@ -117,8 +117,11 @@ final class SchoolResourcesAction
             return Json::error($response, 'Resource not found.', 404);
         }
         $id = $resource->getId();
+        $path = $resource->getFilePath();
         $this->em->remove($resource);
         $this->em->flush();
+        // Don't leave the uploaded file behind on disk.
+        $this->storage->deleteOrphan($path, fn (): bool => $this->em->getRepository(ContentResource::class)->count(['fileUrl' => $path]) > 0);
         $this->audit->log('school_resource.delete', $this->currentUser($request), 'ContentResource', (string) $id, null, null);
 
         return Json::write($response, ['deleted' => true, 'id' => $id]);

@@ -46,6 +46,10 @@ class Institution
     #[ORM\Column(name: 'assigned_package_id', nullable: true)]
     private ?int $assignedPackageId = null;
 
+    /** When the current package was assigned; a package with a duration expires that long after this. */
+    #[ORM\Column(name: 'assigned_package_at', type: Types::DATETIME_IMMUTABLE, nullable: true)]
+    private ?DateTimeImmutable $assignedPackageAt = null;
+
     #[ORM\Column(length: 30, options: ['default' => 'active'])]
     private string $status = 'active';
 
@@ -92,7 +96,22 @@ class Institution
     public function getStatus(): string { return $this->status; }
     public function setStatus(string $status): void { $this->status = $status; }
     public function getAssignedPackageId(): ?int { return $this->assignedPackageId; }
-    public function setAssignedPackageId(?int $id): void { $this->assignedPackageId = $id; }
+    public function setAssignedPackageId(?int $id): void
+    {
+        if ($id !== $this->assignedPackageId) {
+            // A new assignment starts a fresh term; clearing it clears the clock.
+            $this->assignedPackageAt = $id === null ? null : new DateTimeImmutable();
+        }
+        $this->assignedPackageId = $id;
+    }
+    public function getAssignedPackageAt(): ?DateTimeImmutable { return $this->assignedPackageAt; }
+    /** Start the package's term again from today (a renewal of the same package). */
+    public function renewAssignedPackage(): void
+    {
+        if ($this->assignedPackageId !== null) {
+            $this->assignedPackageAt = new DateTimeImmutable();
+        }
+    }
     public function getSettings(): ?array { return $this->settings; }
     public function setSettings(?array $settings): void { $this->settings = $settings; }
     public function isSelfSignup(): bool { return $this->selfSignup; }
@@ -123,6 +142,7 @@ class Institution
             'settings' => $this->settings,
             'subscription_id' => $this->subscriptionId,
             'assigned_package_id' => $this->assignedPackageId,
+            'assigned_package_at' => $this->assignedPackageAt?->format(DATE_ATOM),
             'status' => $this->status,
             'created_at' => $this->createdAt->format(DATE_ATOM),
             'updated_at' => $this->updatedAt->format(DATE_ATOM),

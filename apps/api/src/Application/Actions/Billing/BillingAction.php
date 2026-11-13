@@ -52,10 +52,16 @@ final class BillingAction
         $sub = $this->currentSubscription($institution);
         $status = $sub?->status() ?? 'none';
 
+        // The content package the platform assigned to this school (type, price, term), if any.
+        $package = $institution->getAssignedPackageId() !== null
+            ? $this->em->getRepository(\App\Domain\Entity\ContentPackage::class)->find($institution->getAssignedPackageId())
+            : null;
+
         return Json::write($response, [
             'subscription' => $sub?->toArray(),
             'has_access' => in_array($status, [Subscription::ACTIVE, Subscription::GRACE], true),
             'paystack_live' => $this->paystack->isConfigured(),
+            'content_package' => $package?->assignmentSummary($institution->getAssignedPackageAt()),
         ]);
     }
 
