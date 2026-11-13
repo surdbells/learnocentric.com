@@ -7,6 +7,8 @@ import {LearnoButton} from '../../../../../common/learno-button/learno-button';
 import {DataGrid, GridColumn, GridFilter} from '../../../../../components/data-grid/data-grid';
 import {ApiService} from '../../../../../common/service/api.service';
 import {KpiItem, KpiStrip} from '../../../../../common/ui';
+import {AuthService} from '../../../../../common/auth/auth.service';
+import {roleRoot} from '../../../../../common/auth/portal';
 
 declare const bootstrap: any;
 
@@ -23,6 +25,8 @@ export class Students implements OnInit {
 
   @ViewChild(DataGrid) grid!: DataGrid;
   private readonly api = inject(ApiService);
+  /** '/admin' or '/academy', so links work for both portals. */
+  readonly root = roleRoot(inject(AuthService).getAuthSession()?.user?.role);
 
   selected = signal<any | null>(null);
   allStudents = signal<any[]>([]);

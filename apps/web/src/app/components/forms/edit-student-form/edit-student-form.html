@@ -30,7 +30,7 @@
       </div>
 
     </div>
-    <app-student-guardians class="d-block mt-3" [studentId]="select()['id']" />
+    @if (guardians()) { <app-student-guardians class="d-block mt-3" [studentId]="select()['id']" /> }
   </div>
   <div class="modal-footer">
     <a href="#" #closebtn  class="btn btn-light me-2" data-bs-dismiss="modal">Cancel</a>

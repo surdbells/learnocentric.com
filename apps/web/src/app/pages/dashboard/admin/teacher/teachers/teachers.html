@@ -1,5 +1,5 @@
-<app-page-header icon="supervisor_account" action="Teachers & Staff">
-  <app-learno-button routerLink="/admin/teachers/new" text="Add Staff" icon="add" />
+<app-page-header icon="supervisor_account" [action]="academy ? 'Tutors' : 'Teachers & Staff'">
+  <app-learno-button [routerLink]="root + '/teachers/new'" [text]="academy ? 'Add Tutor' : 'Add Staff'" icon="add" />
 </app-page-header>
 
 <app-learno-modal [modalId]="'edit_teacher'" modalAction="Edit Teacher" [showBtn]="false">

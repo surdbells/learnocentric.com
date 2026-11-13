@@ -51,11 +51,14 @@ final class SearchAction
         $groups = [];
         if ($role === 'super_admin') {
             $groups[] = $this->institutions($like);
-            $groups[] = $this->people($like, null, $base);
-            $groups[] = $this->subjects($like, null, $base);
+            // Platform users and the subject catalogue each have one page.
+            $groups[] = $this->people($like, null, '/super-admin/management/users-roles', '/super-admin/management/users-roles');
+            $groups[] = $this->subjects($like, null, '/super-admin/management/subjects');
         } elseif (in_array($role, ['school_admin', 'tutor_admin', 'academic_lead', 'teacher'], true)) {
-            $groups[] = $this->people($like, $inst, $base);
-            $groups[] = $this->subjects($like, $inst, $base);
+            // Teachers have a learner list but no staff directory, and reach subjects through their hub.
+            $isTeacher = $role === 'teacher';
+            $groups[] = $this->people($like, $inst, $base . '/students', $isTeacher ? null : $base . '/teachers');
+            $groups[] = $this->subjects($like, $inst, $isTeacher ? '/teacher/subjects-curriculum' : $base . '/academics/subjects');
             $groups[] = $this->topics($like, $inst, false, $base . '/academics/topics');
             $groups[] = $this->assessments($like, $inst, false, $base . '/academics/assessments');
             $groups[] = $this->worksheets($like, $inst, false, $base . '/academics/worksheets');
@@ -75,6 +78,7 @@ final class SearchAction
     {
         return match ($role) {
             'super_admin' => '/super-admin/management',
+            // An academy's staff page is /academy/tutors; /academy/teachers redirects there.
             'tutor_admin' => '/academy',
             'teacher' => '/teacher',
             'student' => '/student',
@@ -95,29 +99,29 @@ final class SearchAction
     }
 
     /** @return array<int, array<string, mixed>> */
-    private function people(string $like, ?Institution $inst, string $base): array
+    private function people(string $like, ?Institution $inst, string $learnerLink, ?string $staffLink): array
     {
         $qb = $this->em->createQueryBuilder()->select('u', 'r')->from(User::class, 'u')->join('u.role', 'r')
             ->where('LOWER(CONCAT(u.firstName, \' \', u.lastName)) LIKE :q OR LOWER(u.email) LIKE :q')->setParameter('q', $like)
-            ->andWhere('r.effectiveCode IN (:roles)')->setParameter('roles', ['student', 'teacher'])
+            ->andWhere('r.effectiveCode IN (:roles)')->setParameter('roles', $staffLink === null ? ['student'] : ['student', 'teacher'])
             ->setMaxResults(self::LIMIT_PER_TYPE);
         if ($inst !== null) {
             $qb->andWhere('u.institution = :inst')->setParameter('inst', $inst);
         }
-        return array_map(static function (User $u) use ($base) {
+        return array_map(static function (User $u) use ($learnerLink, $staffLink) {
             $isStudent = $u->getRole()->effectiveCode() === 'student';
             return [
                 'type' => $isStudent ? 'Learner' : 'Teacher',
                 'icon' => $isStudent ? 'group' : 'supervisor_account',
                 'title' => $u->getFirstName() . ' ' . $u->getLastName(),
                 'subtitle' => $u->getEmail(),
-                'link' => $isStudent ? $base . '/students' : $base . '/teachers',
+                'link' => $isStudent ? $learnerLink : $staffLink,
             ];
         }, $qb->getQuery()->getResult());
     }
 
     /** @return array<int, array<string, mixed>> */
-    private function subjects(string $like, ?Institution $inst, string $base): array
+    private function subjects(string $like, ?Institution $inst, string $link): array
     {
         $qb = $this->em->createQueryBuilder()->select('s')->from(Subject::class, 's')
             ->where('LOWER(s.name) LIKE :q')->setParameter('q', $like)->setMaxResults(self::LIMIT_PER_TYPE);
@@ -126,7 +130,7 @@ final class SearchAction
         }
         return array_map(static fn (Subject $s) => [
             'type' => 'Subject', 'icon' => 'subject', 'title' => $s->getName(),
-            'subtitle' => 'Subject', 'link' => $base . '/academics/subjects',
+            'subtitle' => 'Subject', 'link' => $link,
         ], $qb->getQuery()->getResult());
     }
 

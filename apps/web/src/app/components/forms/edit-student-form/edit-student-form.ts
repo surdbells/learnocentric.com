@@ -22,6 +22,8 @@ export class EditStudentForm {
 
   isLoading = signal(false);
   select = input<{ [key:string]: string }>({})
+  /** Show the Parents & guardians panel (learners only; this form is reused for staff). */
+  guardians = input(false);
 
   @Output() submitted = new EventEmitter<{ success: boolean }>();
   @ViewChild('closebtn', { static: false }) autoCloseBtn!: ElementRef<HTMLButtonElement>;

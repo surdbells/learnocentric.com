@@ -3,6 +3,7 @@ import {SignIn} from './pages/authentication/sign-in/sign-in';
 import {Register} from './pages/authentication/register/register';
 import {BillingCallback} from './pages/billing-callback/billing-callback';
 import {TwoFactor} from './pages/account/two-factor/two-factor';
+import {ParentProfile} from './pages/dashboard/parent/profile/parent-profile';
 import {PublicLayout} from './pages/public/public-layout/public-layout';
 import {PublicHome} from './pages/public/home/home';
 import {PublicFeatures} from './pages/public/features/features';
@@ -226,6 +227,16 @@ export const routes: Routes = [
       { path: "students/new", component: NewStudent },
       { path: "tutors", component: Teachers, data: { user: "academy" } },
       { path: "tutors/new", component: NewTeacher, data: { user: "academy" } },
+      // Shared admin pages link to ".../teachers"; an academy calls them tutors.
+      { path: "teachers", redirectTo: "/academy/tutors", pathMatch: "full" },
+      { path: "teachers/new", redirectTo: "/academy/tutors/new", pathMatch: "full" },
+      // The same consolidated hubs the school admin has.
+      { path: "classes-learners", component: ClassesHub },
+      { path: "subjects-curriculum", component: SubjectsCurriculumHub },
+      { path: "assessments-gradebooks", component: AssessmentsGradebooksHub },
+      { path: "reports", component: ReportsHub },
+      { path: "communication-hub", component: CommunicationHub },
+      { path: "resources-hub", component: ResourcesHub },
       {
         path: "main",
         component: Main,
@@ -470,7 +481,7 @@ export const routes: Routes = [
         path: "management",
         component: StudentManagement,
         children: [
-          { path: "profile", component: StudentProfile },
+          { path: "profile", component: ParentProfile },
         ]
       },
       {

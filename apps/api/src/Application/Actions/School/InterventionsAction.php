@@ -395,7 +395,7 @@ final class InterventionsAction
                 'intervention',
                 "{$who} raised an intervention for {$student}",
                 $intervention->getReason(),
-                '/admin/academics/interventions',
+                AppApplicationSupportPortal::link($admin, '/academics/interventions'),
             );
         }
     }
@@ -406,9 +406,7 @@ final class InterventionsAction
         if ($assignee === null) {
             return;
         }
-        $link = $assignee->getRole()->effectiveCode() === 'teacher'
-            ? '/teacher/academics/interventions'
-            : '/admin/academics/interventions';
+        $link = AppApplicationSupportPortal::link($assignee, '/academics/interventions');
         $this->notify->notify(
             $assignee,
             'intervention',

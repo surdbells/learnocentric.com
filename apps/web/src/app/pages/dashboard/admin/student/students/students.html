@@ -1,12 +1,13 @@
 @if (!embedded()) {
   <app-page-header icon="local_library" action="Students">
-    <app-learno-button routerLink="/admin/students/new" text="Add Student" icon="add" />
+    <app-learno-button [routerLink]="root + '/students/new'" text="Add Student" icon="add" />
   </app-page-header>
 }
 
 <app-learno-modal [modalId]="'edit_student'" modalAction="Edit Student" [showBtn]="false">
   <app-edit-student-form
     [select]="selected()"
+    [guardians]="true"
     modalForm
     (submitted)="handleSuccessSubmit($event)"
   />

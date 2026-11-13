@@ -184,7 +184,7 @@ final class SafeguardingAction
                 'safeguarding',
                 'New safeguarding concern reported',
                 'A ' . $case->getCategory() . ' concern was reported. Review it in the safeguarding register.',
-                '/admin/management/safeguarding',
+                AppApplicationSupportPortal::link($lead, '/management/safeguarding'),
             );
         }
     }

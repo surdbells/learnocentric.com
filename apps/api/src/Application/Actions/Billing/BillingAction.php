@@ -211,13 +211,12 @@ final class BillingAction
 
         $recipient = $actor ?? $txn->getInitiatedBy();
         if ($recipient !== null) {
-            $root = $recipient->getRole()->effectiveCode() === 'tutor_admin' ? '/academy' : '/admin';
             $this->notify->notify(
                 $recipient,
                 'billing',
                 'Payment received, ' . $txn->getPlan()->getName() . ' plan',
                 'We received your payment of ₦' . number_format($txn->getAmountKobo() / 100) . '. Your subscription is active until ' . $sub->getPeriodEnd()->format('j M Y') . '.',
-                $root . '/management/billing',
+                AppApplicationSupportPortal::link($recipient, '/management/billing'),
             );
         }
         $this->em->flush();

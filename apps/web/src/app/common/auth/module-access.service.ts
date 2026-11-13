@@ -42,6 +42,14 @@ export class ModuleAccessService {
     return list.some(p => (m[p] ?? []).includes('view'));
   }
 
+  /**
+   * Keep only the entries (hub tabs, tiles…) the school's plan includes and the
+   * user's role may view. Reactive: re-evaluates when modules/matrix load.
+   */
+  visible<T extends {module?: string; perm?: string | string[]}>(items: T[]): T[] {
+    return items.filter(i => this.has(i.module) && this.canView(i.perm));
+  }
+
   /** Fetch the granted modules (and custom-role matrix) for the current session and cache them. */
   refresh(): void {
     this.api.get<{ modules?: string[]; role_matrix?: Record<string, string[]> | null }>('/backend/auth/me').subscribe({

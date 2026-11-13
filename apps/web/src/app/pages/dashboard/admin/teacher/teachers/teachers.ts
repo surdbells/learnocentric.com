@@ -1,4 +1,6 @@
-import {Component, signal, ViewChild} from '@angular/core';
+import {Component, inject, signal, ViewChild} from '@angular/core';
+import {AuthService} from '../../../../../common/auth/auth.service';
+import {roleRoot} from '../../../../../common/auth/portal';
 import {RouterLink} from '@angular/router';
 import {PageHeader} from '../../../../../common/layout/page-header/page-header';
 import {LearnoModal} from '../../../../../components/learno-modal/learno-modal';
@@ -17,6 +19,9 @@ declare const bootstrap: any;
 })
 export class Teachers {
   @ViewChild(DataGrid) grid!: DataGrid;
+  /** '/admin' or '/academy' (where staff are called tutors). */
+  readonly root = roleRoot(inject(AuthService).getAuthSession()?.user?.role);
+  readonly academy = this.root === '/academy';
 
   selected = signal<any | null>(null);
 

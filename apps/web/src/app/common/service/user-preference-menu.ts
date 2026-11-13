@@ -64,67 +64,16 @@ export class UserPreferenceMenu {
     },
   ]
 
-  tutor_admin: IMenu[]= [
-    { name: "Main", icon: "dashboard", link: "academy/main",
-      children: [
-        { name: "Dashboard", link: "/academy/main" },
-        { name: "Calendar", link: "/academy/calendar", perm: "academic_setup" },
-      ]
-    },
+  // The academy (tutor_admin) sidebar is the school-admin one under /academy,
+  // with tutoring wording, so both stay in step as hubs are added.
+  tutor_admin: IMenu[] = academyMenu(this.school_admin);
 
-    { name: "Students", icon: "local_library", link: "/academy/students/", perm: "user" },
-
-    { name: "Tutor", icon: "supervisor_account", link: "academy/teachers",
-      children: [
-        { name: "Tutors", link: "/academy/tutors/", perm: "user" },
-        { name: "New Tutor", link: "/academy/tutors/new", perm: "user" }
-      ]
-    },
-
-    { name: "Academics", icon: "school", link: "/academy/academics",
-      children: [
-        { name: "Classes & Learners", link: "/academy/academics/classes-learners", perm: ["academic_setup", "user"] },
-        { name: "Subjects", link: "/academy/academics/subjects", perm: "academic_setup" },
-        { name: "Lesson Content", link: "/academy/academics/lesson-content", perm: "curriculum_pack" },
-        { name: "Delivery Pack", link: "/academy/academics/delivery-pack", perm: "delivery_pack" },
-        { name: "Scheme of Work", link: "/academy/academics/scheme-of-work", perm: "curriculum_pack" },
-        { name: "Scheme Coverage", link: "/academy/academics/scheme-coverage", perm: "curriculum_pack" },
-        { name: "Curriculum Map", link: "/academy/academics/curriculum-map", perm: "curriculum_pack" },
-        { name: "Approval Queue", link: "/academy/academics/approval-queue", perm: ["curriculum_pack", "delivery_pack", "assessment"] },
-        { name: "Question Bank", link: "/academy/academics/question-bank", module: "assessments", perm: "assessment" },
-        { name: "Assessments", link: "/academy/academics/assessments", module: "assessments", perm: "assessment" },
-        { name: "Worksheets", link: "/academy/academics/worksheets", module: "worksheets", perm: "worksheet" },
-        { name: "Portfolio", link: "/academy/academics/portfolio", module: "portfolio", perm: "portfolio" },
-        { name: "Live Classes", link: "/academy/academics/live-classes", module: "live_classes", perm: "live_class" },
-        { name: "Gradebook", link: "/academy/academics/gradebook", module: "assessments", perm: "gradebook" },
-        { name: "Insights", link: "/academy/academics/insights", perm: "assessment" },
-        { name: "Analytics", link: "/academy/academics/analytics", module: "analytics", perm: "report" },
-        { name: "Reports & Report Cards", link: "/academy/academics/school-report", module: "analytics", perm: "report" },
-        { name: "Report Cards", link: "/academy/academics/report-cards", module: "analytics", perm: "gradebook" },
-        { name: "Interventions", link: "/academy/academics/interventions", module: "interventions", perm: "intervention" },
-        { name: "Resources", link: "/academy/academics/resources", perm: "resource" },
-        { name: "Resource Viewer", link: "/academy/academics/resource-viewer", perm: "resource" },
-      ]
-    },
-
-    { name: "Management", icon: "tenancy", link: "academy/management",
-      children: [
-        { name: "Academy Profile", link: "/academy/management/academy-profile", perm: "academic_setup" },
-        { name: "Settings", link: "/academy/management/settings", perm: "academic_setup" },
-        { name: "Billing", link: "/academy/management/billing", perm: "subscription" },
-        { name: "Safeguarding", link: "/academy/management/safeguarding", module: "safeguarding", perm: "safeguarding_case" },
-        { name: "Support", link: "/academy/management/support", perm: "support_ticket" },
-      ]
-    },
-
-    { name: "Communication", icon: "forum", link: "academy/communication",
-      children: [
-        { name: "Messages", link: "/academy/communication/messages" },
-        { name: "Announcements", link: "/academy/communication/announcements" },
-      ]
-    },
-  ]
-
+  // Academic leads use the admin portal without the owner-only pages
+  // (billing, school profile/settings, safeguarding case management).
+  academic_lead: IMenu[] = withoutLinks(this.school_admin, [
+    '/admin/management/school-profile', '/admin/management/settings',
+    '/admin/management/billing', '/admin/management/safeguarding',
+  ]);
 
   super_admin: IMenu[] = [
     { name: "Main", icon: "dashboard", link: "/super-admin/main",
@@ -223,4 +172,29 @@ export class UserPreferenceMenu {
     },
   ]
 
+}
+
+/** Re-home the school-admin menu under /academy with tutoring wording. */
+function academyMenu(menu: IMenu[]): IMenu[] {
+  const names: Record<string, string> = {
+    'School Setup': 'Academy Setup', 'Teachers & Staff': 'Tutors', 'School Profile': 'Academy Profile',
+  };
+  const map = (i: IMenu): IMenu => ({
+    ...i,
+    name: names[i.name] ?? i.name,
+    link: i.link
+      .replace(/^\/?admin(?=\/|$)/, m => (m.startsWith('/') ? '/academy' : 'academy'))
+      .replace('/academy/teachers', '/academy/tutors')
+      .replace('/management/school-profile', '/management/academy-profile'),
+    children: i.children?.map(map),
+  });
+  return menu.map(map);
+}
+
+/** A copy of the menu without the given links (groups left empty are dropped). */
+function withoutLinks(menu: IMenu[], links: string[]): IMenu[] {
+  return menu
+    .filter(i => !links.includes(i.link))
+    .map(i => i.children ? {...i, children: i.children.filter(c => !links.includes(c.link))} : i)
+    .filter(i => !i.children || i.children.length > 0);
 }

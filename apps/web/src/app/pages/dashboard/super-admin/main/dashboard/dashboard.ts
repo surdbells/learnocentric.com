@@ -86,8 +86,8 @@ export class SuperAdminDashboard {
   readonly recentTickets = computed<any[]>(() => this.tickets().slice(0, 4));
 
   readonly quickActions: QuickAction[] = [
-    {label: 'Onboard school', sublabel: 'Add a new institution', icon: 'apartment', link: `${M}/institutions/onboard`},
-    {label: 'Subscription plans', sublabel: 'Manage plans & billing', icon: 'credit_card', link: `${M}/billing`},
+    {label: 'Onboard school', sublabel: 'Add a new institution', icon: 'apartment', link: `${M}/onboard`},
+    {label: 'Subscription plans', sublabel: 'Manage plans & pricing', icon: 'credit_card', link: `${M}/plans`},
     {label: 'Review content', sublabel: 'Pending content packs', icon: 'library_books', link: `${M}/content-library`},
     {label: 'Safeguarding', sublabel: 'Cases & compliance', icon: 'shield', link: `${M}/safeguarding`},
   ];

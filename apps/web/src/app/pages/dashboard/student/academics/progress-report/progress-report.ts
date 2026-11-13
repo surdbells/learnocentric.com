@@ -91,7 +91,9 @@ export class ProgressReport {
       this.api.get<any>('/backend/analytics/children').subscribe({
         next: (res) => {
           this.children.set(res?.data ?? []);
-          const first = res?.data?.[0]?.student_id;
+          // ?student= (from the parent profile) picks a specific linked child.
+          const wanted = Number(new URLSearchParams(typeof location !== 'undefined' ? location.search : '').get('student'));
+          const first = (res?.data ?? []).find((c: any) => c.student_id === wanted)?.student_id ?? res?.data?.[0]?.student_id;
           if (first) { this.selectChild(first); } else { this.loading.set(false); }
         },
         error: () => this.loading.set(false),

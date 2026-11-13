@@ -1,0 +1,59 @@
+<app-page-header icon="account_circle" action="My Profile" />
+<p class="text-body-secondary mb-4">Your contact details, your children, and your account security.</p>
+
+@if (editing()) {
+  <div class="d-flex justify-content-end mb-2">
+    <button type="button" class="btn btn-sm btn-outline-secondary" (click)="onEdited()"><app-icon name="arrow_back" [size]="16" /> Back to profile</button>
+  </div>
+  <div class="card border-0 shadow-sm"><div class="card-body">
+    <app-profile-form />
+  </div></div>
+} @else {
+  <div class="row g-4">
+    <div class="col-lg-7">
+      <div class="card border-0 shadow-sm mb-4"><div class="card-body">
+        <div class="d-flex align-items-center gap-3 flex-wrap">
+          <span class="rounded-circle bg-success-subtle text-success fw-bold d-inline-flex align-items-center justify-content-center" style="width:64px;height:64px;font-size:1.5rem">{{ fullName()[0] }}</span>
+          <div class="flex-grow-1" style="min-width:12rem">
+            <div class="d-flex align-items-center gap-2 flex-wrap">
+              <h5 class="fw-semibold mb-0">{{ fullName() }}</h5>
+              <span class="badge bg-success-subtle text-success">Parent / Guardian</span>
+            </div>
+            <div class="text-body-secondary small mt-1">
+              <div>{{ user()?.email }}</div>
+              @if (user()?.phone) { <div>{{ user()?.phone }}</div> }
+            </div>
+            <button type="button" class="btn btn-sm btn-outline-success mt-2" (click)="editing.set(true)"><app-icon name="edit" [size]="15" /> Edit Profile</button>
+          </div>
+        </div>
+      </div></div>
+
+      <div class="card border-0 shadow-sm"><div class="card-body">
+        <h6 class="fw-semibold mb-3"><app-icon name="group" [size]="18" class="text-success" /> My children</h6>
+        @if (loading()) {
+          <div class="text-body-secondary small">Loading…</div>
+        } @else {
+          @for (c of children(); track c.id) {
+            <div class="d-flex align-items-center justify-content-between gap-2 py-2 border-top">
+              <div>
+                <div class="fw-medium">{{ c.student }}</div>
+                <div class="small text-body-secondary">You are their {{ c.relationship }}</div>
+              </div>
+              <a class="btn btn-sm btn-outline-success" routerLink="/parent/academics/progress-report" [queryParams]="{student: c.student_id}">Progress report</a>
+            </div>
+          } @empty {
+            <div class="text-body-secondary small">No children are linked to your account yet. Ask the school to link your child to this email address.</div>
+          }
+        }
+      </div></div>
+    </div>
+
+    <div class="col-lg-5">
+      <div class="card border-0 shadow-sm"><div class="card-body">
+        <h6 class="fw-semibold mb-1"><app-icon name="verified_user" [size]="18" class="text-success" /> Account security</h6>
+        <div class="text-body-secondary small mb-3">Two-factor authentication is {{ twoFactorOn() ? 'on' : 'off' }}.</div>
+        <a class="btn btn-sm btn-outline-secondary w-100" routerLink="/account/two-factor"><app-icon name="lock" [size]="15" /> {{ twoFactorOn() ? 'Manage two-factor' : 'Set up two-factor' }}</a>
+      </div></div>
+    </div>
+  </div>
+}
