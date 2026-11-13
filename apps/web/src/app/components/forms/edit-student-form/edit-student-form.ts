@@ -5,6 +5,7 @@ import {LearnoButton} from '../../../common/learno-button/learno-button';
 import {ToastrService} from 'ngx-toastr';
 import {ApiService} from '../../../common/service/api.service';
 import {StudentGuardians} from '../../admin/student-guardians/student-guardians';
+import {OnboardingRecord} from '../../admin/onboarding-record/onboarding-record';
 
 @Component({
   selector: 'app-edit-student-form',
@@ -13,7 +14,8 @@ import {StudentGuardians} from '../../admin/student-guardians/student-guardians'
     LearnoInput,
     ReactiveFormsModule,
     LearnoButton,
-    StudentGuardians
+    StudentGuardians,
+    OnboardingRecord
   ],
   templateUrl: './edit-student-form.html',
   styleUrl: './edit-student-form.css'

@@ -188,6 +188,24 @@ final class TopicsAction
         return Json::write($response, ['deleted' => $count]);
     }
 
+    /**
+     * A list of short strings from an array, or text with one item per line.
+     *
+     * @return string[]
+     */
+    private function stringList(mixed $raw): array
+    {
+        $items = is_array($raw) ? $raw : preg_split('/\R/u', (string) $raw);
+        $out = [];
+        foreach ($items ?: [] as $item) {
+            $s = trim((string) (is_scalar($item) ? $item : ''));
+            if ($s !== '') {
+                $out[] = mb_substr($s, 0, 300);
+            }
+        }
+        return array_slice(array_values(array_unique($out)), 0, 30);
+    }
+
     private function applyFields(Topic $topic, array $body): void
     {
         if (isset($body['week_number']) || isset($body['weekNumber'])) {
@@ -198,6 +216,11 @@ final class TopicsAction
         if (array_key_exists('core_theory', $body)) { $topic->setCoreTheory($body['core_theory'] !== '' ? (string) $body['core_theory'] : null); }
         if (array_key_exists('real_life_relevance', $body)) { $topic->setRealLifeRelevance($body['real_life_relevance'] !== '' ? (string) $body['real_life_relevance'] : null); }
         if (array_key_exists('competency_built', $body)) { $topic->setCompetencyBuilt($body['competency_built'] !== '' ? (string) $body['competency_built'] : null); }
+        // Read by insights, analytics and the approval queue, but no form used to send them.
+        if (array_key_exists('prerequisites', $body)) { $topic->setPrerequisites(trim((string) $body['prerequisites']) !== '' ? (string) $body['prerequisites'] : null); }
+        if (array_key_exists('workplace_relevance', $body)) { $topic->setWorkplaceRelevance(trim((string) $body['workplace_relevance']) !== '' ? (string) $body['workplace_relevance'] : null); }
+        if (array_key_exists('misconceptions', $body)) { $topic->setMisconceptions($this->stringList($body['misconceptions'])); }
+        if (array_key_exists('question_types', $body)) { $topic->setQuestionTypes($this->stringList($body['question_types'])); }
         if (array_key_exists('class_id', $body)) {
             // Empty = all classes (schoolClass NULL); a value scopes it to that class.
             $topic->setSchoolClass(!empty($body['class_id'])

@@ -79,7 +79,7 @@ export class SchemeForm {
       topic_id: v.topicId,
       assigned_teacher_id: v.assignedTeacherId,
       objective: v.objective,
-      status: v.status,
+
     };
     this.isLoading.set(true);
     const req = this.isEdit()

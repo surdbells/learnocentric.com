@@ -203,6 +203,9 @@ final class SchemeOfWorkAction
         if ($class === null || $subject === null || $week < 1) {
             return Json::error($response, 'A class, subject and week number are required.', 422);
         }
+        if (!$this->canActWithin($request, $class->getInstitution()) || !$this->canActWithin($request, $subject->getInstitution())) {
+            return Json::error($response, 'That class or subject is not in your school.', 422);
+        }
 
         $term = !empty($body['term_id']) ? $this->em->getRepository(Term::class)->find((int) $body['term_id']) : null;
         if ($this->duplicateWeek($class, $subject, $term, $week, null)) {
@@ -230,12 +233,33 @@ final class SchemeOfWorkAction
         if (!in_array($scheme->getStatus(), self::EDITABLE, true)) {
             return Json::error($response, "This scheme entry is {$scheme->getStatus()}; return it to draft before editing.", 409);
         }
+        if (!$this->canActWithin($request, $scheme->getSchoolClass()->getInstitution())) {
+            return Json::error($response, 'Scheme entry not found.', 404);
+        }
         $before = $scheme->toArray();
+        // The form lets you move a week to another class or subject; that used to be ignored.
+        if (!empty($body['class_id']) && (int) $body['class_id'] !== $scheme->getSchoolClass()->getId()) {
+            $class = $this->em->getRepository(SchoolClass::class)->find((int) $body['class_id']);
+            if ($class === null || !$this->canActWithin($request, $class->getInstitution())) {
+                return Json::error($response, 'That class is not in your school.', 422);
+            }
+            $scheme->setSchoolClass($class);
+        }
+        if (!empty($body['subject_id']) && (int) $body['subject_id'] !== $scheme->getSubject()->getId()) {
+            $subject = $this->em->getRepository(Subject::class)->find((int) $body['subject_id']);
+            if ($subject === null || !$this->canActWithin($request, $subject->getInstitution())) {
+                return Json::error($response, 'That subject is not in your school.', 422);
+            }
+            $scheme->setSubject($subject);
+        }
         if (isset($body['week_number'])) {
             $scheme->setWeekNumber(max(1, (int) $body['week_number']));
         }
         if (array_key_exists('term_id', $body)) {
             $scheme->setTerm(!empty($body['term_id']) ? $this->em->getRepository(Term::class)->find((int) $body['term_id']) : null);
+        }
+        if ($this->duplicateWeek($scheme->getSchoolClass(), $scheme->getSubject(), $scheme->getTerm(), $scheme->getWeekNumber(), $scheme->getId())) {
+            return Json::error($response, 'That week already has a scheme entry for this class, subject and term.', 409);
         }
         $this->applyFields($scheme, $body);
         $this->em->flush();

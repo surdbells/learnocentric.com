@@ -64,6 +64,11 @@ class SchemeOfWork implements LifecycleAware
     public function getWeekNumber(): int { return $this->weekNumber; }
     public function setWeekNumber(int $v): void { $this->weekNumber = $v; }
     public function setTerm(?Term $v): void { $this->term = $v; }
+    public function getTerm(): ?Term { return $this->term; }
+    public function getSchoolClass(): SchoolClass { return $this->schoolClass; }
+    public function setSchoolClass(SchoolClass $v): void { $this->schoolClass = $v; }
+    public function getSubject(): Subject { return $this->subject; }
+    public function setSubject(Subject $v): void { $this->subject = $v; }
     public function setTopic(?Topic $v): void { $this->topic = $v; }
     public function setObjective(?string $v): void { $this->objective = $v; }
     public function setAssignedTeacher(?User $v): void { $this->assignedTeacher = $v; }

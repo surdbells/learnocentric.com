@@ -57,15 +57,28 @@ final class UserSettingsAction
                 'phone' => $user->getPhone(),
                 'role' => $user->getRole()->effectiveCode(),
                 'profileImageUrl' => $user->getProfileImageUrl(),
-                'staffId' => $user->getId() ? sprintf('LRN-%s-%04d', strtoupper(substr($user->getRole()->effectiveCode(), 0, 2)), $user->getId()) : null,
+                // The ID the school actually recorded: staff ID at onboarding, or a
+                // learner's admission number. Null when none was entered (never made up).
+                'staffId' => $this->recordedId($user),
             ],
             'security' => [
                 'last_login' => $user->getLastLogin()?->format(DATE_ATOM),
                 'active_session' => $this->describeSession($ua),
-                'two_factor' => (bool) ($preferences['privacy']['two_factor'] ?? false),
+                'two_factor' => $user->isTwoFactorEnabled(),
             ],
             'preferences' => $preferences,
         ]);
+    }
+
+    private function recordedId(User $user): ?string
+    {
+        $staffId = trim((string) ($user->getOnboarding()['employment']['staff_id'] ?? ''));
+        if ($staffId !== '') {
+            return $staffId;
+        }
+        $admission = trim((string) ($user->getAdmissionNumber() ?? ''));
+
+        return $admission !== '' ? $admission : null;
     }
 
     /** Role-aware default preference tree. Sections not relevant to a role are simply omitted. */

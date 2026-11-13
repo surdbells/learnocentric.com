@@ -43,7 +43,12 @@ final class UserProfileAction
         return match (strtoupper($request->getMethod())) {
             'PUT' => $this->update($request, $response, $actor, $target),
             'DELETE' => $this->delete($response, $actor, $target),
-            default => Json::write($response, $target->toArray()),
+            // Managers also get the admission / employment record captured at onboarding
+            // (guardian contact, support notes, consents, staff details).
+            default => Json::write($response, $target->toArray() + [
+                'onboarding' => $target->getOnboarding(),
+                'address' => $target->getAddress(),
+            ]),
         };
     }
 

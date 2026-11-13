@@ -106,6 +106,12 @@ class Topic implements LifecycleAware
     public function setStrand(?string $v): void { $this->strand = $v; }
     public function setObjective(?string $v): void { $this->objective = $v; }
     public function setCoreTheory(?string $v): void { $this->coreTheory = $v; }
+    public function setPrerequisites(?string $v): void { $this->prerequisites = $v; }
+    public function setWorkplaceRelevance(?string $v): void { $this->workplaceRelevance = $v; }
+    /** @param string[]|null $v */
+    public function setMisconceptions(?array $v): void { $this->misconceptions = $v === [] ? null : $v; }
+    /** @param string[]|null $v */
+    public function setQuestionTypes(?array $v): void { $this->questionTypes = $v === [] ? null : $v; }
     public function setRealLifeRelevance(?string $v): void { $this->realLifeRelevance = $v; }
     public function setCompetencyBuilt(?string $v): void { $this->competencyBuilt = $v; }
     public function getPortfolioEvidenceExpected(): ?string { return $this->portfolioEvidenceExpected; }

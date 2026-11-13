@@ -6,6 +6,11 @@ import {RichEditor} from '../../../common/rich-editor/rich-editor';
 import {ApiService} from '../../../common/service/api.service';
 import {ToastrService} from 'ngx-toastr';
 
+/** A stored list shown as one item per line in a textarea. */
+function lines(v: unknown): string {
+  return Array.isArray(v) ? v.join('\n') : String(v ?? '');
+}
+
 @Component({
   selector: 'app-topic-form',
   standalone: true,
@@ -33,6 +38,12 @@ export class TopicForm {
     objective: new FormControl(''),
     realLifeRelevance: new FormControl(''),
     competencyBuilt: new FormControl(''),
+    strand: new FormControl(''),
+    prerequisites: new FormControl(''),
+    workplaceRelevance: new FormControl(''),
+    coreTheory: new FormControl(''),
+    misconceptions: new FormControl(''),   // one per line
+    questionTypes: new FormControl(''),    // one per line
   });
 
   constructor() {
@@ -55,6 +66,12 @@ export class TopicForm {
         objective: s['objective'] ?? '',
         realLifeRelevance: s['real_life_relevance'] ?? '',
         competencyBuilt: s['competency_built'] ?? '',
+        strand: s['strand'] ?? '',
+        prerequisites: s['prerequisites'] ?? '',
+        workplaceRelevance: s['workplace_relevance'] ?? '',
+        coreTheory: s['core_theory'] ?? '',
+        misconceptions: lines((s as any)['misconceptions']),
+        questionTypes: lines((s as any)['question_types']),
       }, {emitEvent: false});
       this.isEdit.set(true);
     });
@@ -75,6 +92,13 @@ export class TopicForm {
       objective: v.objective,
       real_life_relevance: v.realLifeRelevance,
       competency_built: v.competencyBuilt,
+      strand: v.strand ?? '',
+      prerequisites: v.prerequisites ?? '',
+      workplace_relevance: v.workplaceRelevance ?? '',
+      core_theory: v.coreTheory ?? '',
+      // one per line → list
+      misconceptions: v.misconceptions ?? '',
+      question_types: v.questionTypes ?? '',
     };
     const req = this.isEdit()
       ? this.api.put('/backend/curriculum/topics', {...body, id: this.select()['id']})

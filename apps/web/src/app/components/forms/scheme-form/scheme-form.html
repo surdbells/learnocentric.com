@@ -55,11 +55,9 @@
         <div learnoInput class="mb-3" [label]="'Objective'" [inputType]="'text'" [id]="'sw_obj'" [formControlName]="'objective'"></div>
       </div>
       <div class="col-lg-3 mb-3">
-        <label class="form-label" for="sw_status">Status</label>
-        <select id="sw_status" class="form-select" formControlName="status">
-          <option value="draft">Draft</option>
-          <option value="published">Published</option>
-        </select>
+        <!-- Status follows the review workflow (submit → approve → publish), so it is shown, not edited. -->
+        <span class="form-label d-block">Status</span>
+        <span class="badge bg-secondary-subtle text-secondary text-capitalize mt-2">{{ form.value.status || 'draft' }}</span>
       </div>
     </div>
   </div>

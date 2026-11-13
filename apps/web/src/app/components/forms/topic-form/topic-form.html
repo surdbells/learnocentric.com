@@ -37,6 +37,33 @@
       <div class="col-lg-6">
         <div learnoInput class="mb-3" [label]="'Competency built'" [inputType]="'text'" [id]="'t_cb'" [formControlName]="'competencyBuilt'"></div>
       </div>
+      <div class="col-lg-6">
+        <div learnoInput class="mb-3" [label]="'Strand / theme'" [inputType]="'text'" [id]="'t_strand'" [formControlName]="'strand'"></div>
+      </div>
+
+      <!-- Teaching notes: shown in Insights, Analytics and the approval queue -->
+      <div class="col-12"><div class="small text-uppercase fw-semibold text-body-secondary mb-2">Teaching notes (optional)</div></div>
+      <div class="col-lg-6 mb-3">
+        <label class="form-label" for="t_pre">Prerequisites</label>
+        <textarea id="t_pre" class="form-control" rows="2" formControlName="prerequisites" placeholder="What learners should already know"></textarea>
+      </div>
+      <div class="col-lg-6 mb-3">
+        <label class="form-label" for="t_work">Workplace relevance</label>
+        <textarea id="t_work" class="form-control" rows="2" formControlName="workplaceRelevance" placeholder="Where this shows up in jobs and careers"></textarea>
+      </div>
+      <div class="col-lg-12 mb-3">
+        <label class="form-label" for="t_core">Core theory</label>
+        <textarea id="t_core" class="form-control" rows="3" formControlName="coreTheory" placeholder="The key ideas of this topic, in brief"></textarea>
+      </div>
+      <div class="col-lg-6 mb-3">
+        <label class="form-label" for="t_mis">Common misconceptions</label>
+        <textarea id="t_mis" class="form-control" rows="3" formControlName="misconceptions" placeholder="One per line"></textarea>
+        <div class="form-text">Mistakes learners often make; Insights compares them with wrong answers.</div>
+      </div>
+      <div class="col-lg-6 mb-3">
+        <label class="form-label" for="t_qt">Question types</label>
+        <textarea id="t_qt" class="form-control" rows="3" formControlName="questionTypes" placeholder="One per line, e.g. Word problems"></textarea>
+      </div>
     </div>
   </div>
   <div class="modal-footer">

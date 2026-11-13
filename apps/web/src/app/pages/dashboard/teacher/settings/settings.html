@@ -17,7 +17,7 @@
                 <div class="pref-line"><span class="text-body-secondary">Full Name</span><span class="fw-medium">{{ profile()?.fullName }}</span></div>
                 <div class="pref-line"><span class="text-body-secondary">Email</span><span class="fw-medium">{{ profile()?.email }}</span></div>
                 <div class="pref-line"><span class="text-body-secondary">Phone</span><span class="fw-medium">{{ profile()?.phone || '-' }}</span></div>
-                <div class="pref-line"><span class="text-body-secondary">Staff ID</span><span class="fw-medium">{{ profile()?.staffId }}</span></div>
+                <div class="pref-line"><span class="text-body-secondary">Staff ID</span><span class="fw-medium">{{ profile()?.staffId || 'Not recorded' }}</span></div>
               </div>
               <a class="btn btn-outline-success btn-sm w-100 mt-3" routerLink="/teacher/management/profile">
                 <app-icon name="edit" [size]="15" /> Edit Profile
