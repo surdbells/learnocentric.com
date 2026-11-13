@@ -38,10 +38,22 @@
           <label for="c-msg">How can we help?</label>
           <textarea id="c-msg" rows="4" [ngModel]="message()" (ngModelChange)="message.set($event)" name="message" placeholder="We're a secondary school of ~400 learners looking to bring assessment and reporting online…"></textarea>
         </div>
-        <button type="submit" class="pub-btn pub-btn-primary pub-btn-lg">
-          <span class="material-symbols-outlined" style="font-size:19px">send</span> Send message
-        </button>
-        <p style="color:var(--pub-mut);font-size:.85rem;margin-top:.8rem">This opens your email app with the details filled in, or write to us directly at <a [href]="'mailto:' + email" style="color:var(--pub-brand-d);font-weight:600">{{ email }}</a>.</p>
+        <!-- Honeypot: off-screen and skipped by keyboards and screen readers; only bots fill it. -->
+        <div aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden">
+          <label for="c-website">Website</label>
+          <input id="c-website" type="text" tabindex="-1" autocomplete="off" [ngModel]="website()" (ngModelChange)="website.set($event)" name="website" />
+        </div>
+        @if (sent()) {
+          <p role="status" style="background:#eefaf0;border:1px solid #a9e6b3;color:#196f27;border-radius:.6rem;padding:.8rem 1rem;font-weight:600">{{ sent() }}</p>
+        } @else {
+          @if (error()) {
+            <p role="alert" style="color:#b42318;font-size:.9rem">{{ error() }} You can also <a [href]="mailtoHref()" style="font-weight:600">send it from your email app</a>.</p>
+          }
+          <button type="submit" class="pub-btn pub-btn-primary pub-btn-lg" [disabled]="busy()">
+            <span class="material-symbols-outlined" style="font-size:19px">send</span> {{ busy() ? 'Sending…' : 'Send message' }}
+          </button>
+          <p style="color:var(--pub-mut);font-size:.85rem;margin-top:.8rem">We reply by email. You can also write to us directly at <a [href]="'mailto:' + email" style="color:var(--pub-brand-d);font-weight:600">{{ email }}</a>.</p>
+        }
       </form>
 
       <!-- Info -->

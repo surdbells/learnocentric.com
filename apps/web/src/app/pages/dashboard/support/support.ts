@@ -42,7 +42,25 @@ export class Support {
   readonly priorities = ['low', 'normal', 'high', 'urgent'];
   readonly openCount = computed(() => this.tickets().filter(t => t.status !== 'resolved' && t.status !== 'closed').length);
 
-  constructor() { this.load(); }
+  // Messages from the public Contact us form (platform owner only).
+  enquiries = signal<any[]>([]);
+  readonly openEnquiries = computed(() => this.enquiries().filter(e => !e.handled).length);
+
+  constructor() {
+    this.load();
+    if (this.isStaff()) this.loadEnquiries();
+  }
+
+  private loadEnquiries(): void {
+    this.api.get<any>('/backend/platform/contact-enquiries').subscribe({next: (r) => this.enquiries.set(r?.data ?? [])});
+  }
+
+  markEnquiry(enquiry: any, handled: boolean): void {
+    this.api.put<any>(`/backend/platform/contact-enquiries/${enquiry.id}`, {handled}).subscribe({
+      next: (updated) => this.enquiries.set(this.enquiries().map(x => x.id === updated.id ? updated : x)),
+      error: () => this.toast.error('Could not update the enquiry'),
+    });
+  }
 
   load(): void {
     this.loading.set(true);

@@ -147,3 +147,38 @@
     </div>
   }
 }
+
+<!-- WEBSITE ENQUIRIES (platform owner): messages from the public Contact us form -->
+@if (isStaff() && mode() === 'list') {
+  <div class="card border-0 shadow-sm mt-4">
+    <div class="card-body">
+      <div class="d-flex align-items-center justify-content-between mb-2">
+        <h6 class="fw-semibold mb-0"><app-icon name="inbox" [size]="18" class="text-success" /> Website enquiries</h6>
+        @if (openEnquiries()) { <span class="badge bg-warning-subtle text-warning-emphasis">{{ openEnquiries() }} to answer</span> }
+      </div>
+      <p class="small text-body-secondary">Sent from the public "Contact us" page. Reply to the sender by email, then mark it handled.</p>
+      @for (e of enquiries(); track e.id) {
+        <div class="border-top py-3">
+          <div class="d-flex justify-content-between gap-3 flex-wrap">
+            <div>
+              <span class="fw-semibold">{{ e.name }}</span>
+              <a class="ms-2 small" [href]="'mailto:' + e.email">{{ e.email }}</a>
+              <div class="small text-body-secondary">{{ e.organisation || 'No organisation given' }}@if (e.role) { · {{ e.role }} } · {{ e.created_at | date:'medium' }}</div>
+            </div>
+            <div>
+              @if (e.handled) {
+                <span class="badge bg-success-subtle text-success">Handled</span>
+              } @else {
+                <button type="button" class="btn btn-sm btn-outline-success" (click)="markEnquiry(e, true)">Mark handled</button>
+              }
+            </div>
+          </div>
+          <p class="mb-0 mt-2" style="white-space: pre-wrap">{{ e.message }}</p>
+          @if (!e.emailed) { <div class="small text-body-secondary mt-1">Not emailed to the support inbox (email isn't configured, or no support address is set in System Settings).</div> }
+        </div>
+      } @empty {
+        <div class="text-body-secondary small">No enquiries yet.</div>
+      }
+    </div>
+  </div>
+}

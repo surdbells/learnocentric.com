@@ -78,6 +78,8 @@ return static function (App $app): void {
         // Second sign-in step, authenticated by the short-lived challenge from /auth/login.
         $group->post('/auth/2fa/verify', \App\Application\Actions\Auth\TwoFactorAction::class . ':verify');
         $group->post('/auth/register', RegisterAction::class);
+        // Public "Contact us" form (honeypot + rate limited).
+        $group->post('/contact', \App\Application\Actions\Support\ContactAction::class . ':submit');
         // Account recovery: each is authenticated by an emailed single-use token.
         $group->post('/auth/password/forgot', \App\Application\Actions\Auth\AccountRecoveryAction::class . ':forgot');
         $group->post('/auth/password/reset', \App\Application\Actions\Auth\AccountRecoveryAction::class . ':reset');
@@ -360,6 +362,8 @@ return static function (App $app): void {
             $auth->post('/notifications/{id:[0-9]+}/read', NotificationsAction::class . ':read');
 
             // Support centre, tickets, SLA, threaded replies, escalation
+            $auth->get('/platform/contact-enquiries', \App\Application\Actions\Support\ContactAction::class . ':list');
+            $auth->put('/platform/contact-enquiries/{id:[0-9]+}', \App\Application\Actions\Support\ContactAction::class . ':update');
             $auth->get('/support/tickets', SupportAction::class . ':list');
             $auth->post('/support/tickets', SupportAction::class . ':create');
             $auth->get('/support/tickets/{id:[0-9]+}', SupportAction::class . ':show');

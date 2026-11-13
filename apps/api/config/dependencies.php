@@ -75,6 +75,15 @@ return [
         );
     }),
 
+    \App\Application\Actions\Support\ContactAction::class => factory(function (ContainerInterface $c): \App\Application\Actions\Support\ContactAction {
+        return new \App\Application\Actions\Support\ContactAction(
+            $c->get(EntityManagerInterface::class),
+            $c->get(ZeptoMailer::class),
+            $c->get(\App\Service\PlatformSettings::class),
+            $c->get('settings')['jwt']['secret'],
+        );
+    }),
+
     \App\Service\TotpService::class => factory(function (ContainerInterface $c): \App\Service\TotpService {
         return new \App\Service\TotpService($c->get('settings')['jwt']['secret']);
     }),
