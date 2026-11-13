@@ -24,7 +24,7 @@ final class TermsAction
         $institution = $this->resolveInstitution($request, $this->em);
 
         $qb = $this->em->createQueryBuilder()->select('t')->from(Term::class, 't')->join('t.session', 'ses')
-            ->orderBy('t.sequence', 'ASC');
+            ->orderBy('ses.id', 'DESC')->addOrderBy('t.sequence', 'ASC');
         if ($institution !== null) {
             $qb->andWhere('ses.institution = :inst')->setParameter('inst', $institution);
         }

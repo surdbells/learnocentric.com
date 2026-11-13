@@ -59,7 +59,7 @@ final class AssessmentsAction
         $query = ListQuery::fromRequest(
             $request,
             ['title', 'type', 'approval_status', 'created_at'],
-            ['subject_id', 'class_id', 'type', 'track', 'approval_status'],
+            ['subject_id', 'class_id', 'type', 'track', 'approval_status', 'term_id'],
             'created_at'
         );
 
@@ -80,6 +80,9 @@ final class AssessmentsAction
         }
         if (isset($query->filters['class_id'])) {
             $qb->andWhere('a.schoolClass = :cid')->setParameter('cid', (int) $query->filters['class_id']);
+        }
+        if (isset($query->filters['term_id'])) {
+            $qb->andWhere('(a.term = :tid OR a.term IS NULL)')->setParameter('tid', (int) $query->filters['term_id']);
         }
 
         $mapper = fn (Assessment $a) => $this->row($a);

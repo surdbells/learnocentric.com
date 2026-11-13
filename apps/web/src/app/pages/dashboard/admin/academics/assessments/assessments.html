@@ -142,6 +142,7 @@
 
 <app-data-grid
   endpoint="/backend/assessment/assessments"
+  [termScoped]="true"
   [columns]="columns"
   [filters]="filterDefs()"
   [actions]="['view', 'edit', 'delete']"

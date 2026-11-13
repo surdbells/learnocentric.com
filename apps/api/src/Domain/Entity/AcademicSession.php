@@ -58,6 +58,7 @@ class AcademicSession
     public function getStatus(): string { return $this->status; }
     public function setStatus(string $v): void { $this->status = $v; }
     public function setCurrent(bool $v): void { $this->isCurrent = $v; }
+    public function isCurrent(): bool { return $this->isCurrent; }
 
     public function toArray(): array
     {

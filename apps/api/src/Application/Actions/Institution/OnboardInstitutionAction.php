@@ -25,6 +25,7 @@ final class OnboardInstitutionAction
         private readonly EntityManagerInterface $em,
         private readonly AuthService $auth,
         private readonly AuditLogger $audit,
+        private readonly \App\Service\AcademicCalendar $calendar,
     ) {
     }
 
@@ -63,6 +64,8 @@ final class OnboardInstitutionAction
         }
         $this->em->persist($institution);
         $this->em->flush();
+        // A new school starts with its current academic session and three terms.
+        $this->calendar->ensureFor($institution);
 
         $adminUser = null;
         // Optionally create the first school admin.

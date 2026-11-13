@@ -84,6 +84,7 @@
 
 <app-data-grid
   endpoint="/backend/curriculum/topics"
+  [termScoped]="true"
   [columns]="columns"
   [filters]="filterDefs()"
   [actions]="['view', 'edit', 'delete']"

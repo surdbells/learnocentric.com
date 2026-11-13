@@ -140,6 +140,9 @@ return static function (App $app): void {
             $auth->post('/school/scheme-of-work/{id:[0-9]+}/transition', SchemeOfWorkAction::class . ':transition');
             $auth->get('/school/scheme-of-work/{id:[0-9]+}/history', SchemeOfWorkAction::class . ':history');
             $auth->get('/school/terms', TermsAction::class);
+            $auth->get('/school/academic-calendar', \App\Application\Actions\School\AcademicCalendarAction::class . ':list');
+            $auth->put('/school/academic-calendar/terms/{id:[0-9]+}', \App\Application\Actions\School\AcademicCalendarAction::class . ':updateTerm');
+            $auth->post('/school/academic-calendar/sessions', \App\Application\Actions\School\AcademicCalendarAction::class . ':startSession');
             $auth->get('/school/calendar', \App\Application\Actions\School\CalendarAction::class);
             $auth->map(['GET', 'PUT'], '/school/profile', SchoolProfileAction::class);
             $auth->map(['GET', 'PUT'], '/school/settings', SchoolSettingsAction::class);

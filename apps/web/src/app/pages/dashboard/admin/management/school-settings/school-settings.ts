@@ -9,6 +9,7 @@ import {Icon} from '../../../../../common/icon/icon';
 import {RichEditor} from '../../../../../common/rich-editor/rich-editor';
 import {FileUpload, UploadedFile} from '../../../../../common/file-upload/file-upload';
 import {RolesPermissions} from './roles-permissions/roles-permissions';
+import {AcademicCalendar} from './academic-calendar/academic-calendar';
 import {AuthService} from '../../../../../common/auth/auth.service';
 import {roleRoot} from '../../../../../common/auth/portal';
 
@@ -24,7 +25,7 @@ interface Band { grade: string; min: number; }
 @Component({
   selector: 'app-school-settings',
   standalone: true,
-  imports: [RichEditor, Icon, PageHeader, FormsModule, RouterLink, FileUpload, RolesPermissions],
+  imports: [RichEditor, Icon, PageHeader, FormsModule, RouterLink, FileUpload, RolesPermissions, AcademicCalendar],
   templateUrl: './school-settings.html',
   styleUrl: './school-settings.css',
 })

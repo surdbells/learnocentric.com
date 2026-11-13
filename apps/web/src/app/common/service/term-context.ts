@@ -7,6 +7,7 @@ export interface TermOption {
   id: number;
   name: string;
   session_id?: number;
+  session?: string;
   status?: string;
   is_current?: boolean;
 }
@@ -54,6 +55,12 @@ export class TermContext {
       },
       error: () => { this.loaded = false; }, // allow a later retry
     });
+  }
+
+  /** Re-fetch after the calendar changed (new session, different current term). */
+  reload(): void {
+    this.loaded = false;
+    this.load();
   }
 
   setActive(id: number): void {

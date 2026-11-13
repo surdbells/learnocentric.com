@@ -51,7 +51,7 @@ final class TopicsAction
     private function list(Request $request, Response $response): Response
     {
         $institution = $this->resolveInstitution($request, $this->em);
-        $query = ListQuery::fromRequest($request, ['title', 'week_number', 'approval_status', 'created_at'], ['approval_status', 'subject_id', 'class_id'], 'week_number');
+        $query = ListQuery::fromRequest($request, ['title', 'week_number', 'approval_status', 'created_at'], ['approval_status', 'subject_id', 'class_id', 'term_id'], 'week_number');
 
         $qb = $this->em->createQueryBuilder()->select('t')->from(Topic::class, 't')->join('t.subject', 's');
         if ($institution !== null) {
@@ -68,6 +68,10 @@ final class TopicsAction
         }
         if (isset($query->filters['class_id'])) {
             $qb->andWhere('t.schoolClass = :cid')->setParameter('cid', (int) $query->filters['class_id']);
+        }
+        if (isset($query->filters['term_id'])) {
+            // Term switcher: this term's topics plus any not tied to a term.
+            $qb->andWhere('(t.term = :tid OR t.term IS NULL)')->setParameter('tid', (int) $query->filters['term_id']);
         }
 
         $mapper = fn (Topic $t) => $this->row($t);

@@ -46,7 +46,7 @@ final class DeliveryPacksAction
     private function list(Request $request, Response $response): Response
     {
         $institution = $this->resolveInstitution($request, $this->em);
-        $query = ListQuery::fromRequest($request, ['status', 'created_at'], ['topic_id', 'subject_id', 'status'], 'created_at');
+        $query = ListQuery::fromRequest($request, ['status', 'created_at'], ['topic_id', 'subject_id', 'status', 'term_id'], 'created_at');
 
         $qb = $this->em->createQueryBuilder()->select('p')->from(TopicDeliveryPack::class, 'p')->join('p.topic', 't')->join('t.subject', 's');
         if ($institution !== null) {
@@ -63,6 +63,9 @@ final class DeliveryPacksAction
         }
         if (isset($query->filters['subject_id'])) {
             $qb->andWhere('t.subject = :sid')->setParameter('sid', (int) $query->filters['subject_id']);
+        }
+        if (isset($query->filters['term_id'])) {
+            $qb->andWhere('(t.term = :tid OR t.term IS NULL)')->setParameter('tid', (int) $query->filters['term_id']);
         }
 
         $mapper = fn (TopicDeliveryPack $p) => $this->row($p);

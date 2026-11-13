@@ -1,4 +1,4 @@
-import {Component, computed, DestroyRef, EventEmitter, inject, Input, OnInit, Output, signal} from '@angular/core';
+import {Component, computed, DestroyRef, effect, EventEmitter, inject, Input, OnInit, Output, signal, untracked} from '@angular/core';
 import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 import {DatePipe} from '@angular/common';
 import {FormsModule} from '@angular/forms';
@@ -6,6 +6,7 @@ import {Subject, debounceTime, distinctUntilChanged} from 'rxjs';
 import {ToastrService} from 'ngx-toastr';
 import {ApiService} from '../../common/service/api.service';
 import {Icon} from '../../common/icon/icon';
+import {TermContext} from '../../common/service/term-context';
 
 export interface GridColumn {
   key: string;
@@ -51,6 +52,11 @@ export class DataGrid implements OnInit {
   @Input() pageSize = 10;
   @Input() idKey = 'id';
   @Input() emptyMessage = 'No records found.';
+  /**
+   * Scope the list to the term picked in the top-bar switcher: sends
+   * `term_id` and refetches when the active term changes.
+   */
+  @Input() termScoped = false;
 
   @Output() view = new EventEmitter<any>();
   @Output() edit = new EventEmitter<any>();
@@ -58,6 +64,18 @@ export class DataGrid implements OnInit {
   private readonly api = inject(ApiService);
   private readonly toast = inject(ToastrService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly termContext = inject(TermContext);
+  private lastTermId: number | null | undefined;
+
+  constructor() {
+    // Refetch from page 1 whenever the active term changes (term-scoped grids only).
+    effect(() => {
+      const id = this.termContext.activeId();
+      if (!this.termScoped || this.lastTermId === undefined || id === this.lastTermId) return;
+      this.lastTermId = id;
+      untracked(() => { this.selected.set(new Set()); this.fetch(1); });
+    });
+  }
 
   rows = signal<any[]>([]);
   meta = signal<GridMeta>({total: 0, page: 1, per_page: 10, total_pages: 1});
@@ -111,6 +129,11 @@ export class DataGrid implements OnInit {
       ...this.filterValues(),
     };
     if (this.sort()) { params['sort'] = this.sort(); params['order'] = this.order(); }
+    if (this.termScoped) {
+      const termId = untracked(() => this.termContext.activeId());
+      this.lastTermId = termId;
+      if (termId) params['term_id'] = termId;
+    }
 
     this.api.get<{ data: any[]; meta: GridMeta }>(this.endpoint, {params}).subscribe({
       next: res => {

@@ -30,6 +30,7 @@
 
 <app-data-grid
   endpoint="/backend/school/scheme-of-work"
+  [termScoped]="true"
   [columns]="columns"
   [filters]="filterDefs()"
   [actions]="['edit', 'delete']"

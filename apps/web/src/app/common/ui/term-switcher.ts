@@ -1,4 +1,4 @@
-import {Component, OnInit, inject} from '@angular/core';
+import {Component, OnInit, computed, inject} from '@angular/core';
 import {Icon} from '../icon/icon';
 import {TermContext} from '../service/term-context';
 
@@ -26,7 +26,7 @@ import {TermContext} from '../service/term-context';
             <li>
               <button type="button" class="dropdown-item ts-item" [class.active]="t.id === ctx.activeId()"
                       (click)="ctx.setActive(t.id)">
-                <span>{{ t.name }}</span>
+                <span>{{ t.name }}@if (multiSession() && t.session) { <span class="ts-session">{{ t.session }}</span> }</span>
                 @if (t.is_current) { <span class="ts-current">Current</span> }
                 @if (t.id === ctx.activeId()) { <app-icon name="check" [size]="15" /> }
               </button>
@@ -53,9 +53,12 @@ import {TermContext} from '../service/term-context';
     .ts-item.active { color: var(--brand-700); font-weight: 600; }
     .ts-current { font-size: .68rem; font-weight: 700; color: var(--brand-700); background: rgba(var(--brand-rgb), .12); border-radius: 999px; padding: .05rem .4rem; margin-left: auto; }
     .ts-item.active .ts-current { margin-left: auto; }
+    .ts-session { margin-left: .35rem; font-size: .72rem; font-weight: 500; color: var(--bs-secondary-color); }
   `],
 })
 export class TermSwitcher implements OnInit {
   protected readonly ctx = inject(TermContext);
+  /** Show the session beside each term once the school has more than one. */
+  protected readonly multiSession = computed(() => new Set(this.ctx.terms().map(t => t.session_id)).size > 1);
   ngOnInit(): void { this.ctx.load(); }
 }

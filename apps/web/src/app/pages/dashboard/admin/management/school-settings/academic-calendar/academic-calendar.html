@@ -1,0 +1,53 @@
+<div class="card border-0 shadow-sm mb-4"><div class="card-body">
+  <h5 class="fw-semibold mb-1"><app-icon name="calendar_month" [size]="20" class="text-success" /> Academic calendar</h5>
+  <p class="text-body-secondary mb-4">Your sessions and terms. The current term is what everyone's term switcher starts on; topics, schemes of work and assessments are organised by term.</p>
+
+  @if (loading()) {
+    <div class="text-body-secondary">Loading…</div>
+  } @else {
+    @for (s of sessions(); track s.id) {
+      <div class="mb-4">
+        <div class="d-flex align-items-center gap-2 mb-2">
+          <span class="fw-semibold">{{ s.name }} session</span>
+          @if (s.is_current) { <span class="badge bg-success-subtle text-success">Current</span> }
+        </div>
+        <div class="table-responsive">
+          <table class="table table-sm align-middle mb-0">
+            <thead class="small text-body-secondary text-uppercase">
+              <tr><th>Term</th><th>Starts</th><th>Ends</th><th></th></tr>
+            </thead>
+            <tbody>
+              @for (t of s.terms; track t.id) {
+                <tr>
+                  <td style="min-width: 160px;">
+                    <input class="form-control form-control-sm" [ngModel]="t.name" (ngModelChange)="patch(t, {name: $event})" [attr.aria-label]="'Name of ' + t.name" />
+                  </td>
+                  <td><input type="date" class="form-control form-control-sm" [ngModel]="t.start_date" (ngModelChange)="patch(t, {start_date: $event || null})" [attr.aria-label]="t.name + ' start date'" /></td>
+                  <td><input type="date" class="form-control form-control-sm" [ngModel]="t.end_date" (ngModelChange)="patch(t, {end_date: $event || null})" [attr.aria-label]="t.name + ' end date'" /></td>
+                  <td class="text-end text-nowrap">
+                    @if (t.is_current) {
+                      <span class="badge bg-success-subtle text-success me-2">Current term</span>
+                    } @else {
+                      <button type="button" class="btn btn-sm btn-link text-decoration-none" [disabled]="busy() === t.id" (click)="makeCurrent(t)">Make current</button>
+                    }
+                    <button type="button" class="btn btn-sm btn-outline-success" [disabled]="busy() === t.id" (click)="save(t)">Save</button>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    } @empty {
+      <div class="text-body-secondary">No sessions yet.</div>
+    }
+
+    <hr />
+    <div class="fw-semibold mb-1">Start the next session</div>
+    <p class="small text-body-secondary mb-2">Creates a new academic year with First, Second and Third Term and makes its First Term current. Earlier sessions stay available in the term switcher.</p>
+    <div class="d-flex gap-2" style="max-width: 360px;">
+      <input class="form-control" placeholder="e.g. 2027/2028" [ngModel]="nextName()" (ngModelChange)="nextName.set($event)" aria-label="New session name" />
+      <button type="button" class="btn btn-success text-nowrap" [disabled]="starting()" (click)="startSession()"><app-icon name="add" [size]="16" /> Start session</button>
+    </div>
+  }
+</div></div>

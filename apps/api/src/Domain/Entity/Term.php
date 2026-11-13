@@ -55,17 +55,21 @@ class Term
     public function getId(): ?int { return $this->id; }
     public function getSession(): AcademicSession { return $this->session; }
     public function getName(): string { return $this->name; }
+    public function setName(string $v): void { $this->name = $v; }
+    public function getSequence(): int { return $this->sequence; }
     public function setStartDate(?DateTimeInterface $v): void { $this->startDate = $v; }
     public function setEndDate(?DateTimeInterface $v): void { $this->endDate = $v; }
     public function getStatus(): string { return $this->status; }
     public function setStatus(string $v): void { $this->status = $v; }
     public function setCurrent(bool $v): void { $this->isCurrent = $v; }
+    public function isCurrent(): bool { return $this->isCurrent; }
 
     public function toArray(): array
     {
         return [
             'id' => $this->id,
             'session_id' => $this->session->getId(),
+            'session' => $this->session->getName(),
             'name' => $this->name,
             'sequence' => $this->sequence,
             'start_date' => $this->startDate?->format('Y-m-d'),

@@ -69,7 +69,7 @@ final class SchemeOfWorkAction
             $qb->andWhere('sow.subject = :sid')->setParameter('sid', (int) $query->filters['subject_id']);
         }
         if (isset($query->filters['term_id'])) {
-            $qb->andWhere('sow.term = :tid')->setParameter('tid', (int) $query->filters['term_id']);
+            $qb->andWhere('(sow.term = :tid OR sow.term IS NULL)')->setParameter('tid', (int) $query->filters['term_id']);
         }
 
         $mapper = static fn (SchemeOfWork $s) => $s->toArray();
