@@ -63,6 +63,18 @@ return [
         return new JwtService($s['secret'], (int) $s['ttl'], $s['issuer']);
     }),
 
+    \App\Service\AccountMailer::class => factory(function (ContainerInterface $c): \App\Service\AccountMailer {
+        $s = $c->get('settings');
+        return new \App\Service\AccountMailer(
+            $c->get(\Doctrine\ORM\EntityManagerInterface::class),
+            $c->get(ZeptoMailer::class),
+            $c->get(\App\Service\PlatformSettings::class),
+            $c->get(LoggerInterface::class),
+            $s['app']['web_url'],
+            $s['app']['env'] === 'dev',
+        );
+    }),
+
     \App\Service\TotpService::class => factory(function (ContainerInterface $c): \App\Service\TotpService {
         return new \App\Service\TotpService($c->get('settings')['jwt']['secret']);
     }),

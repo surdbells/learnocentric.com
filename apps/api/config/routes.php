@@ -78,6 +78,11 @@ return static function (App $app): void {
         // Second sign-in step, authenticated by the short-lived challenge from /auth/login.
         $group->post('/auth/2fa/verify', \App\Application\Actions\Auth\TwoFactorAction::class . ':verify');
         $group->post('/auth/register', RegisterAction::class);
+        // Account recovery: each is authenticated by an emailed single-use token.
+        $group->post('/auth/password/forgot', \App\Application\Actions\Auth\AccountRecoveryAction::class . ':forgot');
+        $group->post('/auth/password/reset', \App\Application\Actions\Auth\AccountRecoveryAction::class . ':reset');
+        $group->post('/auth/email/verify', \App\Application\Actions\Auth\AccountRecoveryAction::class . ':verifyEmail');
+        $group->post('/auth/email/resend', \App\Application\Actions\Auth\AccountRecoveryAction::class . ':resendVerification');
         $group->get('/auth/join/{code:[A-Za-z0-9]{4,16}}', RegisterAction::class . ':lookup');
         // Paystack server-to-server notification (authenticated by its signature, not a login).
         $group->post('/billing/webhook', BillingAction::class . ':webhook');
@@ -98,6 +103,7 @@ return static function (App $app): void {
             $auth->post('/auth/2fa/disable', \App\Application\Actions\Auth\TwoFactorAction::class . ':disable');
             $auth->post('/auth/2fa/backup-codes', \App\Application\Actions\Auth\TwoFactorAction::class . ':backupCodes');
             $auth->map(['GET', 'PUT', 'DELETE'], '/auth/user-profile/{id:[0-9]+}', UserProfileAction::class);
+            $auth->post('/auth/user-profile/{id:[0-9]+}/password', UserProfileAction::class . ':resetPassword');
 
             $auth->get('/admin/institutions', ListInstitutionsAction::class);
             $auth->get('/admin/institutions/{id:[0-9]+}', GetInstitutionAction::class);

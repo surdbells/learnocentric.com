@@ -26,6 +26,12 @@ class ZeptoMailer
         $this->http = new Client(['timeout' => 15]);
     }
 
+    /** False when no ZeptoMail token is set, so nothing can actually be delivered. */
+    public function isConfigured(): bool
+    {
+        return $this->token !== '';
+    }
+
     /**
      * @param array{address:string,name?:string} $to
      * @return bool true if accepted for delivery

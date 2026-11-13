@@ -23,6 +23,8 @@ final class UserProfileAction
     public function __construct(
         private readonly EntityManagerInterface $em,
         private readonly AuditLogger $audit,
+        private readonly \App\Service\PasswordService $passwords,
+        private readonly \App\Service\PlatformSettings $settings,
     ) {
     }
 
@@ -89,11 +91,52 @@ final class UserProfileAction
             // Same institution, and cannot manage platform/other admins.
             $sameInstitution = $actor->getInstitution() !== null
                 && $target->getInstitution()?->getId() === $actor->getInstitution()->getId();
-            $targetIsPrivileged = in_array($target->getRole()->effectiveCode(), [Role::SUPER_ADMIN], true);
+            // Nobody here manages the platform owner, and an academic lead can't manage the school's admins.
+            $privileged = $role === Role::ACADEMIC_LEAD
+                ? [Role::SUPER_ADMIN, Role::SCHOOL_ADMIN, Role::TUTOR_ADMIN]
+                : [Role::SUPER_ADMIN];
+            $targetIsPrivileged = in_array($target->getRole()->effectiveCode(), $privileged, true);
 
             return $sameInstitution && !$targetIsPrivileged;
         }
 
         return false;
+    }
+
+    /** Higher number = more authority; you may only set passwords for accounts below you. */
+    private const RANK = [
+        Role::STUDENT => 1, Role::PARENT => 1, Role::TEACHER => 2, Role::ACADEMIC_LEAD => 3,
+        Role::SCHOOL_ADMIN => 4, Role::TUTOR_ADMIN => 4, Role::SUPER_ADMIN => 5,
+    ];
+
+    /**
+     * POST /auth/user-profile/{id}/password {password}: an administrator sets a
+     * temporary password for someone who can't sign in (they change it after).
+     */
+    public function resetPassword(Request $request, Response $response, array $args): Response
+    {
+        /** @var User $actor */
+        $actor = $request->getAttribute('user');
+        $target = $this->em->getRepository(User::class)->find((int) ($args['id'] ?? 0));
+        if ($target === null || !$this->canManage($actor, $target)) {
+            return Json::error($response, 'User not found.', 404);
+        }
+        $mine = self::RANK[$actor->getRole()->effectiveCode()] ?? 0;
+        $theirs = self::RANK[$target->getRole()->effectiveCode()] ?? 99;
+        if ($theirs >= $mine) {
+            return Json::error($response, 'You can only set passwords for accounts below your own role. They can use "Forgot password" instead.', 403);
+        }
+        $password = (string) (((array) $request->getParsedBody())['password'] ?? '');
+        $min = max(6, (int) $this->settings->get('security.password_min_length', 8));
+        if (strlen($password) < $min) {
+            return Json::error($response, "Choose a temporary password of at least $min characters.", 422);
+        }
+        $target->setPasswordHash($this->passwords->hash($password));
+        $target->clearTotpFailures();
+        $this->em->flush();
+        // The password itself is never written to the audit trail.
+        $this->audit->log('user.password_set_by_admin', $actor, 'User', (string) $target->getId());
+
+        return Json::write($response, ['ok' => true, 'message' => 'Temporary password set. Ask them to change it after signing in.']);
     }
 }

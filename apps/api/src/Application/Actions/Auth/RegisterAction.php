@@ -40,6 +40,7 @@ final class RegisterAction
         private readonly AuditLogger $audit,
         private readonly EntityManagerInterface $em,
         private readonly PlatformSettings $settings,
+        private readonly \App\Service\AccountMailer $accountMail,
     ) {
     }
 
@@ -87,6 +88,8 @@ final class RegisterAction
                 'role' => $role,
                 'institutionId' => $institutionId,
                 'phone' => $body['phone'] ?? null,
+                // An admin vouches for accounts they create; self sign-up must prove the email.
+                'verified' => $adminContext,
             ]);
         } catch (Throwable $e) {
             return Json::error($response, $e->getMessage(), 409);
@@ -97,6 +100,18 @@ final class RegisterAction
         // Admin-created accounts don't return a token; self-registration does.
         if ($adminContext) {
             return Json::write($response, ['user' => $user->toArray()], 201);
+        }
+
+        // When the platform requires it (and mail works), the account stays
+        // signed out until the emailed link is opened.
+        if ($this->settings->bool('registration.require_email_verification') && $this->accountMail->canDeliver()) {
+            $this->accountMail->sendEmailVerification($user);
+
+            return Json::write($response, [
+                'verification_required' => true,
+                'email' => $user->getEmail(),
+                'message' => 'We\'ve sent a confirmation link to ' . $user->getEmail() . '. Open it to finish creating your account.',
+            ], 201);
         }
 
         return Json::write($response, ['token' => $this->jwt->issueForUser($user), 'user' => $user->toArray()], 201);

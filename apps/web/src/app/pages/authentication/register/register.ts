@@ -28,6 +28,8 @@ export class Register {
   private readonly moduleAccess = inject(ModuleAccessService);
 
   isLoading = signal(false);
+  /** Set when the account was created but must confirm its email before signing in. */
+  pendingEmail = signal<string | null>(null);
   /** School the entered code belongs to, once checked. */
   school = signal<string | null>(null);
   codeError = signal<string | null>(null);
@@ -62,7 +64,13 @@ export class Register {
     this.isLoading.set(true);
     const v = this.form.getRawValue();
     this.api.post<AuthResponse>('/backend/auth/register', {...v, joinCode: v.joinCode.trim().toUpperCase()}).subscribe({
-      next: (res) => {
+      next: (res: any) => {
+        if (res?.verification_required) {
+          // The account exists but stays signed out until the emailed link is opened.
+          this.isLoading.set(false);
+          this.pendingEmail.set(res.email ?? v.email);
+          return;
+        }
         this.authService.persistLogin(res);
         this.moduleAccess.refresh();
         this.toast.success('Welcome! Your account is ready.');

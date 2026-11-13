@@ -12,6 +12,13 @@
     <div class="auth-card">
       <img class="auth-card-logo d-lg-none" src="images/logo/logoblack.png" alt="Learnocentric" />
 
+      @if (pendingEmail()) {
+      <h1 class="auth-title">Check your email</h1>
+      <div class="alert alert-success text-start mt-4">
+        We've sent a confirmation link to <strong>{{ pendingEmail() }}</strong>. Open it to finish creating your account, then sign in.
+      </div>
+      <p class="small text-body-secondary">Nothing after a few minutes? Check your spam folder, or sign in with your email and password to have it sent again.</p>
+      } @else {
       <h1 class="auth-title">Create an account</h1>
       <p class="text-body-secondary mb-4">You'll need the join code from your school.</p>
 
@@ -57,6 +64,7 @@
 
         <app-learno-button text="Create account" [isLoading]="isLoading()" />
       </form>
+      }
 
       <p class="small text-body-secondary text-center mt-4 mb-0">
         Already have an account? <a routerLink="/login" class="fw-semibold">Sign in</a>

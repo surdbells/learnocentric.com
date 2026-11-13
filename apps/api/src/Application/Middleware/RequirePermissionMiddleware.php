@@ -188,7 +188,7 @@ class RequirePermissionMiddleware implements MiddlewareInterface
             return 'approve';
         }
         // Working on an existing record through a sub-action is an edit.
-        if (preg_match('#(/\d+/(review|grade|grade-questions|validate|questions|draw-from-bank|start|end)|/assign|/regenerate)$#', $path)
+        if (preg_match('#(/\d+/(password|review|grade|grade-questions|validate|questions|draw-from-bank|start|end)|/assign|/regenerate)$#', $path)
             && strtoupper($request->getMethod()) === 'POST') {
             return 'edit';
         }

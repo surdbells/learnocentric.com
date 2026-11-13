@@ -41,10 +41,20 @@
         </div>
 
         <div class="mb-4">
-          <label class="form-label" for="password">Password</label>
+          <div class="d-flex justify-content-between align-items-baseline">
+            <label class="form-label" for="password">Password</label>
+            <a routerLink="/forgot-password" class="small">Forgot password?</a>
+          </div>
           <input id="password" name="password" type="password" formControlName="password"
                  class="form-control form-control-lg" placeholder="Enter your password" autocomplete="current-password" />
         </div>
+
+        @if (unverifiedEmail()) {
+          <div class="alert alert-warning small text-start">
+            Confirm your email address to sign in: open the link we sent to <strong>{{ unverifiedEmail() }}</strong>.
+            <button type="button" class="btn btn-link btn-sm p-0 align-baseline" (click)="resendVerification()">Send it again</button>
+          </div>
+        }
 
         <app-learno-button text="Sign In" [isLoading]="isLoading()" />
       </form>

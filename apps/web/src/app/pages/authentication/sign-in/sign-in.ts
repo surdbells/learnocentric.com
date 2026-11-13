@@ -28,6 +28,8 @@ export class SignIn {
   /** Set after a correct password when the account has 2FA: the second step. */
   challenge = signal<string | null>(null);
   code = signal('');
+  /** Set when sign-in is refused because the email hasn't been confirmed yet. */
+  unverifiedEmail = signal<string | null>(null);
 
     form = new FormGroup({
         email: new FormControl('', [Validators.email, Validators.required] ),
@@ -64,9 +66,13 @@ export class SignIn {
             this.finish(val);
           },
         error: (err) => {
-          console.log(err)
           this.isLoading.set(false)
-          this.toast.error("Incorrect email or password");
+          if (err?.status === 403 && err?.error?.code === 'email_unverified') {
+            // Self-registered account that hasn't opened its confirmation link yet.
+            this.unverifiedEmail.set(String(this.form.value.email ?? ''));
+            return;
+          }
+          this.toast.error(err?.status === 401 || !err?.error?.error ? "Incorrect email or password" : err.error.error);
           return;
         },
           complete: () => {
@@ -74,6 +80,13 @@ export class SignIn {
           }
         }
       );
+    }
+
+    resendVerification(): void {
+      this.apiService.post<any>('/backend/auth/email/resend', {email: this.unverifiedEmail()}).subscribe({
+        next: (r) => this.toast.success(r?.message ?? 'We\'ve sent a new confirmation link.'),
+        error: () => this.toast.error('Could not send the link. Please try again shortly.'),
+      });
     }
 
     /** Second step: exchange the challenge + authenticator (or backup) code for a session. */

@@ -30,6 +30,18 @@
       </div>
 
     </div>
+
+    @if (select()['id']) {
+      <div class="border rounded-3 p-3 mt-3" (keydown.enter)="$event.preventDefault()">
+        <div class="fw-semibold mb-1">Can't sign in?</div>
+        <div class="small text-body-secondary mb-2">Set a temporary password and share it with them. They can change it after signing in, or use “Forgot password” on the sign-in page.</div>
+        <div class="d-flex gap-2" style="max-width: 420px;">
+          <input type="text" class="form-control form-control-sm" placeholder="Temporary password" autocomplete="off" aria-label="Temporary password"
+                 [ngModel]="tempPassword()" (ngModelChange)="tempPassword.set($event)" [ngModelOptions]="{standalone: true}" />
+          <button type="button" class="btn btn-sm btn-outline-success text-nowrap" [disabled]="settingPassword()" (click)="setPassword()">Set password</button>
+        </div>
+      </div>
+    }
     @if (guardians()) { <app-student-guardians class="d-block mt-3" [studentId]="select()['id']" /> }
   </div>
   <div class="modal-footer">

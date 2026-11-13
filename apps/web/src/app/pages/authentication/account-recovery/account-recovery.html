@@ -1,0 +1,74 @@
+<div class="auth">
+  <aside class="auth-brand d-none d-lg-flex">
+    <div class="auth-brand-inner">
+      <img class="auth-brand-logo" src="images/logo/logowhite.png" alt="Learnocentric" />
+      <h2 class="auth-brand-title">Let's get you back in.</h2>
+      <p class="auth-brand-text">Manage students, academics, and results, all in one place.</p>
+      <img class="auth-brand-art" src="images/pictureoverlay.png" alt="" />
+    </div>
+  </aside>
+
+  <main class="auth-form">
+    <div class="auth-card">
+      <img class="auth-card-logo d-lg-none" src="images/logo/logoblack.png" alt="Learnocentric" />
+
+      @if (mode === 'forgot') {
+        <h1 class="auth-title">Forgot your password?</h1>
+        @if (done()) {
+          <div class="alert alert-success text-start">{{ done() }}</div>
+          @if (!emailAvailable()) {
+            <div class="alert alert-warning text-start">Email isn't set up on this platform yet, so no link can be sent. Ask your school administrator to reset your password.</div>
+          }
+        } @else {
+          <p class="text-body-secondary mb-4">Enter the email you sign in with and we'll send you a link to choose a new password.</p>
+          <form (ngSubmit)="requestReset()" class="text-start">
+            <div class="mb-4">
+              <label class="form-label" for="fp_email">Email</label>
+              <input id="fp_email" name="email" type="email" class="form-control form-control-lg" placeholder="you@example.com" autocomplete="username"
+                     [ngModel]="email()" (ngModelChange)="email.set($event)" />
+            </div>
+            @if (error()) { <div class="text-danger small mb-3">{{ error() }}</div> }
+            <app-learno-button text="Send reset link" [isLoading]="busy()" />
+          </form>
+        }
+      }
+
+      @if (mode === 'reset') {
+        <h1 class="auth-title">Choose a new password</h1>
+        @if (done()) {
+          <div class="alert alert-success text-start">{{ done() }}</div>
+        } @else {
+          <form (ngSubmit)="resetPassword()" class="text-start mt-4">
+            <div class="mb-3">
+              <label class="form-label" for="rp_pw">New password</label>
+              <input id="rp_pw" name="password" type="password" class="form-control form-control-lg" autocomplete="new-password"
+                     [ngModel]="password()" (ngModelChange)="password.set($event)" />
+            </div>
+            <div class="mb-4">
+              <label class="form-label" for="rp_pw2">Repeat new password</label>
+              <input id="rp_pw2" name="confirm" type="password" class="form-control form-control-lg" autocomplete="new-password"
+                     [ngModel]="confirm()" (ngModelChange)="confirm.set($event)" />
+            </div>
+            @if (error()) { <div class="text-danger small mb-3">{{ error() }} @if (linkProblem()) { <a routerLink="/forgot-password">Request a new link</a> }</div> }
+            <app-learno-button text="Change password" [isLoading]="busy()" />
+          </form>
+        }
+      }
+
+      @if (mode === 'verify') {
+        <h1 class="auth-title">Confirming your email</h1>
+        @if (done()) {
+          <div class="alert alert-success text-start mt-4">{{ done() }}</div>
+        } @else if (error()) {
+          <div class="alert alert-danger text-start mt-4">{{ error() }}</div>
+        } @else {
+          <p class="text-body-secondary mt-4"><span class="spinner-border spinner-border-sm me-2"></span> One moment…</p>
+        }
+      }
+
+      <p class="small text-body-secondary text-center mt-4 mb-0">
+        <a routerLink="/login" class="fw-semibold">Back to sign in</a>
+      </p>
+    </div>
+  </main>
+</div>

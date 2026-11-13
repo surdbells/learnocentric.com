@@ -19,6 +19,7 @@ final class LoginAction
         private readonly JwtService $jwt,
         private readonly AuditLogger $audit,
         private readonly \App\Service\PlatformSettings $settings,
+        private readonly \App\Service\AccountMailer $accountMail,
     ) {
     }
 
@@ -37,6 +38,16 @@ final class LoginAction
             // Log failed attempts (spec §15 audit trail), no actor, capture the email tried + IP/device.
             $this->audit->log('auth.login_failed', null, 'User', null, null, ['email' => $email], $this->ip($request));
             return Json::error($response, 'Incorrect email or password.', 401);
+        }
+
+        // Self-registered accounts must confirm their email first (only when we can actually email them).
+        if (!$user->isEmailVerified()
+            && $this->settings->bool('registration.require_email_verification')
+            && $this->accountMail->canDeliver()) {
+            return Json::write($response, [
+                'error' => 'Confirm your email address to sign in. Check your inbox for the link we sent.',
+                'code' => 'email_unverified',
+            ], 403);
         }
 
         // Second factor: the password step only earns a short-lived challenge.

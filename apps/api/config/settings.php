@@ -15,6 +15,9 @@ return function (): array {
             'env' => $env('APP_ENV', 'dev'),
             'debug' => $bool('APP_DEBUG', true),
             'url' => $env('APP_URL', 'http://127.0.0.1:8080'),
+            // Where the web app lives, for links in emails (password reset, email
+            // verification). Defaults to the first allowed CORS origin, i.e. the SPA.
+            'web_url' => $env('WEB_URL') ?: (trim(explode(',', (string) $env('CORS_ALLOWED_ORIGINS', ''))[0]) ?: 'http://localhost:4200'),
         ],
         'cors' => [
             'origins' => array_values(array_filter(array_map('trim', explode(',', (string) $env('CORS_ALLOWED_ORIGINS', ''))))),

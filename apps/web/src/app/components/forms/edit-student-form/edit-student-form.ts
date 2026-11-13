@@ -60,6 +60,19 @@ export class EditStudentForm {
   })
 
 
+  tempPassword = signal('');
+  settingPassword = signal(false);
+
+  /** Admin sets a temporary password for someone who can't sign in. */
+  setPassword(): void {
+    if (!this.tempPassword()) { this.toastService.error('Enter a temporary password'); return; }
+    this.settingPassword.set(true);
+    this.apiSrv.post<any>(`/backend/auth/user-profile/${this.select()['id']}/password`, {password: this.tempPassword()}).subscribe({
+      next: (r) => { this.settingPassword.set(false); this.tempPassword.set(''); this.toastService.success(r?.message ?? 'Temporary password set'); },
+      error: (e) => { this.settingPassword.set(false); this.toastService.error(e?.error?.error || 'Could not set the password'); },
+    });
+  }
+
   onEdit() {
     this.isLoading.set(true);
     this.apiSrv.put("/backend/auth/user-profile/" + this.select()['id'], { ...this.form.value, id: this.select()['id'] })

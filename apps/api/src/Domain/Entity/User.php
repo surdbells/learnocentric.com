@@ -67,6 +67,10 @@ class User
     #[ORM\Column(name: 'last_login', type: Types::DATETIME_IMMUTABLE, nullable: true)]
     private ?DateTimeImmutable $lastLogin = null;
 
+    /** When the user proved they own this email; null = self-registered and not yet verified. */
+    #[ORM\Column(name: 'email_verified_at', type: Types::DATETIME_IMMUTABLE, nullable: true)]
+    private ?DateTimeImmutable $emailVerifiedAt = null;
+
     /** Home/contact address the user entered on their own profile. Private: never in list payloads. */
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $address = null;
@@ -149,13 +153,15 @@ class User
     public function markLoggedIn(): void { $this->lastLogin = new DateTimeImmutable(); }
     public function getCreatedAt(): DateTimeImmutable { return $this->createdAt; }
 
+    public function isEmailVerified(): bool { return $this->emailVerifiedAt !== null; }
+    public function markEmailVerified(): void { $this->emailVerifiedAt ??= new DateTimeImmutable(); }
     public function getAddress(): ?string { return $this->address; }
     public function setAddress(?string $v): void { $this->address = ($v === null || trim($v) === '') ? null : trim($v); }
 
     /** The user's own view of their account: public shape plus private fields. */
     public function toOwnArray(): array
     {
-        return $this->toArray() + ['address' => $this->address];
+        return $this->toArray() + ['address' => $this->address, 'email_verified' => $this->isEmailVerified()];
     }
 
     // --- two-factor (TOTP) ---

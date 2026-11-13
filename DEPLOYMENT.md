@@ -98,7 +98,9 @@ APP_URL=https://api.YOUR_DOMAIN
 # The SPA origin(s) allowed to call the API (comma-separated, no trailing slash).
 CORS_ALLOWED_ORIGINS=https://YOUR_DOMAIN,https://www.YOUR_DOMAIN
 
-# Turn on table-driven RBAC only AFTER verifying the seeded grant matrix in staging.
+# Where the web app lives, used for links in emails (password reset, email
+# confirmation). Optional: defaults to the first CORS origin above.
+WEB_URL=https://YOUR_DOMAIN
 
 DB_DRIVER=pdo_pgsql
 DB_HOST=127.0.0.1

@@ -63,6 +63,11 @@ class AuthService
         $user = new User($data['email'], $data['firstName'], $data['lastName'], $role);
         $user->setPasswordHash($this->passwords->hash($data['password']));
         $user->setPhone($data['phone'] ?? null);
+        // Accounts created by a school or the platform are trusted; only
+        // self-registration (verified => false) has to prove the email.
+        if (($data['verified'] ?? true) === true) {
+            $user->markEmailVerified();
+        }
 
         if (!empty($data['institutionId'])) {
             $institution = $this->em->getRepository(Institution::class)->find((int) $data['institutionId']);
