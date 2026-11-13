@@ -16,9 +16,12 @@ use App\Domain\Entity\SchoolClass;
 use App\Domain\Entity\Subject;
 use App\Domain\Entity\Term;
 use App\Domain\Entity\Topic;
+use App\Domain\Entity\User;
 use App\Domain\Lifecycle;
 use App\Service\AuditLogger;
+use App\Application\Support\Portal;
 use App\Service\LifecycleService;
+use App\Service\NotificationService;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
@@ -32,7 +35,7 @@ final class AssessmentsAction
 {
     use ResolvesInstitution;
 
-    private const EDITABLE = [Lifecycle::DRAFT, Lifecycle::REVIEW];
+    private const EDITABLE = LifecycleService::EDITABLE;
     /** Roles allowed to set an assessment's moderation status. */
     private const MODERATORS = ['academic_lead', 'school_admin', 'tutor_admin', 'super_admin'];
 
@@ -40,6 +43,7 @@ final class AssessmentsAction
         private readonly EntityManagerInterface $em,
         private readonly AuditLogger $audit,
         private readonly LifecycleService $lifecycle,
+        private readonly NotificationService $notify,
     ) {
     }
 
@@ -85,7 +89,7 @@ final class AssessmentsAction
             $qb->andWhere('(a.term = :tid OR a.term IS NULL)')->setParameter('tid', (int) $query->filters['term_id']);
         }
 
-        $mapper = fn (Assessment $a) => $this->row($a);
+        $mapper = fn (Assessment $a) => $this->row($a, $request);
 
         if (!$query->paginated) {
             $qb->orderBy('a.createdAt', 'DESC');
@@ -100,12 +104,12 @@ final class AssessmentsAction
     /** GET /assessment/assessments/{id}, full detail with ordered questions. */
     public function show(Request $request, Response $response, array $args): Response
     {
-        $a = $this->em->getRepository(Assessment::class)->find((int) $args['id']);
+        $a = $this->find($request, (int) $args['id']);
         if ($a === null) {
             return Json::error($response, 'Assessment not found.', 404);
         }
 
-        return Json::write($response, $this->row($a, true));
+        return Json::write($response, $this->row($a, $request, true));
     }
 
     private function create(Request $request, Response $response): Response
@@ -113,7 +117,7 @@ final class AssessmentsAction
         $body = (array) $request->getParsedBody();
         $title = trim((string) ($body['title'] ?? ''));
         $subject = $this->em->getRepository(Subject::class)->find((int) ($body['subject_id'] ?? 0));
-        if ($title === '' || $subject === null) {
+        if ($title === '' || $subject === null || !$this->canActWithin($request, $subject->getInstitution())) {
             return Json::error($response, 'A title and a valid subject_id are required.', 422);
         }
 
@@ -130,18 +134,18 @@ final class AssessmentsAction
         $this->em->flush();
         $this->audit->log('assessment.create', $request->getAttribute('user'), 'Assessment', (string) $a->getId(), null, $a->toArray());
 
-        return Json::write($response, $this->row($a), 201);
+        return Json::write($response, $this->row($a, $request), 201);
     }
 
     private function update(Request $request, Response $response): Response
     {
         $body = (array) $request->getParsedBody();
-        $a = $this->em->getRepository(Assessment::class)->find((int) ($body['id'] ?? 0));
+        $a = $this->find($request, (int) ($body['id'] ?? 0));
         if ($a === null) {
             return Json::error($response, 'Assessment not found.', 404);
         }
         if (!in_array($a->getApprovalStatus(), self::EDITABLE, true)) {
-            return Json::error($response, "This assessment is {$a->getApprovalStatus()}; return it to draft before editing.", 409);
+            return Json::error($response, $this->lockedReason($a, $request), 409);
         }
         $before = $a->toArray();
         if (isset($body['title']) && trim((string) $body['title']) !== '') {
@@ -151,13 +155,13 @@ final class AssessmentsAction
         $this->em->flush();
         $this->audit->log('assessment.update', $request->getAttribute('user'), 'Assessment', (string) $a->getId(), $before, $a->toArray());
 
-        return Json::write($response, $this->row($a));
+        return Json::write($response, $this->row($a, $request));
     }
 
     private function delete(Request $request, Response $response): Response
     {
         $id = (int) ($request->getQueryParams()['id'] ?? 0);
-        $a = $this->em->getRepository(Assessment::class)->find($id);
+        $a = $this->find($request, $id);
         if ($a === null) {
             return Json::error($response, 'Assessment not found.', 404);
         }
@@ -171,12 +175,12 @@ final class AssessmentsAction
     /** POST /assessment/assessments/{id}/questions, attach a validated question. */
     public function attach(Request $request, Response $response, array $args): Response
     {
-        $a = $this->em->getRepository(Assessment::class)->find((int) $args['id']);
+        $a = $this->find($request, (int) $args['id']);
         if ($a === null) {
             return Json::error($response, 'Assessment not found.', 404);
         }
         if (!in_array($a->getApprovalStatus(), self::EDITABLE, true)) {
-            return Json::error($response, "This assessment is {$a->getApprovalStatus()}; return it to draft to change its questions.", 409);
+            return Json::error($response, $this->lockedReason($a, $request), 409);
         }
         $body = (array) $request->getParsedBody();
         $question = $this->em->getRepository(Question::class)->find((int) ($body['question_id'] ?? 0));
@@ -205,7 +209,7 @@ final class AssessmentsAction
         $this->em->flush();
         $this->audit->log('assessment.attach_question', $request->getAttribute('user'), 'Assessment', (string) $a->getId(), null, ['question_id' => $question->getId()]);
 
-        return Json::write($response, $this->row($a, true), 201);
+        return Json::write($response, $this->row($a, $request, true), 201);
     }
 
     /**
@@ -218,12 +222,12 @@ final class AssessmentsAction
      */
     public function drawFromBank(Request $request, Response $response, array $args): Response
     {
-        $a = $this->em->getRepository(Assessment::class)->find((int) $args['id']);
+        $a = $this->find($request, (int) $args['id']);
         if ($a === null) {
             return Json::error($response, 'Assessment not found.', 404);
         }
         if (!in_array($a->getApprovalStatus(), self::EDITABLE, true)) {
-            return Json::error($response, "This assessment is {$a->getApprovalStatus()}; return it to draft to change its questions.", 409);
+            return Json::error($response, $this->lockedReason($a, $request), 409);
         }
 
         $topic = $a->getTopic();
@@ -258,18 +262,18 @@ final class AssessmentsAction
         $this->em->flush();
         $this->audit->log('assessment.draw_from_bank', $request->getAttribute('user'), 'Assessment', (string) $a->getId(), null, ['drawn' => count($candidates)]);
 
-        return Json::write($response, ['drawn' => count($candidates)] + $this->row($a, true), 201);
+        return Json::write($response, ['drawn' => count($candidates)] + $this->row($a, $request, true), 201);
     }
 
     /** DELETE /assessment/assessments/{id}/questions/{qid}, detach a question. */
     public function detach(Request $request, Response $response, array $args): Response
     {
-        $a = $this->em->getRepository(Assessment::class)->find((int) $args['id']);
+        $a = $this->find($request, (int) $args['id']);
         if ($a === null) {
             return Json::error($response, 'Assessment not found.', 404);
         }
         if (!in_array($a->getApprovalStatus(), self::EDITABLE, true)) {
-            return Json::error($response, "This assessment is {$a->getApprovalStatus()}; return it to draft to change its questions.", 409);
+            return Json::error($response, $this->lockedReason($a, $request), 409);
         }
         $qid = (int) $args['qid'];
         foreach ($a->getItems() as $item) {
@@ -277,7 +281,7 @@ final class AssessmentsAction
                 $this->em->remove($item);
                 $this->em->flush();
                 $this->audit->log('assessment.detach_question', $request->getAttribute('user'), 'Assessment', (string) $a->getId(), null, ['question_id' => $qid]);
-                return Json::write($response, $this->row($a, true));
+                return Json::write($response, $this->row($a, $request, true));
             }
         }
 
@@ -287,36 +291,41 @@ final class AssessmentsAction
     /** POST /assessment/assessments/{id}/transition, lifecycle, gated on all questions being validated. */
     public function transition(Request $request, Response $response, array $args): Response
     {
-        $a = $this->em->getRepository(Assessment::class)->find((int) $args['id']);
+        $a = $this->find($request, (int) $args['id']);
         if ($a === null) {
             return Json::error($response, 'Assessment not found.', 404);
         }
         $body = (array) $request->getParsedBody();
         $to = (string) ($body['to'] ?? '');
 
-        if (in_array($to, [Lifecycle::APPROVED, Lifecycle::PUBLISHED], true)) {
-            if ($a->getItems()->count() === 0) {
-                return Json::error($response, 'Add at least one question before approving or publishing.', 422);
-            }
-            $bad = $a->unvalidatedQuestions();
-            if (!empty($bad)) {
-                return Json::error($response, 'Every question must pass answer validation first. Unvalidated: ' . implode(', ', $bad), 422);
+        /** @var User $actor */
+        $actor = $request->getAttribute('user');
+        $from = $a->getApprovalStatus();
+
+        // The gate applies to any move that ends with learners seeing the
+        // assessment, including "submit" at a school with no review step.
+        if ($this->lifecycle->leadsToPublication($from, $to, $actor)) {
+            $blockers = $this->blockers($a);
+            if ($blockers !== []) {
+                return Json::error($response, $blockers[0], 422);
             }
         }
 
         try {
-            $result = $this->lifecycle->transition($a, $to, $request->getAttribute('user'), $body['note'] ?? null);
+            $result = $this->lifecycle->transition($a, $to, $actor, $body['note'] ?? null);
         } catch (Throwable $e) {
             return Json::error($response, $e->getMessage(), 422);
         }
+        $this->announce($a, $from, (string) $result['status'], $actor, isset($body['note']) ? trim((string) $body['note']) : '');
+        $this->em->flush();
 
-        return Json::write($response, ['assessment' => $this->row($a, true)] + $result);
+        return Json::write($response, ['assessment' => $this->row($a, $request, true)] + $result);
     }
 
     /** POST /assessment/assessments/{id}/moderate, set the moderation status (staff/approver only). */
     public function moderate(Request $request, Response $response, array $args): Response
     {
-        $a = $this->em->getRepository(Assessment::class)->find((int) $args['id']);
+        $a = $this->find($request, (int) $args['id']);
         if ($a === null) {
             return Json::error($response, 'Assessment not found.', 404);
         }
@@ -334,13 +343,13 @@ final class AssessmentsAction
         $this->em->flush();
         $this->audit->log('assessment.moderate', $user, 'Assessment', (string) $a->getId(), $before, $a->toArray());
 
-        return Json::write($response, $this->row($a, true));
+        return Json::write($response, $this->row($a, $request, true));
     }
 
     /** GET /assessment/assessments/{id}/history */
     public function history(Request $request, Response $response, array $args): Response
     {
-        $a = $this->em->getRepository(Assessment::class)->find((int) $args['id']);
+        $a = $this->find($request, (int) $args['id']);
         if ($a === null) {
             return Json::error($response, 'Assessment not found.', 404);
         }
@@ -357,6 +366,9 @@ final class AssessmentsAction
         }
         $count = 0;
         foreach ($this->em->getRepository(Assessment::class)->findBy(['id' => $ids]) as $a) {
+            if (!$this->canActWithin($request, $a->getSubject()->getInstitution())) {
+                continue; // another school's record
+            }
             $this->em->remove($a);
             $count++;
         }
@@ -384,12 +396,122 @@ final class AssessmentsAction
         }
     }
 
-    private function row(Assessment $a, bool $withItems = false): array
+    /** Load an assessment the caller's school owns (another school's id reads as "not found"). */
+    private function find(Request $request, int $id): ?Assessment
     {
-        return $a->toArray($withItems) + [
+        $a = $id > 0 ? $this->em->getRepository(Assessment::class)->find($id) : null;
+
+        return $a !== null && $this->canActWithin($request, $a->getSubject()->getInstitution()) ? $a : null;
+    }
+
+    /**
+     * What stops this assessment being approved or published, in plain words.
+     *
+     * @return string[]
+     */
+    private function blockers(Assessment $a): array
+    {
+        if ($a->getItems()->count() === 0) {
+            return ['Add at least one question before this assessment can be approved or published.'];
+        }
+        $bad = [];
+        foreach ($a->getItems() as $item) {
+            if (!$item->getQuestion()->isAnswerValidated()) {
+                $bad[] = '"' . mb_strimwidth(rtrim(trim(strip_tags($item->getQuestion()->getStem())), '.'), 0, 60, '…') . '"';
+            }
+        }
+        if ($bad === []) {
+            return [];
+        }
+        $n = count($bad);
+
+        return [sprintf(
+            '%d question%s no validated answer yet: %s%s. Validate %s, or remove %s, then try again.',
+            $n,
+            $n === 1 ? ' has' : 's have',
+            implode(', ', array_slice($bad, 0, 3)),
+            $n > 3 ? ' and ' . ($n - 3) . ' more' : '',
+            $n === 1 ? 'it' : 'them',
+            $n === 1 ? 'it' : 'them',
+        )];
+    }
+
+    /** Why the caller cannot change this assessment right now, and what would unlock it. */
+    private function lockedReason(Assessment $a, Request $request): string
+    {
+        $g = $this->lifecycle->guidance($a, $request->getAttribute('user'), 'assessment', $a->getSubject()->getInstitution(), [], 'assessment');
+
+        return $g['edit_reason'] ?? 'This assessment cannot be changed right now.';
+    }
+
+    /**
+     * Tell the people a lifecycle move concerns: approvers when something is
+     * waiting for them, the author when a decision has been made.
+     */
+    private function announce(Assessment $a, string $from, string $to, User $actor, string $note): void
+    {
+        $title = $a->getTitle();
+        if ($to === Lifecycle::REVIEW && $from === Lifecycle::DRAFT) {
+            foreach ($this->lifecycle->approversOf($a->getSubject()->getInstitution())['users'] as $approver) {
+                if ($approver->getId() !== $actor->getId()) {
+                    $this->notify->notify(
+                        $approver,
+                        'system',
+                        'An assessment is waiting for your approval',
+                        sprintf('%s submitted "%s" (%s) for review.', $actor->displayName(), $title, $a->getSubject()->getName()),
+                        Portal::link($approver, '/academics/approval-queue'),
+                        false,
+                    );
+                }
+            }
+
+            return;
+        }
+
+        $authorId = $this->lifecycle->lastSubmitterId($a);
+        $author = $authorId !== null && $authorId !== $actor->getId() ? $this->em->getRepository(User::class)->find($authorId) : null;
+        if ($author === null) {
+            return;
+        }
+        [$subject, $message] = match (true) {
+            $to === Lifecycle::PUBLISHED => ['Your assessment was published', sprintf('"%s" is now available to learners.', $title)],
+            $to === Lifecycle::APPROVED => ['Your assessment was approved', sprintf('"%s" was approved. It still needs publishing before learners can take it.', $title)],
+            $to === Lifecycle::DRAFT && $from === Lifecycle::REVIEW => ['Your assessment was returned', sprintf('"%s" was returned for changes.%s', $title, $note !== '' ? ' Note: ' . $note : '')],
+            default => [null, null],
+        };
+        if ($subject !== null) {
+            $this->notify->notify($author, 'system', $subject, $message, Portal::link($author, '/academics/assessments'), false);
+        }
+    }
+
+    private function row(Assessment $a, Request $request, bool $withItems = false): array
+    {
+        $data = $a->toArray($withItems);
+        if ($withItems) {
+            // Say why a question fails the answer gate, and whether it can still be corrected.
+            $byId = [];
+            foreach ($a->getItems() as $item) {
+                $byId[$item->getQuestion()->getId()] = $item->getQuestion();
+            }
+            foreach ($data['questions'] as $i => $q) {
+                $question = $byId[$q['question_id']] ?? null;
+                if ($question === null || $question->isAnswerValidated()) {
+                    continue;
+                }
+                $data['questions'][$i]['answer_error'] = $question->answerError();
+                $data['questions'][$i]['question_editable'] = in_array($question->getApprovalStatus(), self::EDITABLE, true);
+                $data['questions'][$i]['question'] = $question->toArray();
+            }
+        }
+        /** @var User|null $viewer */
+        $viewer = $request->getAttribute('user');
+
+        return $data + [
             'next_states' => Lifecycle::nextStates($a->getApprovalStatus()),
             'unvalidated_questions' => $a->unvalidatedQuestions(),
             'version_count' => $this->em->getRepository(ContentVersion::class)->count(['entityType' => 'Assessment', 'entityId' => $a->getId()]),
+            'lifecycle' => $viewer === null ? null
+                : $this->lifecycle->guidance($a, $viewer, 'assessment', $a->getSubject()->getInstitution(), $this->blockers($a), 'assessment'),
         ];
     }
 }

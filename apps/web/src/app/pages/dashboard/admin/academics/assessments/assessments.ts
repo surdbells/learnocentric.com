@@ -16,7 +16,14 @@ declare const bootstrap: any;
 const STATUS_COLOR: Record<string, string> = {draft: 'secondary', review: 'warning', approved: 'info', published: 'success', archived: 'dark'};
 const MODERATION_COLOR: Record<string, string> = {pending: 'secondary', reviewed: 'info', approved: 'success', flagged: 'danger', returned: 'warning'};
 const MODERATION_STATUSES = ['pending', 'reviewed', 'approved', 'flagged', 'returned'];
-const ACTION_LABEL: Record<string, string> = {review: 'Submit for review', approved: 'Approve', published: 'Publish', archived: 'Archive', draft: 'Return to draft'};
+/** What to tell the person once a step has gone through, by the status the assessment ended in. */
+const DONE_MESSAGE: Record<string, string> = {
+  review: 'Submitted for review. The approvers have been notified.',
+  approved: 'Approved. It still needs publishing before learners can take it.',
+  published: 'Published. Learners can now take it.',
+  archived: 'Archived. Learners can no longer see it.',
+  draft: 'Back in draft. It can be edited again.',
+};
 const APPROVER_ROLES = ['academic_lead', 'school_admin', 'tutor_admin', 'super_admin'];
 
 @Component({
@@ -46,7 +53,13 @@ export class Assessments {
   topics = signal<any[]>([]);
 
   readonly isApprover = computed(() => APPROVER_ROLES.includes(this.auth.getAuthSession()?.user?.role ?? ''));
-  readonly editable = computed(() => ['draft', 'review'].includes(this.builder()?.approval_status));
+  /** The server's account of what this viewer may do with the open assessment, and why not. */
+  readonly life = computed<any | null>(() => this.builder()?.lifecycle ?? null);
+  readonly editable = computed(() => this.life() ? !!this.life().can_edit : ['draft', 'review'].includes(this.builder()?.approval_status));
+  readonly actions = computed<any[]>(() => this.life()?.actions ?? []);
+  readonly blockedActions = computed<any[]>(() => this.actions().filter((x) => !x.allowed && x.reason));
+  /** The question being corrected from inside the builder. */
+  fixing = signal<any | null>(null);
 
   columns: GridColumn[] = [
     {key: 'title', label: 'Title', sortable: true},
@@ -69,16 +82,6 @@ export class Assessments {
     {key: 'subject_id', label: 'Subject', options: this.subjects().map((s) => ({label: s.name, value: String(s.id)}))},
   ]);
 
-  readonly availableActions = computed(() => {
-    const a = this.builder();
-    if (!a) return [];
-    return (a.next_states ?? []).map((to: string) => ({
-      to,
-      label: ACTION_LABEL[to] ?? this.titleCase(to),
-      enabled: this.canDo(a, to),
-    }));
-  });
-
   constructor() {
     this.api.get<any>('/backend/school/subjects').subscribe({next: (r) => this.subjects.set(Array.isArray(r) ? r : (r?.data ?? []))});
     this.api.get<any>('/backend/curriculum/topics').subscribe({next: (r) => this.topics.set(Array.isArray(r) ? r : (r?.data ?? []))});
@@ -87,6 +90,12 @@ export class Assessments {
   onAdd(): void { this.selectAssessment.set(null); }
 
   onEdit(row: any): void {
+    // A locked assessment opens in the builder, which says why and what would unlock it.
+    if (row?.lifecycle && !row.lifecycle.can_edit) {
+      this.toast.info(row.lifecycle.edit_reason || 'This assessment cannot be edited right now.', 'Locked', {timeOut: 9000});
+      this.onView(row);
+      return;
+    }
     this.selectAssessment.set(row);
     this.open('add_assessment');
   }
@@ -208,18 +217,50 @@ export class Assessments {
     });
   }
 
-  transition(to: string): void {
+  transition(act: {to: string; allowed: boolean; reason?: string}): void {
     const a = this.builder();
     if (!a) return;
+    if (!act.allowed) { if (act.reason) this.toast.info(act.reason); return; }
     this.busy.set(true);
-    this.api.post<any>(`/backend/assessment/assessments/${a.id}/transition`, {to}).subscribe({
+    this.api.post<any>(`/backend/assessment/assessments/${a.id}/transition`, {to: act.to}).subscribe({
       next: (res) => {
-        this.toast.success(`Assessment ${res?.action ?? 'updated'}`);
+        this.toast.success(DONE_MESSAGE[res?.status] ?? 'Assessment updated');
         this.builder.set(res?.assessment ?? a);
         this.grid?.refresh();
         this.busy.set(false);
       },
-      error: (e) => { this.toast.error(e?.error?.error || 'Transition failed'); this.busy.set(false); },
+      error: (e) => { this.toast.error(e?.error?.error || 'That step could not be completed'); this.busy.set(false); this.loadDetail(a.id); },
+    });
+  }
+
+  /** Re-run the answer check on a question that is blocking approval. */
+  validateQuestion(q: any): void {
+    const a = this.builder();
+    if (!a) return;
+    this.busy.set(true);
+    this.api.post<any>(`/backend/assessment/questions/${q.question_id}/validate`, {}).subscribe({
+      next: () => { this.busy.set(false); this.toast.success('Answer checked. This question no longer blocks approval.'); this.loadDetail(a.id); this.grid?.refresh(); },
+      error: (e) => { this.busy.set(false); this.toast.error(e?.error?.error || 'The answer could not be validated'); this.loadDetail(a.id); },
+    });
+  }
+
+  /** Open the blocking question in the question form, over the builder. */
+  fixQuestion(q: any): void {
+    this.fixing.set(q.question ?? null);
+    if (q.question) this.open('fix_question');
+  }
+
+  /** The question was saved: check its answer straight away and refresh the builder. */
+  onQuestionFixed(ev: { success: boolean; question?: any }): void {
+    const a = this.builder();
+    const id = ev?.question?.id ?? this.fixing()?.id;
+    this.close('fix_question');
+    this.fixing.set(null);
+    if (!ev?.success || !a || !id) return;
+    this.busy.set(true);
+    this.api.post<any>(`/backend/assessment/questions/${id}/validate`, {}).subscribe({
+      next: () => { this.busy.set(false); this.toast.success('Question corrected and its answer checked.'); this.loadDetail(a.id); this.grid?.refresh(); },
+      error: (e) => { this.busy.set(false); this.toast.warning(e?.error?.error || 'Saved, but the answer still does not pass the check.'); this.loadDetail(a.id); },
     });
   }
 
@@ -240,12 +281,6 @@ export class Assessments {
   }
 
   moderationColor(s: string): string { return MODERATION_COLOR[s] ?? 'secondary'; }
-
-  canDo(a: any, to: string): boolean {
-    if (a.approval_status === 'draft' && to === 'review') return true;
-    if ((to === 'approved' || to === 'published') && ((a.unvalidated_questions?.length ?? 0) > 0 || (a.question_count ?? 0) === 0)) return false;
-    return this.isApprover();
-  }
 
   statusColor(s: string): string { return STATUS_COLOR[s] ?? 'secondary'; }
 

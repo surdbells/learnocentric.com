@@ -1,3 +1,25 @@
 .q-list li:last-child {
   border-bottom: 0 !important;
 }
+
+/* Where the assessment stands, and why it is locked when it is. */
+.life-panel {
+  border: 1px solid var(--bs-border-color);
+  border-left-width: 4px;
+  border-radius: .5rem;
+  padding: .75rem 1rem;
+  background: var(--bs-tertiary-bg);
+}
+.life-panel.life-review { border-left-color: var(--bs-warning); }
+.life-panel.life-approved { border-left-color: var(--bs-info); }
+.life-panel.life-published { border-left-color: var(--bs-success); }
+.life-panel.life-archived { border-left-color: var(--bs-secondary); }
+
+/* A question that stops the assessment being approved. */
+.q-problem {
+  border: 1px solid var(--bs-warning-border-subtle);
+  background: var(--bs-warning-bg-subtle);
+  color: var(--bs-body-color);
+  border-radius: .5rem;
+  padding: .5rem .75rem;
+}

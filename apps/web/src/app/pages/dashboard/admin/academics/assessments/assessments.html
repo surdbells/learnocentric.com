@@ -19,30 +19,63 @@
     @if (builder(); as a) {
       <div class="d-flex align-items-start justify-content-between flex-wrap gap-2 mb-1">
         <h5 class="fw-semibold mb-0">{{ a.title }}</h5>
-        <span class="badge bg-{{ statusColor(a.approval_status) }}-subtle text-{{ statusColor(a.approval_status) }} text-capitalize px-3 py-2">
-          {{ a.approval_status }}
+        <span class="badge bg-{{ statusColor(a.approval_status) }}-subtle text-{{ statusColor(a.approval_status) }} px-3 py-2">
+          {{ a.lifecycle?.status_label || titleCase(a.approval_status) }}
         </span>
       </div>
-      <p class="text-body-secondary small mb-4">
+      <p class="text-body-secondary small mb-3">
         {{ a.subject }}{{ a.topic ? ' · ' + a.topic : '' }} · {{ titleCase(a.type) }} ·
         {{ a.question_count }} question(s) · {{ a.total_marks }} mark(s) · pass {{ a.pass_mark }}%
       </p>
+
+      @if (life(); as l) {
+        <div class="life-panel life-{{ l.status }} mb-4" role="status">
+          <div class="fw-semibold">{{ l.summary }}</div>
+          @if (!l.can_edit && l.edit_reason) {
+            <div class="small mt-2">
+              <span class="fw-semibold"><app-icon name="lock" [size]="14" /> Why you can’t edit it:</span>
+              {{ l.edit_reason }}
+            </div>
+          }
+        </div>
+      }
 
       <!-- Attached questions -->
       <label class="form-label text-uppercase small fw-semibold text-body-secondary">Questions</label>
       @if (a.questions?.length) {
         <ol class="q-list list-unstyled mb-3">
           @for (q of a.questions; track q.id) {
-            <li class="d-flex align-items-center gap-2 py-2 border-bottom">
+            <li class="d-flex align-items-start gap-2 py-2 border-bottom">
               <span class="text-body-secondary small" style="width:1.5rem">{{ q.position + 1 }}.</span>
               <div class="flex-grow-1">
                 <div class="fw-medium">{{ q.stem }}</div>
-                <div class="small text-body-secondary">{{ q.type }} · {{ q.marks }} mark(s)
-                  @if (!q.answer_validated) { <span class="text-warning">· unvalidated</span> }
-                </div>
+                <div class="small text-body-secondary">{{ q.type }} · {{ q.marks }} mark(s)</div>
+                @if (!q.answer_validated) {
+                  <div class="q-problem small mt-1">
+                    <div>
+                      <span class="fw-semibold">Blocks approval:</span>
+                      {{ q.answer_error || 'the answer has not been checked since this question was last changed.' }}
+                    </div>
+                    <div class="d-flex flex-wrap gap-2 mt-2">
+                      @if (!q.answer_error) {
+                        <button type="button" class="btn btn-sm btn-success" [disabled]="busy()" (click)="validateQuestion(q)">Check answer now</button>
+                      }
+                      @if (q.question_editable) {
+                        <button type="button" class="btn btn-sm btn-outline-primary" [disabled]="busy()" (click)="fixQuestion(q)">
+                          {{ q.answer_error ? 'Correct this question' : 'Open question' }}
+                        </button>
+                      } @else if (q.answer_error) {
+                        <span class="text-body-secondary">This question is {{ q.approval_status }}, so it must be returned to draft in the Question Bank before it can be corrected.</span>
+                      }
+                      @if (editable()) {
+                        <button type="button" class="btn btn-sm btn-outline-danger" [disabled]="busy()" (click)="detach(q.question_id)">Remove from assessment</button>
+                      }
+                    </div>
+                  </div>
+                }
               </div>
               @if (editable()) {
-                <button type="button" class="btn btn-sm btn-icon text-danger" [disabled]="busy()" (click)="detach(q.question_id)" title="Remove">
+                <button type="button" class="btn btn-sm btn-icon text-danger" [disabled]="busy()" (click)="detach(q.question_id)" title="Remove" aria-label="Remove question">
                   <app-icon name="close" />
                 </button>
               }
@@ -88,32 +121,37 @@
         </div>
       }
 
-      <!-- Lifecycle -->
-      <label class="form-label text-uppercase small fw-semibold text-body-secondary">Move to</label>
-      @if (availableActions().length) {
+      <!-- Next steps -->
+      <label class="form-label text-uppercase small fw-semibold text-body-secondary">Next step</label>
+      @if (actions().length) {
         <div class="d-flex flex-wrap gap-2">
-          @for (act of availableActions(); track act.to) {
+          @for (act of actions(); track act.to) {
             <button type="button" class="btn btn-sm"
-                    [class.btn-primary]="act.to !== 'archived'"
+                    [class.btn-primary]="act.to !== 'archived' && act.action !== 'return'"
+                    [class.btn-outline-secondary]="act.action === 'return'"
                     [class.btn-outline-danger]="act.to === 'archived'"
-                    [disabled]="!act.enabled || busy()"
-                    (click)="transition(act.to)">
+                    [disabled]="!act.allowed || busy()"
+                    [attr.aria-describedby]="!act.allowed ? 'why-' + act.to : null"
+                    (click)="transition(act)">
               {{ act.label }}
             </button>
           }
         </div>
-        @if ((a.unvalidated_questions?.length ?? 0) > 0) {
-          <div class="form-text text-warning">Every question must be validated before this assessment can be approved or published.</div>
-        } @else if ((a.question_count ?? 0) === 0) {
-          <div class="form-text">Add at least one question before approving or publishing.</div>
+        @if (blockedActions().length) {
+          <ul class="list-unstyled small text-body-secondary mt-2 mb-0">
+            @for (act of blockedActions(); track act.to) {
+              <li [id]="'why-' + act.to"><span class="fw-semibold">{{ act.label }}:</span> {{ act.reason }}</li>
+            }
+          </ul>
         }
       } @else {
-        <div class="text-body-secondary small">No further transitions available from this state.</div>
+        <div class="text-body-secondary small">No further steps are available from this state.</div>
       }
 
       <!-- Moderation -->
       <div class="mt-4">
-        <label class="form-label text-uppercase small fw-semibold text-body-secondary">Moderation</label>
+        <label class="form-label text-uppercase small fw-semibold text-body-secondary">Moderation note</label>
+        <div class="form-text mt-0 mb-2">A quality marker for staff. It does not approve or publish the assessment; use “Next step” above for that.</div>
         <div class="mb-2">
           <span class="badge bg-{{ moderationColor(a.moderation_status) }}-subtle text-{{ moderationColor(a.moderation_status) }} text-capitalize px-3 py-2">
             {{ titleCase(a.moderation_status) }}
@@ -133,6 +171,11 @@
       <div class="text-body-secondary small">Loading…</div>
     }
   </div>
+</app-learno-modal>
+
+<!-- Correct a question that is blocking approval, stacked over the builder -->
+<app-learno-modal [modalId]="'fix_question'" [modalAction]="'Correct question'" [showBtn]="false">
+  <app-question-form modalForm [select]="fixing()" [topics]="topics()" (submitted)="onQuestionFixed($event)" />
 </app-learno-modal>
 
 <!-- Inline question authoring, stacked over the builder (PDF review item 6) -->

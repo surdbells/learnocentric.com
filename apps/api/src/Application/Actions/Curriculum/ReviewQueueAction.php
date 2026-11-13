@@ -12,8 +12,10 @@ use App\Domain\Entity\Question;
 use App\Domain\Entity\SchemeOfWork;
 use App\Domain\Entity\Topic;
 use App\Domain\Entity\TopicDeliveryPack;
+use App\Domain\Entity\User;
 use App\Domain\Entity\Worksheet;
 use App\Domain\Lifecycle;
+use App\Service\LifecycleService;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
@@ -23,8 +25,10 @@ final class ReviewQueueAction
 {
     use ResolvesInstitution;
 
-    public function __construct(private readonly EntityManagerInterface $em)
-    {
+    public function __construct(
+        private readonly EntityManagerInterface $em,
+        private readonly LifecycleService $lifecycle,
+    ) {
     }
 
     public function __invoke(Request $request, Response $response): Response
@@ -35,7 +39,7 @@ final class ReviewQueueAction
             $this->topics($institution),
             $this->deliveryPacks($institution),
             $this->questions($institution),
-            $this->assessments($institution),
+            $this->assessments($institution, $request->getAttribute('user')),
             $this->worksheets($institution),
             $this->schemesOfWork($institution),
             $this->contentPackages($institution),
@@ -107,21 +111,35 @@ final class ReviewQueueAction
     }
 
     /** @return array<int, array<string, mixed>> */
-    private function assessments(?object $institution): array
+    private function assessments(?object $institution, ?User $viewer): array
     {
+        // Approved assessments stay listed until they are published: at a school with a
+        // separate publish step they would otherwise drop out of sight, approved but
+        // never available to learners.
         $qb = $this->em->createQueryBuilder()->select('a')->from(Assessment::class, 'a')->join('a.subject', 's')
-            ->where('a.approvalStatus = :st')->setParameter('st', Lifecycle::REVIEW);
+            ->where('a.approvalStatus IN (:st)')->setParameter('st', [Lifecycle::REVIEW, Lifecycle::APPROVED]);
         if ($institution !== null) {
             $qb->andWhere('s.institution = :inst')->setParameter('inst', $institution);
         }
 
-        return array_map(static fn (Assessment $a): array => [
+        return array_map(fn (Assessment $a): array => [
             'type' => 'Assessment',
             'id' => $a->getId(),
             'title' => $a->getTitle(),
             'subject' => $a->getSubject()->getName(),
             'status' => $a->getApprovalStatus(),
             'updated_at' => $a->getUpdatedAt()->format(DATE_ATOM),
+            // What this viewer may do with it, and why not where they may not.
+            'lifecycle' => $viewer === null ? null : $this->lifecycle->guidance(
+                $a,
+                $viewer,
+                'assessment',
+                $a->getSubject()->getInstitution(),
+                $a->getItems()->count() === 0
+                    ? ['Add at least one question before this assessment can be approved or published.']
+                    : ($a->unvalidatedQuestions() !== [] ? [count($a->unvalidatedQuestions()) . ' question(s) have no validated answer yet. Open the assessment to validate or remove them.'] : []),
+                'assessment',
+            ),
         ], $qb->getQuery()->getResult());
     }
 

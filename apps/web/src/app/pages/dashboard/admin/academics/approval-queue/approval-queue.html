@@ -27,7 +27,15 @@
                   <app-icon [name]="typeIcon(item.type)" [size]="14" /> {{ typeLabel(item.type) }}
                 </span>
               </td>
-              <td class="fw-medium item-title">{{ item.title }}</td>
+              <td class="fw-medium item-title">
+                {{ item.title }}
+                @if (item.status === 'approved') {
+                  <span class="badge bg-info-subtle text-info ms-1">Approved, not published</span>
+                }
+                @if (blockReason(item); as why) {
+                  <span class="d-block small fw-normal text-body-secondary mt-1">{{ why }}</span>
+                }
+              </td>
               <td class="text-body-secondary">{{ item.subject || '-' }}</td>
               <td class="text-body-secondary small">
                 {{ waited(item.updated_at) }}
@@ -38,12 +46,18 @@
                   <button type="button" class="btn btn-outline-primary" [disabled]="isBusy(item)" (click)="review(item)">
                     <app-icon name="visibility" [size]="15" /> Review
                   </button>
-                  <button type="button" class="btn btn-success" [disabled]="isBusy(item)" (click)="approve(item)">
-                    <app-icon name="check" [size]="15" /> Approve
-                  </button>
-                  <button type="button" class="btn btn-outline-secondary" [disabled]="isBusy(item)" (click)="return(item)">
-                    Return
-                  </button>
+                  @if (item.status === 'approved') {
+                    <button type="button" class="btn btn-success" [disabled]="isBusy(item) || !can(item, 'published')" (click)="publish(item)">
+                      <app-icon name="check" [size]="15" /> Publish
+                    </button>
+                  } @else {
+                    <button type="button" class="btn btn-success" [disabled]="isBusy(item) || !can(item, 'approved')" (click)="approve(item)">
+                      <app-icon name="check" [size]="15" /> {{ stepLabel(item, 'approved', 'Approve') }}
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary" [disabled]="isBusy(item) || !can(item, 'draft')" (click)="return(item)">
+                      Return
+                    </button>
+                  }
                 </div>
               </td>
             </tr>
@@ -108,11 +122,20 @@
         }
       }
 
+      @if (blockReason(it); as why) {
+        <div class="alert alert-warning small py-2 px-3 mt-3 mb-0" role="status">{{ why }}</div>
+      }
       <div class="d-flex justify-content-end gap-2 mt-4 pt-3 border-top">
-        <button type="button" class="btn btn-outline-secondary" [disabled]="isBusy(it)" (click)="reviewReturn()">Return to author</button>
-        <button type="button" class="btn btn-success" [disabled]="isBusy(it)" (click)="reviewApprove()">
-          <app-icon name="check" [size]="16" /> Approve
-        </button>
+        @if (it.status === 'approved') {
+          <button type="button" class="btn btn-success" [disabled]="isBusy(it) || !can(it, 'published')" (click)="reviewPublish()">
+            <app-icon name="check" [size]="16" /> Publish
+          </button>
+        } @else {
+          <button type="button" class="btn btn-outline-secondary" [disabled]="isBusy(it) || !can(it, 'draft')" (click)="reviewReturn()">Return to author</button>
+          <button type="button" class="btn btn-success" [disabled]="isBusy(it) || !can(it, 'approved')" (click)="reviewApprove()">
+            <app-icon name="check" [size]="16" /> {{ stepLabel(it, 'approved', 'Approve') }}
+          </button>
+        }
       </div>
     }
   </div>

@@ -99,7 +99,7 @@ export class ApprovalQueue {
     const it = this.items();
     const oldest = it.length ? it.reduce((a, b) => a.updated_at < b.updated_at ? a : b) : null;
     return [
-      {label: 'Awaiting approval', value: it.length, icon: 'inbox', tone: it.length > 0 ? 'warning' : 'success'},
+      {label: 'Awaiting approval', value: it.filter(x => x.status !== 'approved').length, icon: 'inbox', tone: it.some(x => x.status !== 'approved') ? 'warning' : 'success'},
       {label: 'Content types', value: new Set(it.map(x => x.type)).size, icon: 'layers', tone: 'info'},
       {label: 'Assessments', value: it.filter(x => x.type === 'Assessment' || x.type === 'Question').length, icon: 'quiz', tone: 'primary'},
       {label: 'Oldest waiting', value: oldest ? this.waited(oldest.updated_at) : '-', icon: 'schedule', tone: 'secondary'},
@@ -154,12 +154,37 @@ export class ApprovalQueue {
     this.transition(item, 'approved', null, 'approved');
   }
 
+  /** The final step for an item that was approved but never made available. */
+  publish(item: any): void {
+    this.transition(item, 'published', null, 'published');
+  }
+  reviewPublish(): void { const it = this.reviewItem(); if (it) { this.close('review_item'); this.publish(it); } }
+
+  /**
+   * May the viewer take this step? Items that carry the server's guidance are
+   * answered from it; the rest behave as before and the server decides.
+   */
+  can(item: any, to: string): boolean {
+    const act = item?.lifecycle?.actions?.find((a: any) => a.to === to);
+    return item?.lifecycle ? !!act?.allowed : true;
+  }
+  /** The button text for a step (a school without a separate publish step approves and publishes at once). */
+  stepLabel(item: any, to: string, fallback: string): string {
+    return item?.lifecycle?.actions?.find((a: any) => a.to === to)?.label ?? fallback;
+  }
+  /** Why the main step is not available to this viewer, when it is not. */
+  blockReason(item: any): string | null {
+    const main = item?.status === 'approved' ? 'published' : 'approved';
+    const act = item?.lifecycle?.actions?.find((a: any) => a.to === main);
+    return act && !act.allowed ? (act.reason ?? null) : null;
+  }
+
   return(item: any): void {
     const note = isPlatformBrowser(this.platformId)
-      ? (window.prompt('Reason for returning to the author (optional):') ?? '')
+      ? window.prompt('Reason for returning to the author (optional):')
       : '';
-    // A null return from prompt means the user cancelled.
-    if (isPlatformBrowser(this.platformId) && note === null) return;
+    // A null return from prompt means the user cancelled: leave the item where it is.
+    if (note === null) return;
     this.transition(item, 'draft', note, 'returned to the author');
   }
 
@@ -169,11 +194,16 @@ export class ApprovalQueue {
     const key = `${item.type}:${item.id}`;
     this.busyKey.set(key);
     this.api.post<any>(`${base}/${item.id}/transition`, {to, note}).subscribe({
-      next: () => {
+      next: (res) => {
         this.busyKey.set(null);
-        this.toast.success(`${this.typeLabel(item.type)} ${verb}`);
-        // Drop it from the queue, it's no longer in review.
-        this.items.set(this.items().filter(x => !(x.type === item.type && x.id === item.id)));
+        const ended = res?.status ?? to;
+        if (ended === 'approved') {
+          // Approved but not yet available: say so, and keep it listed for the publish step.
+          this.toast.success(`${this.typeLabel(item.type)} approved. It still needs publishing before learners can use it.`);
+        } else {
+          this.toast.success(`${this.typeLabel(item.type)} ${ended === 'published' ? 'published' : verb}`);
+        }
+        this.load();
       },
       error: (e) => { this.busyKey.set(null); this.toast.error(e?.error?.error || 'Could not update this item'); },
     });
