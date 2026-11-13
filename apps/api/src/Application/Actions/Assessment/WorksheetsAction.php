@@ -18,6 +18,7 @@ use App\Domain\Lifecycle;
 use App\Service\AuditLogger;
 use App\Service\LifecycleNotifier;
 use App\Service\LifecycleService;
+use App\Service\SubmittedWork;
 use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Http\Message\ResponseInterface as Response;
@@ -37,6 +38,7 @@ final class WorksheetsAction
         private readonly AuditLogger $audit,
         private readonly LifecycleService $lifecycle,
         private readonly LifecycleNotifier $notifier,
+        private readonly SubmittedWork $work,
     ) {
     }
 
@@ -134,11 +136,46 @@ final class WorksheetsAction
         if ($w === null) {
             return Json::error($response, 'Worksheet not found.', 404);
         }
+        // Work learners have handed in is never deleted along with its parent.
+        if (($held = $this->work->refusal($w)) !== null) {
+            return Json::error($response, $held, 409);
+        }
         $this->em->remove($w);
         $this->em->flush();
         $this->audit->log('worksheet.delete', $request->getAttribute('user'), 'Worksheet', (string) $id, null, null);
 
         return Json::write($response, ['deleted' => true, 'id' => $id]);
+    }
+
+    /**
+     * PUT /assessment/worksheets/{id}/due-date {due_date: "YYYY-MM-DD" | null}
+     *
+     * The due date decides when the worksheet stops accepting work, so it can be
+     * moved at any time, including on a published worksheet whose content is
+     * locked. Otherwise extending a deadline would mean taking the worksheet
+     * down and having it approved again.
+     */
+    public function setDueDate(Request $request, Response $response, array $args): Response
+    {
+        $w = $this->findOwned($request, (int) $args['id']);
+        if ($w === null) {
+            return Json::error($response, 'Worksheet not found.', 404);
+        }
+        $body = (array) $request->getParsedBody();
+        $raw = trim((string) ($body['due_date'] ?? ''));
+        $date = null;
+        if ($raw !== '') {
+            $date = DateTimeImmutable::createFromFormat('!Y-m-d', $raw);
+            if ($date === false || $date->format('Y-m-d') !== $raw) {
+                return Json::error($response, 'Give the due date as a calendar date (YYYY-MM-DD), or leave it empty for no due date.', 422);
+            }
+        }
+        $before = $w->getDueDate()?->format('Y-m-d');
+        $w->setDueDate($date);
+        $this->em->flush();
+        $this->audit->log('worksheet.due_date', $request->getAttribute('user'), 'Worksheet', (string) $w->getId(), ['due_date' => $before], ['due_date' => $date?->format('Y-m-d')]);
+
+        return Json::write($response, $this->row($w, $request));
     }
 
     public function transition(Request $request, Response $response, array $args): Response
@@ -172,9 +209,14 @@ final class WorksheetsAction
             return Json::error($response, 'No ids provided.', 422);
         }
         $count = 0;
+        $kept = 0;
         foreach ($this->em->getRepository(Worksheet::class)->findBy(['id' => $ids]) as $w) {
             if (!$this->canActWithin($request, $this->ownerOf($w))) {
                 continue; // another school's record
+            }
+            if ($this->work->refusal($w) !== null) {
+                $kept++; // holds work learners have handed in
+                continue;
             }
             $this->em->remove($w);
             $count++;
@@ -182,7 +224,13 @@ final class WorksheetsAction
         $this->em->flush();
         $this->audit->log('worksheet.bulk_delete', $request->getAttribute('user'), 'Worksheet', implode(',', $ids), null, ['count' => $count]);
 
-        return Json::write($response, ['deleted' => $count]);
+        return Json::write($response, [
+            'deleted' => $count,
+            'kept' => $kept,
+            'message' => $kept > 0
+                ? sprintf('%d of the selected worksheets could not be deleted because learners have handed in work for %s. Archive %s instead.', $kept, $kept === 1 ? 'it' : 'them', $kept === 1 ? 'it' : 'them')
+                : null,
+        ]);
     }
 
     private function applyFields(Worksheet $w, array $body): void

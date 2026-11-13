@@ -39,6 +39,8 @@ export class Worksheets {
   summary = signal<any | null>(null);
   gradeDraft = signal<Record<number, { score: any; feedback: string }>>({});
   busy = signal(false);
+  /** The due date being edited in the manage view (YYYY-MM-DD, or '' for none). */
+  dueDraft = signal<string>('');
   topics = signal<any[]>([]);
 
   // Per-question marking (structured worksheets)
@@ -91,6 +93,7 @@ export class Worksheets {
 
   onView(row: any): void {
     this.manage.set(row);
+    this.dueDraft.set(row?.due_date ?? '');
     this.history.set([]);
     this.submissions.set([]);
     this.summary.set(null);
@@ -177,6 +180,25 @@ export class Worksheets {
         this.loadSubmissions(this.manage().id);
       },
       error: (e) => { this.toast.error(e?.error?.error || 'Could not save marks'); this.markBusy.set(false); },
+    });
+  }
+
+  /** Move (or remove) the due date. Allowed at any status: it changes when work is accepted, not the content. */
+  saveDueDate(): void {
+    const w = this.manage();
+    if (!w) return;
+    this.busy.set(true);
+    this.api.put<any>(`/backend/assessment/worksheets/${w.id}/due-date`, {due_date: this.dueDraft() || null}).subscribe({
+      next: (res) => {
+        this.manage.set(res ?? w);
+        this.dueDraft.set(res?.due_date ?? '');
+        this.toast.success(res?.due_date
+          ? (res.closed ? 'Due date saved. The worksheet is closed to new work.' : 'Due date saved. Learners can hand in work until the end of that day.')
+          : 'Due date removed. The worksheet has no deadline.');
+        this.grid?.refresh();
+        this.busy.set(false);
+      },
+      error: (e) => { this.toast.error(e?.error?.error || 'Could not save the due date'); this.busy.set(false); },
     });
   }
 

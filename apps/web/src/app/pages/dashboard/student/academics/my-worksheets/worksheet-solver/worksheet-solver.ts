@@ -64,7 +64,9 @@ export class WorksheetSolver implements OnInit, OnDestroy {
     });
   }
 
-  readOnly = computed(() => ['submitted', 'graded'].includes(this.data()?.status));
+  /** Past its due date and not handed in: it can be read, not answered. */
+  closed = computed(() => !!this.data()?.closed && !['submitted', 'graded'].includes(this.data()?.status));
+  readOnly = computed(() => ['submitted', 'graded'].includes(this.data()?.status) || this.closed());
 
   flatQuestions = computed<any[]>(() => (this.data()?.sections ?? []).flatMap((s: any) => s.questions));
 

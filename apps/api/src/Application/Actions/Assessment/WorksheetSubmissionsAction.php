@@ -15,6 +15,7 @@ use App\Domain\Entity\WorksheetSubmission;
 use App\Domain\Lifecycle;
 use App\Service\AuditLogger;
 use App\Service\LifecycleService;
+use App\Service\SubmittedWork;
 use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Http\Message\ResponseInterface as Response;
@@ -33,6 +34,7 @@ final class WorksheetSubmissionsAction
         private readonly AuditLogger $audit,
         private readonly \App\Service\NotificationService $notify,
         private readonly LifecycleService $lifecycle,
+        private readonly SubmittedWork $work,
     ) {
     }
 
@@ -244,6 +246,21 @@ final class WorksheetSubmissionsAction
         $existing = [];
         foreach ($this->em->getRepository(WorksheetQuestion::class)->findBy(['worksheet' => $worksheet]) as $old) {
             $existing[(int) $old->getId()] = $old;
+        }
+
+        // Before changing anything: a question learners have already answered in
+        // handed-in work can be reworded but not removed, since removing it would
+        // delete those answers.
+        $named = [];
+        foreach ($items as $item) {
+            if (is_array($item) && trim((string) ($item['prompt'] ?? '')) !== '') {
+                $named[(int) ($item['id'] ?? 0)] = true;
+            }
+        }
+        foreach ($existing as $id => $old) {
+            if (!isset($named[$id]) && ($held = $this->work->refusal($old)) !== null) {
+                return Json::error($response, sprintf('The question "%s" cannot be removed. %s You can still change its wording.', mb_strimwidth($old->getPrompt(), 0, 60, '…'), $held), 409);
+            }
         }
 
         $total = 0;
@@ -641,6 +658,8 @@ final class WorksheetSubmissionsAction
             'sections' => array_map(static fn ($k) => $sections[$k], $order),
             'responses' => $respMap,
             'status' => $submission?->getStatus() ?? 'not_started',
+            'closed' => $worksheet->isClosed(),
+            'closed_message' => $worksheet->isClosed() ? $worksheet->closedMessage() : null,
             'score' => $submission?->getScore(),
             'feedback' => $submission?->getFeedback(),
             'attachment_url' => $submission !== null ? ($submission->toArray()['attachment_url'] ?? null) : null,
@@ -695,6 +714,12 @@ final class WorksheetSubmissionsAction
             if (!$handedIn) {
                 return [null, Json::error($response, $toWork ? 'This worksheet is not open for submissions.' : 'Worksheet not found.', $toWork ? 422 : 404)];
             }
+        }
+
+        // Past the due date nothing more is handed in, changed or saved. What was
+        // already handed in stays readable.
+        if ($toWork && $worksheet->isClosed()) {
+            return [null, Json::error($response, $worksheet->closedMessage(), 409)];
         }
 
         return [$worksheet, null];

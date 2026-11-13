@@ -165,4 +165,13 @@ export class MyWorksheets {
   }
 
   isGraded(w: any): boolean { return w.submission?.status === 'graded'; }
+  /** Submitted or marked (an unfinished draft is not handed in). */
+  handedIn(w: any): boolean { return ['submitted', 'graded'].includes(w.submission?.status); }
+  /** Can the learner still answer or change answers? Not once it is marked, or after the due date. */
+  canWork(w: any): boolean { return !this.isGraded(w) && !w.closed; }
+  closedText(w: any): string {
+    return this.handedIn(w)
+      ? `This worksheet closed on ${w.due_date}. Your work was handed in and is waiting to be marked.`
+      : `This worksheet closed on ${w.due_date} and no longer accepts work. If you need more time, ask your teacher to extend the due date.`;
+  }
 }

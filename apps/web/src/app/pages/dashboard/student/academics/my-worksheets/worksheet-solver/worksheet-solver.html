@@ -6,7 +6,9 @@
     <button type="button" class="btn btn-link text-decoration-none px-0" (click)="exit()">
       <app-icon name="arrow_back" [size]="18" /> Back to Worksheets
     </button>
-    @if (readOnly()) {
+    @if (closed()) {
+      <span class="badge bg-secondary-subtle text-secondary px-3 py-2"><app-icon name="lock" [size]="15" /> Closed</span>
+    } @else if (readOnly()) {
       <span class="badge bg-success-subtle text-success px-3 py-2"><app-icon name="check_circle" [size]="15" /> {{ d.status === 'graded' ? 'Graded' : 'Submitted' }}</span>
     } @else if (savedAt()) {
       <span class="small text-body-secondary"><app-icon name="cloud_done" [size]="15" /> Saved</span>
@@ -21,16 +23,23 @@
         <div class="ws-ico"><app-icon name="description" [size]="26" /></div>
         <div>
           <span class="badge mb-1" [class.bg-warning-subtle]="!readOnly()" [class.text-warning]="!readOnly()"
-                [class.bg-success-subtle]="readOnly()" [class.text-success]="readOnly()">
-            {{ readOnly() ? (d.status === 'graded' ? 'Graded' : 'Submitted') : 'In Progress' }}
+                [class.bg-success-subtle]="readOnly() && !closed()" [class.text-success]="readOnly() && !closed()"
+                [class.bg-secondary-subtle]="closed()" [class.text-secondary]="closed()">
+            {{ closed() ? 'Closed' : (readOnly() ? (d.status === 'graded' ? 'Graded' : 'Submitted') : 'In Progress') }}
           </span>
           <h5 class="fw-semibold mb-1">{{ d.worksheet.title }}</h5>
           <div class="small text-body-secondary">{{ d.worksheet.subject }} · {{ totalQuestions() }} Questions · {{ totalMarks() }} Marks</div>
         </div>
       </div></div>
 
+      @if (closed()) {
+        <div class="alert alert-secondary py-3 px-3 mb-4" role="status">
+          <app-icon name="lock" [size]="18" /> {{ d.closed_message }}
+        </div>
+      }
+
       <!-- Result banner (after grading) -->
-      @if (readOnly()) {
+      @if (readOnly() && !closed()) {
         <div class="alert py-3 px-3 mb-4" [class.alert-success]="d.status === 'graded'" [class.alert-info]="d.status !== 'graded'">
           <div class="d-flex align-items-center gap-2">
             <app-icon [name]="d.status === 'graded' ? 'workspace_premium' : 'hourglass_top'" [size]="20" />

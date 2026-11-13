@@ -34,11 +34,14 @@
           </div>
           <div class="lo-row-end">
             @if (isGraded(w)) { <span class="fw-bold">{{ w.submission.score }}/{{ w.total_marks }}</span> }
-            @if (w.submission) {
+            @if (w.submission && w.submission.status !== 'draft') {
               <span class="badge bg-{{ statusColor(w.submission.status) }}-subtle text-{{ statusColor(w.submission.status) }} text-capitalize">{{ w.submission.status }}</span>
             }
-            <button type="button" class="btn btn-sm" [class.btn-primary]="!isGraded(w)" [class.btn-outline-secondary]="isGraded(w)" (click)="openDo(w)">
-              {{ isGraded(w) ? 'View' : (w.submission ? 'Edit' : 'Start') }}
+            @if (w.closed && !isGraded(w)) {
+              <span class="badge bg-secondary-subtle text-secondary">Closed</span>
+            }
+            <button type="button" class="btn btn-sm" [class.btn-primary]="canWork(w)" [class.btn-outline-secondary]="!canWork(w)" (click)="openDo(w)">
+              {{ canWork(w) ? (handedIn(w) ? 'Edit' : (w.submission ? 'Continue' : 'Start')) : 'View' }}
             </button>
           </div>
         </div>
@@ -73,6 +76,14 @@
           @if (w.submission.graded_at) { <div class="small text-body-secondary mt-1">Graded {{ w.submission.graded_at | date:'medium' }}</div> }
         </div>
         @if (w.submission.attachment_url) {
+          <a class="btn btn-sm btn-outline-secondary d-inline-flex align-items-center gap-1" [href]="w.submission.attachment_url" [attr.download]="downloadName(w.submission.attachment_url)" title="Save your submitted work">
+            <app-icon name="download" [size]="16" /> Download your submitted file
+          </a>
+        }
+        <div><button type="button" class="btn btn-primary mt-4" (click)="backToList()">Back to my worksheets</button></div>
+      } @else if (w.closed) {
+        <div class="alert alert-secondary" role="status">{{ closedText(w) }}</div>
+        @if (w.submission?.attachment_url) {
           <a class="btn btn-sm btn-outline-secondary d-inline-flex align-items-center gap-1" [href]="w.submission.attachment_url" [attr.download]="downloadName(w.submission.attachment_url)" title="Save your submitted work">
             <app-icon name="download" [size]="16" /> Download your submitted file
           </a>
@@ -123,6 +134,13 @@
             <app-icon name="download" [size]="16" /> Download your submitted file
           </a>
         }
+      } @else if (w.closed) {
+        <div class="alert alert-secondary" role="status">{{ closedText(w) }}</div>
+        @if (w.submission?.response_text) {
+          <label class="form-label small text-body-secondary">What you handed in</label>
+          <div class="border rounded-3 p-3 bg-light"><app-rich-text [value]="w.submission.response_text" /></div>
+        }
+        <div><button type="button" class="btn btn-primary mt-4" (click)="backToList()">Back to my worksheets</button></div>
       } @else {
         <label class="form-label" for="ws_answer">Your answers</label>
         <app-rich-editor [ngModel]="responseText()" (ngModelChange)="responseText.set($event)" placeholder="Type your worked answers here…" class="mb-3" />

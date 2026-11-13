@@ -98,6 +98,29 @@ class Worksheet implements LifecycleAware
     public function setTotalMarks(int $v): void { $this->totalMarks = max(1, $v); }
     public function getDueDate(): ?\DateTimeImmutable { return $this->dueDate; }
     public function setDueDate(?\DateTimeImmutable $v): void { $this->dueDate = $v; }
+
+    /**
+     * True once the due date has passed. Work is accepted through the whole of
+     * the due day in the school's time zone; a worksheet with no due date never closes.
+     */
+    public function isClosed(?\DateTimeImmutable $now = null): bool
+    {
+        if ($this->dueDate === null) {
+            return false;
+        }
+        $zone = $this->topic->getSubject()->getInstitution()->timeZone();
+
+        return ($now ?? new \DateTimeImmutable())->setTimezone($zone)->format('Y-m-d') > $this->dueDate->format('Y-m-d');
+    }
+
+    /** What a learner is told when they try to hand in work after the due date. */
+    public function closedMessage(): string
+    {
+        return sprintf(
+            'This worksheet closed on %s and no longer accepts work. If you need more time, ask your teacher to extend the due date.',
+            $this->dueDate?->format('j F Y') ?? 'its due date',
+        );
+    }
     public function getApprovalStatus(): string { return $this->approvalStatus; }
     public function setApprovalStatus(string $v): void { $this->approvalStatus = $v; }
 
@@ -125,6 +148,7 @@ class Worksheet implements LifecycleAware
             'worked_example' => $this->workedExample,
             'total_marks' => $this->totalMarks,
             'due_date' => $this->dueDate?->format('Y-m-d'),
+            'closed' => $this->isClosed(),
             'approval_status' => $this->approvalStatus,
         ];
     }

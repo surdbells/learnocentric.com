@@ -17,6 +17,23 @@
       </div>
       <p class="text-body-secondary small mb-4">{{ w.topic }} · {{ w.total_marks }} mark(s){{ w.due_date ? ' · due ' + w.due_date : '' }}</p>
 
+      <!-- Due date: movable at any time, even once the worksheet is published and locked -->
+      <div class="due-box mb-4">
+        <label class="form-label text-uppercase small fw-semibold text-body-secondary" for="ws_due">Due date</label>
+        <div class="d-flex flex-wrap align-items-center gap-2">
+          <input id="ws_due" type="date" class="form-control form-control-sm" style="max-width: 12rem"
+                 [ngModel]="dueDraft()" (ngModelChange)="dueDraft.set($event)" [ngModelOptions]="{standalone: true}" />
+          <button type="button" class="btn btn-sm btn-outline-primary" [disabled]="busy() || dueDraft() === (w.due_date || '')" (click)="saveDueDate()">Save due date</button>
+          @if (w.due_date) {
+            <button type="button" class="btn btn-sm btn-link text-decoration-none" [disabled]="busy()" (click)="dueDraft.set(''); saveDueDate()">Remove</button>
+          }
+          @if (w.closed) { <span class="badge bg-secondary-subtle text-secondary">Closed to learners</span> }
+        </div>
+        <div class="form-text">
+          Learners can hand in work until the end of this day. After it the worksheet closes to new work; move the date to reopen it. Leave it empty for no deadline.
+        </div>
+      </div>
+
       <!-- Lifecycle -->
       <app-lifecycle-panel class="mb-4" [life]="w.lifecycle" [nextStates]="w.next_states" [busy]="busy()" (step)="transition($event)" />
 

@@ -128,6 +128,16 @@ class Institution
         }
     }
     public function getSettings(): ?array { return $this->settings; }
+
+    /** The school's time zone (Settings → Localisation), used for anything that happens "on a day". */
+    public function timeZone(): \DateTimeZone
+    {
+        try {
+            return new \DateTimeZone((string) ($this->settings['localization']['timezone'] ?? 'Africa/Lagos'));
+        } catch (\Throwable) {
+            return new \DateTimeZone('Africa/Lagos');
+        }
+    }
     public function setSettings(?array $settings): void { $this->settings = $settings; }
     public function isSelfSignup(): bool { return $this->selfSignup; }
     public function setSelfSignup(bool $v): void { $this->selfSignup = $v; }

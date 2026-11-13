@@ -222,6 +222,8 @@ return static function (App $app): void {
             $auth->get('/assessment/submissions/by-learner', SubmissionsInboxAction::class . ':byLearner');
             $auth->get('/assessment/worksheets/available', WorksheetSubmissionsAction::class . ':available');
             $auth->post('/assessment/worksheets/{id:[0-9]+}/transition', WorksheetsAction::class . ':transition');
+            // Move the due date on a worksheet in any state (its content stays locked once published).
+            $auth->put('/assessment/worksheets/{id:[0-9]+}/due-date', WorksheetsAction::class . ':setDueDate');
             $auth->get('/assessment/worksheets/{id:[0-9]+}/history', WorksheetsAction::class . ':history');
             $auth->get('/assessment/worksheets/{id:[0-9]+}/solve', WorksheetSubmissionsAction::class . ':solve');
             $auth->post('/assessment/worksheets/{id:[0-9]+}/save', WorksheetSubmissionsAction::class . ':save');
