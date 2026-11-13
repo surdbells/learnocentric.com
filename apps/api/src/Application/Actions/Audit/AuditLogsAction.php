@@ -60,7 +60,7 @@ final class AuditLogsAction
         $total = (int) (clone $base)->select('COUNT(a.id)')->getQuery()->getSingleScalarResult();
 
         $rows = $base
-            ->select('a.id AS id, a.actionType AS action_type, a.objectType AS object_type, a.objectId AS object_id, a.ipDevice AS ip_device, a.createdAt AS created_at, a.userId AS user_id, u.firstName AS actor_first, u.lastName AS actor_last, i.name AS institution')
+            ->select('a.id AS id, a.actionType AS action_type, a.objectType AS object_type, a.objectId AS object_id, a.ipDevice AS ip_device, a.createdAt AS created_at, a.userId AS user_id, a.oldValue AS old_value, a.newValue AS new_value, u.firstName AS actor_first, u.lastName AS actor_last, i.name AS institution')
             ->orderBy('a.createdAt', 'DESC')
             ->setFirstResult(($page - 1) * $perPage)
             ->setMaxResults($perPage)
@@ -79,6 +79,7 @@ final class AuditLogsAction
                 'actor' => $actor !== '' ? $actor : 'System',
                 'institution' => $r['institution'],
                 'ip_device' => $r['ip_device'],
+                'changes' => $this->changes($r['old_value'] ?? null, $r['new_value'] ?? null),
                 'created_at' => $r['created_at'] instanceof \DateTimeInterface ? $r['created_at']->format(DATE_ATOM) : $r['created_at'],
             ];
         }, $rows);
@@ -130,6 +131,57 @@ final class AuditLogsAction
             'failed_logins' => $count(fn ($qb) => $qb->where("x.actionType = 'auth.login_failed'")),
             'categories' => $categories,
         ];
+    }
+
+    /**
+     * What the entry recorded, as a flat before/after list.
+     * When both sides were recorded only the fields that differ are returned;
+     * otherwise every recorded field is. Secrets are never sent to the browser.
+     *
+     * @return array<int, array{field: string, before: ?string, after: ?string}>
+     */
+    private function changes(mixed $old, mixed $new): array
+    {
+        $before = is_array($old) ? $this->flatten($old) : [];
+        $after = is_array($new) ? $this->flatten($new) : [];
+        $out = [];
+        foreach (array_unique(array_merge(array_keys($before), array_keys($after))) as $field) {
+            $b = $before[$field] ?? null;
+            $a = $after[$field] ?? null;
+            if (is_array($old) && is_array($new) && $b === $a) {
+                continue;
+            }
+            $out[] = ['field' => (string) $field, 'before' => $b, 'after' => $a];
+            if (count($out) >= 60) {
+                break;
+            }
+        }
+
+        return $out;
+    }
+
+    /** @return array<string, string> dotted path => printable value */
+    private function flatten(array $value, string $prefix = '', int $depth = 0): array
+    {
+        $out = [];
+        foreach ($value as $k => $v) {
+            $path = $prefix === '' ? (string) $k : $prefix . '.' . $k;
+            if (preg_match('/password|secret|token|hash|api_?key|certificate|totp|recovery_code/i', (string) $k) === 1) {
+                $out[$path] = '(hidden)';
+            } elseif (is_array($v) && $depth < 4 && $v !== []) {
+                $out += $this->flatten($v, $path, $depth + 1);
+            } elseif (is_array($v)) {
+                $out[$path] = $v === [] ? '(empty)' : mb_substr((string) json_encode($v, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES), 0, 300);
+            } elseif (is_bool($v)) {
+                $out[$path] = $v ? 'Yes' : 'No';
+            } elseif ($v === null || $v === '') {
+                $out[$path] = '(empty)';
+            } else {
+                $out[$path] = mb_substr((string) $v, 0, 300);
+            }
+        }
+
+        return $out;
     }
 
     private function risk(string $action): string

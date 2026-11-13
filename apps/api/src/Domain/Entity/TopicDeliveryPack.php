@@ -80,6 +80,7 @@ class TopicDeliveryPack implements LifecycleAware
         $this->media = $clean === [] ? null : $clean;
     }
     public function setWorkedExamples(?string $v): void { $this->workedExamples = $v; }
+    public function getParentWording(): ?string { return $this->parentWording; }
     public function setParentWording(?string $v): void { $this->parentWording = $v; }
     public function getStatus(): string { return $this->status; }
     public function setStatus(string $v): void { $this->status = $v; }

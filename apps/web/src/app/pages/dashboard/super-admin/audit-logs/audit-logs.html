@@ -19,14 +19,14 @@
     <table class="table table-hover align-middle mb-0">
       <thead>
         <tr class="text-body-secondary small">
-          <th>Time</th><th>Actor</th><th>Action</th><th>Object</th><th>Institution</th><th>Risk</th><th>IP / device</th>
+          <th>Time</th><th>Actor</th><th>Action</th><th>Object</th><th>Institution</th><th>Risk</th><th>IP / device</th><th class="text-end">Details</th>
         </tr>
       </thead>
       <tbody>
         @if (loading()) {
-          <tr><td colspan="7" class="text-center text-body-secondary py-4">Loading…</td></tr>
+          <tr><td colspan="8" class="text-center text-body-secondary py-4">Loading…</td></tr>
         } @else if (!rows().length) {
-          <tr><td colspan="7" class="text-center text-body-secondary py-4">No audit entries in this view.</td></tr>
+          <tr><td colspan="8" class="text-center text-body-secondary py-4">No audit entries in this view.</td></tr>
         } @else {
           @for (r of rows(); track r.id) {
             <tr>
@@ -37,7 +37,44 @@
               <td class="small text-body-secondary">{{ r.institution || '-' }}</td>
               <td><app-status-badge [value]="r.risk" [tone]="riskColor(r.risk)" /></td>
               <td class="small text-body-secondary text-truncate" style="max-width: 220px">{{ r.ip_device || '-' }}</td>
+              <td class="text-end text-nowrap">
+                @if (r.changes?.length) {
+                  <button type="button" class="btn btn-sm btn-link text-decoration-none p-0" (click)="toggle(r.id)"
+                          [attr.aria-expanded]="open() === r.id" [attr.aria-controls]="'audit-detail-' + r.id">
+                    {{ open() === r.id ? 'Hide' : 'View' }}
+                  </button>
+                } @else {
+                  <span class="small text-body-tertiary" aria-label="No values recorded">-</span>
+                }
+              </td>
             </tr>
+            @if (open() === r.id) {
+              <tr [id]="'audit-detail-' + r.id">
+                <td colspan="8" class="bg-body-tertiary">
+                  <div class="small fw-semibold mb-2">{{ hasBefore(r) ? 'What changed' : 'What was recorded' }}</div>
+                  <div class="table-responsive">
+                    <table class="table table-sm mb-0 small audit-changes">
+                      <thead>
+                        <tr class="text-body-secondary">
+                          <th>Field</th>
+                          @if (hasBefore(r)) { <th>Before</th> }
+                          <th>{{ hasBefore(r) ? 'After' : 'Value' }}</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        @for (c of r.changes; track c.field) {
+                          <tr>
+                            <td class="text-body-secondary">{{ fieldLabel(c.field) }}</td>
+                            @if (hasBefore(r)) { <td>{{ c.before ?? '(not set)' }}</td> }
+                            <td class="fw-medium">{{ c.after ?? '(removed)' }}</td>
+                          </tr>
+                        }
+                      </tbody>
+                    </table>
+                  </div>
+                </td>
+              </tr>
+            }
           }
         }
       </tbody>

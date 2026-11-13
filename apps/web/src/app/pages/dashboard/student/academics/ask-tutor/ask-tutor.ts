@@ -85,6 +85,20 @@ export class AskTutor {
     });
   }
 
+  /** The tutor whose comment box is open (one at a time). */
+  commentFor = signal<number | null>(null);
+  commentText = signal('');
+
+  openComment(tutor: any): void { this.commentText.set(tutor.my_comment ?? ''); this.commentFor.set(tutor.id); }
+
+  saveComment(tutor: any): void {
+    this.busy.set(true);
+    this.api.post<any>('/backend/ask-tutor/ratings', {tutor_id: tutor.id, rating: tutor.my_rating, comment: this.commentText().trim()}).subscribe({
+      next: () => { this.busy.set(false); this.commentFor.set(null); this.toast.success('Comment saved'); this.load(); },
+      error: (e) => { this.busy.set(false); this.toast.error(e?.error?.error || 'Could not save your comment'); },
+    });
+  }
+
   message(): void {
     this.router.navigate(['/student/communication/messages']);
   }

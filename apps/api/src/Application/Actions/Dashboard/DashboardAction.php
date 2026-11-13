@@ -650,10 +650,49 @@ final class DashboardAction
                 'quizzes_taken' => count($attempts),
                 'unread_feedback' => (int) $this->em->createQueryBuilder()->select('COUNT(f.id)')->from(FeedbackNote::class, 'f')
                     ->where('f.student = :c')->andWhere('f.acknowledged = false')->setParameter('c', $child)->getQuery()->getSingleScalarResult(),
+                'learning_now' => $this->learningNow($child),
             ];
         }
 
         return Json::write($response, ['children' => $children]);
+    }
+
+    /**
+     * The lessons a child opened most recently, with the note the school wrote
+     * for parents about each one. Only published lesson packs that carry a
+     * parent note are listed.
+     *
+     * @return array<int, array{topic: string, subject: string, viewed_at: string, note: string}>
+     */
+    private function learningNow(User $child): array
+    {
+        $recent = $this->em->createQueryBuilder()->select('p', 't')
+            ->from(TopicProgress::class, 'p')->join('p.topic', 't')
+            ->where('p.student = :c')->andWhere('p.lessonViewedAt IS NOT NULL')
+            ->setParameter('c', $child)
+            ->orderBy('p.lessonViewedAt', 'DESC')->setMaxResults(12)
+            ->getQuery()->getResult();
+        $out = [];
+        foreach ($recent as $progress) {
+            /** @var TopicProgress $progress */
+            $pack = $this->em->getRepository(TopicDeliveryPack::class)
+                ->findOneBy(['topic' => $progress->getTopic(), 'status' => Lifecycle::PUBLISHED], ['id' => 'DESC']);
+            $note = trim((string) $pack?->getParentWording());
+            if ($note === '' || trim(strip_tags($note)) === '') {
+                continue;
+            }
+            $out[] = [
+                'topic' => $progress->getTopic()->getTitle(),
+                'subject' => $progress->getTopic()->getSubject()->getName(),
+                'viewed_at' => $progress->getLessonViewedAt()->format(DATE_ATOM),
+                'note' => $note,
+            ];
+            if (count($out) >= 3) {
+                break;
+            }
+        }
+
+        return $out;
     }
 
     // --- helpers ---

@@ -1,0 +1,3 @@
+
+.learning-note + .learning-note { margin-top: .6rem; }
+.learning-note app-rich-text { display: block; margin-top: .15rem; }

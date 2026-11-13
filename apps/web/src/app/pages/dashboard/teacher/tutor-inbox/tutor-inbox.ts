@@ -28,6 +28,10 @@ export class TutorInbox {
   loading = signal(true);
   questions = signal<any[]>([]);
   openCount = signal(0);
+  /** The tutor's own ratings: average, count and learners' comments (shown without names). */
+  rating = signal<{average: number | null; count: number; comments: any[]}>({average: null, count: 0, comments: []});
+  showComments = signal(false);
+  readonly stars = [1, 2, 3, 4, 5];
   drafts = signal<Record<number, string>>({});
   busy = signal<number | null>(null);
   filter = signal<'all' | 'open' | 'answered'>('open');
@@ -42,7 +46,8 @@ export class TutorInbox {
   load(): void {
     this.loading.set(true);
     this.api.get<any>('/backend/ask-tutor/inbox').subscribe({
-      next: (res) => { this.questions.set(res?.data ?? []); this.openCount.set(res?.meta?.open ?? 0); this.loading.set(false); },
+      next: (res) => { this.questions.set(res?.data ?? []); this.openCount.set(res?.meta?.open ?? 0);
+        this.rating.set(res?.meta?.rating ?? {average: null, count: 0, comments: []}); this.loading.set(false); },
       error: () => { this.loading.set(false); this.toast.error('Could not load questions'); },
     });
   }

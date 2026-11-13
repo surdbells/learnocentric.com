@@ -41,6 +41,17 @@
                 </div>
               </div>
             </div>
+            @if (c.learning_now?.length) {
+              <div class="border-top pt-3 mb-3">
+                <div class="small fw-semibold mb-2"><app-icon name="menu_book" [size]="15" class="text-body-secondary me-1" /> Learning now, and how you can help</div>
+                @for (n of c.learning_now; track n.topic) {
+                  <div class="learning-note">
+                    <div class="small"><span class="fw-medium">{{ n.topic }}</span> <span class="text-body-secondary">· {{ n.subject }} · opened {{ n.viewed_at | date:'mediumDate' }}</span></div>
+                    <app-rich-text class="small" [value]="n.note" />
+                  </div>
+                }
+              </div>
+            }
             <a class="btn btn-sm btn-primary w-100" [routerLink]="['/parent/academics/progress-report']">View full report</a>
           </div>
         </div>

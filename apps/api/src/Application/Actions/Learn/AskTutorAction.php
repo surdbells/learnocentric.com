@@ -74,6 +74,7 @@ final class AskTutorAction
                 'rating' => $agg['avg'] !== null ? round((float) $agg['avg'], 1) : null,
                 'rating_count' => (int) $agg['c'],
                 'my_rating' => $mine?->getRating(),
+                'my_comment' => $mine?->getComment(),
             ];
         }
         usort($tutorRows, static fn ($a, $b) => ($b['rating'] ?? 0) <=> ($a['rating'] ?? 0));
@@ -132,6 +133,16 @@ final class AskTutorAction
         if ($tutor === null || $rating < 1 || $rating > 5) {
             return Json::error($response, 'Choose a tutor and a rating from 1 to 5.', 422);
         }
+        // A learner rates only the tutors who teach their own classes.
+        $classIds = $this->studentClassIds($student);
+        $teaches = $classIds === [] ? 0 : (int) $this->em->createQueryBuilder()->select('COUNT(ta.id)')
+            ->from(TeacherAssignment::class, 'ta')
+            ->where('ta.teacher = :t')->andWhere('ta.schoolClass IN (:cids)')
+            ->setParameter('t', $tutor)->setParameter('cids', $classIds)
+            ->getQuery()->getSingleScalarResult();
+        if ($teaches === 0) {
+            return Json::error($response, 'You can rate the tutors who teach your classes.', 403);
+        }
         $existing = $this->em->getRepository(TutorRating::class)->findOneBy(['tutor' => $tutor, 'student' => $student]);
         if ($existing === null) {
             $existing = new TutorRating($student, $tutor, $rating);
@@ -139,10 +150,16 @@ final class AskTutorAction
         } else {
             $existing->setRating($rating);
         }
-        $existing->setComment($this->str($body['comment'] ?? null));
+        // Changing only the stars keeps the comment already given.
+        if (array_key_exists('comment', $body)) {
+            $comment = $this->str($body['comment']);
+            $existing->setComment($comment === null ? null : mb_substr($comment, 0, 1000));
+        }
         $this->em->flush();
 
-        return Json::write($response, ['tutor_id' => $tutor->getId(), 'rating' => $existing->getRating()], 201);
+        return Json::write($response, [
+            'tutor_id' => $tutor->getId(), 'rating' => $existing->getRating(), 'comment' => $existing->getComment(),
+        ], 201);
     }
 
     /** GET /ask-tutor/inbox, tutor's incoming questions (directed to them or unanswered in their subjects). */
@@ -166,9 +183,27 @@ final class AskTutorAction
         }
         $rows = $qb->getQuery()->getResult();
 
+        // The tutor's own ratings. Comments are shown without the learner's
+        // name so learners can be candid.
+        $ratings = $this->em->getRepository(TutorRating::class)->findBy(['tutor' => $me], ['updatedAt' => 'DESC']);
+        $comments = [];
+        foreach ($ratings as $r) {
+            if ($r->getComment() !== null && count($comments) < 30) {
+                $comments[] = ['rating' => $r->getRating(), 'comment' => $r->getComment(), 'date' => $r->getUpdatedAt()->format(DATE_ATOM)];
+            }
+        }
+        $count = count($ratings);
+
         return Json::write($response, [
             'data' => array_map(static fn (TutorQuestion $q) => $q->toArray(), $rows),
-            'meta' => ['open' => count(array_filter($rows, static fn (TutorQuestion $q) => $q->getStatus() === TutorQuestion::OPEN))],
+            'meta' => [
+                'open' => count(array_filter($rows, static fn (TutorQuestion $q) => $q->getStatus() === TutorQuestion::OPEN)),
+                'rating' => [
+                    'average' => $count > 0 ? round(array_sum(array_map(static fn (TutorRating $r) => $r->getRating(), $ratings)) / $count, 1) : null,
+                    'count' => $count,
+                    'comments' => $comments,
+                ],
+            ],
         ]);
     }
 

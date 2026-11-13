@@ -4,6 +4,37 @@
 @if (loading()) {
   <div class="text-body-secondary p-4">Loading…</div>
 } @else {
+  @if (rating().count) {
+    <div class="card border-0 shadow-sm mb-3"><div class="card-body">
+      <div class="d-flex flex-wrap align-items-center gap-2">
+        <span class="fw-semibold">Your rating</span>
+        <span class="d-inline-flex align-items-center" [attr.aria-label]="rating().average + ' out of 5'">
+          @for (s of stars; track s) {
+            <app-icon name="star" [size]="16" [class]="s <= (rating().average || 0) ? 'text-warning' : 'text-body-secondary opacity-25'" />
+          }
+        </span>
+        <span class="small text-body-secondary">{{ rating().average }} from {{ rating().count }} learner{{ rating().count === 1 ? '' : 's' }}</span>
+        @if (rating().comments.length) {
+          <button type="button" class="btn btn-sm btn-link text-decoration-none ms-auto p-0" (click)="showComments.set(!showComments())"
+                  [attr.aria-expanded]="showComments()" aria-controls="tutor-rating-comments">
+            {{ showComments() ? 'Hide' : 'Read' }} {{ rating().comments.length }} comment{{ rating().comments.length === 1 ? '' : 's' }}
+          </button>
+        }
+      </div>
+      @if (showComments()) {
+        <div id="tutor-rating-comments" class="mt-3 d-flex flex-column gap-2">
+          <div class="small text-body-secondary">Comments are shown without names so learners can be candid.</div>
+          @for (c of rating().comments; track $index) {
+            <div class="rating-comment">
+              <div class="small text-body-secondary mb-1">{{ c.rating }} out of 5 · {{ c.date | date:'mediumDate' }}</div>
+              <div class="small">{{ c.comment }}</div>
+            </div>
+          }
+        </div>
+      }
+    </div></div>
+  }
+
   <div class="d-flex align-items-center gap-2 mb-3">
     <span class="badge bg-warning-subtle text-warning">{{ openCount() }} open</span>
     <div class="btn-group btn-group-sm ms-auto">

@@ -34,7 +34,7 @@ const MAP: Record<string, any> = {
   apartment: Building2, domain: Building2, tenancy: Building, home_and_garden: House, meeting_room: DoorOpen,
   // learning / content
   school: GraduationCap, dashboard: LayoutDashboard, subject: BookMarked, book: Book,
-  menu_book: BookOpen, local_library: BookOpen, library_books: Library, folder_special: Star,
+  menu_book: BookOpen, local_library: BookOpen, library_books: Library, folder_special: Star, star: Star,
   description: FileText, news: Newspaper, folder: Folder, folder_open: FolderOpen,
   assignment: ClipboardList, assignment_turned_in: ClipboardCheck, quiz: ListChecks, grading: ClipboardPen,
   workspace_premium: Award, interactive: Pointer, document: FileText, video: Video, edit_note: FilePen,

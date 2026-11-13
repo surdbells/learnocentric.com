@@ -1,14 +1,15 @@
 import {Component, inject, PLATFORM_ID, signal} from '@angular/core';
-import {isPlatformBrowser} from '@angular/common';
+import {DatePipe, isPlatformBrowser} from '@angular/common';
 import {RouterLink} from '@angular/router';
 import {AuthService} from '../../../../common/auth/auth.service';
 import {ApiService} from '../../../../common/service/api.service';
 import {Icon} from '../../../../common/icon/icon';
+import {RichText} from '../../../../common/rich-editor/rich-text';
 
 @Component({
   selector: 'app-parent-main',
   standalone: true,
-  imports: [Icon, RouterLink],
+  imports: [Icon, RouterLink, DatePipe, RichText],
   templateUrl: './parent-main.html',
   styleUrl: './parent-main.css',
 })

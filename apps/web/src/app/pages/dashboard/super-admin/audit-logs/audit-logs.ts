@@ -30,6 +30,8 @@ export class SuperAdminAuditLogs {
   category = signal<string>('all');
   search = signal<string>('');
   page = signal<number>(1);
+  /** The entry whose recorded values are expanded (one at a time). */
+  open = signal<number | null>(null);
 
   readonly riskMap: Record<string, Tone> = {high: 'danger', medium: 'warning', low: 'secondary'};
 
@@ -60,6 +62,7 @@ export class SuperAdminAuditLogs {
     this.api.get<any>('/backend/audit-logs', {params}).subscribe({
       next: (res) => {
         this.rows.set(res?.data ?? []);
+        this.open.set(null);
         this.meta.set(res?.meta ?? this.meta());
         if (res?.stats) this.stats.set(res.stats);
         this.loading.set(false);
@@ -72,6 +75,14 @@ export class SuperAdminAuditLogs {
   runSearch(): void { this.page.set(1); this.load(); }
   prev(): void { if (this.page() > 1) { this.page.set(this.page() - 1); this.load(); } }
   next(): void { if (this.page() * (this.meta().per_page || 25) < (this.meta().total || 0)) { this.page.set(this.page() + 1); this.load(); } }
+
+  toggle(id: number): void { this.open.set(this.open() === id ? null : id); }
+  /** True when the entry recorded the earlier value as well as the new one. */
+  hasBefore(r: any): boolean { return (r?.changes ?? []).some((c: any) => c.before !== null); }
+  /** "localization.date_format" reads as "Localization › Date format". */
+  fieldLabel(path: string): string {
+    return String(path).split('.').map(p => { const t = p.split('_').join(' '); return t.charAt(0).toUpperCase() + t.slice(1); }).join(' › ');
+  }
 
   totalPages(): number { const m = this.meta(); return Math.max(1, Math.ceil((m.total || 0) / (m.per_page || 25))); }
   riskColor(r: string): Tone { return this.riskMap[r] ?? 'secondary'; }

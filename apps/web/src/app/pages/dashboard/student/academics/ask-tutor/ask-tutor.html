@@ -38,7 +38,28 @@
                       <app-icon name="star" [size]="18" [class]="(t.my_rating && s <= t.my_rating) ? 'text-warning' : 'text-body-secondary opacity-50'" />
                     </button>
                   }
+                  @if (t.my_rating && commentFor() !== t.id) {
+                    <button type="button" class="btn btn-sm btn-link text-decoration-none p-0 ms-2" (click)="openComment(t)">
+                      {{ t.my_comment ? 'Edit comment' : 'Add a comment' }}
+                    </button>
+                  }
                 </div>
+                @if (t.my_comment && commentFor() !== t.id) {
+                  <div class="small text-body-secondary mt-1">Your comment: {{ t.my_comment }}</div>
+                }
+                @if (commentFor() === t.id) {
+                  <div class="mt-2">
+                    <label class="form-label small mb-1" [attr.for]="'rate-comment-' + t.id">Comment for {{ t.name }} (optional)</label>
+                    <textarea class="form-control form-control-sm" rows="2" maxlength="1000" [id]="'rate-comment-' + t.id"
+                              placeholder="What is going well, or what would help you more?"
+                              [ngModel]="commentText()" (ngModelChange)="commentText.set($event)"></textarea>
+                    <div class="small text-body-secondary mt-1">Your tutor sees the comment without your name.</div>
+                    <div class="d-flex justify-content-end gap-2 mt-2">
+                      <button type="button" class="btn btn-sm btn-outline-secondary" (click)="commentFor.set(null)">Cancel</button>
+                      <button type="button" class="btn btn-sm btn-success" [disabled]="busy()" (click)="saveComment(t)">Save comment</button>
+                    </div>
+                  </div>
+                }
               </div></div>
             </div>
           }
