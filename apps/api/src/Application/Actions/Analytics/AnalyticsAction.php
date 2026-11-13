@@ -219,7 +219,7 @@ final class AnalyticsAction
         $by = [];
         foreach ($attempts as $a) {
             $sid = $a->getStudent()->getId();
-            $by[$sid] ??= ['student' => $a->getStudent()->getFirstName() . ' ' . $a->getStudent()->getLastName(), 'sum' => 0.0, 'n' => 0];
+            $by[$sid] ??= ['student' => $a->getStudent()->displayName(), 'sum' => 0.0, 'n' => 0];
             $by[$sid]['sum'] += (float) $a->getPercentage();
             $by[$sid]['n']++;
         }
@@ -520,7 +520,7 @@ final class AnalyticsAction
 
         return Json::write($response, [
             'school' => $institution?->getName(),
-            'student' => ['id' => $student->getId(), 'name' => $student->getFirstName() . ' ' . $student->getLastName(), 'class' => $classLabel],
+            'student' => ['id' => $student->getId(), 'name' => $student->displayName(), 'class' => $classLabel],
             'subjects' => $subjects,
             'overall' => [
                 'average' => $overallAvg,
@@ -666,7 +666,7 @@ final class AnalyticsAction
         return Json::write($response, [
             'student' => [
                 'id' => $student->getId(),
-                'name' => $student->getFirstName() . ' ' . $student->getLastName(),
+                'name' => $student->displayName(),
             ],
             'academic' => [
                 'average' => $academicAvg,

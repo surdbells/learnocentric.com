@@ -52,7 +52,7 @@ final class UserSettingsAction
                 'id' => $user->getId(),
                 'firstName' => $user->getFirstName(),
                 'lastName' => $user->getLastName(),
-                'fullName' => trim($user->getFirstName() . ' ' . $user->getLastName()),
+                'fullName' => $user->displayName(),
                 'email' => $user->getEmail(),
                 'phone' => $user->getPhone(),
                 'role' => $user->getRole()->effectiveCode(),

@@ -10,6 +10,7 @@
         <div class="d-flex align-items-center gap-2 mb-2">
           <span class="fw-semibold">{{ s.name }} session</span>
           @if (s.is_current) { <span class="badge bg-success-subtle text-success">Current</span> }
+          @if (s.archived) { <span class="badge bg-secondary-subtle text-secondary" title="Hidden from the term switcher by your archive policy">Archived</span> }
         </div>
         <div class="table-responsive">
           <table class="table table-sm align-middle mb-0">

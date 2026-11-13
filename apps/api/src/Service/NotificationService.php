@@ -66,7 +66,7 @@ final class NotificationService
         }
         try {
             return $this->mailer->send(
-                ['address' => $user->getEmail(), 'name' => trim($user->getFirstName() . ' ' . $user->getLastName())],
+                ['address' => $user->getEmail(), 'name' => $user->displayName()],
                 $title,
                 $this->htmlBody($user, $title, $message),
                 $this->textBody($title, $message),

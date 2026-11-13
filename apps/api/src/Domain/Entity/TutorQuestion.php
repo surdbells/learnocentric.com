@@ -84,16 +84,16 @@ class TutorQuestion
     {
         return [
             'id' => $this->id,
-            'student' => trim($this->student->getFirstName() . ' ' . $this->student->getLastName()),
+            'student' => $this->student->displayName(),
             'student_id' => $this->student->getId(),
-            'tutor' => $this->tutor ? trim($this->tutor->getFirstName() . ' ' . $this->tutor->getLastName()) : null,
+            'tutor' => $this->tutor ? $this->tutor->displayName() : null,
             'tutor_id' => $this->tutor?->getId(),
             'subject' => $this->subject?->getName(),
             'subject_id' => $this->subject?->getId(),
             'question' => $this->question,
             'answer' => $this->answer,
             'status' => $this->status,
-            'answered_by' => $this->answeredBy ? trim($this->answeredBy->getFirstName() . ' ' . $this->answeredBy->getLastName()) : null,
+            'answered_by' => $this->answeredBy ? $this->answeredBy->displayName() : null,
             'answered_at' => $this->answeredAt?->format(DATE_ATOM),
             'created_at' => $this->createdAt->format(DATE_ATOM),
         ];

@@ -152,7 +152,7 @@ final class MessagingAction
         $this->notifications->notify(
             $recipient,
             'message.received',
-            'New message from ' . trim($user->getFirstName() . ' ' . $user->getLastName()),
+            'New message from ' . $user->displayName(),
             mb_strimwidth($text, 0, 120, '…'),
             '/notifications',
             false, // in-app only; messaging isn't email-worthy per message
@@ -397,7 +397,7 @@ final class MessagingAction
     {
         return [
             'id' => $u->getId(),
-            'name' => trim($u->getFirstName() . ' ' . $u->getLastName()),
+            'name' => $u->displayName(),
             'role' => $u->getRole()->effectiveCode(),
             'profile_image_url' => $u->getProfileImageUrl(),
         ];

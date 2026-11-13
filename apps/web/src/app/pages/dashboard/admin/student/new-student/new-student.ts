@@ -7,6 +7,9 @@ import {Icon} from '../../../../../common/icon/icon';
 import {FileUpload, UploadedFile} from '../../../../../common/file-upload/file-upload';
 import {ApiService} from '../../../../../common/service/api.service';
 import {AuthService} from '../../../../../common/auth/auth.service';
+import {SchoolPrefsService} from '../../../../../common/service/school-prefs.service';
+import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
+import {debounceTime} from 'rxjs';
 
 const DRAFT_KEY = 'add_learner_draft';
 
@@ -39,6 +42,8 @@ export class NewStudent {
 
   readonly schoolName = signal((this.auth.getAuthSession()?.user as any)?.institutionName ?? 'Your school');
   private readonly root = this.auth.getAuthSession()?.user?.role === 'tutor_admin' ? '/academy' : '/admin';
+  /** School Settings → Data & System Preferences → Auto-save (on unless the school switched it off). */
+  private readonly autoSave = inject(SchoolPrefsService).prefs()?.auto_save !== false;
   readonly backLink = this.root + '/students';
 
   form = this.fb.group({
@@ -61,6 +66,10 @@ export class NewStudent {
 
   constructor() {
     this.form.valueChanges.subscribe(() => this.tick.update(v => v + 1));
+    // School Settings → Auto-save: keep the draft up to date as the form is filled in.
+    if (this.autoSave) {
+      this.form.valueChanges.pipe(debounceTime(1500), takeUntilDestroyed()).subscribe(() => { if (this.form.dirty) this.saveDraft(true); });
+    }
     this.api.get<any>('/backend/school/classes').subscribe({next: (r) => this.classes.set(Array.isArray(r) ? r : (r?.data ?? []))});
     const draft = localStorage.getItem(DRAFT_KEY);
     if (draft) {
@@ -98,12 +107,12 @@ export class NewStudent {
 
   readonly completeCount = computed(() => this.checklist().filter(c => c.done).length);
 
-  saveDraft(): void {
+  saveDraft(quiet = false): void {
     // A draft stays in this browser, so it never holds the temporary password
     // or the learner's medical / support notes: those are typed again on return.
     const {password, support, ...safe} = this.form.getRawValue();
     localStorage.setItem(DRAFT_KEY, JSON.stringify(safe));
-    this.toast.success('Draft saved on this device (password and support notes are not kept)');
+    if (!quiet) this.toast.success('Draft saved on this device (password and support notes are not kept)');
   }
 
   submit(): void {

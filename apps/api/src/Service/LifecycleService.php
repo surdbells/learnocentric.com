@@ -70,12 +70,42 @@ class LifecycleService
             throw new RuntimeException("You are not permitted to {$action} this item.");
         }
 
+        $version = $this->record($entity, $from, $to, $action, $actor, $note);
+
+        // The school's approval workflow (Settings → Data & System Preferences):
+        //  admin_final  submit → approve → publish, each a separate step (default)
+        //  single       approving also publishes
+        //  none         submitting publishes straight away, with no review step
+        $workflow = $this->workflowFor($actor);
+        $auto = [];
+        if ($workflow === 'none' && $action === 'submit') {
+            $auto = [Lifecycle::APPROVED, Lifecycle::PUBLISHED];
+        } elseif ($workflow === 'single' && $action === 'approve') {
+            $auto = [Lifecycle::PUBLISHED];
+        }
+        foreach ($auto as $next) {
+            $prev = $entity->getLifecycleStatus();
+            $step = Lifecycle::actionFor($prev, $next);
+            $why = $workflow === 'none'
+                ? 'Automatic: this school\'s workflow needs no approval.'
+                : 'Automatic: this school publishes on approval.';
+            $version = $this->record($entity, $prev, $next, $step, $actor, $why);
+            $to = $next;
+            $action = $step;
+        }
+
+        return ['status' => $to, 'action' => $action, 'version' => $version, 'next' => Lifecycle::nextStates($to)];
+    }
+
+    /** Write one lifecycle step: version record, status change, audit entry. Returns the version number. */
+    private function record(LifecycleAware $entity, string $from, string $to, string $action, User $actor, ?string $note): int
+    {
         $version = $this->nextVersion($entity);
         $record = new ContentVersion($entity->lifecycleType(), (int) $entity->getId(), $version, $to, $action);
         $record->setFromStatus($from);
         $record->setSnapshot($entity->lifecycleSnapshot());
         $record->setNote($note);
-        $record->setActor($actor->getId(), trim($actor->getFirstName() . ' ' . $actor->getLastName()));
+        $record->setActor($actor->getId(), $actor->displayName());
         $this->em->persist($record);
 
         $entity->setLifecycleStatus($to);
@@ -90,7 +120,15 @@ class LifecycleService
             ['status' => $to, 'note' => $note],
         );
 
-        return ['status' => $to, 'action' => $action, 'version' => $version, 'next' => Lifecycle::nextStates($to)];
+        return $version;
+    }
+
+    /** The acting user's school approval workflow; platform users always use the full two-step review. */
+    private function workflowFor(User $actor): string
+    {
+        $w = $actor->getInstitution()?->getSettings()['data']['approval_workflow'] ?? 'admin_final';
+
+        return in_array($w, ['admin_final', 'single', 'none'], true) ? $w : 'admin_final';
     }
 
     /** @return ContentVersion[] newest first */

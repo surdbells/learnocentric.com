@@ -234,7 +234,7 @@ final class FeedbackAction
         $this->notify->notify(
             $student,
             'feedback',
-            'New feedback from ' . $author->getFirstName() . ' ' . $author->getLastName(),
+            'New feedback from ' . $author->displayName(),
             $note->getMessage(),
             '/student/academics/feedback',
         );

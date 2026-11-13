@@ -88,7 +88,7 @@ final class ReportsAction
         $report = new Report($type, $title);
         $report->setSummary($built['summary']);
         $report->setData(['columns' => $built['columns'], 'rows' => $built['rows']]);
-        $report->setGeneratedBy($user->getId(), $user->getFirstName() . ' ' . $user->getLastName());
+        $report->setGeneratedBy($user->getId(), $user->displayName());
         $this->em->persist($report);
         $this->em->flush();
         $this->audit->log('report.generate', $user, 'Report', (string) $report->getId(), null, ['type' => $type]);

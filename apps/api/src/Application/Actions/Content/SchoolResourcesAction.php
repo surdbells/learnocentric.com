@@ -92,7 +92,7 @@ final class SchoolResourcesAction
         $resource->setDifficultyLevel($this->str($body['difficultyLevel'] ?? null));
         $resource->setTags($this->tags($body['tags'] ?? null));
         $resource->setFile($path, (string) $file->getClientFilename(), (int) ($file->getSize() ?? 0));
-        $resource->setSource(trim($user->getFirstName() . ' ' . $user->getLastName()));
+        $resource->setSource($user->displayName());
         $resource->setLicence('owned');
         $resource->setAudience((string) ($body['audience'] ?? 'learner'));
         $resource->setVisibility('published');

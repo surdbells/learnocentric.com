@@ -1,9 +1,10 @@
-import {Component, effect, ElementRef, EventEmitter, input, Output, signal, ViewChild} from '@angular/core';
+import {Component, effect, ElementRef, EventEmitter, inject, input, Output, signal, ViewChild} from '@angular/core';
 import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {LearnoInput} from '../../../common/learno-input/learno-input';
 import {ToastrService} from 'ngx-toastr';
 import {ApiService} from '../../../common/service/api.service';
 import {AuthService} from '../../../common/auth/auth.service';
+import {SchoolPrefsService} from '../../../common/service/school-prefs.service';
 import {LearnoButton} from '../../../common/learno-button/learno-button';
 
 @Component({
@@ -28,13 +29,17 @@ export class SchoolClassForm {
   @Output() submitted = new EventEmitter<{ success: boolean }>();
   @ViewChild('closebtn', { static: false }) autoCloseBtn!: ElementRef<HTMLButtonElement>;
 
+  /** Level suggestions for the school's class structure (School Settings → Academic Defaults). */
+  readonly levels = inject(SchoolPrefsService).classLevels();
+  readonly levelExamples = this.levels.slice(0, 2).join(', ');
+
   form = new FormGroup({
     // Level + section make the class label (e.g. "JSS 1 A"), so the level is text,
     // not a number — Nigerian levels like "JSS 1" / "Primary 4" aren't numeric.
     gradeLevel: new FormControl('', {nonNullable: true, validators: [Validators.required]}),
     section: new FormControl('', {nonNullable: true}),
     classTeacherId: new FormControl<number | null>(null),
-    // inactive = closed to new enrolments and hidden from teachers' class lists
+    // inactive = closed to new enrolments and hidden from teachers' class lists (see status below)
     status: new FormControl<'active' | 'inactive'>('active', {nonNullable: true}),
   })
   action = input<string>('');

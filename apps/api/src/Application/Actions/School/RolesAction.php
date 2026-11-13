@@ -65,7 +65,7 @@ final class RolesAction
                 /** @var User $u */
                 $usersByRole[$u->getRole()->getId()][] = [
                     'id' => $u->getId(),
-                    'name' => trim($u->getFirstName() . ' ' . $u->getLastName()),
+                    'name' => $u->displayName(),
                 ];
             }
         }
@@ -231,7 +231,7 @@ final class RolesAction
 
         return Json::write($response, ['data' => array_map(static fn (User $u) => [
             'id' => $u->getId(),
-            'name' => trim($u->getFirstName() . ' ' . $u->getLastName()),
+            'name' => $u->displayName(),
             'email' => $u->getEmail(),
             'role_id' => $u->getRole()->getId(),
             'role' => $u->getRole()->getName(),

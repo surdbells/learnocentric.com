@@ -439,7 +439,7 @@ final class LiveClassesAction
             'channel' => $channel,
             'token' => $token,
             'uid' => $uid,
-            'user_name' => trim($user->getFirstName() . ' ' . $user->getLastName()),
+            'user_name' => $user->displayName(),
             'is_host' => $isStaff,
             'title' => $lc->getTitle(),
             'status' => $lc->getStatus(),

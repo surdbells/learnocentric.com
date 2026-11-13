@@ -47,7 +47,7 @@ class GuardianLink
             'id' => $this->id,
             'guardian_id' => $this->guardian->getId(),
             'student_id' => $this->student->getId(),
-            'student' => $this->student->getFirstName() . ' ' . $this->student->getLastName(),
+            'student' => $this->student->displayName(),
             'relationship' => $this->relationship,
         ];
     }

@@ -1455,7 +1455,7 @@ class SeedCommand extends Command
             return;
         }
         $by = static function (Report $r) use ($super): Report {
-            $r->setGeneratedBy($super->getId(), $super->getFirstName() . ' ' . $super->getLastName());
+            $r->setGeneratedBy($super->getId(), $super->displayName());
             return $r;
         };
 

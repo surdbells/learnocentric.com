@@ -383,8 +383,8 @@ final class InterventionsAction
             ->where('u.institution = :inst')->andWhere('r.effectiveCode IN (:roles)')
             ->setParameter('inst', $institution)->setParameter('roles', ['school_admin', 'tutor_admin'])
             ->getQuery()->getResult();
-        $student = $intervention->getStudent()->getFirstName() . ' ' . $intervention->getStudent()->getLastName();
-        $who = $creator->getFirstName() . ' ' . $creator->getLastName();
+        $student = $intervention->getStudent()->displayName();
+        $who = $creator->displayName();
         foreach ($admins as $admin) {
             /** @var User $admin */
             if ($admin->getId() === $creator->getId()) {
@@ -410,7 +410,7 @@ final class InterventionsAction
         $this->notify->notify(
             $assignee,
             'intervention',
-            $title . ': ' . $intervention->getStudent()->getFirstName() . ' ' . $intervention->getStudent()->getLastName(),
+            $title . ': ' . $intervention->getStudent()->displayName(),
             $intervention->getReason(),
             $link,
         );

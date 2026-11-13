@@ -169,7 +169,7 @@ class Announcement
             'email_status' => !$this->wantsEmail() ? 'not_requested' : ($this->emailedAt !== null ? 'sent' : 'queued'),
             'emailed_at' => $this->emailedAt?->format(DATE_ATOM),
             'emailed_count' => $this->emailedCount,
-            'author' => $this->author ? trim($this->author->getFirstName() . ' ' . $this->author->getLastName()) : 'School',
+            'author' => $this->author ? $this->author->displayName() : 'School',
             'created_at' => $this->createdAt->format(DATE_ATOM),
             'updated_at' => $this->updatedAt->format(DATE_ATOM),
         ];

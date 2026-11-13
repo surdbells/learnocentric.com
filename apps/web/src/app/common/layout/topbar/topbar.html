@@ -77,7 +77,7 @@
           <img class="tb-avatar-img" [src]="avatar()" alt="Profile" />
         </span>
         <span class="tb-user-meta d-none d-sm-flex">
-          <span class="tb-user-name">{{ user()?.firstName }} {{ user()?.lastName }}</span>
+          <span class="tb-user-name">{{ schoolPrefs.name(user()?.firstName, user()?.lastName) }}</span>
           <span class="tb-user-role">{{ user()?.role }}</span>
         </span>
         <app-icon name="expand_more" class="tb-user-caret d-none d-sm-inline" />

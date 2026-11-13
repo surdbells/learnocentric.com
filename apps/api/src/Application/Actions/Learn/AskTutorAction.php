@@ -52,7 +52,7 @@ final class AskTutorAction
                 if (!isset($tutors[$tid])) {
                     $tutors[$tid] = [
                         'id' => $tid,
-                        'name' => trim($ta->getTeacher()->getFirstName() . ' ' . $ta->getTeacher()->getLastName()),
+                        'name' => $ta->getTeacher()->displayName(),
                         'profile_image_url' => \App\Service\Storage\FilePath::toUrl($ta->getTeacher()->getProfileImageUrl()),
                         'subjects' => [],
                     ];
@@ -112,7 +112,7 @@ final class AskTutorAction
             $tutor = $this->em->getRepository(User::class)->find((int) $body['tutor_id']);
             $q->setTutor($tutor);
             if ($tutor !== null) {
-                $this->notify->notify($tutor, 'message', 'New question from ' . trim($student->getFirstName() . ' ' . $student->getLastName()), mb_strimwidth($text, 0, 120, '…'), '/teacher/ask-tutor', false);
+                $this->notify->notify($tutor, 'message', 'New question from ' . $student->displayName(), mb_strimwidth($text, 0, 120, '…'), '/teacher/ask-tutor', false);
             }
         }
         $this->em->persist($q);

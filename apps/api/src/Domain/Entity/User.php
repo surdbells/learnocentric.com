@@ -153,6 +153,22 @@ class User
     public function markLoggedIn(): void { $this->lastLogin = new DateTimeImmutable(); }
     public function getCreatedAt(): DateTimeImmutable { return $this->createdAt; }
 
+    /**
+     * The person's name the way their school writes names (Settings → Academic
+     * Defaults → Naming Convention): "First Last" or "Last, First".
+     */
+    public function displayName(): string
+    {
+        $first = trim($this->firstName);
+        $last = trim($this->lastName);
+        $convention = $this->institution?->getSettings()['academic']['naming_convention'] ?? 'first_last';
+        if ($convention === 'last_first' && $first !== '' && $last !== '') {
+            return $last . ', ' . $first;
+        }
+
+        return trim($first . ' ' . $last);
+    }
+
     public function isEmailVerified(): bool { return $this->emailVerifiedAt !== null; }
     public function markEmailVerified(): void { $this->emailVerifiedAt ??= new DateTimeImmutable(); }
     public function getAddress(): ?string { return $this->address; }
@@ -189,6 +205,7 @@ class User
             'email' => $this->email,
             'firstName' => $this->firstName,
             'lastName' => $this->lastName,
+            'displayName' => $this->displayName(),
             'phone' => $this->phone,
             'gender' => $this->gender,
             'admissionNumber' => $this->admissionNumber,

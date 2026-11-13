@@ -6,7 +6,7 @@ import {Icon} from '../../../../../../common/icon/icon';
 import {TermContext} from '../../../../../../common/service/term-context';
 
 interface CalTerm { id: number; name: string; sequence: number; start_date: string | null; end_date: string | null; is_current: boolean; }
-interface CalSession { id: number; name: string; is_current: boolean; terms: CalTerm[]; }
+interface CalSession { id: number; name: string; is_current: boolean; archived?: boolean; terms: CalTerm[]; }
 
 /**
  * Settings → Academic calendar. The school's sessions and terms: set real term

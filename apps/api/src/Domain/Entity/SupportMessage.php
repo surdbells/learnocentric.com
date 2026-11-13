@@ -52,7 +52,7 @@ class SupportMessage
             'id' => $this->id,
             'body' => $this->body,
             'is_staff' => $this->isStaff,
-            'author' => $this->author ? trim($this->author->getFirstName() . ' ' . $this->author->getLastName()) : 'Removed user',
+            'author' => $this->author ? $this->author->displayName() : 'Removed user',
             'created_at' => $this->createdAt->format(DATE_ATOM),
         ];
     }

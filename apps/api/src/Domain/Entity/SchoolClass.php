@@ -76,7 +76,7 @@ class SchoolClass
             'arm' => $this->arm,
             'label' => $this->getLabel(),
             'class_teacher_id' => $this->classTeacher?->getId(),
-            'class_teacher' => $this->classTeacher ? trim($this->classTeacher->getFirstName() . ' ' . $this->classTeacher->getLastName()) : null,
+            'class_teacher' => $this->classTeacher ? $this->classTeacher->displayName() : null,
             'status' => $this->status,
         ];
     }

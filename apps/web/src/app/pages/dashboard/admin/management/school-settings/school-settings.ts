@@ -13,6 +13,7 @@ import {AcademicCalendar} from './academic-calendar/academic-calendar';
 import {AuthService} from '../../../../../common/auth/auth.service';
 import {roleRoot} from '../../../../../common/auth/portal';
 import {BrandThemeService} from '../../../../../common/service/brand-theme.service';
+import {ModuleAccessService} from '../../../../../common/auth/module-access.service';
 
 interface Band { grade: string; min: number; }
 
@@ -35,6 +36,7 @@ export class SchoolSettings {
   private readonly toast = inject(ToastrService);
   private readonly auth = inject(AuthService);
   private readonly brandTheme = inject(BrandThemeService);
+  private readonly moduleAccess = inject(ModuleAccessService);
 
   /** '/admin' or '/academy', so links work for both school and academy admins. */
   readonly root = roleRoot(this.auth.getAuthSession()?.user?.role);
@@ -203,6 +205,8 @@ export class SchoolSettings {
         this.profile.set(profile ?? this.profile());
         // The new brand colour themes the app straight away.
         this.brandTheme.apply((profile ?? this.profile())?.brand_color ?? null);
+        // Re-read the school's presentation preferences (dates, names, language) so they apply now.
+        this.moduleAccess.refresh();
         this.settings.set(settings ?? this.settings());
         this.bands.set(settings?.grading?.bands ?? bands);
         this.passMark.set(settings?.grading?.pass_mark ?? this.passMark());

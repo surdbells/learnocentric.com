@@ -141,7 +141,7 @@ class AccountMailer
 HTML;
 
         return $this->mailer->send(
-            ['address' => $user->getEmail(), 'name' => trim($user->getFirstName() . ' ' . $user->getLastName())],
+            ['address' => $user->getEmail(), 'name' => $user->displayName()],
             $subject,
             $html,
             "Hi {$user->getFirstName()},\n\n{$intro}\n\n{$button}: {$link}\n\n{$footer}",

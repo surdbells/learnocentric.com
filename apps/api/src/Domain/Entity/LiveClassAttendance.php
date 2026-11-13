@@ -46,7 +46,7 @@ class LiveClassAttendance
         return [
             'id' => $this->id,
             'student_id' => $this->student->getId(),
-            'student' => $this->student->getFirstName() . ' ' . $this->student->getLastName(),
+            'student' => $this->student->displayName(),
             'joined_at' => $this->joinedAt->format(DATE_ATOM),
         ];
     }

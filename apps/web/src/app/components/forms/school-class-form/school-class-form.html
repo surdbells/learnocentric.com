@@ -3,7 +3,12 @@
     <div class="row">
 
       <div class="col-md-6">
-        <div learnoInput class="mb-3" [label]="'Level'" [inputType]="'text'" [id]="'gradeLevel'" [formControlName]="'gradeLevel'" [placeholder]="'e.g. JSS 1, SS 2, Primary 4'"></div>
+        <div learnoInput class="mb-3" [label]="'Level'" [inputType]="'text'" [id]="'gradeLevel'" [formControlName]="'gradeLevel'" [placeholder]="'e.g. ' + levelExamples"></div>
+        <div class="d-flex flex-wrap gap-1 mb-3" aria-label="Suggested levels">
+          @for (lvl of levels; track lvl) {
+            <button type="button" class="btn btn-sm btn-outline-secondary py-0" (click)="form.controls.gradeLevel.setValue(lvl)">{{ lvl }}</button>
+          }
+        </div>
       </div>
       <div class="col-md-6">
         <div learnoInput class="mb-3" [label]="'Arm / Section (optional)'" [inputType]="'text'" [id]="'section'" [formControlName]="'section'" [placeholder]="'e.g. A, B, Gold'"></div>

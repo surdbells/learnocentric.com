@@ -1,5 +1,6 @@
 import {computed, inject, Injectable, signal} from '@angular/core';
 import {ApiService} from '../service/api.service';
+import {SchoolPrefsService} from '../service/school-prefs.service';
 
 const MODULES_KEY = 'granted_modules';
 const MATRIX_KEY = 'role_matrix';
@@ -15,6 +16,7 @@ const MATRIX_KEY = 'role_matrix';
 @Injectable({providedIn: 'root'})
 export class ModuleAccessService {
   private readonly api = inject(ApiService);
+  private readonly schoolPrefs = inject(SchoolPrefsService);
 
   /** null = not yet loaded on this client (fail-open in the UI; backend still enforces). */
   private readonly _modules = signal<string[] | null>(this.readCache());
@@ -53,7 +55,12 @@ export class ModuleAccessService {
   /** Fetch the granted modules (and custom-role matrix) for the current session and cache them. */
   refresh(): void {
     this.api.get<{ modules?: string[]; role_matrix?: Record<string, string[]> | null }>('/backend/auth/me').subscribe({
-      next: (res) => { this.set(res?.modules ?? []); this.setMatrix(res?.role_matrix ?? null); },
+      next: (res: any) => {
+        this.set(res?.modules ?? []);
+        this.setMatrix(res?.role_matrix ?? null);
+        // The school's presentation preferences (time zone, date format, names, language).
+        this.schoolPrefs.set(res?.school ?? null);
+      },
       error: () => { /* leave cache as-is; backend still enforces */ },
     });
   }

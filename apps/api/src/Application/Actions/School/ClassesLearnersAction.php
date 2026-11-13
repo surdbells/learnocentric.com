@@ -116,7 +116,7 @@ final class ClassesLearnersAction
             }
             $learners[] = [
                 'id' => $student->getId(),
-                'name' => trim($student->getFirstName() . ' ' . $student->getLastName()),
+                'name' => $student->displayName(),
                 'email' => $student->getEmail(),
                 'avg_score' => $avg,
                 'status' => $status,
@@ -183,7 +183,7 @@ final class ClassesLearnersAction
         if ($t === null) {
             $t = $this->em->getRepository(TeacherAssignment::class)->findOneBy(['schoolClass' => $class])?->getTeacher();
         }
-        return $t ? trim($t->getFirstName() . ' ' . $t->getLastName()) : null;
+        return $t ? $t->displayName() : null;
     }
 
     private function currentTopic(SchoolClass $class): ?string

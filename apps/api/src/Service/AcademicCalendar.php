@@ -67,6 +67,33 @@ class AcademicCalendar
         return $session;
     }
 
+    /**
+     * Sessions the school's archive policy has retired (Settings → Data &
+     * System Preferences → Archive Policy): "after 1 academic year" keeps the
+     * current session and the one before it, "after 3" keeps the current and
+     * three before. Archived sessions leave the term switcher; nothing is
+     * deleted and they remain listed (as archived) in the calendar.
+     *
+     * @return int[] ids of archived sessions
+     */
+    public function archivedSessionIds(Institution $institution): array
+    {
+        $keepPrevious = match ($institution->getSettings()['data']['archive_policy'] ?? 'after_3_years') {
+            'never' => null,
+            'after_1_year' => 1,
+            default => 3,
+        };
+        if ($keepPrevious === null) {
+            return [];
+        }
+        $sessions = $this->em->getRepository(AcademicSession::class)->findBy(['institution' => $institution], ['id' => 'DESC']);
+
+        return array_map(
+            static fn (AcademicSession $s) => (int) $s->getId(),
+            array_slice($sessions, $keepPrevious + 1)
+        );
+    }
+
     /** "2026/2027": the academic year starts in September. */
     public static function sessionName(?DateTimeImmutable $today = null): string
     {

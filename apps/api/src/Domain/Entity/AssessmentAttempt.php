@@ -115,7 +115,7 @@ class AssessmentAttempt
             'assessment_id' => $this->assessment->getId(),
             'assessment' => $this->assessment->getTitle(),
             'student_id' => $this->student->getId(),
-            'student' => $this->student->getFirstName() . ' ' . $this->student->getLastName(),
+            'student' => $this->student->displayName(),
             'status' => $this->status,
             'track' => $this->track,
             'total_marks' => $this->totalMarks,

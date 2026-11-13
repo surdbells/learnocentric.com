@@ -73,7 +73,7 @@ final class GuardiansAction
 
         return Json::write($response, ['data' => array_map(static fn (User $u) => [
             'id' => $u->getId(),
-            'name' => trim($u->getFirstName() . ' ' . $u->getLastName()),
+            'name' => $u->displayName(),
             'email' => $u->getEmail(),
         ], $rows)]);
     }
@@ -210,7 +210,7 @@ final class GuardiansAction
         return [
             'id' => $l->getId(),
             'guardian_id' => $g->getId(),
-            'name' => trim($g->getFirstName() . ' ' . $g->getLastName()),
+            'name' => $g->displayName(),
             'email' => $g->getEmail(),
             'phone' => $g->getPhone(),
             'relationship' => $l->getRelationship(),

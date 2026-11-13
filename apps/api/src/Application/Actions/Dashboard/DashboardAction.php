@@ -295,7 +295,7 @@ final class DashboardAction
         foreach ($ws as $s) {
             /** @var WorksheetSubmission $s */
             $rows[] = [
-                'learner' => $s->getStudent()->getFirstName() . ' ' . $s->getStudent()->getLastName(),
+                'learner' => $s->getStudent()->displayName(),
                 'type' => 'Worksheet',
                 'topic' => $s->getWorksheet()->getTopic()->getTitle(),
                 'subject' => $s->getWorksheet()->getTopic()->getSubject()->getName(),
@@ -312,7 +312,7 @@ final class DashboardAction
         foreach ($pf as $p) {
             /** @var PortfolioEntry $p */
             $rows[] = [
-                'learner' => $p->getStudent()->getFirstName() . ' ' . $p->getStudent()->getLastName(),
+                'learner' => $p->getStudent()->displayName(),
                 'type' => 'Portfolio task',
                 'topic' => $p->getTopic()->getTitle(),
                 'subject' => $p->getTopic()->getSubject()->getName(),
@@ -645,7 +645,7 @@ final class DashboardAction
             $attempts = $this->em->getRepository(AssessmentAttempt::class)->findBy(['student' => $child, 'status' => AssessmentAttempt::GRADED]);
             $children[] = [
                 'student_id' => $child->getId(),
-                'name' => $child->getFirstName() . ' ' . $child->getLastName(),
+                'name' => $child->displayName(),
                 'quiz_average' => $this->avg(array_map(static fn (AssessmentAttempt $a) => (float) $a->getPercentage(), $attempts)),
                 'quizzes_taken' => count($attempts),
                 'unread_feedback' => (int) $this->em->createQueryBuilder()->select('COUNT(f.id)')->from(FeedbackNote::class, 'f')

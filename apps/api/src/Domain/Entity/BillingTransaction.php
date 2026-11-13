@@ -86,7 +86,7 @@ class BillingTransaction
             'amount_naira' => $this->amountKobo / 100,
             'status' => $this->status,
             'channel' => $this->channel,
-            'initiated_by' => $this->initiatedBy ? $this->initiatedBy->getFirstName() . ' ' . $this->initiatedBy->getLastName() : null,
+            'initiated_by' => $this->initiatedBy ? $this->initiatedBy->displayName() : null,
             'paid_at' => $this->paidAt?->format(DATE_ATOM),
             'created_at' => $this->getCreatedAt()->format(DATE_ATOM),
         ];

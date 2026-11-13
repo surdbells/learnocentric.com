@@ -184,7 +184,7 @@ class ContentResource
             'downloadable' => $this->downloadable,
             'institution_id' => $this->institution?->getId(),
             'owned_by_school' => $this->institution !== null,
-            'uploaded_by' => $this->createdBy ? trim($this->createdBy->getFirstName() . ' ' . $this->createdBy->getLastName()) : null,
+            'uploaded_by' => $this->createdBy ? $this->createdBy->displayName() : null,
             'created_at' => $this->createdAt->format(DATE_ATOM),
         ];
     }

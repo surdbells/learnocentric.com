@@ -139,8 +139,8 @@ class FeedbackNote
         return [
             'id' => $this->id,
             'student_id' => $this->student->getId(),
-            'student' => $this->student->getFirstName() . ' ' . $this->student->getLastName(),
-            'author' => $this->author ? $this->author->getFirstName() . ' ' . $this->author->getLastName() : null,
+            'student' => $this->student->displayName(),
+            'author' => $this->author ? $this->author->displayName() : null,
             'topic_id' => $this->topic?->getId(),
             'topic' => $this->topic?->getTitle(),
             'type' => $this->type,

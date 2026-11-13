@@ -60,7 +60,7 @@ class TeacherAssignment
         return [
             'id' => $this->id,
             'teacher_id' => $this->teacher->getId(),
-            'teacher' => trim($this->teacher->getFirstName() . ' ' . $this->teacher->getLastName()),
+            'teacher' => $this->teacher->displayName(),
             'class_id' => $this->schoolClass->getId(),
             'class_label' => $this->schoolClass->getLabel(),
             'subject_id' => $this->subject->getId(),

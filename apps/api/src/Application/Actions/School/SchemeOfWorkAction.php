@@ -131,7 +131,7 @@ final class SchemeOfWorkAction
         if ($teacherIds !== []) {
             foreach ($this->em->getRepository(User::class)->findBy(['id' => $teacherIds]) as $u) {
                 /** @var User $u */
-                $teacherName[$u->getId()] = $u->getFirstName() . ' ' . $u->getLastName();
+                $teacherName[$u->getId()] = $u->displayName();
             }
         }
 

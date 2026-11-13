@@ -89,7 +89,7 @@ class WorksheetSubmission
             'worksheet' => $this->worksheet->getTitle(),
             'total_marks' => $this->worksheet->getTotalMarks(),
             'student_id' => $this->student->getId(),
-            'student' => $this->student->getFirstName() . ' ' . $this->student->getLastName(),
+            'student' => $this->student->displayName(),
             'response_text' => $this->responseText,
             'attachment_url' => \App\Service\Storage\FilePath::toUrl($this->attachmentUrl),
             'status' => $this->status,

@@ -3,6 +3,7 @@ import {isPlatformBrowser, Location} from '@angular/common';
 import {FormsModule} from '@angular/forms';
 import {Router, RouterLink} from '@angular/router';
 import {BrandThemeService} from '../../service/brand-theme.service';
+import {SchoolPrefsService} from '../../service/school-prefs.service';
 import {Subject} from 'rxjs';
 import {debounceTime, distinctUntilChanged, switchMap} from 'rxjs/operators';
 import {of} from 'rxjs';
@@ -39,6 +40,7 @@ export class Topbar implements OnInit {
   user = signal<AuthUser | null>(null);
   institution = signal<any | null>(null);
   private readonly brandTheme = inject(BrandThemeService);
+  protected readonly schoolPrefs = inject(SchoolPrefsService);
   /** Whether the currently-applied theme is dark (resolves 'system' against the OS). */
   isDark = signal(false);
 

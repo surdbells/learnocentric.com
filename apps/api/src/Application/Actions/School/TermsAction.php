@@ -15,8 +15,10 @@ final class TermsAction
 {
     use ResolvesInstitution;
 
-    public function __construct(private readonly EntityManagerInterface $em)
-    {
+    public function __construct(
+        private readonly EntityManagerInterface $em,
+        private readonly \App\Service\AcademicCalendar $calendar,
+    ) {
     }
 
     public function __invoke(Request $request, Response $response): Response
@@ -27,6 +29,11 @@ final class TermsAction
             ->orderBy('ses.id', 'DESC')->addOrderBy('t.sequence', 'ASC');
         if ($institution !== null) {
             $qb->andWhere('ses.institution = :inst')->setParameter('inst', $institution);
+            // Sessions retired by the school's archive policy leave the term switcher.
+            $archived = $this->calendar->archivedSessionIds($institution);
+            if ($archived !== []) {
+                $qb->andWhere('ses.id NOT IN (:archived)')->setParameter('archived', $archived);
+            }
         }
 
         return Json::write($response, array_map(static fn (Term $t) => $t->toArray(), $qb->getQuery()->getResult()));

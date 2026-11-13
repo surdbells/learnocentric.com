@@ -44,11 +44,16 @@ final class AcademicCalendarAction
         }
         $this->calendar->ensureFor($institution);
 
+        $archived = $this->calendar->archivedSessionIds($institution);
         $out = [];
         foreach ($this->em->getRepository(AcademicSession::class)->findBy(['institution' => $institution], ['id' => 'DESC']) as $s) {
             /** @var AcademicSession $s */
             $terms = $this->em->getRepository(Term::class)->findBy(['session' => $s], ['sequence' => 'ASC']);
-            $out[] = $s->toArray() + ['terms' => array_map(static fn (Term $t) => $t->toArray(), $terms)];
+            $out[] = $s->toArray() + [
+                'terms' => array_map(static fn (Term $t) => $t->toArray(), $terms),
+                // Retired by the archive policy: kept here, hidden from the term switcher.
+                'archived' => in_array((int) $s->getId(), $archived, true),
+            ];
         }
 
         return Json::write($response, ['sessions' => $out, 'suggested_next' => $this->nextName($out[0]['name'] ?? null)]);

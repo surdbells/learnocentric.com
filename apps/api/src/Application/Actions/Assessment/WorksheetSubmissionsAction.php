@@ -381,7 +381,7 @@ final class WorksheetSubmissionsAction
         return Json::write($response, [
             'submission' => [
                 'id' => $submission->getId(),
-                'student' => $submission->getStudent()->getFirstName() . ' ' . $submission->getStudent()->getLastName(),
+                'student' => $submission->getStudent()->displayName(),
                 'status' => $submission->getStatus(),
                 'score' => $submission->getScore(),
                 'feedback' => $submission->getFeedback(),

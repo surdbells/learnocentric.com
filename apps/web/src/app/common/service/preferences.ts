@@ -68,6 +68,18 @@ export class Preferences {
     this.applyLanguageAttributes(lang);
   }
 
+  /**
+   * The school's language (School Settings → Localization) is used until the
+   * user picks a language of their own; it is never stored as their choice.
+   */
+  applySchoolDefault(lang: 'en' | 'fr' | 'ar'): void {
+    if (!isPlatformBrowser(this.plaformId) || this.getStoredLanguage()) return;
+    if (this.languageSubject.value !== lang) {
+      this.languageSubject.next(lang);
+      this.applyLanguageAttributes(lang);
+    }
+  }
+
   private applyLanguageAttributes(lang: string) {
     if (!isPlatformBrowser(this.plaformId)) return;
     const isArabic = lang === 'ar';

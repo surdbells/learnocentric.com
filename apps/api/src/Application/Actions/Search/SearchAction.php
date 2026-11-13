@@ -113,7 +113,7 @@ final class SearchAction
             return [
                 'type' => $isStudent ? 'Learner' : 'Teacher',
                 'icon' => $isStudent ? 'group' : 'supervisor_account',
-                'title' => $u->getFirstName() . ' ' . $u->getLastName(),
+                'title' => $u->displayName(),
                 'subtitle' => $u->getEmail(),
                 'link' => $isStudent ? $learnerLink : $staffLink,
             ];

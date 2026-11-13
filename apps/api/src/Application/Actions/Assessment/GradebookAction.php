@@ -76,7 +76,7 @@ final class GradebookAction
         $data = array_map(static fn (AssessmentAttempt $a) => [
             'attempt_id' => $a->getId(),
             'student_id' => $a->getStudent()->getId(),
-            'student' => $a->getStudent()->getFirstName() . ' ' . $a->getStudent()->getLastName(),
+            'student' => $a->getStudent()->displayName(),
             'score' => $a->getScore(),
             'total_marks' => $a->getTotalMarks(),
             'percentage' => $a->getPercentage(),
@@ -113,7 +113,7 @@ final class GradebookAction
         foreach ($qb->getQuery()->getResult() as $attempt) {
             /** @var AssessmentAttempt $attempt */
             $sid = $attempt->getStudent()->getId();
-            $byStudent[$sid] ??= ['student_id' => $sid, 'student' => $attempt->getStudent()->getFirstName() . ' ' . $attempt->getStudent()->getLastName(),
+            $byStudent[$sid] ??= ['student_id' => $sid, 'student' => $attempt->getStudent()->displayName(),
                 'academic' => [], 'competency' => [], 'attempts' => 0, 'passed' => 0];
             $byStudent[$sid][$attempt->getTrack() === 'competency' ? 'competency' : 'academic'][] = (float) $attempt->getPercentage();
             $byStudent[$sid]['attempts']++;
@@ -223,7 +223,7 @@ final class GradebookAction
             $sid = $attempt->getStudent()->getId();
             $byStudent[$sid] ??= [
                 'student_id' => $sid,
-                'student' => $attempt->getStudent()->getFirstName() . ' ' . $attempt->getStudent()->getLastName(),
+                'student' => $attempt->getStudent()->displayName(),
                 'scores' => [],
             ];
             $pct = (float) $attempt->getPercentage();

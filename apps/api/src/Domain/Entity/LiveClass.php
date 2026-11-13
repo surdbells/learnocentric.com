@@ -122,7 +122,7 @@ class LiveClass
             'topic_id' => $this->topic?->getId(),
             'topic' => $this->topic?->getTitle(),
             'host_id' => $this->host?->getId(),
-            'host' => $this->host ? $this->host->getFirstName() . ' ' . $this->host->getLastName() : null,
+            'host' => $this->host ? $this->host->displayName() : null,
             'title' => $this->title,
             'scheduled_at' => $this->scheduledAt->format(DATE_ATOM),
             'duration_minutes' => $this->durationMinutes,
