@@ -45,7 +45,7 @@ final class SchoolProfileAction
     {
         /** @var User|null $user */
         $user = $request->getAttribute('user');
-        if (!in_array($user?->getRole()->getCode(), ['school_admin', 'tutor_admin'], true)) {
+        if (!in_array($user?->getRole()->effectiveCode(), ['school_admin', 'tutor_admin'], true)) {
             return Json::error($response, 'Only a school administrator can update the profile.', 403);
         }
         $institution = $this->institution($request);

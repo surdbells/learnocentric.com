@@ -193,7 +193,7 @@ final class OnboardingAction
     {
         /** @var User $user */
         $user = $request->getAttribute('user');
-        if (!in_array($user->getRole()->getCode(), self::ADMIN, true)) {
+        if (!in_array($user->getRole()->effectiveCode(), self::ADMIN, true)) {
             return Json::error($response, 'Only administrators can onboard learners and staff.', 403);
         }
         return null;

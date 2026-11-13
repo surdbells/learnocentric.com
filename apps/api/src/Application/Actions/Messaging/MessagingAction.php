@@ -50,13 +50,13 @@ final class MessagingAction
         if ($institution === null) {
             return Json::write($response, []);
         }
-        $allowed = self::PAIRS[$user->getRole()->getCode()] ?? [];
+        $allowed = self::PAIRS[$user->getRole()->effectiveCode()] ?? [];
         if ($allowed === []) {
             return Json::write($response, []);
         }
         $rows = $this->em->createQueryBuilder()
             ->select('u')->from(User::class, 'u')->join('u.role', 'r')
-            ->where('u.institution = :inst')->andWhere('r.code IN (:roles)')->andWhere('u.id != :me')
+            ->where('u.institution = :inst')->andWhere('r.effectiveCode IN (:roles)')->andWhere('u.id != :me')
             ->setParameter('inst', $institution)->setParameter('roles', $allowed)->setParameter('me', $user->getId())
             ->orderBy('u.firstName', 'ASC')
             ->getQuery()->getResult();
@@ -176,7 +176,7 @@ final class MessagingAction
         if ($institution === null) {
             return Json::write($response, []);
         }
-        $role = $user->getRole()->getCode();
+        $role = $user->getRole()->effectiveCode();
         $isStaff = in_array($role, self::STAFF, true);
         $all = $this->em->getRepository(Announcement::class)->findBy(['institution' => $institution], ['createdAt' => 'DESC']);
 
@@ -206,7 +206,7 @@ final class MessagingAction
         /** @var User $user */
         $user = $request->getAttribute('user');
         $institution = $user->getInstitution();
-        if ($institution === null || !in_array($user->getRole()->getCode(), self::STAFF, true)) {
+        if ($institution === null || !in_array($user->getRole()->effectiveCode(), self::STAFF, true)) {
             return Json::error($response, 'Staff only.', 403);
         }
         $all = $this->em->getRepository(Announcement::class)->findBy(['institution' => $institution]);
@@ -232,7 +232,7 @@ final class MessagingAction
     {
         /** @var User $user */
         $user = $request->getAttribute('user');
-        if (!in_array($user->getRole()->getCode(), self::STAFF, true)) {
+        if (!in_array($user->getRole()->effectiveCode(), self::STAFF, true)) {
             return Json::error($response, 'Only staff can post announcements.', 403);
         }
         $institution = $user->getInstitution();
@@ -269,7 +269,7 @@ final class MessagingAction
         if ($announcement === null || $announcement->getInstitution() !== $user->getInstitution()) {
             return Json::error($response, 'Announcement not found.', 404);
         }
-        if (!in_array($user->getRole()->getCode(), self::STAFF, true)) {
+        if (!in_array($user->getRole()->effectiveCode(), self::STAFF, true)) {
             return Json::error($response, 'Staff only.', 403);
         }
         if ($announcement->getStatus() === Announcement::SENT) {
@@ -295,7 +295,7 @@ final class MessagingAction
         if ($announcement === null || $announcement->getInstitution() !== $user->getInstitution()) {
             return Json::error($response, 'Announcement not found.', 404);
         }
-        if (!in_array($user->getRole()->getCode(), self::STAFF, true)) {
+        if (!in_array($user->getRole()->effectiveCode(), self::STAFF, true)) {
             return Json::error($response, 'Staff only.', 403);
         }
         $this->em->remove($announcement);
@@ -372,15 +372,15 @@ final class MessagingAction
         }
         $roles = Announcement::rolesForAudience($a->getAudience());
         return $this->em->createQueryBuilder()->select('u')->from(User::class, 'u')->join('u.role', 'r')
-            ->where('u.institution = :i')->andWhere('r.code IN (:roles)')
+            ->where('u.institution = :i')->andWhere('r.effectiveCode IN (:roles)')
             ->setParameter('i', $institution)->setParameter('roles', $roles)
             ->getQuery()->getResult();
     }
 
     private function canMessage(User $a, User $b): bool
     {
-        $allowed = self::PAIRS[$a->getRole()->getCode()] ?? [];
-        return in_array($b->getRole()->getCode(), $allowed, true);
+        $allowed = self::PAIRS[$a->getRole()->effectiveCode()] ?? [];
+        return in_array($b->getRole()->effectiveCode(), $allowed, true);
     }
 
     private function contactRow(User $u): array
@@ -388,7 +388,7 @@ final class MessagingAction
         return [
             'id' => $u->getId(),
             'name' => trim($u->getFirstName() . ' ' . $u->getLastName()),
-            'role' => $u->getRole()->getCode(),
+            'role' => $u->getRole()->effectiveCode(),
             'profile_image_url' => $u->getProfileImageUrl(),
         ];
     }

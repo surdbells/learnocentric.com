@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import {SignIn} from './pages/authentication/sign-in/sign-in';
+import {Register} from './pages/authentication/register/register';
 import {PublicLayout} from './pages/public/public-layout/public-layout';
 import {PublicHome} from './pages/public/home/home';
 import {PublicFeatures} from './pages/public/features/features';
@@ -122,6 +123,7 @@ export const routes: Routes = [
     ]
   },
   { path: "login", component: SignIn, title: "Sign in | Learn-O'Centric" },
+  { path: "register", component: Register, title: "Create account | Learn-O'Centric" },
 
   {
     path: "notifications",

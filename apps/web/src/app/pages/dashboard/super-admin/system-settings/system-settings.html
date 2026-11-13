@@ -117,21 +117,14 @@
           <h6 class="fw-semibold mb-1"><app-icon name="cloud_upload" [size]="18" class="me-1 text-body-secondary" /> Integrations</h6>
           <p class="text-body-secondary small mb-3">Third-party providers. Credentials are configured on the server, never stored here.</p>
           <div class="row g-3">
-            <div class="col-md-4">
+            <div class="col-md-6">
               <div class="form-check form-switch mb-2">
                 <input class="form-check-input" type="checkbox" id="int_email" [(ngModel)]="model.integrations.email_enabled" />
                 <label class="form-check-label fw-medium" for="int_email">Email</label>
               </div>
               <input type="text" class="form-control" placeholder="Provider (e.g. SendGrid)" [(ngModel)]="model.integrations.email_provider" [disabled]="!model.integrations.email_enabled" />
             </div>
-            <div class="col-md-4">
-              <div class="form-check form-switch mb-2">
-                <input class="form-check-input" type="checkbox" id="int_sms" [(ngModel)]="model.integrations.sms_enabled" />
-                <label class="form-check-label fw-medium" for="int_sms">SMS</label>
-              </div>
-              <input type="text" class="form-control" placeholder="Provider (e.g. Twilio)" [(ngModel)]="model.integrations.sms_provider" [disabled]="!model.integrations.sms_enabled" />
-            </div>
-            <div class="col-md-4">
+            <div class="col-md-6">
               <div class="form-check form-switch mb-2">
                 <input class="form-check-input" type="checkbox" id="int_pay" [(ngModel)]="model.integrations.payments_enabled" />
                 <label class="form-check-label fw-medium" for="int_pay">Payments</label>

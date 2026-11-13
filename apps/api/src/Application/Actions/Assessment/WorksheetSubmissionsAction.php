@@ -630,7 +630,7 @@ final class WorksheetSubmissionsAction
     private function staffGuard(Request $request, Response $response): ?Response
     {
         $user = $this->currentUser($request);
-        if (!in_array($user->getRole()->getCode(), self::STAFF, true)) {
+        if (!in_array($user->getRole()->effectiveCode(), self::STAFF, true)) {
             return Json::error($response, 'Only teachers and administrators can do that.', 403);
         }
         return null;

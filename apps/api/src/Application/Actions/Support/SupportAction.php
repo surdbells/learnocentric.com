@@ -184,19 +184,19 @@ final class SupportAction
 
     private function isPlatform(User $user): bool
     {
-        return $user->getRole()->getCode() === 'super_admin';
+        return $user->getRole()->effectiveCode() === 'super_admin';
     }
 
     private function isInstitutionAdmin(User $user): bool
     {
-        return in_array($user->getRole()->getCode(), ['school_admin', 'tutor_admin'], true);
+        return in_array($user->getRole()->effectiveCode(), ['school_admin', 'tutor_admin'], true);
     }
 
     /** @return User[] */
     private function platformAdmins(): array
     {
         return $this->em->getRepository(User::class)->createQueryBuilder('u')
-            ->join('u.role', 'r')->where('r.code = :c')->setParameter('c', 'super_admin')
+            ->join('u.role', 'r')->where('r.effectiveCode = :c')->setParameter('c', 'super_admin')
             ->getQuery()->getResult();
     }
 

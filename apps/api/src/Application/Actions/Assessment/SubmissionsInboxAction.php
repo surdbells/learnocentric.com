@@ -191,7 +191,7 @@ final class SubmissionsInboxAction
      */
     private function subjectScope(User $user): array
     {
-        $role = $user->getRole()->getCode();
+        $role = $user->getRole()->effectiveCode();
         if (in_array($role, ['teacher', 'tutor'], true)) {
             $ids = [];
             foreach ($this->em->getRepository(TeacherAssignment::class)->findBy(['teacher' => $user]) as $a) {

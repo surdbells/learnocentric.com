@@ -44,7 +44,7 @@ class LifecycleService
     {
         $allowed = self::ACTION_ROLES[$action] ?? [];
 
-        return in_array($actor->getRole()->getCode(), $allowed, true);
+        return in_array($actor->getRole()->effectiveCode(), $allowed, true);
     }
 
     /**

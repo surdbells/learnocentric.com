@@ -1,7 +1,8 @@
 import {Component, signal} from '@angular/core';
 import {FormControl, FormGroup, ReactiveFormsModule, Validators} from "@angular/forms";
 import {ToastrService} from "ngx-toastr";
-import {Router} from "@angular/router";
+import {Router, RouterLink} from "@angular/router";
+import {portalFor} from '../../../common/auth/portal';
 import {AuthResponse, AuthUser} from '../../../common/auth/auth.models';
 import {AuthService} from '../../../common/auth/auth.service';
 import {ModuleAccessService} from '../../../common/auth/module-access.service';
@@ -12,7 +13,8 @@ import {LearnoButton} from '../../../common/learno-button/learno-button';
   selector: 'app-sign-in',
   imports: [
     ReactiveFormsModule,
-    LearnoButton
+    LearnoButton,
+    RouterLink
   ],
   templateUrl: './sign-in.html',
   styleUrl: './sign-in.css'
@@ -56,33 +58,11 @@ export class SignIn {
             this.toast.success('Login Successful');
 
               const user = val.user as AuthUser;
-              switch (user['role']) {
-                case "school_admin":
-                  this.router.navigate(["admin/main"]);
-                  break;
-
-                case "tutor_admin":
-                  this.router.navigate(["academy/main"]);
-                  break;
-
-                case "teacher":
-                  this.router.navigate(["teacher/main"]);
-                  break;
-
-                case "student":
-                  this.router.navigate(["student/main"]);
-                  break;
-
-                case "parent":
-                  this.router.navigate(["parent/main"]);
-                  break;
-
-                case "super_admin":
-                  this.router.navigate(["super-admin/main"]);
-                  break;
-
-                default:
-                  this.toast.error("Your account has no dashboard assigned. Please contact your administrator.");
+              const portal = portalFor(user['role']);
+              if (portal) {
+                this.router.navigateByUrl(portal);
+              } else {
+                this.toast.error("Your account has no dashboard assigned. Please contact your administrator.");
               }
 
           },

@@ -10,6 +10,7 @@ import {
   Image, Moon, Music, Newspaper, PanelLeftClose, PartyPopper, Pencil, Play, Plus, Pointer, Receipt,
   Search, Settings, Shield, ShieldCheck, Smile, SquarePen, Star, Sun, Tag, Trash2, TrendingUp,
   User, UserCog, UserPlus, Users, Video, Wallet, X,
+  RefreshCw, KeyRound, Lock, MailCheck,
 } from 'lucide-angular';
 
 /**
@@ -19,6 +20,7 @@ import {
  * logic. Unknown names fall back to a neutral dot.
  */
 const MAP: Record<string, any> = {
+  refresh: RefreshCw, key: KeyRound, lock: Lock, mark_email_read: MailCheck,
   // actions / chrome
   add: Plus, close: X, check: Check, done_all: CheckCheck, delete: Trash2, edit: Pencil,
   search: Search, settings: Settings, filter_list: ListFilter, menu: Menu, menu_open: PanelLeftClose,

@@ -156,7 +156,7 @@ final class FeedbackAction
         $body = (array) $request->getParsedBody();
         $student = $this->em->getRepository(User::class)->find((int) ($body['student_id'] ?? 0));
         $message = trim((string) ($body['message'] ?? ''));
-        if ($student === null || $student->getRole()->getCode() !== 'student') {
+        if ($student === null || $student->getRole()->effectiveCode() !== 'student') {
             return Json::error($response, 'A valid student is required.', 422);
         }
         if ($message === '') {
@@ -304,7 +304,7 @@ final class FeedbackAction
     private function staffGuard(Request $request, Response $response): ?Response
     {
         $user = $this->currentUser($request);
-        if (!in_array($user->getRole()->getCode(), self::STAFF, true)) {
+        if (!in_array($user->getRole()->effectiveCode(), self::STAFF, true)) {
             return Json::error($response, 'Only teachers and administrators can do that.', 403);
         }
         return null;

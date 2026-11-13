@@ -122,7 +122,7 @@ abstract class AbstractUsersResourceAction
             ->select('u')
             ->from(User::class, 'u')
             ->join('u.role', 'r')
-            ->where('r.code = :role')
+            ->where('r.effectiveCode = :role')
             ->setParameter('role', $this->roleCode());
         if ($institution !== null) {
             $qb->andWhere('u.institution = :inst')->setParameter('inst', $institution);
@@ -133,7 +133,7 @@ abstract class AbstractUsersResourceAction
 
     protected function canManage(User $actor, User $target): bool
     {
-        $role = $actor->getRole()->getCode();
+        $role = $actor->getRole()->effectiveCode();
         if ($role === Role::SUPER_ADMIN) {
             return true;
         }
@@ -141,7 +141,7 @@ abstract class AbstractUsersResourceAction
             $sameInstitution = $actor->getInstitution() !== null
                 && $target->getInstitution()?->getId() === $actor->getInstitution()->getId();
 
-            return $sameInstitution && $target->getRole()->getCode() !== Role::SUPER_ADMIN;
+            return $sameInstitution && $target->getRole()->effectiveCode() !== Role::SUPER_ADMIN;
         }
 
         return false;

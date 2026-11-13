@@ -43,7 +43,7 @@ final class AnalyticsAction
     public function overview(Request $request, Response $response): Response
     {
         $user = $this->currentUser($request);
-        if (!in_array($user->getRole()->getCode(), self::STAFF, true)) {
+        if (!in_array($user->getRole()->effectiveCode(), self::STAFF, true)) {
             return Json::error($response, 'Only teachers and administrators can view analytics.', 403);
         }
         $institution = $this->resolveInstitution($request, $this->em);
@@ -340,7 +340,7 @@ final class AnalyticsAction
     public function schoolReport(Request $request, Response $response): Response
     {
         $user = $this->currentUser($request);
-        if (!in_array($user->getRole()->getCode(), self::STAFF, true)) {
+        if (!in_array($user->getRole()->effectiveCode(), self::STAFF, true)) {
             return Json::error($response, 'Only teachers and administrators can view reports.', 403);
         }
         $institution = $this->resolveInstitution($request, $this->em);
@@ -469,7 +469,7 @@ final class AnalyticsAction
     {
         $viewer = $this->currentUser($request);
         $student = $this->em->getRepository(User::class)->find((int) $args['id']);
-        if ($student === null || $student->getRole()->getCode() !== 'student') {
+        if ($student === null || $student->getRole()->effectiveCode() !== 'student') {
             return Json::error($response, 'Student not found.', 404);
         }
         if (!$this->canViewStudent($viewer, $student)) {
@@ -585,7 +585,7 @@ final class AnalyticsAction
     {
         $viewer = $this->currentUser($request);
         $student = $this->em->getRepository(User::class)->find((int) $args['id']);
-        if ($student === null || $student->getRole()->getCode() !== 'student') {
+        if ($student === null || $student->getRole()->effectiveCode() !== 'student') {
             return Json::error($response, 'Student not found.', 404);
         }
         if (!$this->canViewStudent($viewer, $student)) {
@@ -798,7 +798,7 @@ final class AnalyticsAction
     private function countByRole(string $role, $institution): int
     {
         $qb = $this->em->createQueryBuilder()->select('COUNT(u.id)')->from(User::class, 'u')->join('u.role', 'r')
-            ->where('r.code = :role')->setParameter('role', $role);
+            ->where('r.effectiveCode = :role')->setParameter('role', $role);
         if ($institution !== null) {
             $qb->andWhere('u.institution = :inst')->setParameter('inst', $institution);
         }
@@ -826,7 +826,7 @@ final class AnalyticsAction
         if ($viewer->getId() === $student->getId()) {
             return true;
         }
-        $role = $viewer->getRole()->getCode();
+        $role = $viewer->getRole()->effectiveCode();
         if (in_array($role, self::STAFF, true)) {
             return $viewer->getInstitution() === null
                 || $student->getInstitution()?->getId() === $viewer->getInstitution()->getId();

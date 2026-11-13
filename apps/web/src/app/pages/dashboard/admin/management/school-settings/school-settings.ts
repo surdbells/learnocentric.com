@@ -9,6 +9,8 @@ import {Icon} from '../../../../../common/icon/icon';
 import {RichEditor} from '../../../../../common/rich-editor/rich-editor';
 import {FileUpload, UploadedFile} from '../../../../../common/file-upload/file-upload';
 import {RolesPermissions} from './roles-permissions/roles-permissions';
+import {AuthService} from '../../../../../common/auth/auth.service';
+import {roleRoot} from '../../../../../common/auth/portal';
 
 interface Band { grade: string; min: number; }
 
@@ -29,6 +31,14 @@ interface Band { grade: string; min: number; }
 export class SchoolSettings {
   private readonly api = inject(ApiService);
   private readonly toast = inject(ToastrService);
+  private readonly auth = inject(AuthService);
+
+  /** '/admin' or '/academy', so links work for both school and academy admins. */
+  readonly root = roleRoot(this.auth.getAuthSession()?.user?.role);
+
+  // self sign-up (privacy tab): {enabled, join_code, platform_allows}
+  signup = signal<{enabled: boolean; join_code: string | null; platform_allows: boolean} | null>(null);
+  signupBusy = signal(false);
 
   loading = signal(true);
   saving = signal(false);
@@ -47,7 +57,27 @@ export class SchoolSettings {
   // safeguarding (privacy tab)
   safeguarding = signal({lead_name: '', lead_email: '', lead_phone: '', policy_note: ''});
 
-  constructor() { this.load(); }
+  constructor() {
+    this.load();
+    this.api.get<any>('/backend/school/signup').subscribe({next: (s) => this.signup.set(s)});
+  }
+
+  /** Open/close self sign-up; takes effect immediately (no Save needed). */
+  setSignup(enabled: boolean): void {
+    this.signupBusy.set(true);
+    this.api.put<any>('/backend/school/signup', {enabled}).subscribe({
+      next: (s) => { this.signup.set(s); this.signupBusy.set(false); this.toast.success(enabled ? 'Self sign-up is open' : 'Self sign-up is closed'); },
+      error: (e) => { this.signupBusy.set(false); this.toast.error(e?.error?.error || 'Could not update sign-up'); },
+    });
+  }
+
+  regenerateJoinCode(): void {
+    this.signupBusy.set(true);
+    this.api.post<any>('/backend/school/signup/regenerate', {}).subscribe({
+      next: (s) => { this.signup.set(s); this.signupBusy.set(false); this.toast.success('New join code issued — the old one no longer works'); },
+      error: (e) => { this.signupBusy.set(false); this.toast.error(e?.error?.error || 'Could not issue a new code'); },
+    });
+  }
 
   load(): void {
     this.loading.set(true);

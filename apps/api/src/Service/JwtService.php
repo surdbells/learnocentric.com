@@ -30,7 +30,7 @@ class JwtService
             'exp' => $now + $this->ttl,
             'userId' => $user->getId(),
             'email' => $user->getEmail(),
-            'role' => $user->getRole()->getCode(),
+            'role' => $user->getRole()->effectiveCode(),
             'institutionId' => $user->getInstitution()?->getId(),
         ]);
     }

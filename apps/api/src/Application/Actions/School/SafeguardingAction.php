@@ -83,7 +83,7 @@ final class SafeguardingAction
     {
         /** @var User $user */
         $user = $request->getAttribute('user');
-        if (!in_array($user->getRole()->getCode(), self::REPORTERS, true)) {
+        if (!in_array($user->getRole()->effectiveCode(), self::REPORTERS, true)) {
             return Json::error($response, 'You are not permitted to report a concern here.', 403);
         }
         $body = (array) $request->getParsedBody();
@@ -104,7 +104,7 @@ final class SafeguardingAction
             $case->setEvidence($this->normaliseEvidence($body['evidence']));
         }
 
-        $reporterRole = $user->getRole()->getCode();
+        $reporterRole = $user->getRole()->effectiveCode();
         if ($reporterRole === 'student') {
             // A student raising a concern, the case is about themselves.
             $case->setStudent($user);
@@ -113,7 +113,7 @@ final class SafeguardingAction
             $case->setStudent($this->resolveGuardedStudent($user, $body['student_id'] ?? null));
         } elseif (!empty($body['student_id'])) {
             $student = $this->em->getRepository(User::class)->find((int) $body['student_id']);
-            if ($student !== null && $student->getRole()->getCode() === 'student') {
+            if ($student !== null && $student->getRole()->effectiveCode() === 'student') {
                 $case->setStudent($student);
             }
         }
@@ -175,7 +175,7 @@ final class SafeguardingAction
             return;
         }
         $leads = $this->em->createQueryBuilder()->select('u')->from(User::class, 'u')->join('u.role', 'r')
-            ->where('r.code IN (:roles)')->andWhere('u.institution = :inst')
+            ->where('r.effectiveCode IN (:roles)')->andWhere('u.institution = :inst')
             ->setParameter('roles', ['school_admin', 'tutor_admin'])->setParameter('inst', $institution)
             ->getQuery()->getResult();
         foreach ($leads as $lead) {
@@ -238,7 +238,7 @@ final class SafeguardingAction
     {
         /** @var User|null $user */
         $user = $request->getAttribute('user');
-        if ($user === null || !in_array($user->getRole()->getCode(), self::LEADS, true)) {
+        if ($user === null || !in_array($user->getRole()->effectiveCode(), self::LEADS, true)) {
             return Json::error($response, 'Safeguarding cases are restricted to designated leads.', 403);
         }
         return null;

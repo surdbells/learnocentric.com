@@ -210,7 +210,7 @@ final class RolesAction
         }
         // Any institution staff member may be re-roled, everyone except learners and guardians.
         $users = $this->em->createQueryBuilder()->select('u', 'r')->from(User::class, 'u')->join('u.role', 'r')
-            ->where('u.institution = :inst')->andWhere('r.code NOT IN (:excluded)')
+            ->where('u.institution = :inst')->andWhere('r.effectiveCode NOT IN (:excluded)')
             ->setParameter('inst', $institution)->setParameter('excluded', ['student', 'parent'])
             ->orderBy('u.firstName', 'ASC')->getQuery()->getResult();
 
@@ -329,7 +329,7 @@ final class RolesAction
     private function elevatedUsers(?Institution $institution): int
     {
         $qb = $this->em->createQueryBuilder()->select('COUNT(u.id)')->from(User::class, 'u')->join('u.role', 'r')
-            ->where('r.code IN (:elev)')->setParameter('elev', ['school_admin', 'tutor_admin', 'academic_lead']);
+            ->where('r.effectiveCode IN (:elev)')->setParameter('elev', ['school_admin', 'tutor_admin', 'academic_lead']);
         if ($institution !== null) {
             $qb->andWhere('u.institution = :inst')->setParameter('inst', $institution);
         }
@@ -367,7 +367,7 @@ final class RolesAction
     {
         /** @var User $user */
         $user = $request->getAttribute('user');
-        if (!in_array($user->getRole()->getCode(), self::ADMIN, true)) {
+        if (!in_array($user->getRole()->effectiveCode(), self::ADMIN, true)) {
             return Json::error($response, 'Only administrators can manage roles.', 403);
         }
         return null;

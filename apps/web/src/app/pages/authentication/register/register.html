@@ -1,0 +1,66 @@
+<div class="auth">
+  <aside class="auth-brand d-none d-lg-flex">
+    <div class="auth-brand-inner">
+      <img class="auth-brand-logo" src="images/logo/logowhite.png" alt="Learnocentric" />
+      <h2 class="auth-brand-title">Join your school on Learnocentric.</h2>
+      <p class="auth-brand-text">Use the join code your school gave you to create your learner or parent account.</p>
+      <img class="auth-brand-art" src="images/pictureoverlay.png" alt="" />
+    </div>
+  </aside>
+
+  <main class="auth-form">
+    <div class="auth-card">
+      <img class="auth-card-logo d-lg-none" src="images/logo/logoblack.png" alt="Learnocentric" />
+
+      <h1 class="auth-title">Create an account</h1>
+      <p class="text-body-secondary mb-4">You'll need the join code from your school.</p>
+
+      <form [formGroup]="form" (ngSubmit)="submit()" class="text-start">
+        <div class="mb-3">
+          <label class="form-label" for="joinCode">Join code</label>
+          <input id="joinCode" formControlName="joinCode" class="form-control form-control-lg text-uppercase"
+                 placeholder="e.g. WFZ3HY4T" autocomplete="off" (blur)="checkCode()" />
+          @if (school()) { <div class="form-text text-success">You're joining <strong>{{ school() }}</strong>.</div> }
+          @if (codeError()) { <div class="form-text text-danger">{{ codeError() }}</div> }
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label d-block">I am a</label>
+          <div class="btn-group w-100" role="group">
+            <input type="radio" class="btn-check" id="role_student" value="student" formControlName="role" />
+            <label class="btn btn-outline-success" for="role_student">Learner</label>
+            <input type="radio" class="btn-check" id="role_parent" value="parent" formControlName="role" />
+            <label class="btn btn-outline-success" for="role_parent">Parent / guardian</label>
+          </div>
+        </div>
+
+        <div class="row g-3 mb-3">
+          <div class="col-6">
+            <label class="form-label" for="firstName">First name</label>
+            <input id="firstName" formControlName="firstName" class="form-control form-control-lg" autocomplete="given-name" />
+          </div>
+          <div class="col-6">
+            <label class="form-label" for="lastName">Last name</label>
+            <input id="lastName" formControlName="lastName" class="form-control form-control-lg" autocomplete="family-name" />
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label" for="email">Email</label>
+          <input id="email" type="email" formControlName="email" class="form-control form-control-lg" placeholder="you@example.com" autocomplete="email" />
+        </div>
+
+        <div class="mb-4">
+          <label class="form-label" for="password">Password</label>
+          <input id="password" type="password" formControlName="password" class="form-control form-control-lg" placeholder="At least 8 characters" autocomplete="new-password" />
+        </div>
+
+        <app-learno-button text="Create account" [isLoading]="isLoading()" />
+      </form>
+
+      <p class="small text-body-secondary text-center mt-4 mb-0">
+        Already have an account? <a routerLink="/login" class="fw-semibold">Sign in</a>
+      </p>
+    </div>
+  </main>
+</div>

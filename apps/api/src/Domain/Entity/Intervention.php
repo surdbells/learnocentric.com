@@ -121,7 +121,7 @@ class Intervention
             'topic' => $this->topic?->getTitle(),
             'raised_by' => $this->raisedBy ? $this->raisedBy->getFirstName() . ' ' . $this->raisedBy->getLastName() : null,
             'raised_by_id' => $this->raisedBy?->getId(),
-            'raised_by_role' => $this->raisedBy?->getRole()->getCode(),
+            'raised_by_role' => $this->raisedBy?->getRole()->effectiveCode(),
             'assigned_to_id' => $this->assignedTo?->getId(),
             'assigned_to' => $this->assignedTo ? $this->assignedTo->getFirstName() . ' ' . $this->assignedTo->getLastName() : null,
             'reason' => $this->reason,

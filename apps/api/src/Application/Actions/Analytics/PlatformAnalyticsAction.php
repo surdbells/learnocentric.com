@@ -35,7 +35,7 @@ final class PlatformAnalyticsAction
     {
         /** @var User|null $user */
         $user = $request->getAttribute('user');
-        if ($user === null || $user->getRole()->getCode() !== 'super_admin') {
+        if ($user === null || $user->getRole()->effectiveCode() !== 'super_admin') {
             return Json::error($response, 'Only the platform owner can view platform analytics.', 403);
         }
 
@@ -78,7 +78,7 @@ final class PlatformAnalyticsAction
 
         $roleCreated = function (string $role, DateTimeImmutable $from, DateTimeImmutable $to): int {
             return (int) $this->em->createQueryBuilder()->select('COUNT(u.id)')->from(User::class, 'u')->join('u.role', 'r')
-                ->where('r.code = :role')->andWhere('u.createdAt >= :from')->andWhere('u.createdAt < :to')
+                ->where('r.effectiveCode = :role')->andWhere('u.createdAt >= :from')->andWhere('u.createdAt < :to')
                 ->setParameter('role', $role)->setParameter('from', $from)->setParameter('to', $to)->getQuery()->getSingleScalarResult();
         };
 
@@ -272,8 +272,8 @@ final class PlatformAnalyticsAction
     /** @return array<int, array{role:string, count:int}> */
     private function roleBreakdown(): array
     {
-        $rows = $this->em->createQueryBuilder()->select('r.code AS role', 'COUNT(u.id) AS c')
-            ->from(User::class, 'u')->join('u.role', 'r')->groupBy('r.code')->orderBy('c', 'DESC')
+        $rows = $this->em->createQueryBuilder()->select('r.effectiveCode AS role', 'COUNT(u.id) AS c')
+            ->from(User::class, 'u')->join('u.role', 'r')->groupBy('r.effectiveCode')->orderBy('c', 'DESC')
             ->getQuery()->getArrayResult();
 
         return array_map(static fn (array $r) => ['role' => (string) $r['role'], 'count' => (int) $r['c']], $rows);
@@ -379,7 +379,7 @@ final class PlatformAnalyticsAction
         }
 
         $students = $this->em->createQueryBuilder()->select('IDENTITY(u.institution) AS inst', 'COUNT(u.id) AS c')
-            ->from(User::class, 'u')->join('u.role', 'r')->where('u.institution IS NOT NULL')->andWhere('r.code = :s')
+            ->from(User::class, 'u')->join('u.role', 'r')->where('u.institution IS NOT NULL')->andWhere('r.effectiveCode = :s')
             ->setParameter('s', 'student')->groupBy('u.institution')->getQuery()->getArrayResult();
         foreach ($students as $r) {
             if (isset($rows[(int) $r['inst']])) {
@@ -414,6 +414,6 @@ final class PlatformAnalyticsAction
     private function countRole(string $role): int
     {
         return (int) $this->em->createQueryBuilder()->select('COUNT(u.id)')->from(User::class, 'u')->join('u.role', 'r')
-            ->where('r.code = :role')->setParameter('role', $role)->getQuery()->getSingleScalarResult();
+            ->where('r.effectiveCode = :role')->setParameter('role', $role)->getQuery()->getSingleScalarResult();
     }
 }

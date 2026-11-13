@@ -50,6 +50,7 @@ use App\Application\Actions\School\SafeguardingAction;
 use App\Application\Actions\School\SchemeOfWorkAction;
 use App\Application\Actions\School\SchoolProfileAction;
 use App\Application\Actions\School\SchoolSettingsAction;
+use App\Application\Actions\School\SignupSettingsAction;
 use App\Application\Actions\School\RolesAction;
 use App\Application\Actions\School\StudentsAction;
 use App\Application\Actions\School\TermsAction;
@@ -75,6 +76,7 @@ return static function (App $app): void {
         // --- Public ---
         $group->post('/auth/login', LoginAction::class);
         $group->post('/auth/register', RegisterAction::class);
+        $group->get('/auth/join/{code:[A-Za-z0-9]{4,16}}', RegisterAction::class . ':lookup');
         // Public file serving (unguessable paths). Uses ?p= so the request URL
         // has no static-file extension in its path (the PHP dev server would
         // otherwise intercept e.g. .png before the app runs); works in prod too.
@@ -132,6 +134,8 @@ return static function (App $app): void {
             $auth->get('/school/calendar', \App\Application\Actions\School\CalendarAction::class);
             $auth->map(['GET', 'PUT'], '/school/profile', SchoolProfileAction::class);
             $auth->map(['GET', 'PUT'], '/school/settings', SchoolSettingsAction::class);
+            $auth->map(['GET', 'PUT'], '/school/signup', SignupSettingsAction::class);
+            $auth->post('/school/signup/regenerate', SignupSettingsAction::class . ':regenerate');
             $auth->get('/school/interventions/board', InterventionsAction::class . ':board');
             $auth->map(['GET', 'POST', 'PUT', 'DELETE'], '/school/interventions', InterventionsAction::class);
             $auth->post('/school/interventions/bulk-delete', InterventionsAction::class . ':bulkDelete');

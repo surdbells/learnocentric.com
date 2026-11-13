@@ -215,7 +215,7 @@ final class ContentLibraryAction
     {
         /** @var User|null $user */
         $user = $request->getAttribute('user');
-        if ($user === null || $user->getRole()->getCode() !== 'super_admin') {
+        if ($user === null || $user->getRole()->effectiveCode() !== 'super_admin') {
             return Json::error($response, 'Only the platform administrator can manage the content library.', 403);
         }
         return null;

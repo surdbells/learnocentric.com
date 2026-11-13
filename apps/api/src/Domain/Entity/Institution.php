@@ -49,6 +49,14 @@ class Institution
     #[ORM\Column(length: 30, options: ['default' => 'active'])]
     private string $status = 'active';
 
+    /** Learners/parents may self-register into this school with its join code. */
+    #[ORM\Column(name: 'self_signup', type: Types::BOOLEAN, options: ['default' => false])]
+    private bool $selfSignup = false;
+
+    /** Code people enter on the public sign-up page; never the raw institution id. */
+    #[ORM\Column(name: 'join_code', length: 16, unique: true, nullable: true)]
+    private ?string $joinCode = null;
+
     #[ORM\Column(name: 'created_at', type: Types::DATETIME_IMMUTABLE)]
     private DateTimeImmutable $createdAt;
 
@@ -87,6 +95,20 @@ class Institution
     public function setAssignedPackageId(?int $id): void { $this->assignedPackageId = $id; }
     public function getSettings(): ?array { return $this->settings; }
     public function setSettings(?array $settings): void { $this->settings = $settings; }
+    public function isSelfSignup(): bool { return $this->selfSignup; }
+    public function setSelfSignup(bool $v): void { $this->selfSignup = $v; }
+    public function getJoinCode(): ?string { return $this->joinCode; }
+
+    /** New random join code (no ambiguous characters like 0/O, 1/I). */
+    public function regenerateJoinCode(): string
+    {
+        $alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+        $code = '';
+        for ($i = 0; $i < 8; $i++) {
+            $code .= $alphabet[random_int(0, strlen($alphabet) - 1)];
+        }
+        return $this->joinCode = $code;
+    }
 
     public function toArray(): array
     {

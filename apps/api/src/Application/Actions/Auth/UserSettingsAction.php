@@ -30,7 +30,7 @@ final class UserSettingsAction
     {
         /** @var User $user */
         $user = $request->getAttribute('user');
-        $defaults = $this->defaultsFor($user->getRole()->getCode());
+        $defaults = $this->defaultsFor($user->getRole()->effectiveCode());
 
         if (strtoupper($request->getMethod()) === 'PUT') {
             $incoming = (array) ($request->getParsedBody()['preferences'] ?? $request->getParsedBody() ?? []);
@@ -55,9 +55,9 @@ final class UserSettingsAction
                 'fullName' => trim($user->getFirstName() . ' ' . $user->getLastName()),
                 'email' => $user->getEmail(),
                 'phone' => $user->getPhone(),
-                'role' => $user->getRole()->getCode(),
+                'role' => $user->getRole()->effectiveCode(),
                 'profileImageUrl' => $user->getProfileImageUrl(),
-                'staffId' => $user->getId() ? sprintf('LRN-%s-%04d', strtoupper(substr($user->getRole()->getCode(), 0, 2)), $user->getId()) : null,
+                'staffId' => $user->getId() ? sprintf('LRN-%s-%04d', strtoupper(substr($user->getRole()->effectiveCode(), 0, 2)), $user->getId()) : null,
             ],
             'security' => [
                 'last_login' => $user->getLastLogin()?->format(DATE_ATOM),

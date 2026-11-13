@@ -712,7 +712,7 @@ final class DashboardAction
     private function countRole(string $role, ?Institution $inst): int
     {
         $qb = $this->em->createQueryBuilder()->select('COUNT(u.id)')->from(User::class, 'u')->join('u.role', 'r')
-            ->where('r.code = :role')->setParameter('role', $role);
+            ->where('r.effectiveCode = :role')->setParameter('role', $role);
         if ($inst !== null) {
             $qb->andWhere('u.institution = :inst')->setParameter('inst', $inst);
         }

@@ -312,7 +312,7 @@ final class AssessmentsAction
             return Json::error($response, 'Assessment not found.', 404);
         }
         $user = $request->getAttribute('user');
-        if ($user === null || !in_array($user->getRole()->getCode(), self::MODERATORS, true)) {
+        if ($user === null || !in_array($user->getRole()->effectiveCode(), self::MODERATORS, true)) {
             return Json::error($response, 'You are not allowed to moderate assessments.', 403);
         }
         $body = (array) $request->getParsedBody();

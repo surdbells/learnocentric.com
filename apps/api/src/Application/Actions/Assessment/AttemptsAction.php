@@ -254,7 +254,7 @@ final class AttemptsAction
         if ($attempt->getStudent()->getId() === $user->getId()) {
             return true;
         }
-        $role = $user->getRole()->getCode();
+        $role = $user->getRole()->effectiveCode();
         if (in_array($role, ['teacher', 'academic_lead', 'school_admin', 'tutor_admin', 'super_admin'], true)) {
             // Staff can see attempts within their institution.
             return $user->getInstitution() === null

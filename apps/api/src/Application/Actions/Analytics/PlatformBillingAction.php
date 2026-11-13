@@ -189,7 +189,7 @@ final class PlatformBillingAction
     {
         /** @var User|null $user */
         $user = $request->getAttribute('user');
-        if ($user === null || $user->getRole()->getCode() !== 'super_admin') {
+        if ($user === null || $user->getRole()->effectiveCode() !== 'super_admin') {
             return Json::error($response, 'Platform billing is restricted to the platform owner.', 403);
         }
         return null;

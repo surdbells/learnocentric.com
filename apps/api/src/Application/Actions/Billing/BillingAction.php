@@ -219,7 +219,7 @@ final class BillingAction
     {
         /** @var User|null $user */
         $user = $request->getAttribute('user');
-        if ($user === null || !in_array($user->getRole()->getCode(), self::ADMIN, true)) {
+        if ($user === null || !in_array($user->getRole()->effectiveCode(), self::ADMIN, true)) {
             return Json::error($response, 'Only institution administrators can manage billing.', 403);
         }
         return null;

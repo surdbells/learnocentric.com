@@ -42,7 +42,7 @@ final class SearchAction
         if (mb_strlen($q) < 2) {
             return Json::write($response, ['data' => [], 'meta' => ['query' => $q, 'total' => 0]]);
         }
-        $role = $user->getRole()->getCode();
+        $role = $user->getRole()->effectiveCode();
         $base = $this->roleBase($role);
         $needle = mb_strtolower($q);
         $like = '%' . $needle . '%';
@@ -99,13 +99,13 @@ final class SearchAction
     {
         $qb = $this->em->createQueryBuilder()->select('u', 'r')->from(User::class, 'u')->join('u.role', 'r')
             ->where('LOWER(CONCAT(u.firstName, \' \', u.lastName)) LIKE :q OR LOWER(u.email) LIKE :q')->setParameter('q', $like)
-            ->andWhere('r.code IN (:roles)')->setParameter('roles', ['student', 'teacher'])
+            ->andWhere('r.effectiveCode IN (:roles)')->setParameter('roles', ['student', 'teacher'])
             ->setMaxResults(self::LIMIT_PER_TYPE);
         if ($inst !== null) {
             $qb->andWhere('u.institution = :inst')->setParameter('inst', $inst);
         }
         return array_map(static function (User $u) use ($base) {
-            $isStudent = $u->getRole()->getCode() === 'student';
+            $isStudent = $u->getRole()->effectiveCode() === 'student';
             return [
                 'type' => $isStudent ? 'Learner' : 'Teacher',
                 'icon' => $isStudent ? 'group' : 'supervisor_account',

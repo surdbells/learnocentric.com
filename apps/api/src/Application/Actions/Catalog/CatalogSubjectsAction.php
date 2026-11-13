@@ -116,7 +116,7 @@ final class CatalogSubjectsAction
     {
         /** @var User|null $user */
         $user = $request->getAttribute('user');
-        return $user !== null && $user->getRole()->getCode() === 'super_admin';
+        return $user !== null && $user->getRole()->effectiveCode() === 'super_admin';
     }
 
     private function guard(Request $request, Response $response): ?Response

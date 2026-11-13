@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Application\Actions\Institution;
 
+use App\Application\Support\Guard;
 use App\Application\Support\Json;
 use App\Domain\Entity\Institution;
 use App\Domain\Entity\User;
@@ -29,6 +30,9 @@ final class DeleteInstitutionAction
 
     public function __invoke(Request $request, Response $response, array $args): Response
     {
+        if (($deny = Guard::superAdmin($request, $response, "Only the platform owner can manage institutions.")) !== null) {
+            return $deny;
+        }
         /** @var User $actor */
         $actor = $request->getAttribute('user');
         $institution = $this->em->getRepository(Institution::class)->find((int) $args['id']);

@@ -204,7 +204,7 @@ final class ReportsAction
             }
         }
         $students = $this->em->createQueryBuilder()->select('IDENTITY(u.institution) AS k', 'COUNT(u.id) AS c')
-            ->from(User::class, 'u')->join('u.role', 'r')->where('u.institution IS NOT NULL')->andWhere('r.code = :s')
+            ->from(User::class, 'u')->join('u.role', 'r')->where('u.institution IS NOT NULL')->andWhere('r.effectiveCode = :s')
             ->setParameter('s', 'student')->groupBy('u.institution')->getQuery()->getArrayResult();
         foreach ($students as $r) {
             if (isset($rows[(int) $r['k']])) {
@@ -314,7 +314,7 @@ final class ReportsAction
     {
         /** @var User|null $user */
         $user = $request->getAttribute('user');
-        if ($user === null || $user->getRole()->getCode() !== 'super_admin') {
+        if ($user === null || $user->getRole()->effectiveCode() !== 'super_admin') {
             return Json::error($response, 'Only the platform owner can manage reports.', 403);
         }
         return null;
@@ -323,7 +323,7 @@ final class ReportsAction
     private function countRole(string $role): int
     {
         return (int) $this->em->createQueryBuilder()->select('COUNT(u.id)')->from(User::class, 'u')->join('u.role', 'r')
-            ->where('r.code = :role')->setParameter('role', $role)->getQuery()->getSingleScalarResult();
+            ->where('r.effectiveCode = :role')->setParameter('role', $role)->getQuery()->getSingleScalarResult();
     }
 
     private function mrrNaira(): float

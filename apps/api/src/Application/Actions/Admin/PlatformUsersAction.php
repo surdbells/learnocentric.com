@@ -27,7 +27,7 @@ final class PlatformUsersAction
     {
         /** @var User|null $user */
         $user = $request->getAttribute('user');
-        if ($user === null || $user->getRole()->getCode() !== 'super_admin') {
+        if ($user === null || $user->getRole()->effectiveCode() !== 'super_admin') {
             return Json::error($response, 'Only the platform super admin can view the user directory.', 403);
         }
 
@@ -43,7 +43,7 @@ final class PlatformUsersAction
             ->leftJoin('u.institution', 'i');
 
         if ($role !== '') {
-            $base->andWhere('r.code = :role')->setParameter('role', $role);
+            $base->andWhere('r.effectiveCode = :role')->setParameter('role', $role);
         }
         if ($search !== '') {
             $base->andWhere('(LOWER(u.firstName) LIKE :s OR LOWER(u.lastName) LIKE :s OR LOWER(u.email) LIKE :s)')
@@ -53,7 +53,7 @@ final class PlatformUsersAction
         $total = (int) (clone $base)->select('COUNT(u.id)')->getQuery()->getSingleScalarResult();
 
         $rows = $base
-            ->select('u.id AS id, u.email AS email, u.firstName AS first_name, u.lastName AS last_name, u.status AS status, u.profileImageUrl AS profile_image_url, r.code AS role, r.name AS role_name, i.name AS institution')
+            ->select('u.id AS id, u.email AS email, u.firstName AS first_name, u.lastName AS last_name, u.status AS status, u.profileImageUrl AS profile_image_url, r.effectiveCode AS role, r.name AS role_name, i.name AS institution')
             ->orderBy('u.firstName', 'ASC')->addOrderBy('u.lastName', 'ASC')
             ->setFirstResult(($page - 1) * $perPage)
             ->setMaxResults($perPage)
@@ -69,9 +69,9 @@ final class PlatformUsersAction
     private function stats(): array
     {
         $byRole = $this->em->createQueryBuilder()
-            ->select('r.code AS role, r.name AS name, COUNT(u.id) AS c')
+            ->select('r.effectiveCode AS role, r.name AS name, COUNT(u.id) AS c')
             ->from(User::class, 'u')->join('u.role', 'r')
-            ->groupBy('r.code, r.name')
+            ->groupBy('r.effectiveCode, r.name')
             ->orderBy('c', 'DESC')
             ->getQuery()->getArrayResult();
 

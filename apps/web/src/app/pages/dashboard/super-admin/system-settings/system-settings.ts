@@ -28,7 +28,6 @@ export class SuperAdminSystemSettings {
     {key: 'portfolio', label: 'Portfolio', hint: 'Competency-track evidence and task portfolio'},
     {key: 'messaging', label: 'Messaging', hint: '1:1 threaded messages between users'},
     {key: 'analytics', label: 'Analytics', hint: 'Progress analytics and reporting surfaces'},
-    {key: 'ai_grading', label: 'AI grading', hint: 'Assisted marking suggestions (beta)'},
     {key: 'parent_portal', label: 'Parent portal', hint: 'Guardian accounts and the parent dashboard'},
   ];
 

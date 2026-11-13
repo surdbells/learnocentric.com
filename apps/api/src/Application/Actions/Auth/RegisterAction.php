@@ -5,11 +5,14 @@ declare(strict_types=1);
 namespace App\Application\Actions\Auth;
 
 use App\Application\Support\Json;
+use App\Domain\Entity\Institution;
 use App\Domain\Entity\Role;
 use App\Domain\Entity\User;
 use App\Service\AuditLogger;
 use App\Service\AuthService;
 use App\Service\JwtService;
+use App\Service\PlatformSettings;
+use Doctrine\ORM\EntityManagerInterface;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Throwable;
@@ -18,7 +21,12 @@ use Throwable;
  * POST /backend/auth/register
  * - Called by an admin (Bearer token present): creates student/teacher/parent/lead
  *   scoped to the admin's institution (super admin may target any institution).
- * - Called publicly: restricted to self-registerable roles.
+ * - Called publicly: self sign-up as a learner or parent, only with a valid school
+ *   join code, and only when the platform allows self sign-up and that school has
+ *   opened it. A raw institution id is never accepted from the public.
+ *
+ * GET /backend/auth/join/{code}: public lookup so the sign-up page can show which
+ * school a join code belongs to before the person registers.
  */
 final class RegisterAction
 {
@@ -30,6 +38,8 @@ final class RegisterAction
         private readonly AuthService $auth,
         private readonly JwtService $jwt,
         private readonly AuditLogger $audit,
+        private readonly EntityManagerInterface $em,
+        private readonly PlatformSettings $settings,
     ) {
     }
 
@@ -41,20 +51,31 @@ final class RegisterAction
                 return Json::error($response, "Field '{$required}' is required.", 422);
             }
         }
+        $minLength = (int) $this->settings->get('security.password_min_length', 8);
+        if (mb_strlen((string) $body['password']) < $minLength) {
+            return Json::error($response, "Password must be at least {$minLength} characters.", 422);
+        }
 
         $actor = $this->actorFromRequest($request);
         $requestedRole = (string) ($body['role'] ?? Role::STUDENT);
-        $adminContext = $actor !== null && in_array($actor->getRole()->getCode(), self::ADMIN_ROLES, true);
+        $adminContext = $actor !== null && in_array($actor->getRole()->effectiveCode(), self::ADMIN_ROLES, true);
 
         if ($adminContext) {
             $role = in_array($requestedRole, self::ADMIN_CREATABLE, true) ? $requestedRole : Role::STUDENT;
             // Non-super admins can only create within their own institution.
-            $institutionId = $actor->getRole()->getCode() === Role::SUPER_ADMIN
+            $institutionId = $actor->getRole()->effectiveCode() === Role::SUPER_ADMIN
                 ? ($body['institutionId'] ?? null)
                 : $actor->getInstitution()?->getId();
         } else {
+            if (!$this->settings->bool('registration.allow_self_signup')) {
+                return Json::error($response, 'Self sign-up is not available. Ask your school to create your account.', 403);
+            }
+            $institution = $this->institutionForCode((string) ($body['joinCode'] ?? ''));
+            if ($institution === null) {
+                return Json::error($response, 'That join code is not valid. Check it with your school.', 422);
+            }
             $role = in_array($requestedRole, self::SELF_REGISTERABLE, true) ? $requestedRole : Role::STUDENT;
-            $institutionId = $body['institutionId'] ?? null;
+            $institutionId = $institution->getId();
         }
 
         try {
@@ -79,6 +100,33 @@ final class RegisterAction
         }
 
         return Json::write($response, ['token' => $this->jwt->issueForUser($user), 'user' => $user->toArray()], 201);
+    }
+
+    /** GET /auth/join/{code}: which school a join code opens, or 404. */
+    public function lookup(Request $request, Response $response, array $args): Response
+    {
+        if (!$this->settings->bool('registration.allow_self_signup')) {
+            return Json::error($response, 'Self sign-up is not available.', 403);
+        }
+        $institution = $this->institutionForCode((string) ($args['code'] ?? ''));
+        if ($institution === null) {
+            return Json::error($response, 'That join code is not valid.', 404);
+        }
+        return Json::write($response, ['name' => $institution->getName(), 'type' => $institution->getType()]);
+    }
+
+    /** An active school that has opened self sign-up, by its join code. */
+    private function institutionForCode(string $code): ?Institution
+    {
+        $code = strtoupper(trim($code));
+        if ($code === '') {
+            return null;
+        }
+        /** @var Institution|null $institution */
+        $institution = $this->em->getRepository(Institution::class)->findOneBy(['joinCode' => $code]);
+        return $institution !== null && $institution->isSelfSignup() && $institution->getStatus() === 'active'
+            ? $institution
+            : null;
     }
 
     private function actorFromRequest(Request $request): ?User

@@ -69,7 +69,7 @@ trait ResolvesInstitution
             ->select('u')
             ->from(User::class, 'u')
             ->join('u.role', 'r')
-            ->where('r.code = :role')
+            ->where('r.effectiveCode = :role')
             ->setParameter('role', $roleCode)
             ->orderBy('u.firstName', 'ASC');
 
@@ -108,7 +108,7 @@ trait ResolvesInstitution
     {
         /** @var User|null $user */
         $user = $request->getAttribute('user');
-        $role = $user?->getRole()?->getCode();
+        $role = $user?->getRole()?->effectiveCode();
 
         return in_array($role, ['school_admin', 'tutor_admin', 'academic_lead', 'super_admin'], true);
     }

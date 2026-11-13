@@ -81,7 +81,7 @@ final class UserProfileAction
 
     private function canManage(User $actor, User $target): bool
     {
-        $role = $actor->getRole()->getCode();
+        $role = $actor->getRole()->effectiveCode();
         if ($role === Role::SUPER_ADMIN) {
             return true;
         }
@@ -89,7 +89,7 @@ final class UserProfileAction
             // Same institution, and cannot manage platform/other admins.
             $sameInstitution = $actor->getInstitution() !== null
                 && $target->getInstitution()?->getId() === $actor->getInstitution()->getId();
-            $targetIsPrivileged = in_array($target->getRole()->getCode(), [Role::SUPER_ADMIN], true);
+            $targetIsPrivileged = in_array($target->getRole()->effectiveCode(), [Role::SUPER_ADMIN], true);
 
             return $sameInstitution && !$targetIsPrivileged;
         }

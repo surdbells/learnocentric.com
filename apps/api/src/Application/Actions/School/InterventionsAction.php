@@ -90,7 +90,7 @@ final class InterventionsAction
         $body = (array) $request->getParsedBody();
         $student = $this->em->getRepository(User::class)->find((int) ($body['student_id'] ?? 0));
         $reason = trim((string) ($body['reason'] ?? ''));
-        if ($student === null || $student->getRole()->getCode() !== 'student'
+        if ($student === null || $student->getRole()->effectiveCode() !== 'student'
             || !$this->canActWithin($request, $student->getInstitution())) {
             return Json::error($response, 'A valid student is required.', 422);
         }
@@ -108,7 +108,7 @@ final class InterventionsAction
 
         $this->notifyAssignee($intervention, 'New intervention assigned');
         // When a teacher raises an intervention, keep the admins in the loop.
-        if ($creator->getRole()->getCode() === 'teacher') {
+        if ($creator->getRole()->effectiveCode() === 'teacher') {
             $this->notifyAdmins($intervention, $creator);
         }
         $this->em->flush();
@@ -352,13 +352,13 @@ final class InterventionsAction
 
     private function isAdmin(User $user): bool
     {
-        return in_array($user->getRole()->getCode(), self::ADMIN_ROLES, true);
+        return in_array($user->getRole()->effectiveCode(), self::ADMIN_ROLES, true);
     }
 
     /** True when the intervention was raised by a teacher (not an admin/system). */
     private function isTeacherCreated(Intervention $intervention): bool
     {
-        return $intervention->getRaisedBy()?->getRole()->getCode() === 'teacher';
+        return $intervention->getRaisedBy()?->getRole()->effectiveCode() === 'teacher';
     }
 
     /** True when the body tries to change anything beyond resolve/progress/outcome. */
@@ -380,7 +380,7 @@ final class InterventionsAction
             return;
         }
         $admins = $this->em->createQueryBuilder()->select('u')->from(User::class, 'u')->join('u.role', 'r')
-            ->where('u.institution = :inst')->andWhere('r.code IN (:roles)')
+            ->where('u.institution = :inst')->andWhere('r.effectiveCode IN (:roles)')
             ->setParameter('inst', $institution)->setParameter('roles', ['school_admin', 'tutor_admin'])
             ->getQuery()->getResult();
         $student = $intervention->getStudent()->getFirstName() . ' ' . $intervention->getStudent()->getLastName();
@@ -406,7 +406,7 @@ final class InterventionsAction
         if ($assignee === null) {
             return;
         }
-        $link = $assignee->getRole()->getCode() === 'teacher'
+        $link = $assignee->getRole()->effectiveCode() === 'teacher'
             ? '/teacher/academics/interventions'
             : '/admin/academics/interventions';
         $this->notify->notify(
@@ -422,7 +422,7 @@ final class InterventionsAction
     {
         /** @var User|null $user */
         $user = $request->getAttribute('user');
-        if ($user === null || !in_array($user->getRole()->getCode(), self::STAFF, true)) {
+        if ($user === null || !in_array($user->getRole()->effectiveCode(), self::STAFF, true)) {
             return Json::error($response, 'Only teachers and administrators can manage interventions.', 403);
         }
         return null;

@@ -209,6 +209,33 @@
             <app-rich-editor [ngModel]="safeguarding().policy_note" (ngModelChange)="setSafe({policy_note: $event})" placeholder="How concerns are handled at your school…" />
           </div>
         </div></div>
+
+        @if (signup(); as su) {
+          <div class="card border-0 shadow-sm mt-4"><div class="card-body">
+            <h5 class="fw-semibold mb-1">Self sign-up</h5>
+            <p class="text-body-secondary mb-3">Let learners and parents create their own accounts with a join code you share. Changes apply immediately.</p>
+            @if (!su.platform_allows) {
+              <div class="alert alert-light border small mb-0">Self sign-up is switched off for the whole platform. Contact Learnocentric support if you need it.</div>
+            } @else {
+              <div class="form-check form-switch mb-3">
+                <input class="form-check-input" type="checkbox" id="self_signup" [checked]="su.enabled" [disabled]="signupBusy()" (change)="setSignup($any($event.target).checked)" />
+                <label class="form-check-label" for="self_signup">Allow self sign-up with a join code</label>
+              </div>
+              @if (su.enabled && su.join_code) {
+                <div class="d-flex flex-wrap align-items-center gap-3">
+                  <div>
+                    <div class="small text-body-secondary">Join code</div>
+                    <div class="fs-4 fw-bold font-monospace">{{ su.join_code }}</div>
+                  </div>
+                  <button type="button" class="btn btn-outline-secondary btn-sm" [disabled]="signupBusy()" (click)="regenerateJoinCode()">
+                    <app-icon name="refresh" [size]="15" /> Issue a new code
+                  </button>
+                </div>
+                <div class="form-text">People enter this at <strong>/register</strong>. Issue a new code if it has been shared too widely.</div>
+              }
+            }
+          </div></div>
+        }
       }
     </div>
 
@@ -251,7 +278,7 @@
           <button type="button" class="btn btn-success w-100 mb-2" [disabled]="saving()" (click)="save()">
             <app-icon name="save" [size]="16" /> {{ saving() ? 'Saving…' : 'Save Changes' }}
           </button>
-          <a class="btn btn-outline-secondary w-100" routerLink="/admin/management/safeguarding"><app-icon name="shield" [size]="16" /> Safeguarding Cases</a>
+          <a class="btn btn-outline-secondary w-100" [routerLink]="root + '/management/safeguarding'"><app-icon name="shield" [size]="16" /> Safeguarding Cases</a>
         </div>
       </div>
     </div>

@@ -237,7 +237,7 @@ final class ContentPackagesAction
     {
         /** @var User|null $user */
         $user = $request->getAttribute('user');
-        if ($user === null || $user->getRole()->getCode() !== 'super_admin') {
+        if ($user === null || $user->getRole()->effectiveCode() !== 'super_admin') {
             return Json::error($response, 'Only the platform administrator can manage content packages.', 403);
         }
         return null;

@@ -398,7 +398,7 @@ final class LiveClassesAction
         if ($lc === null) {
             return Json::error($response, 'Live class not found.', 404);
         }
-        $isStaff = in_array($user->getRole()->getCode(), self::STAFF, true);
+        $isStaff = in_array($user->getRole()->effectiveCode(), self::STAFF, true);
 
         // A class is only joinable once it is live (a channel is assigned). Before
         // that a learner should wait for the host to go live.
@@ -530,7 +530,7 @@ final class LiveClassesAction
     private function staffGuard(Request $request, Response $response): ?Response
     {
         $user = $this->currentUser($request);
-        if (!in_array($user->getRole()->getCode(), self::STAFF, true)) {
+        if (!in_array($user->getRole()->effectiveCode(), self::STAFF, true)) {
             return Json::error($response, 'Only teachers and administrators can do that.', 403);
         }
         return null;

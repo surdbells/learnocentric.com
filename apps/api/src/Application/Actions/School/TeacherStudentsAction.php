@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Application\Actions\School;
 
+use App\Application\Support\Guard;
 use App\Application\Support\Json;
 use App\Domain\Entity\Enrollment;
 use App\Domain\Entity\Role;
@@ -28,6 +29,12 @@ final class TeacherStudentsAction
 
     public function __invoke(Request $request, Response $response): Response
     {
+        // Staff only: learners must never receive the class/institution roster.
+        $deny = Guard::roles($request, $response, [Role::TEACHER, Role::ACADEMIC_LEAD, Role::SCHOOL_ADMIN, Role::TUTOR_ADMIN, Role::SUPER_ADMIN], 'Only staff can view the student roster.');
+        if ($deny !== null) {
+            return $deny;
+        }
+
         /** @var User $teacher */
         $teacher = $request->getAttribute('user');
 

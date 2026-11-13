@@ -126,7 +126,7 @@ final class SchoolResourcesAction
 
     private function staffGuard(Request $request, Response $response): ?Response
     {
-        if (!in_array($this->currentUser($request)->getRole()->getCode(), self::STAFF, true)) {
+        if (!in_array($this->currentUser($request)->getRole()->effectiveCode(), self::STAFF, true)) {
             return Json::error($response, 'Only teachers and administrators can upload resources.', 403);
         }
         return null;

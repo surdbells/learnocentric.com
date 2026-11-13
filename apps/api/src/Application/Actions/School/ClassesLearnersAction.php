@@ -67,7 +67,7 @@ final class ClassesLearnersAction
 
         $totalLearners = $institution !== null
             ? (int) $this->em->createQueryBuilder()->select('COUNT(u.id)')->from(User::class, 'u')->join('u.role', 'r')
-                ->where('u.institution = :i')->andWhere('r.code = :s')->setParameter('i', $institution)->setParameter('s', 'student')
+                ->where('u.institution = :i')->andWhere('r.effectiveCode = :s')->setParameter('i', $institution)->setParameter('s', 'student')
                 ->getQuery()->getSingleScalarResult()
             : 0;
 
@@ -201,7 +201,7 @@ final class ClassesLearnersAction
     {
         /** @var User $user */
         $user = $request->getAttribute('user');
-        if (!in_array($user->getRole()->getCode(), self::STAFF, true)) {
+        if (!in_array($user->getRole()->effectiveCode(), self::STAFF, true)) {
             return Json::error($response, 'Only administrators can view this.', 403);
         }
         return null;

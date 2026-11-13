@@ -221,7 +221,7 @@ final class AskTutorAction
 
     private function staffGuard(Request $request, Response $response): ?Response
     {
-        if (!in_array($this->currentUser($request)->getRole()->getCode(), self::STAFF, true)) {
+        if (!in_array($this->currentUser($request)->getRole()->effectiveCode(), self::STAFF, true)) {
             return Json::error($response, 'Only tutors can do that.', 403);
         }
         return null;

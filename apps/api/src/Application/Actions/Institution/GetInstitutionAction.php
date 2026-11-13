@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Application\Actions\Institution;
 
+use App\Application\Support\Guard;
 use App\Application\Support\Json;
 use App\Domain\Entity\Institution;
 use App\Domain\Entity\User;
@@ -25,10 +26,27 @@ final class GetInstitutionAction
             return Json::error($response, 'Institution not found.', 404);
         }
 
+        // Everyone signed in can read their OWN institution's public profile (the
+        // topbar shows its name/logo); only the platform owner sees any institution
+        // and its admin contacts/settings.
+        if (!Guard::isSuperAdmin($request)) {
+            if (Guard::user($request)?->getInstitution()?->getId() !== $institution->getId()) {
+                return Json::error($response, 'Institution not found.', 404);
+            }
+            return Json::write($response, [
+                'id' => $institution->getId(),
+                'name' => $institution->getName(),
+                'type' => $institution->getType(),
+                'logo_url' => $institution->toArray()['logo_url'],
+                'branding' => $institution->getBranding(),
+                'status' => $institution->getStatus(),
+            ]);
+        }
+
         // Admins (school_admin / tutor_admin) for this institution, so the edit form can pre-fill.
         $adminUsers = $this->em->createQueryBuilder()->select('u')->from(User::class, 'u')->join('u.role', 'r')
             ->where('u.institution = :inst')
-            ->andWhere('r.code IN (:codes)')
+            ->andWhere('r.effectiveCode IN (:codes)')
             ->setParameter('inst', $institution)
             ->setParameter('codes', ['school_admin', 'tutor_admin'])
             ->orderBy('u.id', 'ASC')

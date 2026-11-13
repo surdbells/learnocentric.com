@@ -283,7 +283,7 @@ final class ExportAction
     private function countByRole(string $role, $institution): int
     {
         $qb = $this->em->createQueryBuilder()->select('COUNT(u.id)')->from(User::class, 'u')->join('u.role', 'r')
-            ->where('r.code = :role')->setParameter('role', $role);
+            ->where('r.effectiveCode = :role')->setParameter('role', $role);
         if ($institution !== null) {
             $qb->andWhere('u.institution = :inst')->setParameter('inst', $institution);
         }
@@ -305,7 +305,7 @@ final class ExportAction
     {
         /** @var User|null $user */
         $user = $request->getAttribute('user');
-        if ($user === null || !in_array($user->getRole()->getCode(), self::STAFF, true)) {
+        if ($user === null || !in_array($user->getRole()->effectiveCode(), self::STAFF, true)) {
             return null;
         }
         return $user;

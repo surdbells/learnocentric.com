@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Application\Actions\Institution;
 
+use App\Application\Support\Guard;
 use App\Application\Support\Json;
 use App\Domain\Entity\Institution;
 use Doctrine\ORM\EntityManagerInterface;
@@ -19,6 +20,9 @@ final class ListInstitutionsAction
 
     public function __invoke(Request $request, Response $response): Response
     {
+        if (($deny = Guard::superAdmin($request, $response, "Only the platform owner can manage institutions.")) !== null) {
+            return $deny;
+        }
         // Archived institutions are soft-deleted; hide them from the roster.
         $institutions = $this->em->createQueryBuilder()->select('i')->from(Institution::class, 'i')
             ->where('i.status != :archived')->setParameter('archived', 'archived')

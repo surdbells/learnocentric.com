@@ -18,7 +18,7 @@ class PermissionService
     public function can(Role $role, string $permissionCode, string $action): bool
     {
         // super_admin is unconditionally allowed at the platform layer.
-        if ($role->getCode() === Role::SUPER_ADMIN) {
+        if ($role->effectiveCode() === Role::SUPER_ADMIN) {
             return true;
         }
 

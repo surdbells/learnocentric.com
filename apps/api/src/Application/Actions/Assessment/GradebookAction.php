@@ -357,7 +357,7 @@ final class GradebookAction
     {
         /** @var User|null $user */
         $user = $request->getAttribute('user');
-        if ($user === null || !in_array($user->getRole()->getCode(), self::STAFF, true)) {
+        if ($user === null || !in_array($user->getRole()->effectiveCode(), self::STAFF, true)) {
             return Json::error($response, 'Only teachers and administrators can view the gradebook.', 403);
         }
         return null;
