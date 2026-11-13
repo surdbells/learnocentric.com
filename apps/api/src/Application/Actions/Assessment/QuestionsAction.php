@@ -5,14 +5,17 @@ declare(strict_types=1);
 namespace App\Application\Actions\Assessment;
 
 use App\Application\Actions\School\ResolvesInstitution;
+use App\Application\Support\GovernedContent;
 use App\Application\Support\Json;
 use App\Application\Support\ListQuery;
 use App\Application\Support\Paginator;
 use App\Domain\Entity\ContentVersion;
 use App\Domain\Entity\Question;
 use App\Domain\Entity\Topic;
+use App\Domain\Entity\Institution;
 use App\Domain\Lifecycle;
 use App\Service\AuditLogger;
+use App\Service\LifecycleNotifier;
 use App\Service\LifecycleService;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Http\Message\ResponseInterface as Response;
@@ -26,6 +29,7 @@ use Throwable;
 final class QuestionsAction
 {
     use ResolvesInstitution;
+    use GovernedContent;
 
     private const EDITABLE = [Lifecycle::DRAFT, Lifecycle::REVIEW];
 
@@ -33,6 +37,7 @@ final class QuestionsAction
         private readonly EntityManagerInterface $em,
         private readonly AuditLogger $audit,
         private readonly LifecycleService $lifecycle,
+        private readonly LifecycleNotifier $notifier,
     ) {
     }
 
@@ -79,7 +84,7 @@ final class QuestionsAction
             $qb->andWhere('qn.answerValidated = :av')->setParameter('av', (bool) (int) $query->filters['answer_validated']);
         }
 
-        $mapper = fn (Question $q) => $this->row($q);
+        $mapper = fn (Question $q) => $this->row($q, $request);
 
         if (!$query->paginated) {
             $qb->orderBy('qn.createdAt', 'DESC');
@@ -96,7 +101,7 @@ final class QuestionsAction
         $body = (array) $request->getParsedBody();
         $stem = trim((string) ($body['stem'] ?? ''));
         $topic = $this->em->getRepository(Topic::class)->find((int) ($body['topic_id'] ?? 0));
-        if ($stem === '' || $topic === null) {
+        if ($stem === '' || $topic === null || !$this->canActWithin($request, $topic->getSubject()->getInstitution())) {
             return Json::error($response, 'A question stem and a valid topic_id are required.', 422);
         }
 
@@ -107,7 +112,7 @@ final class QuestionsAction
         $this->em->flush();
         $this->audit->log('question.create', $request->getAttribute('user'), 'Question', (string) $q->getId(), null, $q->toArray());
 
-        return Json::write($response, $this->row($q), 201);
+        return Json::write($response, $this->row($q, $request), 201);
     }
 
     /**
@@ -143,7 +148,8 @@ final class QuestionsAction
                 continue;
             }
             if (!isset($topicCache[$topicId])) {
-                $topicCache[$topicId] = $topicId > 0 ? $this->em->getRepository(Topic::class)->find($topicId) : null;
+                $found = $topicId > 0 ? $this->em->getRepository(Topic::class)->find($topicId) : null;
+                $topicCache[$topicId] = $found !== null && $this->canActWithin($request, $found->getSubject()->getInstitution()) ? $found : null;
             }
             $topic = $topicCache[$topicId];
             if ($topic === null) {
@@ -167,12 +173,12 @@ final class QuestionsAction
     private function update(Request $request, Response $response): Response
     {
         $body = (array) $request->getParsedBody();
-        $q = $this->em->getRepository(Question::class)->find((int) ($body['id'] ?? 0));
+        $q = $this->findOwned($request, (int) ($body['id'] ?? 0));
         if ($q === null) {
             return Json::error($response, 'Question not found.', 404);
         }
         if (!in_array($q->getApprovalStatus(), self::EDITABLE, true)) {
-            return Json::error($response, "This question is {$q->getApprovalStatus()}; return it to draft before editing.", 409);
+            return Json::error($response, $this->lockedReasonFor($request, $q, 'assessment', $this->ownerOf($q), 'question'), 409);
         }
         $before = $q->toArray();
         if (isset($body['stem']) && trim((string) $body['stem']) !== '') {
@@ -184,13 +190,13 @@ final class QuestionsAction
         $this->em->flush();
         $this->audit->log('question.update', $request->getAttribute('user'), 'Question', (string) $q->getId(), $before, $q->toArray());
 
-        return Json::write($response, $this->row($q));
+        return Json::write($response, $this->row($q, $request));
     }
 
     private function delete(Request $request, Response $response): Response
     {
         $id = (int) ($request->getQueryParams()['id'] ?? 0);
-        $q = $this->em->getRepository(Question::class)->find($id);
+        $q = $this->findOwned($request, $id);
         if ($q === null) {
             return Json::error($response, 'Question not found.', 404);
         }
@@ -205,7 +211,7 @@ final class QuestionsAction
     /** POST /assessment/questions/{id}/validate, run the answer-validation gate. */
     public function validate(Request $request, Response $response, array $args): Response
     {
-        $q = $this->em->getRepository(Question::class)->find((int) $args['id']);
+        $q = $this->findOwned($request, (int) $args['id']);
         if ($q === null) {
             return Json::error($response, 'Question not found.', 404);
         }
@@ -219,54 +225,38 @@ final class QuestionsAction
         $this->em->flush();
         $this->audit->log('question.validate', $request->getAttribute('user'), 'Question', (string) $q->getId(), null, ['answer_validated' => true]);
 
-        return Json::write($response, $this->row($q));
+        return Json::write($response, $this->row($q, $request));
     }
 
     /** POST /assessment/questions/{id}/transition, lifecycle, gated on validation for publish. */
     public function transition(Request $request, Response $response, array $args): Response
     {
-        $q = $this->em->getRepository(Question::class)->find((int) $args['id']);
+        $q = $this->findOwned($request, (int) $args['id']);
         if ($q === null) {
             return Json::error($response, 'Question not found.', 404);
         }
-        $body = (array) $request->getParsedBody();
-        $to = (string) ($body['to'] ?? '');
-
-        // The gate: a question cannot be approved or published without a validated
-        // answer, an explanation (every type is auto-marked) and a difficulty set.
-        if (in_array($to, [Lifecycle::APPROVED, Lifecycle::PUBLISHED], true)) {
-            $error = $q->answerError();
-            if ($error !== null) {
-                return Json::error($response, $error, 422);
-            }
-            $missing = [];
-            if (!$q->isAnswerValidated()) {
-                $missing[] = 'a validated answer';
-            }
-            if (trim((string) $q->getExplanation()) === '') {
-                $missing[] = 'an explanation';
-            }
-            if (!in_array($q->getDifficulty(), Question::DIFFICULTIES, true)) {
-                $missing[] = 'a difficulty level';
-            }
-            if (!empty($missing)) {
-                return Json::error($response, 'This question needs ' . implode(', ', $missing) . ' before it can be approved or published.', 422);
-            }
+        // The gate (see blockers()) applies to any move that ends with the question
+        // published, including "submit" at a school with no review step.
+        [$result, $error] = $this->moveItem(
+            $request,
+            $q,
+            'question',
+            $q->getStem(),
+            $this->ownerOf($q),
+            '/academics/question-bank',
+            fn (): array => $this->blockers($q),
+        );
+        if ($result === null) {
+            return Json::error($response, (string) $error, 422);
         }
 
-        try {
-            $result = $this->lifecycle->transition($q, $to, $request->getAttribute('user'), $body['note'] ?? null);
-        } catch (Throwable $e) {
-            return Json::error($response, $e->getMessage(), 422);
-        }
-
-        return Json::write($response, ['question' => $this->row($q)] + $result);
+        return Json::write($response, ['question' => $this->row($q, $request)] + $result);
     }
 
     /** GET /assessment/questions/{id}/history */
     public function history(Request $request, Response $response, array $args): Response
     {
-        $q = $this->em->getRepository(Question::class)->find((int) $args['id']);
+        $q = $this->findOwned($request, (int) $args['id']);
         if ($q === null) {
             return Json::error($response, 'Question not found.', 404);
         }
@@ -283,6 +273,9 @@ final class QuestionsAction
         }
         $count = 0;
         foreach ($this->em->getRepository(Question::class)->findBy(['id' => $ids]) as $q) {
+            if (!$this->canActWithin($request, $this->ownerOf($q))) {
+                continue; // another school's record
+            }
             $this->em->remove($q);
             $count++;
         }
@@ -349,10 +342,30 @@ final class QuestionsAction
         return $out === [] ? null : $out;
     }
 
-    private function row(Question $q): array
+    /** @return string[] what stops this question being approved or published */
+    private function blockers(Question $q): array
+    {
+        return $q->publishBlockers();
+    }
+
+    /** The school a question belongs to. */
+    private function ownerOf(Question $item): ?Institution
+    {
+        return $item->getTopic()->getSubject()->getInstitution();
+    }
+
+    /** A question the caller's school owns (another school's id reads as "not found"). */
+    private function findOwned(Request $request, int $id): ?Question
+    {
+        return $this->ownedRecord($request, Question::class, $id, fn (Question $item) => $this->ownerOf($item));
+    }
+
+    private function row(Question $q, Request $request): array
     {
         return $q->toArray() + [
             'next_states' => Lifecycle::nextStates($q->getApprovalStatus()),
+            // What this viewer may do with it, and why not where they may not.
+            'lifecycle' => $this->guidanceFor($request, $q, 'assessment', $this->ownerOf($q), 'question', $this->blockers($q)),
             'answer_error' => $q->answerError(),
             'version_count' => $this->em->getRepository(ContentVersion::class)->count(['entityType' => 'Question', 'entityId' => $q->getId()]),
         ];

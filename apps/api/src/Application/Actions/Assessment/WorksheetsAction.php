@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Application\Actions\Assessment;
 
 use App\Application\Actions\School\ResolvesInstitution;
+use App\Application\Support\GovernedContent;
 use App\Application\Support\Json;
 use App\Application\Support\ListQuery;
 use App\Application\Support\Paginator;
@@ -12,8 +13,10 @@ use App\Domain\Entity\ContentVersion;
 use App\Domain\Entity\SchoolClass;
 use App\Domain\Entity\Topic;
 use App\Domain\Entity\Worksheet;
+use App\Domain\Entity\Institution;
 use App\Domain\Lifecycle;
 use App\Service\AuditLogger;
+use App\Service\LifecycleNotifier;
 use App\Service\LifecycleService;
 use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
@@ -25,6 +28,7 @@ use Throwable;
 final class WorksheetsAction
 {
     use ResolvesInstitution;
+    use GovernedContent;
 
     private const EDITABLE = [Lifecycle::DRAFT, Lifecycle::REVIEW];
 
@@ -32,6 +36,7 @@ final class WorksheetsAction
         private readonly EntityManagerInterface $em,
         private readonly AuditLogger $audit,
         private readonly LifecycleService $lifecycle,
+        private readonly LifecycleNotifier $notifier,
     ) {
     }
 
@@ -73,7 +78,7 @@ final class WorksheetsAction
             $qb->andWhere('w.schoolClass = :cid')->setParameter('cid', (int) $query->filters['class_id']);
         }
 
-        $mapper = fn (Worksheet $w) => $this->row($w);
+        $mapper = fn (Worksheet $w) => $this->row($w, $request);
         if (!$query->paginated) {
             $qb->orderBy('w.createdAt', 'DESC');
             return Json::write($response, array_map($mapper, $qb->getQuery()->getResult()));
@@ -88,7 +93,7 @@ final class WorksheetsAction
         $body = (array) $request->getParsedBody();
         $title = trim((string) ($body['title'] ?? ''));
         $topic = $this->em->getRepository(Topic::class)->find((int) ($body['topic_id'] ?? 0));
-        if ($title === '' || $topic === null) {
+        if ($title === '' || $topic === null || !$this->canActWithin($request, $topic->getSubject()->getInstitution())) {
             return Json::error($response, 'A title and a valid topic_id are required.', 422);
         }
         $w = new Worksheet($topic, $title);
@@ -98,18 +103,18 @@ final class WorksheetsAction
         $this->em->flush();
         $this->audit->log('worksheet.create', $request->getAttribute('user'), 'Worksheet', (string) $w->getId(), null, $w->toArray());
 
-        return Json::write($response, $this->row($w), 201);
+        return Json::write($response, $this->row($w, $request), 201);
     }
 
     private function update(Request $request, Response $response): Response
     {
         $body = (array) $request->getParsedBody();
-        $w = $this->em->getRepository(Worksheet::class)->find((int) ($body['id'] ?? 0));
+        $w = $this->findOwned($request, (int) ($body['id'] ?? 0));
         if ($w === null) {
             return Json::error($response, 'Worksheet not found.', 404);
         }
         if (!in_array($w->getApprovalStatus(), self::EDITABLE, true)) {
-            return Json::error($response, "This worksheet is {$w->getApprovalStatus()}; return it to draft before editing.", 409);
+            return Json::error($response, $this->lockedReasonFor($request, $w, 'worksheet', $this->ownerOf($w), 'worksheet'), 409);
         }
         $before = $w->toArray();
         if (isset($body['title']) && trim((string) $body['title']) !== '') {
@@ -119,13 +124,13 @@ final class WorksheetsAction
         $this->em->flush();
         $this->audit->log('worksheet.update', $request->getAttribute('user'), 'Worksheet', (string) $w->getId(), $before, $w->toArray());
 
-        return Json::write($response, $this->row($w));
+        return Json::write($response, $this->row($w, $request));
     }
 
     private function delete(Request $request, Response $response): Response
     {
         $id = (int) ($request->getQueryParams()['id'] ?? 0);
-        $w = $this->em->getRepository(Worksheet::class)->find($id);
+        $w = $this->findOwned($request, $id);
         if ($w === null) {
             return Json::error($response, 'Worksheet not found.', 404);
         }
@@ -138,23 +143,21 @@ final class WorksheetsAction
 
     public function transition(Request $request, Response $response, array $args): Response
     {
-        $w = $this->em->getRepository(Worksheet::class)->find((int) $args['id']);
+        $w = $this->findOwned($request, (int) $args['id']);
         if ($w === null) {
             return Json::error($response, 'Worksheet not found.', 404);
         }
-        $body = (array) $request->getParsedBody();
-        try {
-            $result = $this->lifecycle->transition($w, (string) ($body['to'] ?? ''), $request->getAttribute('user'), $body['note'] ?? null);
-        } catch (Throwable $e) {
-            return Json::error($response, $e->getMessage(), 422);
+        [$result, $error] = $this->moveItem($request, $w, 'worksheet', $w->getTitle(), $this->ownerOf($w), '/academics/worksheets');
+        if ($result === null) {
+            return Json::error($response, (string) $error, 422);
         }
 
-        return Json::write($response, ['worksheet' => $this->row($w)] + $result);
+        return Json::write($response, ['worksheet' => $this->row($w, $request)] + $result);
     }
 
     public function history(Request $request, Response $response, array $args): Response
     {
-        $w = $this->em->getRepository(Worksheet::class)->find((int) $args['id']);
+        $w = $this->findOwned($request, (int) $args['id']);
         if ($w === null) {
             return Json::error($response, 'Worksheet not found.', 404);
         }
@@ -170,6 +173,9 @@ final class WorksheetsAction
         }
         $count = 0;
         foreach ($this->em->getRepository(Worksheet::class)->findBy(['id' => $ids]) as $w) {
+            if (!$this->canActWithin($request, $this->ownerOf($w))) {
+                continue; // another school's record
+            }
             $this->em->remove($w);
             $count++;
         }
@@ -195,10 +201,24 @@ final class WorksheetsAction
         }
     }
 
-    private function row(Worksheet $w): array
+    /** The school a worksheet belongs to. */
+    private function ownerOf(Worksheet $item): ?Institution
+    {
+        return $item->getTopic()->getSubject()->getInstitution();
+    }
+
+    /** A worksheet the caller's school owns (another school's id reads as "not found"). */
+    private function findOwned(Request $request, int $id): ?Worksheet
+    {
+        return $this->ownedRecord($request, Worksheet::class, $id, fn (Worksheet $item) => $this->ownerOf($item));
+    }
+
+    private function row(Worksheet $w, Request $request): array
     {
         return $w->toArray() + [
             'next_states' => Lifecycle::nextStates($w->getApprovalStatus()),
+            // What this viewer may do with it, and why not where they may not.
+            'lifecycle' => $this->guidanceFor($request, $w, 'worksheet', $this->ownerOf($w), 'worksheet'),
             'version_count' => $this->em->getRepository(ContentVersion::class)->count(['entityType' => 'Worksheet', 'entityId' => $w->getId()]),
         ];
     }

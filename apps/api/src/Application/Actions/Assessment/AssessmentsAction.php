@@ -19,9 +19,8 @@ use App\Domain\Entity\Topic;
 use App\Domain\Entity\User;
 use App\Domain\Lifecycle;
 use App\Service\AuditLogger;
-use App\Application\Support\Portal;
 use App\Service\LifecycleService;
-use App\Service\NotificationService;
+use App\Service\LifecycleNotifier;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
@@ -43,7 +42,7 @@ final class AssessmentsAction
         private readonly EntityManagerInterface $em,
         private readonly AuditLogger $audit,
         private readonly LifecycleService $lifecycle,
-        private readonly NotificationService $notify,
+        private readonly LifecycleNotifier $notifier,
     ) {
     }
 
@@ -316,7 +315,17 @@ final class AssessmentsAction
         } catch (Throwable $e) {
             return Json::error($response, $e->getMessage(), 422);
         }
-        $this->announce($a, $from, (string) $result['status'], $actor, isset($body['note']) ? trim((string) $body['note']) : '');
+        $this->notifier->announce(
+            $a,
+            'assessment',
+            $a->getTitle(),
+            $a->getSubject()->getInstitution(),
+            $from,
+            (string) $result['status'],
+            $actor,
+            isset($body['note']) ? (string) $body['note'] : null,
+            '/academics/assessments',
+        );
         $this->em->flush();
 
         return Json::write($response, ['assessment' => $this->row($a, $request, true)] + $result);
@@ -404,36 +413,10 @@ final class AssessmentsAction
         return $a !== null && $this->canActWithin($request, $a->getSubject()->getInstitution()) ? $a : null;
     }
 
-    /**
-     * What stops this assessment being approved or published, in plain words.
-     *
-     * @return string[]
-     */
+    /** @return string[] what stops this assessment being approved or published */
     private function blockers(Assessment $a): array
     {
-        if ($a->getItems()->count() === 0) {
-            return ['Add at least one question before this assessment can be approved or published.'];
-        }
-        $bad = [];
-        foreach ($a->getItems() as $item) {
-            if (!$item->getQuestion()->isAnswerValidated()) {
-                $bad[] = '"' . mb_strimwidth(rtrim(trim(strip_tags($item->getQuestion()->getStem())), '.'), 0, 60, '…') . '"';
-            }
-        }
-        if ($bad === []) {
-            return [];
-        }
-        $n = count($bad);
-
-        return [sprintf(
-            '%d question%s no validated answer yet: %s%s. Validate %s, or remove %s, then try again.',
-            $n,
-            $n === 1 ? ' has' : 's have',
-            implode(', ', array_slice($bad, 0, 3)),
-            $n > 3 ? ' and ' . ($n - 3) . ' more' : '',
-            $n === 1 ? 'it' : 'them',
-            $n === 1 ? 'it' : 'them',
-        )];
+        return $a->publishBlockers();
     }
 
     /** Why the caller cannot change this assessment right now, and what would unlock it. */
@@ -442,46 +425,6 @@ final class AssessmentsAction
         $g = $this->lifecycle->guidance($a, $request->getAttribute('user'), 'assessment', $a->getSubject()->getInstitution(), [], 'assessment');
 
         return $g['edit_reason'] ?? 'This assessment cannot be changed right now.';
-    }
-
-    /**
-     * Tell the people a lifecycle move concerns: approvers when something is
-     * waiting for them, the author when a decision has been made.
-     */
-    private function announce(Assessment $a, string $from, string $to, User $actor, string $note): void
-    {
-        $title = $a->getTitle();
-        if ($to === Lifecycle::REVIEW && $from === Lifecycle::DRAFT) {
-            foreach ($this->lifecycle->approversOf($a->getSubject()->getInstitution())['users'] as $approver) {
-                if ($approver->getId() !== $actor->getId()) {
-                    $this->notify->notify(
-                        $approver,
-                        'system',
-                        'An assessment is waiting for your approval',
-                        sprintf('%s submitted "%s" (%s) for review.', $actor->displayName(), $title, $a->getSubject()->getName()),
-                        Portal::link($approver, '/academics/approval-queue'),
-                        false,
-                    );
-                }
-            }
-
-            return;
-        }
-
-        $authorId = $this->lifecycle->lastSubmitterId($a);
-        $author = $authorId !== null && $authorId !== $actor->getId() ? $this->em->getRepository(User::class)->find($authorId) : null;
-        if ($author === null) {
-            return;
-        }
-        [$subject, $message] = match (true) {
-            $to === Lifecycle::PUBLISHED => ['Your assessment was published', sprintf('"%s" is now available to learners.', $title)],
-            $to === Lifecycle::APPROVED => ['Your assessment was approved', sprintf('"%s" was approved. It still needs publishing before learners can take it.', $title)],
-            $to === Lifecycle::DRAFT && $from === Lifecycle::REVIEW => ['Your assessment was returned', sprintf('"%s" was returned for changes.%s', $title, $note !== '' ? ' Note: ' . $note : '')],
-            default => [null, null],
-        };
-        if ($subject !== null) {
-            $this->notify->notify($author, 'system', $subject, $message, Portal::link($author, '/academics/assessments'), false);
-        }
     }
 
     private function row(Assessment $a, Request $request, bool $withItems = false): array

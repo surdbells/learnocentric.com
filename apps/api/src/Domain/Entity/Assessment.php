@@ -119,6 +119,39 @@ class Assessment implements LifecycleAware
         return $total;
     }
 
+    /**
+     * What stops this assessment being approved or published, in plain words
+     * (empty when nothing does).
+     *
+     * @return string[]
+     */
+    public function publishBlockers(): array
+    {
+        if ($this->items->count() === 0) {
+            return ['Add at least one question before this assessment can be approved or published.'];
+        }
+        $bad = [];
+        foreach ($this->items as $item) {
+            if (!$item->getQuestion()->isAnswerValidated()) {
+                $bad[] = '"' . mb_strimwidth(rtrim(trim(strip_tags($item->getQuestion()->getStem())), '.'), 0, 60, '…') . '"';
+            }
+        }
+        if ($bad === []) {
+            return [];
+        }
+        $n = count($bad);
+
+        return [sprintf(
+            '%d question%s no validated answer yet: %s%s. Validate %s, or remove %s, then try again.',
+            $n,
+            $n === 1 ? ' has' : 's have',
+            implode(', ', array_slice($bad, 0, 3)),
+            $n > 3 ? ' and ' . ($n - 3) . ' more' : '',
+            $n === 1 ? 'it' : 'them',
+            $n === 1 ? 'it' : 'them',
+        )];
+    }
+
     /** Attached questions still failing the answer gate, empty means publishable. */
     public function unvalidatedQuestions(): array
     {

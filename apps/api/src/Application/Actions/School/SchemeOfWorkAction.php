@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Application\Actions\School;
 
+use App\Application\Support\GovernedContent;
 use App\Application\Support\Json;
 use App\Application\Support\ListQuery;
 use App\Application\Support\Paginator;
@@ -13,8 +14,10 @@ use App\Domain\Entity\Subject;
 use App\Domain\Entity\Term;
 use App\Domain\Entity\Topic;
 use App\Domain\Entity\User;
+use App\Domain\Entity\Institution;
 use App\Domain\Lifecycle;
 use App\Service\AuditLogger;
+use App\Service\LifecycleNotifier;
 use App\Service\LifecycleService;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Http\Message\ResponseInterface as Response;
@@ -25,6 +28,7 @@ use Throwable;
 final class SchemeOfWorkAction
 {
     use ResolvesInstitution;
+    use GovernedContent;
 
     private const EDITABLE = [Lifecycle::DRAFT, Lifecycle::REVIEW];
 
@@ -32,6 +36,7 @@ final class SchemeOfWorkAction
         private readonly EntityManagerInterface $em,
         private readonly AuditLogger $audit,
         private readonly LifecycleService $lifecycle,
+        private readonly LifecycleNotifier $notifier,
     ) {
     }
 
@@ -72,7 +77,7 @@ final class SchemeOfWorkAction
             $qb->andWhere('(sow.term = :tid OR sow.term IS NULL)')->setParameter('tid', (int) $query->filters['term_id']);
         }
 
-        $mapper = static fn (SchemeOfWork $s) => $s->toArray();
+        $mapper = fn (SchemeOfWork $s) => $this->row($s, $request);
         if (!$query->paginated) {
             $qb->orderBy('sow.weekNumber', 'ASC');
             return Json::write($response, array_map($mapper, $qb->getQuery()->getResult()));
@@ -220,18 +225,18 @@ final class SchemeOfWorkAction
         $this->em->flush();
         $this->audit->log('scheme.create', $request->getAttribute('user'), 'SchemeOfWork', (string) $scheme->getId(), null, $scheme->toArray());
 
-        return Json::write($response, $scheme->toArray(), 201);
+        return Json::write($response, $this->row($scheme, $request), 201);
     }
 
     private function update(Request $request, Response $response): Response
     {
         $body = (array) $request->getParsedBody();
-        $scheme = $this->em->getRepository(SchemeOfWork::class)->find((int) ($body['id'] ?? 0));
+        $scheme = $this->findOwned($request, (int) ($body['id'] ?? 0));
         if ($scheme === null) {
             return Json::error($response, 'Scheme entry not found.', 404);
         }
         if (!in_array($scheme->getStatus(), self::EDITABLE, true)) {
-            return Json::error($response, "This scheme entry is {$scheme->getStatus()}; return it to draft before editing.", 409);
+            return Json::error($response, $this->lockedReasonFor($request, $scheme, 'curriculum_pack', $this->ownerOf($scheme), 'scheme entry'), 409);
         }
         if (!$this->canActWithin($request, $scheme->getSchoolClass()->getInstitution())) {
             return Json::error($response, 'Scheme entry not found.', 404);
@@ -265,13 +270,13 @@ final class SchemeOfWorkAction
         $this->em->flush();
         $this->audit->log('scheme.update', $request->getAttribute('user'), 'SchemeOfWork', (string) $scheme->getId(), $before, $scheme->toArray());
 
-        return Json::write($response, $scheme->toArray());
+        return Json::write($response, $this->row($scheme, $request));
     }
 
     private function delete(Request $request, Response $response): Response
     {
         $id = (int) ($request->getQueryParams()['id'] ?? 0);
-        $scheme = $this->em->getRepository(SchemeOfWork::class)->find($id);
+        $scheme = $this->findOwned($request, $id);
         if ($scheme === null) {
             return Json::error($response, 'Scheme entry not found.', 404);
         }
@@ -290,6 +295,9 @@ final class SchemeOfWorkAction
         }
         $count = 0;
         foreach ($this->em->getRepository(SchemeOfWork::class)->findBy(['id' => $ids]) as $scheme) {
+            if (!$this->canActWithin($request, $this->ownerOf($scheme))) {
+                continue; // another school's record
+            }
             $this->em->remove($scheme);
             $count++;
         }
@@ -301,29 +309,48 @@ final class SchemeOfWorkAction
     /** POST /backend/school/scheme-of-work/{id}/transition, body { to, note } */
     public function transition(Request $request, Response $response, array $args): Response
     {
-        $scheme = $this->em->getRepository(SchemeOfWork::class)->find((int) $args['id']);
+        $scheme = $this->findOwned($request, (int) $args['id']);
         if ($scheme === null) {
             return Json::error($response, 'Scheme entry not found.', 404);
         }
-        $body = (array) $request->getParsedBody();
-        try {
-            $result = $this->lifecycle->transition($scheme, (string) ($body['to'] ?? ''), $request->getAttribute('user'), $body['note'] ?? null);
-        } catch (Throwable $e) {
-            return Json::error($response, $e->getMessage(), 422);
+        [$result, $error] = $this->moveItem($request, $scheme, 'scheme entry', 'Week ' . $scheme->getWeekNumber() . ' · ' . $scheme->getSubject()->getName(), $this->ownerOf($scheme), '/academics/scheme-of-work');
+        if ($result === null) {
+            return Json::error($response, (string) $error, 422);
         }
 
-        return Json::write($response, ['scheme' => $scheme->toArray()] + $result);
+        return Json::write($response, ['scheme' => $this->row($scheme, $request)] + $result);
     }
 
     /** GET /backend/school/scheme-of-work/{id}/history */
     public function history(Request $request, Response $response, array $args): Response
     {
-        $scheme = $this->em->getRepository(SchemeOfWork::class)->find((int) $args['id']);
+        $scheme = $this->findOwned($request, (int) $args['id']);
         if ($scheme === null) {
             return Json::error($response, 'Scheme entry not found.', 404);
         }
 
         return Json::write($response, array_map(static fn ($v) => $v->toArray(), $this->lifecycle->history($scheme)));
+    }
+
+    /** The school a scheme entry belongs to. */
+    private function ownerOf(SchemeOfWork $item): ?Institution
+    {
+        return $item->getSchoolClass()->getInstitution();
+    }
+
+    /** A scheme entry the caller's school owns (another school's id reads as "not found"). */
+    private function findOwned(Request $request, int $id): ?SchemeOfWork
+    {
+        return $this->ownedRecord($request, SchemeOfWork::class, $id, fn (SchemeOfWork $item) => $this->ownerOf($item));
+    }
+
+    private function row(SchemeOfWork $item, Request $request): array
+    {
+        return $item->toArray() + [
+            'next_states' => Lifecycle::nextStates($item->getStatus()),
+            // What this viewer may do with it, and why not where they may not.
+            'lifecycle' => $this->guidanceFor($request, $item, 'curriculum_pack', $this->ownerOf($item), 'scheme entry'),
+        ];
     }
 
     private function applyFields(SchemeOfWork $scheme, array $body): void

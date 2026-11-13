@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Application\Actions\Curriculum;
 
 use App\Application\Actions\School\ResolvesInstitution;
+use App\Application\Support\GovernedContent;
 use App\Application\Support\Json;
 use App\Application\Support\ListQuery;
 use App\Application\Support\Paginator;
@@ -12,8 +13,10 @@ use App\Domain\Entity\SchoolClass;
 use App\Domain\Entity\Subject;
 use App\Domain\Entity\Term;
 use App\Domain\Entity\Topic;
+use App\Domain\Entity\Institution;
 use App\Domain\Lifecycle;
 use App\Service\AuditLogger;
+use App\Service\LifecycleNotifier;
 use App\Service\LifecycleService;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Http\Message\ResponseInterface as Response;
@@ -28,6 +31,7 @@ use Throwable;
 final class TopicsAction
 {
     use ResolvesInstitution;
+    use GovernedContent;
 
     private const EDITABLE = [Lifecycle::DRAFT, Lifecycle::REVIEW];
 
@@ -35,6 +39,7 @@ final class TopicsAction
         private readonly EntityManagerInterface $em,
         private readonly AuditLogger $audit,
         private readonly LifecycleService $lifecycle,
+        private readonly LifecycleNotifier $notifier,
     ) {
     }
 
@@ -74,7 +79,7 @@ final class TopicsAction
             $qb->andWhere('(t.term = :tid OR t.term IS NULL)')->setParameter('tid', (int) $query->filters['term_id']);
         }
 
-        $mapper = fn (Topic $t) => $this->row($t);
+        $mapper = fn (Topic $t) => $this->row($t, $request);
 
         if (!$query->paginated) {
             $qb->orderBy('t.weekNumber', 'ASC');
@@ -91,7 +96,7 @@ final class TopicsAction
         $body = (array) $request->getParsedBody();
         $title = trim((string) ($body['title'] ?? ''));
         $subject = $this->em->getRepository(Subject::class)->find((int) ($body['subject_id'] ?? $body['subjectId'] ?? 0));
-        if ($title === '' || $subject === null) {
+        if ($title === '' || $subject === null || !$this->canActWithin($request, $subject->getInstitution())) {
             return Json::error($response, 'A title and a valid subject_id are required.', 422);
         }
 
@@ -103,18 +108,18 @@ final class TopicsAction
 
         $this->audit->log('topic.create', $request->getAttribute('user'), 'Topic', (string) $topic->getId(), null, $topic->toArray());
 
-        return Json::write($response, $this->row($topic), 201);
+        return Json::write($response, $this->row($topic, $request), 201);
     }
 
     private function update(Request $request, Response $response): Response
     {
         $body = (array) $request->getParsedBody();
-        $topic = $this->em->getRepository(Topic::class)->find((int) ($body['id'] ?? 0));
+        $topic = $this->findOwned($request, (int) ($body['id'] ?? 0));
         if ($topic === null) {
             return Json::error($response, 'Topic not found.', 404);
         }
         if (!in_array($topic->getApprovalStatus(), self::EDITABLE, true)) {
-            return Json::error($response, "This topic is {$topic->getApprovalStatus()}; return it to draft before editing.", 409);
+            return Json::error($response, $this->lockedReasonFor($request, $topic, 'curriculum_pack', $this->ownerOf($topic), 'topic'), 409);
         }
         $before = $topic->toArray();
         if (isset($body['title']) && trim((string) $body['title']) !== '') {
@@ -124,13 +129,13 @@ final class TopicsAction
         $this->em->flush();
         $this->audit->log('topic.update', $request->getAttribute('user'), 'Topic', (string) $topic->getId(), $before, $topic->toArray());
 
-        return Json::write($response, $this->row($topic));
+        return Json::write($response, $this->row($topic, $request));
     }
 
     private function delete(Request $request, Response $response): Response
     {
         $id = (int) ($request->getQueryParams()['id'] ?? 0);
-        $topic = $this->em->getRepository(Topic::class)->find($id);
+        $topic = $this->findOwned($request, $id);
         if ($topic === null) {
             return Json::error($response, 'Topic not found.', 404);
         }
@@ -145,24 +150,22 @@ final class TopicsAction
     /** POST /backend/curriculum/topics/{id}/transition, body { to, note } */
     public function transition(Request $request, Response $response, array $args): Response
     {
-        $topic = $this->em->getRepository(Topic::class)->find((int) $args['id']);
+        $topic = $this->findOwned($request, (int) $args['id']);
         if ($topic === null) {
             return Json::error($response, 'Topic not found.', 404);
         }
-        $body = (array) $request->getParsedBody();
-        try {
-            $result = $this->lifecycle->transition($topic, (string) ($body['to'] ?? ''), $request->getAttribute('user'), $body['note'] ?? null);
-        } catch (Throwable $e) {
-            return Json::error($response, $e->getMessage(), 422);
+        [$result, $error] = $this->moveItem($request, $topic, 'topic', $topic->getTitle(), $this->ownerOf($topic), '/academics/topics');
+        if ($result === null) {
+            return Json::error($response, (string) $error, 422);
         }
 
-        return Json::write($response, ['topic' => $this->row($topic)] + $result);
+        return Json::write($response, ['topic' => $this->row($topic, $request)] + $result);
     }
 
     /** GET /backend/curriculum/topics/{id}/history */
     public function history(Request $request, Response $response, array $args): Response
     {
-        $topic = $this->em->getRepository(Topic::class)->find((int) $args['id']);
+        $topic = $this->findOwned($request, (int) $args['id']);
         if ($topic === null) {
             return Json::error($response, 'Topic not found.', 404);
         }
@@ -179,6 +182,9 @@ final class TopicsAction
         }
         $count = 0;
         foreach ($this->em->getRepository(Topic::class)->findBy(['id' => $ids]) as $topic) {
+            if (!$this->canActWithin($request, $this->ownerOf($topic))) {
+                continue; // another school's record
+            }
             $this->em->remove($topic);
             $count++;
         }
@@ -232,10 +238,24 @@ final class TopicsAction
         }
     }
 
-    private function row(Topic $t): array
+    /** The school a topic belongs to. */
+    private function ownerOf(Topic $item): ?Institution
+    {
+        return $item->getSubject()->getInstitution();
+    }
+
+    /** A topic the caller's school owns (another school's id reads as "not found"). */
+    private function findOwned(Request $request, int $id): ?Topic
+    {
+        return $this->ownedRecord($request, Topic::class, $id, fn (Topic $item) => $this->ownerOf($item));
+    }
+
+    private function row(Topic $t, Request $request): array
     {
         return $t->toArray() + [
             'next_states' => Lifecycle::nextStates($t->getApprovalStatus()),
+            // What this viewer may do with it, and why not where they may not.
+            'lifecycle' => $this->guidanceFor($request, $t, 'curriculum_pack', $this->ownerOf($t), 'topic'),
             'version_count' => $this->em->getRepository(\App\Domain\Entity\ContentVersion::class)->count(['entityType' => 'Topic', 'entityId' => $t->getId()]),
         ];
     }

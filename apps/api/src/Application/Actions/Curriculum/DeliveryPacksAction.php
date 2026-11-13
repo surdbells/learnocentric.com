@@ -5,14 +5,17 @@ declare(strict_types=1);
 namespace App\Application\Actions\Curriculum;
 
 use App\Application\Actions\School\ResolvesInstitution;
+use App\Application\Support\GovernedContent;
 use App\Application\Support\Json;
 use App\Application\Support\ListQuery;
 use App\Application\Support\Paginator;
 use App\Domain\Entity\ContentVersion;
 use App\Domain\Entity\Topic;
 use App\Domain\Entity\TopicDeliveryPack;
+use App\Domain\Entity\Institution;
 use App\Domain\Lifecycle;
 use App\Service\AuditLogger;
+use App\Service\LifecycleNotifier;
 use App\Service\LifecycleService;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Http\Message\ResponseInterface as Response;
@@ -23,6 +26,7 @@ use Throwable;
 final class DeliveryPacksAction
 {
     use ResolvesInstitution;
+    use GovernedContent;
 
     private const EDITABLE = [Lifecycle::DRAFT, Lifecycle::REVIEW];
 
@@ -30,6 +34,7 @@ final class DeliveryPacksAction
         private readonly EntityManagerInterface $em,
         private readonly AuditLogger $audit,
         private readonly LifecycleService $lifecycle,
+        private readonly LifecycleNotifier $notifier,
     ) {
     }
 
@@ -68,7 +73,7 @@ final class DeliveryPacksAction
             $qb->andWhere('(t.term = :tid OR t.term IS NULL)')->setParameter('tid', (int) $query->filters['term_id']);
         }
 
-        $mapper = fn (TopicDeliveryPack $p) => $this->row($p);
+        $mapper = fn (TopicDeliveryPack $p) => $this->row($p, $request);
         if (!$query->paginated) {
             $qb->orderBy('p.id', 'DESC');
             return Json::write($response, array_map($mapper, $qb->getQuery()->getResult()));
@@ -81,7 +86,7 @@ final class DeliveryPacksAction
     {
         $body = (array) $request->getParsedBody();
         $topic = $this->em->getRepository(Topic::class)->find((int) ($body['topic_id'] ?? 0));
-        if ($topic === null) {
+        if ($topic === null || !$this->canActWithin($request, $topic->getSubject()->getInstitution())) {
             return Json::error($response, 'A valid topic_id is required.', 422);
         }
         if ($this->em->getRepository(TopicDeliveryPack::class)->findOneBy(['topic' => $topic]) !== null) {
@@ -94,31 +99,31 @@ final class DeliveryPacksAction
         $this->em->flush();
         $this->audit->log('deliverypack.create', $request->getAttribute('user'), 'TopicDeliveryPack', (string) $pack->getId(), null, $pack->toArray());
 
-        return Json::write($response, $this->row($pack), 201);
+        return Json::write($response, $this->row($pack, $request), 201);
     }
 
     private function update(Request $request, Response $response): Response
     {
         $body = (array) $request->getParsedBody();
-        $pack = $this->em->getRepository(TopicDeliveryPack::class)->find((int) ($body['id'] ?? 0));
+        $pack = $this->findOwned($request, (int) ($body['id'] ?? 0));
         if ($pack === null) {
             return Json::error($response, 'Delivery pack not found.', 404);
         }
         if (!in_array($pack->getStatus(), self::EDITABLE, true)) {
-            return Json::error($response, "This pack is {$pack->getStatus()}; return it to draft before editing.", 409);
+            return Json::error($response, $this->lockedReasonFor($request, $pack, 'delivery_pack', $this->ownerOf($pack), 'lesson pack'), 409);
         }
         $before = $pack->toArray();
         $this->applyFields($pack, $body);
         $this->em->flush();
         $this->audit->log('deliverypack.update', $request->getAttribute('user'), 'TopicDeliveryPack', (string) $pack->getId(), $before, $pack->toArray());
 
-        return Json::write($response, $this->row($pack));
+        return Json::write($response, $this->row($pack, $request));
     }
 
     private function delete(Request $request, Response $response): Response
     {
         $id = (int) ($request->getQueryParams()['id'] ?? 0);
-        $pack = $this->em->getRepository(TopicDeliveryPack::class)->find($id);
+        $pack = $this->findOwned($request, $id);
         if ($pack === null) {
             return Json::error($response, 'Delivery pack not found.', 404);
         }
@@ -136,7 +141,7 @@ final class DeliveryPacksAction
      */
     public function show(Request $request, Response $response, array $args): Response
     {
-        $pack = $this->em->getRepository(TopicDeliveryPack::class)->find((int) $args['id']);
+        $pack = $this->findOwned($request, (int) $args['id']);
         if ($pack === null) {
             return Json::error($response, 'Delivery pack not found.', 404);
         }
@@ -155,7 +160,7 @@ final class DeliveryPacksAction
         $total = count($materials);
 
         return Json::write($response, [
-            'pack' => $this->row($pack),
+            'pack' => $this->row($pack, $request),
             'topic' => [
                 'id' => $topic->getId(),
                 'title' => $ta['title'],
@@ -179,23 +184,21 @@ final class DeliveryPacksAction
 
     public function transition(Request $request, Response $response, array $args): Response
     {
-        $pack = $this->em->getRepository(TopicDeliveryPack::class)->find((int) $args['id']);
+        $pack = $this->findOwned($request, (int) $args['id']);
         if ($pack === null) {
             return Json::error($response, 'Delivery pack not found.', 404);
         }
-        $body = (array) $request->getParsedBody();
-        try {
-            $result = $this->lifecycle->transition($pack, (string) ($body['to'] ?? ''), $request->getAttribute('user'), $body['note'] ?? null);
-        } catch (Throwable $e) {
-            return Json::error($response, $e->getMessage(), 422);
+        [$result, $error] = $this->moveItem($request, $pack, 'lesson pack', $pack->getTopic()->getTitle(), $this->ownerOf($pack), '/academics/lesson-content');
+        if ($result === null) {
+            return Json::error($response, (string) $error, 422);
         }
 
-        return Json::write($response, ['pack' => $this->row($pack)] + $result);
+        return Json::write($response, ['pack' => $this->row($pack, $request)] + $result);
     }
 
     public function history(Request $request, Response $response, array $args): Response
     {
-        $pack = $this->em->getRepository(TopicDeliveryPack::class)->find((int) $args['id']);
+        $pack = $this->findOwned($request, (int) $args['id']);
         if ($pack === null) {
             return Json::error($response, 'Delivery pack not found.', 404);
         }
@@ -211,6 +214,9 @@ final class DeliveryPacksAction
         }
         $count = 0;
         foreach ($this->em->getRepository(TopicDeliveryPack::class)->findBy(['id' => $ids]) as $pack) {
+            if (!$this->canActWithin($request, $this->ownerOf($pack))) {
+                continue; // another school's record
+            }
             $this->em->remove($pack);
             $count++;
         }
@@ -240,7 +246,19 @@ final class DeliveryPacksAction
         }
     }
 
-    private function row(TopicDeliveryPack $pack): array
+    /** The school a lesson pack belongs to. */
+    private function ownerOf(TopicDeliveryPack $item): ?Institution
+    {
+        return $item->getTopic()->getSubject()->getInstitution();
+    }
+
+    /** A lesson pack the caller's school owns (another school's id reads as "not found"). */
+    private function findOwned(Request $request, int $id): ?TopicDeliveryPack
+    {
+        return $this->ownedRecord($request, TopicDeliveryPack::class, $id, fn (TopicDeliveryPack $item) => $this->ownerOf($item));
+    }
+
+    private function row(TopicDeliveryPack $pack, Request $request): array
     {
         $topic = $pack->getTopic();
         $class = $topic->getSchoolClass();
@@ -260,6 +278,8 @@ final class DeliveryPacksAction
             'student_visible' => $pack->getStatus() === Lifecycle::PUBLISHED
                 && $topic->getApprovalStatus() === Lifecycle::PUBLISHED,
             'next_states' => Lifecycle::nextStates($pack->getStatus()),
+            // What this viewer may do with it, and why not where they may not.
+            'lifecycle' => $this->guidanceFor($request, $pack, 'delivery_pack', $this->ownerOf($pack), 'lesson pack'),
             'version_count' => $this->em->getRepository(ContentVersion::class)->count(['entityType' => 'TopicDeliveryPack', 'entityId' => $pack->getId()]),
         ];
     }

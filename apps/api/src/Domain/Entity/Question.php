@@ -110,6 +110,33 @@ class Question implements LifecycleAware
     public function setApprovalStatus(string $v): void { $this->approvalStatus = $v; }
 
     /**
+     * What stops this question being approved or published: it needs a sound,
+     * validated answer, an explanation (every type is auto-marked) and a
+     * difficulty. Empty when nothing does.
+     *
+     * @return string[]
+     */
+    public function publishBlockers(): array
+    {
+        $error = $this->answerError();
+        if ($error !== null) {
+            return [$error];
+        }
+        $missing = [];
+        if (!$this->answerValidated) {
+            $missing[] = 'a validated answer';
+        }
+        if (trim((string) $this->explanation) === '') {
+            $missing[] = 'an explanation';
+        }
+        if (!in_array($this->difficulty, self::DIFFICULTIES, true)) {
+            $missing[] = 'a difficulty level';
+        }
+
+        return $missing === [] ? [] : ['This question needs ' . implode(', ', $missing) . ' before it can be approved or published.'];
+    }
+
+    /**
      * The answer-validation gate. Returns a human error when the correct answer
      * is missing or malformed for the question type, or null when it is sound.
      */
