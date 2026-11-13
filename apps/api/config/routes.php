@@ -75,6 +75,8 @@ return static function (App $app): void {
     $app->group('/backend', function (RouteCollectorProxy $group): void {
         // --- Public ---
         $group->post('/auth/login', LoginAction::class);
+        // Second sign-in step, authenticated by the short-lived challenge from /auth/login.
+        $group->post('/auth/2fa/verify', \App\Application\Actions\Auth\TwoFactorAction::class . ':verify');
         $group->post('/auth/register', RegisterAction::class);
         $group->get('/auth/join/{code:[A-Za-z0-9]{4,16}}', RegisterAction::class . ':lookup');
         // Paystack server-to-server notification (authenticated by its signature, not a login).
@@ -90,6 +92,11 @@ return static function (App $app): void {
             $auth->map(['GET', 'PUT'], '/auth/profile', ProfileAction::class);
             $auth->map(['GET', 'PUT'], '/auth/settings', UserSettingsAction::class);
             $auth->post('/auth/password', ChangePasswordAction::class);
+            $auth->get('/auth/2fa', \App\Application\Actions\Auth\TwoFactorAction::class . ':status');
+            $auth->post('/auth/2fa/setup', \App\Application\Actions\Auth\TwoFactorAction::class . ':setup');
+            $auth->post('/auth/2fa/enable', \App\Application\Actions\Auth\TwoFactorAction::class . ':enable');
+            $auth->post('/auth/2fa/disable', \App\Application\Actions\Auth\TwoFactorAction::class . ':disable');
+            $auth->post('/auth/2fa/backup-codes', \App\Application\Actions\Auth\TwoFactorAction::class . ':backupCodes');
             $auth->map(['GET', 'PUT', 'DELETE'], '/auth/user-profile/{id:[0-9]+}', UserProfileAction::class);
 
             $auth->get('/admin/institutions', ListInstitutionsAction::class);

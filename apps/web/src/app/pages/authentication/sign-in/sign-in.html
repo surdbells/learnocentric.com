@@ -14,6 +14,22 @@
     <div class="auth-card">
       <img class="auth-card-logo d-lg-none" src="images/logo/logoblack.png" alt="Learnocentric" />
 
+      @if (challenge()) {
+      <h1 class="auth-title">Enter your code</h1>
+      <p class="text-body-secondary mb-4">Open your authenticator app and enter the 6-digit code for LearnoCentric. Lost your phone? Use one of your backup codes.</p>
+
+      <form (ngSubmit)="verifyCode()" class="text-start">
+        <div class="mb-4">
+          <label class="form-label" for="otp">Authentication code</label>
+          <input id="otp" name="otp" class="form-control form-control-lg" inputmode="numeric" autocomplete="one-time-code"
+                 placeholder="123456" maxlength="9" [ngModel]="code()" (ngModelChange)="code.set($event)" autofocus />
+        </div>
+        <app-learno-button text="Verify" [isLoading]="isLoading()" />
+      </form>
+      <p class="small text-center mt-3 mb-0">
+        <button type="button" class="btn btn-link btn-sm p-0" (click)="cancelCode()">Use a different account</button>
+      </p>
+      } @else {
       <h1 class="auth-title">Sign In</h1>
       <p class="text-body-secondary mb-4">Log in to your account to continue.</p>
 
@@ -36,6 +52,7 @@
       <p class="small text-body-secondary text-center mt-4 mb-0">
         Got a join code from your school? <a routerLink="/register" class="fw-semibold">Create an account</a>
       </p>
+      }
     </div>
   </main>
 </div>

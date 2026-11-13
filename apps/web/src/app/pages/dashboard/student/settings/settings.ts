@@ -1,4 +1,5 @@
 import {Component, inject, OnInit, signal, PLATFORM_ID} from '@angular/core';
+import {AuthService} from '../../../../common/auth/auth.service';
 import {isPlatformBrowser} from '@angular/common';
 import {FormsModule} from '@angular/forms';
 import {RouterLink} from '@angular/router';
@@ -24,6 +25,8 @@ interface MenuItem { key: string; label: string; sub: string; icon: string; }
   styleUrl: './settings.css',
 })
 export class StudentSettings implements OnInit {
+  /** Real 2FA status from the session (managed at /account/two-factor). */
+  readonly twoFactorOn = inject(AuthService).getAuthSession()?.user?.['two_factor_enabled'] === true;
   private api = inject(ApiService);
   private prefs = inject(Preferences);
   private toast = inject(ToastrService);

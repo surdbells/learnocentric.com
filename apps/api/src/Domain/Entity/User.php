@@ -67,6 +67,29 @@ class User
     #[ORM\Column(name: 'last_login', type: Types::DATETIME_IMMUTABLE, nullable: true)]
     private ?DateTimeImmutable $lastLogin = null;
 
+    /** TOTP secret, encrypted at rest (TotpService); set during enrolment, kept while enabled. */
+    #[ORM\Column(name: 'totp_secret', type: Types::TEXT, nullable: true)]
+    private ?string $totpSecret = null;
+
+    /** When two-factor sign-in was switched on; null = off (a pending secret may exist). */
+    #[ORM\Column(name: 'totp_enabled_at', type: Types::DATETIME_IMMUTABLE, nullable: true)]
+    private ?DateTimeImmutable $totpEnabledAt = null;
+
+    /** Password-hashed one-time backup codes. */
+    #[ORM\Column(name: 'totp_backup_codes', type: Types::JSON, nullable: true)]
+    private ?array $totpBackupCodes = null;
+
+    /** Last accepted 30s time-step, so a code can't be replayed. */
+    #[ORM\Column(name: 'totp_last_step', type: Types::BIGINT, nullable: true)]
+    private ?string $totpLastStep = null;
+
+    /** Consecutive failed codes and when the latest happened (brute-force lockout). */
+    #[ORM\Column(name: 'totp_failures', type: Types::SMALLINT, options: ['default' => 0])]
+    private int $totpFailures = 0;
+
+    #[ORM\Column(name: 'totp_failed_at', type: Types::DATETIME_IMMUTABLE, nullable: true)]
+    private ?DateTimeImmutable $totpFailedAt = null;
+
     #[ORM\Column(name: 'created_at', type: Types::DATETIME_IMMUTABLE)]
     private DateTimeImmutable $createdAt;
 
@@ -122,6 +145,23 @@ class User
     public function markLoggedIn(): void { $this->lastLogin = new DateTimeImmutable(); }
     public function getCreatedAt(): DateTimeImmutable { return $this->createdAt; }
 
+    // --- two-factor (TOTP) ---
+    public function getTotpSecret(): ?string { return $this->totpSecret; }
+    public function setTotpSecret(?string $v): void { $this->totpSecret = $v; }
+    public function isTwoFactorEnabled(): bool { return $this->totpEnabledAt !== null && $this->totpSecret !== null; }
+    public function getTotpEnabledAt(): ?DateTimeImmutable { return $this->totpEnabledAt; }
+    public function setTotpEnabledAt(?DateTimeImmutable $v): void { $this->totpEnabledAt = $v; }
+    /** @return string[] */
+    public function getTotpBackupCodes(): array { return $this->totpBackupCodes ?? []; }
+    /** @param string[]|null $hashes */
+    public function setTotpBackupCodes(?array $hashes): void { $this->totpBackupCodes = $hashes === null ? null : array_values($hashes); }
+    public function getTotpLastStep(): ?int { return $this->totpLastStep === null ? null : (int) $this->totpLastStep; }
+    public function setTotpLastStep(?int $v): void { $this->totpLastStep = $v === null ? null : (string) $v; }
+    public function getTotpFailures(): int { return $this->totpFailures; }
+    public function getTotpFailedAt(): ?DateTimeImmutable { return $this->totpFailedAt; }
+    public function recordTotpFailure(): void { $this->totpFailures++; $this->totpFailedAt = new DateTimeImmutable(); }
+    public function clearTotpFailures(): void { $this->totpFailures = 0; $this->totpFailedAt = null; }
+
     /** Public shape consumed by the Angular frontend (AuthUser). */
     public function toArray(): array
     {
@@ -139,6 +179,7 @@ class User
             'institutionId' => $this->institution?->getId(),
             'profileImageUrl' => \App\Service\Storage\FilePath::toUrl($this->profileImageUrl),
             'status' => $this->status,
+            'two_factor_enabled' => $this->isTwoFactorEnabled(),
         ];
     }
 }

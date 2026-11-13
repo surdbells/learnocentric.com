@@ -76,6 +76,11 @@
         <app-icon name="expand_more" class="tb-user-caret d-none d-sm-inline" />
       </button>
       <ul class="dropdown-menu dropdown-menu-end">
+        <li>
+          <a class="dropdown-item d-flex align-items-center gap-2" routerLink="/account/two-factor">
+            <app-icon name="verified_user" /> Two-factor security
+          </a>
+        </li>
         <li (click)="signOut()">
           <a class="dropdown-item d-flex align-items-center gap-2" role="button">
             <app-icon name="logout" /> Sign out

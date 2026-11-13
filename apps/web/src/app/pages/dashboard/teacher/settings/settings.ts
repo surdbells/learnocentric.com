@@ -1,4 +1,5 @@
 import {Component, inject, OnInit, signal, input } from '@angular/core';
+import {AuthService} from '../../../../common/auth/auth.service';
 import {FormsModule} from '@angular/forms';
 import {RouterLink} from '@angular/router';
 import {DatePipe} from '@angular/common';
@@ -21,6 +22,8 @@ import {ToastrService} from 'ngx-toastr';
   styleUrl: './settings.css',
 })
 export class TeacherSettings implements OnInit {
+  /** Real 2FA status from the session (managed at /account/two-factor). */
+  readonly twoFactorOn = inject(AuthService).getAuthSession()?.user?.['two_factor_enabled'] === true;
   /** Hidden page header when hosted inside a teacher hub. */
   readonly embedded = input<boolean>(false);
 

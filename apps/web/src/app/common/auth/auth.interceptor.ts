@@ -3,6 +3,7 @@ import { HttpErrorResponse, HttpInterceptorFn } from '@angular/common/http';
 import { AuthStore } from './auth.store';
 import { API_BASE_URL } from '../service/api.service';
 import { catchError, throwError } from 'rxjs';
+import { Router } from '@angular/router';
 
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const store = inject(AuthStore);
@@ -20,8 +21,15 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
     setHeaders: token ? { Authorization: `Bearer ${token}` } : {}
   });
 
+  const router = inject(Router);
+
   return next(authReq).pipe(
     catchError((error: HttpErrorResponse) => {
+      // The platform requires 2FA for staff and this account hasn't enrolled yet.
+      if (error?.status === 403 && (error.error as any)?.code === 'two_factor_setup_required'
+          && !router.url.startsWith('/account/two-factor')) {
+        router.navigateByUrl('/account/two-factor');
+      }
       if (error && (error.status === 401 || error.status === 419)) {
         const hasAuthUrl = (() => {
           const payload = error?.error as any;

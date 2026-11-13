@@ -100,7 +100,8 @@
           </div>
           <div class="form-check form-switch mb-2">
             <input class="form-check-input" type="checkbox" id="sec_2fa" [(ngModel)]="model.security.enforce_2fa" />
-            <label class="form-check-label" for="sec_2fa">Enforce two-factor authentication</label>
+            <label class="form-check-label" for="sec_2fa">Require two-factor authentication for staff</label>
+            <div class="form-text">Staff (admins, academic leads, teachers) must enrol an authenticator app before they can continue. Learners and parents can opt in.</div>
           </div>
           <div class="form-check form-switch">
             <input class="form-check-input" type="checkbox" id="sec_rbac" [(ngModel)]="model.security.rbac_enforce" />

@@ -1,5 +1,5 @@
 import {Component, signal} from '@angular/core';
-import {FormControl, FormGroup, ReactiveFormsModule, Validators} from "@angular/forms";
+import {FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators} from "@angular/forms";
 import {ToastrService} from "ngx-toastr";
 import {Router, RouterLink} from "@angular/router";
 import {portalFor} from '../../../common/auth/portal';
@@ -13,6 +13,7 @@ import {LearnoButton} from '../../../common/learno-button/learno-button';
   selector: 'app-sign-in',
   imports: [
     ReactiveFormsModule,
+    FormsModule,
     LearnoButton,
     RouterLink
   ],
@@ -24,6 +25,9 @@ export class SignIn {
   private auth: AuthResponse | null = null;
 
   isLoading = signal<boolean>(false)
+  /** Set after a correct password when the account has 2FA: the second step. */
+  challenge = signal<string | null>(null);
+  code = signal('');
 
     form = new FormGroup({
         email: new FormControl('', [Validators.email, Validators.required] ),
@@ -49,22 +53,15 @@ export class SignIn {
 
       this.apiService.post(`/backend/auth/login`, this.form.value).subscribe(
         {
-          next: (val: AuthResponse) => {
-            this.auth = val
-            this.authService.persistLogin(this.auth);
-            this.moduleAccess.refresh(); // load the school's granted feature modules
+          next: (val: any) => {
             this.isLoading.set(false)
-            this.form.reset()
-            this.toast.success('Login Successful');
-
-              const user = val.user as AuthUser;
-              const portal = portalFor(user['role']);
-              if (portal) {
-                this.router.navigateByUrl(portal);
-              } else {
-                this.toast.error("Your account has no dashboard assigned. Please contact your administrator.");
-              }
-
+            if (val?.two_factor_required) {
+              // Password OK; ask for the authenticator code.
+              this.challenge.set(val.challenge);
+              this.code.set('');
+              return;
+            }
+            this.finish(val);
           },
         error: (err) => {
           console.log(err)
@@ -77,5 +74,53 @@ export class SignIn {
           }
         }
       );
+    }
+
+    /** Second step: exchange the challenge + authenticator (or backup) code for a session. */
+    verifyCode(): void {
+      const code = this.code().trim();
+      if (!code) { this.toast.error('Enter the code from your authenticator app'); return; }
+      this.isLoading.set(true);
+      this.apiService.post<any>('/backend/auth/2fa/verify', {challenge: this.challenge(), code}).subscribe({
+        next: (val) => {
+          this.isLoading.set(false);
+          if (val?.backup_codes_left !== undefined && val.backup_codes_left <= 2 && /-/.test(code)) {
+            this.toast.warning(`Only ${val.backup_codes_left} backup codes left. Issue new ones from Two-factor settings.`);
+          }
+          this.finish(val);
+        },
+        error: (e) => {
+          this.isLoading.set(false);
+          if (e?.status === 401 && /expired/i.test(e?.error?.error ?? '')) { this.cancelCode(); }
+          this.toast.error(e?.error?.error || 'That code is incorrect');
+        },
+      });
+    }
+
+    cancelCode(): void {
+      this.challenge.set(null);
+      this.code.set('');
+      this.form.reset();
+    }
+
+    private finish(val: AuthResponse & {two_factor_setup_required?: boolean}): void {
+      this.auth = val;
+      this.authService.persistLogin(this.auth);
+      this.moduleAccess.refresh(); // load the school's granted feature modules
+      this.form.reset();
+      this.challenge.set(null);
+      this.toast.success('Login Successful');
+
+      if (val.two_factor_setup_required) {
+        this.router.navigateByUrl('/account/two-factor');
+        return;
+      }
+      const user = val.user as AuthUser;
+      const portal = portalFor(user['role']);
+      if (portal) {
+        this.router.navigateByUrl(portal);
+      } else {
+        this.toast.error("Your account has no dashboard assigned. Please contact your administrator.");
+      }
     }
 }

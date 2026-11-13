@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Application\Actions\Auth;
 
+use App\Application\Middleware\JwtAuthMiddleware;
 use App\Application\Support\Json;
 use App\Service\AuditLogger;
 use App\Service\AuthService;
@@ -17,6 +18,7 @@ final class LoginAction
         private readonly AuthService $auth,
         private readonly JwtService $jwt,
         private readonly AuditLogger $audit,
+        private readonly \App\Service\PlatformSettings $settings,
     ) {
     }
 
@@ -37,10 +39,24 @@ final class LoginAction
             return Json::error($response, 'Incorrect email or password.', 401);
         }
 
+        // Second factor: the password step only earns a short-lived challenge.
+        if ($user->isTwoFactorEnabled()) {
+            $this->audit->log('auth.login_password_ok', $user, 'User', (string) $user->getId(), null, null, $this->ip($request));
+            return Json::write($response, [
+                'two_factor_required' => true,
+                'challenge' => $this->jwt->issueTwoFactorChallenge($user),
+            ]);
+        }
+
         $token = $this->jwt->issueForUser($user);
         $this->audit->log('auth.login', $user, 'User', (string) $user->getId(), null, null, $this->ip($request));
 
-        return Json::write($response, ['token' => $token, 'user' => $user->toArray()]);
+        return Json::write($response, [
+            'token' => $token,
+            'user' => $user->toArray(),
+            // Platform requires 2FA for staff and this account hasn't enrolled yet.
+            'two_factor_setup_required' => JwtAuthMiddleware::mustEnrolTwoFactor($user, $this->settings),
+        ]);
     }
 
     private function ip(Request $request): string

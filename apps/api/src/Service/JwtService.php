@@ -35,6 +35,35 @@ class JwtService
         ]);
     }
 
+    /**
+     * A 5-minute token proving the password step passed, exchanged for a real
+     * session at /auth/2fa/verify. It carries `purpose`, which the auth
+     * middleware refuses, so it can't be used as a session token.
+     */
+    public function issueTwoFactorChallenge(User $user): string
+    {
+        $now = time();
+
+        return $this->encode([
+            'iss' => $this->issuer,
+            'iat' => $now,
+            'exp' => $now + 300,
+            'purpose' => '2fa',
+            'userId' => $user->getId(),
+        ]);
+    }
+
+    /** @return int user id from a valid, unexpired 2FA challenge */
+    public function decodeTwoFactorChallenge(string $token): int
+    {
+        $claims = $this->decode($token);
+        if (($claims['purpose'] ?? null) !== '2fa' || (int) ($claims['userId'] ?? 0) <= 0) {
+            throw new RuntimeException('Not a two-factor challenge.');
+        }
+
+        return (int) $claims['userId'];
+    }
+
     /** @param array<string,mixed> $payload */
     public function encode(array $payload): string
     {

@@ -107,6 +107,7 @@ DB_NAME=learnocentric
 DB_USER=learno
 DB_PASSWORD=CHANGE_ME_STRONG_DB_PASSWORD
 
+# Keep this stable: it also encrypts 2FA secrets (rotating it forces 2FA re-enrolment).
 JWT_SECRET=CHANGE_ME_LONG_RANDOM_STRING   # e.g. `openssl rand -hex 48`
 JWT_TTL=86400
 JWT_ISSUER=learnocentric

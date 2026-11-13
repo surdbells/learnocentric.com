@@ -1,0 +1,98 @@
+<div class="tf-page">
+  <div class="tf-card card border-0 shadow-sm">
+    <div class="card-body p-4 p-md-5">
+      <div class="d-flex align-items-center justify-content-between mb-4">
+        <img class="tf-logo" src="images/logo/logoblack.png" alt="LearnoCentric" />
+        @if (!state()?.required || state()?.enabled) {
+          <a [routerLink]="home" class="small fw-semibold text-decoration-none"><app-icon name="arrow_back" [size]="16" /> Back to dashboard</a>
+        } @else {
+          <button type="button" class="btn btn-link btn-sm p-0" (click)="signOut()"><app-icon name="logout" [size]="16" /> Sign out</button>
+        }
+      </div>
+
+      <div class="d-flex align-items-center gap-3 mb-2">
+        <span class="tf-ico"><app-icon name="verified_user" [size]="26" /></span>
+        <div>
+          <h1 class="h4 fw-bold mb-0">Two-factor authentication</h1>
+          <div class="text-body-secondary small">A 6-digit code from your phone, on top of your password.</div>
+        </div>
+      </div>
+
+      @if (loading()) {
+        <div class="text-body-secondary py-4">Loading…</div>
+      } @else if (backupCodes().length) {
+        <!-- Backup codes: shown once -->
+        <div class="alert alert-success mt-4 mb-3">
+          <strong>Save these backup codes now.</strong> Each one signs you in once if you lose your phone. We won't show them again.
+        </div>
+        <div class="tf-codes mb-3">
+          @for (c of backupCodes(); track c) { <code>{{ c }}</code> }
+        </div>
+        <div class="d-flex flex-wrap gap-2">
+          <button type="button" class="btn btn-outline-success" (click)="downloadCodes()"><app-icon name="download" [size]="16" /> Download codes</button>
+          <button type="button" class="btn btn-success" (click)="continue()">I've saved them, continue</button>
+        </div>
+      } @else if (state()?.enabled) {
+        <!-- On -->
+        <div class="tf-status mt-4">
+          <app-icon name="check_circle" [size]="20" class="text-success" />
+          <div>
+            <div class="fw-semibold">On</div>
+            <div class="small text-body-secondary">Backup codes left: {{ state()?.backup_codes_left }}</div>
+          </div>
+        </div>
+
+        <hr class="my-4" />
+        <div class="fw-semibold mb-1">New backup codes</div>
+        <p class="small text-body-secondary">Issues 10 new codes and cancels the old ones.</p>
+        <div class="d-flex gap-2 tf-row">
+          <input class="form-control" inputmode="numeric" maxlength="6" placeholder="Current 6-digit code" autocomplete="one-time-code"
+                 [ngModel]="regenCode()" (ngModelChange)="regenCode.set($event)" />
+          <button type="button" class="btn btn-outline-success text-nowrap" [disabled]="busy()" (click)="regenerate()"><app-icon name="refresh" [size]="16" /> Issue codes</button>
+        </div>
+
+        <hr class="my-4" />
+        @if (state()?.required) {
+          <p class="small text-body-secondary mb-0"><app-icon name="lock" [size]="14" /> Two-factor authentication is required for staff accounts on this platform, so it can't be turned off.</p>
+        } @else {
+          <div class="fw-semibold mb-1">Turn off</div>
+          <p class="small text-body-secondary">You'll sign in with your password only.</p>
+          <div class="d-flex gap-2 tf-row">
+            <input class="form-control" type="password" placeholder="Your password" autocomplete="current-password"
+                   [ngModel]="password()" (ngModelChange)="password.set($event)" />
+            <button type="button" class="btn btn-outline-danger text-nowrap" [disabled]="busy()" (click)="disable()">Turn off</button>
+          </div>
+        }
+      } @else {
+        <!-- Off: enrol -->
+        @if (state()?.required) {
+          <div class="alert alert-warning mt-4 mb-0">Your platform requires two-factor authentication for staff accounts. Set it up to continue.</div>
+        }
+        @if (!secret()) {
+          <ol class="tf-steps mt-4">
+            <li>Install an authenticator app on your phone, such as Google Authenticator, Microsoft Authenticator or Authy.</li>
+            <li>Scan the QR code we show you.</li>
+            <li>Enter the 6-digit code the app displays.</li>
+          </ol>
+          <button type="button" class="btn btn-success" [disabled]="busy()" (click)="startSetup()"><app-icon name="key" [size]="16" /> Set up two-factor</button>
+        } @else {
+          <div class="row g-4 mt-1 align-items-center">
+            <div class="col-sm-auto text-center">
+              @if (qr()) { <img class="tf-qr" [src]="qr()" alt="QR code for your authenticator app" width="220" height="220" /> }
+            </div>
+            <div class="col">
+              <div class="small text-body-secondary mb-1">Can't scan? Enter this setup key in the app:</div>
+              <code class="tf-key">{{ secret() }}</code>
+              <label class="form-label mt-3 mb-1" for="tf_code">6-digit code from the app</label>
+              <div class="d-flex gap-2 tf-row">
+                <input id="tf_code" class="form-control form-control-lg" inputmode="numeric" maxlength="6" placeholder="123456" autocomplete="one-time-code"
+                       [ngModel]="code()" (ngModelChange)="code.set($event)" (keyup.enter)="enable()" />
+                <button type="button" class="btn btn-success" [disabled]="busy()" (click)="enable()">Turn on</button>
+              </div>
+            </div>
+          </div>
+        }
+      }
+    </div>
+  </div>
+</div>

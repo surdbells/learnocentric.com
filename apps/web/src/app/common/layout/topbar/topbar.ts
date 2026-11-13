@@ -1,7 +1,7 @@
 import {Component, computed, inject, input, OnInit, output, PLATFORM_ID, signal} from '@angular/core';
 import {isPlatformBrowser, Location} from '@angular/common';
 import {FormsModule} from '@angular/forms';
-import {Router} from '@angular/router';
+import {Router, RouterLink} from '@angular/router';
 import {Subject} from 'rxjs';
 import {debounceTime, distinctUntilChanged, switchMap} from 'rxjs/operators';
 import {of} from 'rxjs';
@@ -18,7 +18,7 @@ import {TermSwitcher} from '../../ui/term-switcher';
 @Component({
   selector: 'app-topbar',
   standalone: true,
-  imports: [Icon, FormsModule, PreferenceSetting, NotificationBell, TermSwitcher],
+  imports: [Icon, FormsModule, PreferenceSetting, NotificationBell, TermSwitcher, RouterLink],
   templateUrl: './topbar.html',
   styleUrl: './topbar.css',
   host: { 'class': 'app-topbar' },

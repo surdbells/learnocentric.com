@@ -63,6 +63,10 @@ return [
         return new JwtService($s['secret'], (int) $s['ttl'], $s['issuer']);
     }),
 
+    \App\Service\TotpService::class => factory(function (ContainerInterface $c): \App\Service\TotpService {
+        return new \App\Service\TotpService($c->get('settings')['jwt']['secret']);
+    }),
+
     ZeptoMailer::class => factory(function (ContainerInterface $c): ZeptoMailer {
         $m = $c->get('settings')['mail'];
         return new ZeptoMailer($m['api_url'], $m['token'], $m['from_address'], $m['from_name'], $c->get(LoggerInterface::class));
