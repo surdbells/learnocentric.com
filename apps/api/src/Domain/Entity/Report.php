@@ -18,8 +18,6 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\Index(name: 'idx_reports_type', columns: ['type'])]
 class Report
 {
-    public const READY = 'ready';
-
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
@@ -31,10 +29,6 @@ class Report
     #[ORM\Column(length: 200)]
     private string $title;
 
-    /** @var array<string, mixed>|null */
-    #[ORM\Column(type: Types::JSON, nullable: true)]
-    private ?array $params = null;
-
     /** @var array<int, array{label:string, value:mixed}>|null */
     #[ORM\Column(type: Types::JSON, nullable: true)]
     private ?array $summary = null;
@@ -42,9 +36,6 @@ class Report
     /** @var array{columns: array<int,string>, rows: array<int, array<int, mixed>>}|null */
     #[ORM\Column(type: Types::JSON, nullable: true)]
     private ?array $data = null;
-
-    #[ORM\Column(length: 20)]
-    private string $status = self::READY;
 
     #[ORM\Column(name: 'generated_by_id', nullable: true)]
     private ?int $generatedById = null;
@@ -66,7 +57,6 @@ class Report
     public function getType(): string { return $this->type; }
     public function getTitle(): string { return $this->title; }
 
-    public function setParams(?array $v): void { $this->params = $v; }
     public function setSummary(?array $v): void { $this->summary = $v; }
     public function setData(?array $v): void { $this->data = $v; }
     public function setGeneratedBy(?int $id, ?string $name): void { $this->generatedById = $id; $this->generatedByName = $name; }
@@ -78,8 +68,6 @@ class Report
             'id' => $this->id,
             'type' => $this->type,
             'title' => $this->title,
-            'status' => $this->status,
-            'params' => $this->params,
             'summary' => $this->summary,
             'generated_by' => $this->generatedByName,
             'created_at' => $this->createdAt->format(DATE_ATOM),

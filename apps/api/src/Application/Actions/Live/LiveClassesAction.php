@@ -479,7 +479,6 @@ final class LiveClassesAction
     {
         $channel = 'learno-' . substr(md5($lc->getTitle() . microtime(true)), 0, 16);
         $lc->setRoomName($channel);
-        $lc->setRoomUrl(null); // Agora has no join URL; the client joins the channel by name.
     }
 
     private function applyRelations(LiveClass $lc, array $body): void

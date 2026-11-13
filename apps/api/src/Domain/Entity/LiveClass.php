@@ -57,9 +57,6 @@ class LiveClass
     #[ORM\Column(name: 'room_name', length: 200, nullable: true)]
     private ?string $roomName = null;
 
-    #[ORM\Column(name: 'room_url', length: 500, nullable: true)]
-    private ?string $roomUrl = null;
-
     #[ORM\Column(length: 20)]
     private string $status = self::SCHEDULED;
 
@@ -100,8 +97,6 @@ class LiveClass
     public function setDurationMinutes(int $v): void { $this->durationMinutes = max(5, $v); }
     public function getRoomName(): ?string { return $this->roomName; }
     public function setRoomName(?string $v): void { $this->roomName = $v; }
-    public function getRoomUrl(): ?string { return $this->roomUrl; }
-    public function setRoomUrl(?string $v): void { $this->roomUrl = $v; }
     public function getStatus(): string { return $this->status; }
     public function setStatus(string $v): void { $this->status = $v; }
 

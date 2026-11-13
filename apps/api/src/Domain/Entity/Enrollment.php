@@ -9,7 +9,7 @@ use DateTimeInterface;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
-/** Enrolls a student into a class (optionally for a session/term). */
+/** Enrolls a student into a class (optionally for a term). */
 #[ORM\Entity]
 #[ORM\Table(name: 'enrollments')]
 #[ORM\UniqueConstraint(name: 'uniq_student_class', columns: ['student_id', 'class_id'])]
@@ -30,10 +30,6 @@ class Enrollment
     #[ORM\ManyToOne(targetEntity: SchoolClass::class)]
     #[ORM\JoinColumn(name: 'class_id', referencedColumnName: 'id', nullable: false, onDelete: 'CASCADE')]
     private SchoolClass $schoolClass;
-
-    #[ORM\ManyToOne(targetEntity: AcademicSession::class)]
-    #[ORM\JoinColumn(name: 'session_id', referencedColumnName: 'id', nullable: true, onDelete: 'SET NULL')]
-    private ?AcademicSession $session = null;
 
     #[ORM\ManyToOne(targetEntity: Term::class)]
     #[ORM\JoinColumn(name: 'term_id', referencedColumnName: 'id', nullable: true, onDelete: 'SET NULL')]
@@ -56,7 +52,6 @@ class Enrollment
     public function getStudent(): User { return $this->student; }
     public function getSchoolClass(): SchoolClass { return $this->schoolClass; }
     public function setSchoolClass(SchoolClass $v): void { $this->schoolClass = $v; }
-    public function setSession(?AcademicSession $v): void { $this->session = $v; }
     public function setTerm(?Term $v): void { $this->term = $v; }
     public function setEnrollmentDate(?DateTimeInterface $v): void { $this->enrollmentDate = $v; }
     public function getStatus(): string { return $this->status; }
@@ -77,7 +72,6 @@ class Enrollment
             'is_active' => $s->getStatus() === 'active',
             'class_id' => $this->schoolClass->getId(),
             'class_label' => $this->schoolClass->getLabel(),
-            'session_id' => $this->session?->getId(),
             'term_id' => $this->term?->getId(),
             'enrollment_date' => $this->enrollmentDate?->format('Y-m-d'),
             'status' => $this->status,

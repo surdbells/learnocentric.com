@@ -38,9 +38,6 @@ class TeacherAssignment
     #[ORM\JoinColumn(name: 'term_id', referencedColumnName: 'id', nullable: true, onDelete: 'SET NULL')]
     private ?Term $term = null;
 
-    #[ORM\Column(length: 20, options: ['default' => 'active'])]
-    private string $status = 'active';
-
     public function __construct(User $teacher, SchoolClass $schoolClass, Subject $subject, ?Term $term = null)
     {
         $this->teacher = $teacher;
@@ -66,7 +63,6 @@ class TeacherAssignment
             'subject_id' => $this->subject->getId(),
             'subject' => $this->subject->getName(),
             'term_id' => $this->term?->getId(),
-            'status' => $this->status,
         ];
     }
 }

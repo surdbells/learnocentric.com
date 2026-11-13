@@ -40,9 +40,6 @@ class Institution
     #[ORM\Column(type: Types::JSON, nullable: true)]
     private ?array $settings = null;
 
-    #[ORM\Column(name: 'subscription_id', nullable: true)]
-    private ?int $subscriptionId = null;
-
     #[ORM\Column(name: 'assigned_package_id', nullable: true)]
     private ?int $assignedPackageId = null;
 
@@ -160,7 +157,6 @@ class Institution
             'primary_color' => $this->getBrandColor(),
             'admin_contact' => $this->adminContact,
             'settings' => $this->settings,
-            'subscription_id' => $this->subscriptionId,
             'assigned_package_id' => $this->assignedPackageId,
             'assigned_package_at' => $this->assignedPackageAt?->format(DATE_ATOM),
             'status' => $this->status,

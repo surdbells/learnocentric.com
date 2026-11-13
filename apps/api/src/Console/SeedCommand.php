@@ -383,7 +383,6 @@ class SeedCommand extends Command
         if ($class === null) {
             return;
         }
-        $session = $this->em->getRepository(AcademicSession::class)->findOneBy([]);
         $term = $this->em->getRepository(Term::class)->findOneBy(['isCurrent' => true]);
 
         $count = 0;
@@ -393,7 +392,6 @@ class SeedCommand extends Command
                 continue;
             }
             $enrollment = new Enrollment($student, $class);
-            $enrollment->setSession($session);
             $enrollment->setTerm($term);
             $enrollment->setEnrollmentDate(new DateTimeImmutable('2025-09-16'));
             $this->em->persist($enrollment);
