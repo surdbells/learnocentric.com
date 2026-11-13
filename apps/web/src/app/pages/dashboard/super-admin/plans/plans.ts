@@ -33,7 +33,6 @@ export class SuperAdminPlans {
     {key: 'live_classes', label: 'Live classes'},
     {key: 'analytics', label: 'Analytics & progress reports'},
     {key: 'interventions', label: 'Interventions'},
-    {key: 'safeguarding', label: 'Safeguarding'},
   ];
   selectedModules = signal<Set<string>>(new Set());
 

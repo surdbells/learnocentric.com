@@ -46,7 +46,8 @@ class ModuleGateMiddleware implements MiddlewareInterface
         '/export/gradebook' => 'assessments',
         '/export/summary' => 'analytics',
         '/school/interventions' => 'interventions',
-        '/safeguarding' => 'safeguarding',
+        // Safeguarding is deliberately absent: reporting a concern, and the school's
+        // leads seeing it, is a core safety feature and is never plan-gated.
     ];
 
     /** Direct messaging (not announcements), switched off platform-wide by the "messaging" feature flag. */

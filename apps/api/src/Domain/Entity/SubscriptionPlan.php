@@ -18,10 +18,13 @@ class SubscriptionPlan
 
     public const INTERVALS = ['monthly', 'termly', 'yearly'];
 
-    /** Gateable feature modules a plan may grant (core features are always on). */
+    /**
+     * Gateable feature modules a plan may grant (core features are always on).
+     * Safeguarding used to be listed here; it is core now and never gated.
+     */
     public const MODULES = [
         'assessments', 'worksheets', 'portfolio', 'live_classes',
-        'analytics', 'interventions', 'safeguarding',
+        'analytics', 'interventions',
     ];
 
     #[ORM\Id]

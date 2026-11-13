@@ -5,6 +5,8 @@ import {ToastrService} from 'ngx-toastr';
 import {PageHeader} from '../../../../common/layout/page-header/page-header';
 import {ApiService} from '../../../../common/service/api.service';
 import {Icon} from '../../../../common/icon/icon';
+import {AuthService} from '../../../../common/auth/auth.service';
+import {portalFor} from '../../../../common/auth/portal';
 
 const CATEGORIES = [
   {value: 'welfare', label: 'Welfare'},
@@ -34,6 +36,24 @@ export class ReportConcern {
 
   readonly categories = CATEGORIES;
 
+  private readonly auth = inject(AuthService);
+  private readonly role = this.auth.getAuthSession()?.user?.role;
+  /** Parents say which of their linked children the concern is about. */
+  readonly isParent = this.role === 'parent';
+  children = signal<any[]>([]);
+  childId = signal<string>('');
+
+  constructor() {
+    if (this.isParent) {
+      this.api.get<any>('/backend/analytics/children').subscribe({
+        next: (r) => {
+          this.children.set(r?.data ?? []);
+          if (this.children().length === 1) this.childId.set(String(this.children()[0].student_id));
+        },
+      });
+    }
+  }
+
   category = signal('welfare');
   summary = signal('');
   details = signal('');
@@ -51,6 +71,7 @@ export class ReportConcern {
       category: this.category(),
       summary,
       details: this.details().trim() || null,
+      ...(this.isParent && this.childId() ? {student_id: Number(this.childId())} : {}),
     }).subscribe({
       next: (res) => {
         this.busy.set(false);
@@ -72,6 +93,6 @@ export class ReportConcern {
   }
 
   done(): void {
-    this.router.navigate(['/student/main']);
+    this.router.navigateByUrl(portalFor(this.role) ?? '/');
   }
 }

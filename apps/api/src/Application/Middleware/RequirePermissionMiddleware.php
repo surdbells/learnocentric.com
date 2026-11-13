@@ -96,6 +96,8 @@ class RequirePermissionMiddleware implements MiddlewareInterface
         ['GET', '#^/assessment/feedback/mine$#', false],
         ['POST', '#^/assessment/feedback/\d+/acknowledge$#', false],
         ['GET|PUT', '#^/content/my-resources/\d+/progress$#', false],
+        // Anyone may raise a safeguarding concern, whatever their role's matrix says.
+        ['POST', '#^/safeguarding/cases$#', false],
         ['GET', '#^/live-classes/(upcoming|board)$#', false],
         ['POST', '#^/live-classes/\d+/join$#', false],
         ['GET', '#^/analytics/(children|student/\d+|report-card/\d+)$#', true],

@@ -24,6 +24,15 @@
           </p>
 
           <form (ngSubmit)="submit()">
+            @if (isParent && children().length > 1) {
+              <div class="mb-3">
+                <label class="form-label fw-medium" for="rc_child">Which child is this about?</label>
+                <select id="rc_child" class="form-select" [ngModel]="childId()" (ngModelChange)="childId.set($event)" name="child">
+                  <option value="">Not about one child in particular</option>
+                  @for (c of children(); track c.student_id) { <option [value]="'' + c.student_id">{{ c.student }}</option> }
+                </select>
+              </div>
+            }
             <div class="mb-3">
               <label class="form-label fw-medium">What is your concern about?</label>
               <select class="form-select" [ngModel]="category()" (ngModelChange)="category.set($event)" name="category">

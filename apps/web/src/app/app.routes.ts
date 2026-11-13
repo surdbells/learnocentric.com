@@ -203,7 +203,7 @@ export const routes: Routes = [
           { path: "school-profile", component: SchoolProfile },
           { path: "settings", component: SchoolSettings },
           { path: "billing", component: Billing },
-          { path: "safeguarding", component: Safeguarding, canActivate: [moduleGuard('safeguarding')] },
+          { path: "safeguarding", component: Safeguarding },
           { path: "support", component: Support },
         ]
       },
@@ -286,7 +286,7 @@ export const routes: Routes = [
           { path: "academy-profile", component: SchoolProfile },
           { path: "settings", component: SchoolSettings },
           { path: "billing", component: Billing },
-          { path: "safeguarding", component: Safeguarding, canActivate: [moduleGuard('safeguarding')] },
+          { path: "safeguarding", component: Safeguarding },
           { path: "support", component: Support },
         ]
       },
@@ -348,7 +348,7 @@ export const routes: Routes = [
           { path: "insights", component: Insights },
           { path: "analytics", component: Analytics, canActivate: [moduleGuard('analytics')] },
           { path: "interventions", component: Interventions, canActivate: [moduleGuard('interventions')] },
-          { path: "safeguarding", component: Safeguarding, canActivate: [moduleGuard('safeguarding')] },
+          { path: "safeguarding", component: Safeguarding },
           { path: "submissions", component: SubmissionsInbox },
           { path: "resources", component: Resources },
           { path: "resource-viewer", component: ResourceViewer },
@@ -488,6 +488,8 @@ export const routes: Routes = [
           { path: "profile", component: ParentProfile },
         ]
       },
+      // A parent can raise a safeguarding concern about a child linked to them.
+      { path: "report-concern", component: ReportConcern },
       {
         path: "communication",
         children: [

@@ -58,7 +58,7 @@ export class UserPreferenceMenu {
         { name: "School Profile", link: "/admin/management/school-profile", perm: "academic_setup" },
         { name: "Settings", link: "/admin/management/settings", perm: "academic_setup" },
         { name: "Billing", link: "/admin/management/billing", perm: "subscription" },
-        { name: "Safeguarding", link: "/admin/management/safeguarding", module: "safeguarding", perm: "safeguarding_case" },
+        { name: "Safeguarding", link: "/admin/management/safeguarding" },
         { name: "Support", link: "/admin/management/support", perm: "support_ticket" },
       ]
     },
@@ -69,10 +69,10 @@ export class UserPreferenceMenu {
   tutor_admin: IMenu[] = academyMenu(this.school_admin);
 
   // Academic leads use the admin portal without the owner-only pages
-  // (billing, school profile/settings, safeguarding case management).
+  // (billing, school profile/settings). They keep Safeguarding, where they can raise a concern.
   academic_lead: IMenu[] = withoutLinks(this.school_admin, [
     '/admin/management/school-profile', '/admin/management/settings',
-    '/admin/management/billing', '/admin/management/safeguarding',
+    '/admin/management/billing',
   ]);
 
   super_admin: IMenu[] = [
@@ -121,7 +121,7 @@ export class UserPreferenceMenu {
     { name: "Feedback & Questions", icon: "rate_review", link: "/teacher/feedback-questions", perm: "assessment" },
     { name: "Reports & Analytics", icon: "insights", link: "/teacher/reports", perm: ["report", "gradebook"] },
     { name: "Interventions", icon: "monitoring", link: "/teacher/academics/interventions", module: "interventions", perm: "intervention" },
-    { name: "Safeguarding", icon: "health_and_safety", link: "/teacher/academics/safeguarding", module: "safeguarding", perm: "safeguarding_case" },
+    { name: "Safeguarding", icon: "health_and_safety", link: "/teacher/academics/safeguarding" },
     { name: "Resources", icon: "library_books", link: "/teacher/resources-hub", perm: "resource" },
     { name: "Communication", icon: "forum", link: "/teacher/communication-hub" },
     { name: "Settings", icon: "settings", link: "/teacher/settings-hub" },
@@ -168,6 +168,7 @@ export class UserPreferenceMenu {
     { name: "Management", icon: "tenancy", link: "parent/management",
       children: [
         { name: "Profile", link: "/parent/management/profile" },
+        { name: "Report a Concern", link: "/parent/report-concern" },
       ]
     },
   ]
