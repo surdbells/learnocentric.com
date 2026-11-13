@@ -297,7 +297,7 @@ final class QuestionsAction
         if (isset($body['type'])) { $q->setType((string) $body['type']); }
         if (isset($body['track'])) { $q->setTrack((string) $body['track']); }
         if (isset($body['difficulty'])) { $q->setDifficulty((string) $body['difficulty']); }
-        if (array_key_exists('options', $body)) { $q->setOptions(is_array($body['options']) ? $body['options'] : null); }
+        if (array_key_exists('options', $body)) { $q->setOptions($this->normaliseOptions($body['options'])); }
         if (array_key_exists('correct_answer', $body)) {
             $answer = $body['correct_answer'];
             // multi-select stores a de-duplicated, re-indexed list of option keys.
@@ -310,6 +310,43 @@ final class QuestionsAction
         if (array_key_exists('misconception_tag', $body)) { $q->setMisconceptionTag($body['misconception_tag'] !== '' && $body['misconception_tag'] !== null ? (string) $body['misconception_tag'] : null); }
         if (array_key_exists('common_wrong_answer', $body)) { $q->setCommonWrongAnswer($body['common_wrong_answer'] !== '' && $body['common_wrong_answer'] !== null ? (string) $body['common_wrong_answer'] : null); }
         if (isset($body['marks'])) { $q->setMarks((int) $body['marks']); }
+    }
+
+    /**
+     * Options are stored as [{key, text}]. Imports and other clients may send a
+     * plain list of texts or a {a: text, b: text} map, so accept those too rather
+     * than saving choices with no text. Blank choices are dropped.
+     *
+     * @return array<int, array{key: string, text: string}>|null
+     */
+    private function normaliseOptions(mixed $options): ?array
+    {
+        if (!is_array($options) || $options === []) {
+            return null;
+        }
+        $letters = 'abcdefghij';
+        $out = [];
+        $position = 0;
+        foreach ($options as $k => $o) {
+            if (is_array($o)) {
+                $text = $o['text'] ?? $o['label'] ?? $o['value'] ?? '';
+                $key = $o['key'] ?? null;
+            } else {
+                $text = $o;
+                $key = is_string($k) ? $k : null;
+            }
+            $text = trim((string) (is_scalar($text) ? $text : ''));
+            $key = strtolower(trim((string) ($key ?? '')));
+            if ($key === '') {
+                $key = $letters[$position] ?? (string) ($position + 1);
+            }
+            $position++;
+            if ($text !== '') {
+                $out[] = ['key' => $key, 'text' => $text];
+            }
+        }
+
+        return $out === [] ? null : $out;
     }
 
     private function row(Question $q): array

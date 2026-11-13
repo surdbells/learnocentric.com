@@ -15,33 +15,34 @@ declare const bootstrap: any;
 
 const STATUS_COLOR: Record<string, string> = {draft: 'secondary', review: 'warning', approved: 'info', published: 'success', archived: 'dark'};
 const DIFF_COLOR: Record<string, string> = {foundational: 'success', moderate: 'info', challenging: 'warning', extension: 'danger'};
-const TYPE_LABEL: Record<string, string> = {mcq: 'Multiple choice', true_false: 'True / False', short: 'Short answer', numeric: 'Numeric'};
+const TYPE_LABEL: Record<string, string> = {mcq: 'Multiple choice', multi: 'Multiple answer', true_false: 'True / False', short: 'Short answer', numeric: 'Numeric'};
 const ACTION_LABEL: Record<string, string> = {review: 'Submit for review', approved: 'Approve', published: 'Publish', archived: 'Archive', draft: 'Return to draft'};
 const APPROVER_ROLES = ['academic_lead', 'school_admin', 'tutor_admin', 'super_admin'];
 
-// Bulk-upload column aliases: logical field -> accepted header names (lowercased),
-// so the client's agreed sheet (Question, Option A, Correct Answer…) imports as-is.
+// Bulk-upload column aliases: logical field -> accepted headings. Headings are compared
+// with case, spaces and punctuation removed, so "Correct Answer", "correct_answer" and
+// "CORRECT-ANSWER:" are the same column.
 const BULK_ALIASES: Record<string, string[]> = {
-  stem: ['stem', 'question'],
-  type: ['type', 'question type'],
-  option_a: ['option_a', 'option a'],
-  option_b: ['option_b', 'option b'],
-  option_c: ['option_c', 'option c'],
-  option_d: ['option_d', 'option d'],
-  correct: ['correct', 'correct answer'],
-  marks: ['marks'],
-  difficulty: ['difficulty', 'difficulty level'],
-  explanation: ['explanation'],
-  misconception_tag: ['misconception_tag', 'misconception tag'],
-  common_wrong_answer: ['common_wrong_answer', 'common wrong answer'],
-  topic_id: ['topic_id'],
+  stem: ['stem', 'question', 'questions', 'questiontext', 'questionstem'],
+  type: ['type', 'questiontype', 'format', 'questionformat'],
+  options: ['options', 'choices', 'answeroptions', 'alternatives'],
+  correct: ['correct', 'correctanswer', 'correctanswers', 'correctoption', 'answer', 'answers', 'answerkey', 'rightanswer', 'key'],
+  marks: ['marks', 'mark', 'points', 'score'],
+  difficulty: ['difficulty', 'difficultylevel', 'level'],
+  explanation: ['explanation', 'solution', 'rationale', 'workedsolution', 'feedback'],
+  misconception_tag: ['misconceptiontag', 'misconception'],
+  common_wrong_answer: ['commonwronganswer', 'commonwrong', 'commonerror'],
+  topic_id: ['topicid'],
 };
 const BULK_TYPE_MAP: Record<string, string> = {
-  'mcq': 'mcq', 'multiple choice': 'mcq', 'multiple-choice': 'mcq',
-  'multi': 'multi', 'multi-select': 'multi', 'multiple select': 'multi', 'multiple-select': 'multi',
-  'true_false': 'true_false', 'true/false': 'true_false', 'true or false': 'true_false', 'true false': 'true_false',
-  'short': 'short', 'short answer': 'short',
-  'numeric': 'numeric', 'number': 'numeric',
+  mcq: 'mcq', multiplechoice: 'mcq', multiplechoicequestion: 'mcq', multiplechoicequestions: 'mcq',
+  objective: 'mcq', objectives: 'mcq', singlechoice: 'mcq', singleanswer: 'mcq', choice: 'mcq',
+  multi: 'multi', multiselect: 'multi', multipleselect: 'multi', multipleanswer: 'multi', multipleanswers: 'multi',
+  multipleresponse: 'multi', checkbox: 'multi', checkboxes: 'multi',
+  truefalse: 'true_false', trueorfalse: 'true_false', tf: 'true_false', boolean: 'true_false',
+  short: 'short', shortanswer: 'short', text: 'short', fillintheblank: 'short', fillinthegap: 'short',
+  theory: 'short', essay: 'short', open: 'short', openended: 'short',
+  numeric: 'numeric', number: 'numeric', numerical: 'numeric', calculation: 'numeric',
 };
 const BULK_DIFF_MAP: Record<string, string> = {
   'foundational': 'foundational', 'foundation': 'foundational', 'easy': 'foundational',
@@ -49,6 +50,24 @@ const BULK_DIFF_MAP: Record<string, string> = {
   'challenging': 'challenging', 'hard': 'challenging',
   'extension': 'extension',
 };
+const BULK_LETTERS = 'abcdefghij';
+const TRUE_WORDS = ['true', 't', 'yes', 'y', 'correct', 'right'];
+const FALSE_WORDS = ['false', 'f', 'no', 'n', 'incorrect', 'wrong'];
+
+/** Reduce a heading or keyword to letters and digits: "Option  A:" -> "optiona". */
+const bulkNorm = (s: string): string => String(s ?? '').replace(/^\uFEFF/, '').toLowerCase().replace(/[^a-z0-9]+/g, '');
+
+/**
+ * Which option does a heading name? "Option A", "OPTION_B", "Choice 3", "(d)" and a
+ * bare "A" all count; returns the position (0 = A) or -1 when it is not an option column.
+ */
+function bulkOptionIndex(heading: string): number {
+  const m = /^(?:answeroption|option|options|opt|choice|choices|alternative|alt)?([a-j]|10|[1-9])$/.exec(bulkNorm(heading));
+  if (!m) return -1;
+  const prefixed = bulkNorm(heading).length > m[1].length;
+  if (/^\d+$/.test(m[1])) return prefixed ? Number(m[1]) - 1 : -1; // a bare number is not an option heading
+  return BULK_LETTERS.indexOf(m[1]);
+}
 
 @Component({
   selector: 'app-question-bank',
@@ -125,6 +144,8 @@ export class QuestionBank {
   bulkText = signal<string>('');
   bulkParsed = signal<any[]>([]);
   bulkParseError = signal<string | null>(null);
+  /** A warning about the whole sheet (for example, no option columns recognised). */
+  bulkNotice = signal<string | null>(null);
   bulkBusy = signal(false);
 
   constructor() {
@@ -139,6 +160,7 @@ export class QuestionBank {
     this.bulkText.set('');
     this.bulkParsed.set([]);
     this.bulkParseError.set(null);
+    this.bulkNotice.set(null);
     this.open('bulk_upload');
   }
 
@@ -166,28 +188,65 @@ export class QuestionBank {
     if (input) input.value = '';
   }
 
-  /** Parse the pasted/uploaded CSV into a questions payload, with a live preview. */
+  /** Parse the pasted/uploaded sheet into a questions payload, with a live preview. */
   parseBulk(): void {
     this.bulkParseError.set(null);
+    this.bulkNotice.set(null);
     const rows = this.parseCsv(this.bulkText());
-    if (rows.length < 2) { this.bulkParsed.set([]); this.bulkParseError.set('Add a header row plus at least one question row.'); return; }
-    const header = rows[0].map(h => h.trim().toLowerCase());
-    // Resolve a logical field to its column index via its accepted aliases.
-    const idx = (field: string) => {
+    // The heading row is the first of the top rows that names the question column, so a
+    // title or instruction line above the table does not stop the import.
+    const stemNames = BULK_ALIASES['stem'];
+    const headAt = rows.slice(0, 15).findIndex(r => r.some(c => stemNames.includes(bulkNorm(c))));
+    if (headAt < 0) {
+      this.bulkParsed.set([]);
+      this.bulkParseError.set(rows.length < 2
+        ? 'Add a heading row plus at least one question row.'
+        : 'The sheet must include a "Question" column. Headings found: ' + (rows[0] ?? []).filter(c => c.trim()).slice(0, 12).join(', ') + '.');
+      return;
+    }
+    const header = rows[headAt].map(bulkNorm);
+    const idx = (field: string): number => {
       for (const alias of (BULK_ALIASES[field] ?? [field])) { const i = header.indexOf(alias); if (i >= 0) return i; }
       return -1;
     };
     const iStem = idx('stem');
-    if (iStem < 0) { this.bulkParsed.set([]); this.bulkParseError.set('The sheet must include a "Question" (or "stem") column.'); return; }
+    // Option columns, in A, B, C… order: [column, position].
+    const optionCols: [number, number][] = [];
+    rows[headAt].forEach((h, col) => {
+      const pos = bulkOptionIndex(h);
+      if (pos >= 0 && col !== iStem && !optionCols.some(([, p]) => p === pos)) optionCols.push([col, pos]);
+    });
+    optionCols.sort((a, b) => a[1] - b[1]);
+    const iOptions = idx('options'); // one column holding every choice
 
     const out: any[] = [];
-    for (let r = 1; r < rows.length; r++) {
+    let lettersWithoutOptions = false;
+    for (let r = headAt + 1; r < rows.length; r++) {
       const row = rows[r];
       if (!row.length || row.every(c => !c.trim())) continue;
       const get = (field: string) => { const i = idx(field); return i >= 0 ? (row[i] ?? '').trim() : ''; };
       const stem = (row[iStem] ?? '').trim();
       if (!stem) continue;
-      const type = BULK_TYPE_MAP[(get('type') || 'mcq').toLowerCase()] ?? 'mcq';
+
+      // Choices: one column each, or a single column split on new lines, ";" or "|".
+      let options: {key: string; text: string}[] = optionCols
+        .map(([col, pos]) => ({key: BULK_LETTERS[pos], text: (row[col] ?? '').trim()}))
+        .filter(o => o.text !== '');
+      if (!options.length && iOptions >= 0 && (row[iOptions] ?? '').trim()) {
+        options = (row[iOptions] ?? '').split(/\n|\s*[;|]\s*/)
+          .map(t => t.trim().replace(/^\(?[a-jA-J1-9][\).:\-]\s+/, '').trim())
+          .filter(Boolean).slice(0, BULK_LETTERS.length)
+          .map((text, i) => ({key: BULK_LETTERS[i], text}));
+      }
+
+      const correct = get('correct');
+      const typeRaw = bulkNorm(get('type'));
+      // No (or an unknown) type: work it out from what the row holds.
+      const type = BULK_TYPE_MAP[typeRaw] ?? (
+        options.length >= 1 ? (/[,;&]/.test(correct) && correct.split(/[,;&]/).every(p => this.optionKey(p, options) !== null) ? 'multi' : 'mcq')
+          : [...TRUE_WORDS.slice(0, 1), ...FALSE_WORDS.slice(0, 1)].includes(correct.toLowerCase()) ? 'true_false'
+          : (correct !== '' && !isNaN(Number(correct.replace(/,/g, '')))) ? 'numeric'
+          : 'short');
       const diffRaw = get('difficulty').toLowerCase();
       const q: any = {stem, type, marks: Number(get('marks')) || 1, difficulty: BULK_DIFF_MAP[diffRaw] ?? 'moderate'};
       if (get('explanation')) q.explanation = get('explanation');
@@ -195,25 +254,86 @@ export class QuestionBank {
       if (get('common_wrong_answer')) q.common_wrong_answer = get('common_wrong_answer');
       if (get('topic_id')) q.topic_id = Number(get('topic_id'));
 
+      const issues: string[] = [];
       if (type === 'mcq' || type === 'multi') {
-        const options: any[] = [];
-        for (const k of ['a', 'b', 'c', 'd']) { const text = get('option_' + k); if (text) options.push({key: k, text}); }
         q.options = options;
-        const correct = get('correct');
-        q.correct_answer = type === 'multi' ? correct.split(/[,;]/).map(s => s.trim().toLowerCase()).filter(Boolean) : correct.toLowerCase();
+        if (options.length < 2) issues.push(options.length ? 'Only one option has text' : 'No option text found');
+        if (type === 'multi') {
+          const parts = correct.split(/[,;&]|\band\b/i).map(s => s.trim()).filter(Boolean);
+          const keys = parts.map(p => this.optionKey(p, options));
+          q.correct_answer = [...new Set(keys.filter((k): k is string => k !== null))];
+          if (!parts.length) issues.push('No correct answer given');
+          else if (keys.some(k => k === null)) issues.push('"' + correct + '" does not match the options');
+        } else {
+          const key = this.optionKey(correct, options);
+          q.correct_answer = key ?? correct.toLowerCase();
+          if (!correct) issues.push('No correct answer given');
+          else if (key === null) issues.push('Answer "' + correct + '" does not match an option');
+        }
       } else if (type === 'true_false') {
-        q.correct_answer = get('correct').toLowerCase();
+        const v = correct.toLowerCase();
+        q.correct_answer = TRUE_WORDS.includes(v) ? 'true' : FALSE_WORDS.includes(v) ? 'false' : v;
+        if (!['true', 'false'].includes(q.correct_answer)) issues.push(correct ? 'Answer must be True or False' : 'No correct answer given');
       } else {
-        q.correct_answer = get('correct');
+        q.correct_answer = type === 'numeric' ? correct.replace(/,/g, '') : correct;
+        if (!correct) issues.push('No correct answer given');
+        else if (type === 'numeric' && isNaN(Number(q.correct_answer))) issues.push('Answer must be a number');
+        // An answer of "B" with no choices almost always means the option columns were not recognised.
+        else if (!BULK_TYPE_MAP[typeRaw] && !options.length && /^[a-j]$/i.test(correct)) {
+          issues.push('The answer is a letter, but no options were found for this row');
+          lettersWithoutOptions = true;
+        }
       }
+      q._issues = issues;
+      q._row = r + 1;
       out.push(q);
     }
     this.bulkParsed.set(out);
-    if (!out.length) this.bulkParseError.set('No valid question rows found.');
+    if (!out.length) { this.bulkParseError.set('No question rows were found under the headings.'); return; }
+
+    const choiceRows = out.filter(q => q.type === 'mcq' || q.type === 'multi');
+    if ((choiceRows.length || lettersWithoutOptions) && !optionCols.length && iOptions < 0) {
+      this.bulkNotice.set('No option columns were recognised, so multiple-choice questions have no choices. '
+        + 'Name the columns Option A, Option B, Option C… (or A, B, C…). Headings found: '
+        + rows[headAt].filter(c => c.trim()).slice(0, 14).join(', ') + '.');
+    }
+  }
+
+  /**
+   * Which option does a "correct answer" cell point at? Accepts the letter ("B", "b.",
+   * "(b)", "Option B"), the option's own text, "B. 12", or its number (2). Null when unclear.
+   */
+  private optionKey(raw: string, options: {key: string; text: string}[]): string | null {
+    const v = (raw ?? '').trim();
+    if (!v || !options.length) return null;
+    const has = (k: string) => options.some(o => o.key === k);
+    const letter = /^\(?\s*(?:option|opt|choice)?\s*([a-j])\s*[\).:]?$/i.exec(v);
+    if (letter && has(letter[1].toLowerCase())) return letter[1].toLowerCase();
+    const same = options.find(o => o.text.trim().toLowerCase() === v.toLowerCase());
+    if (same) return same.key;
+    const lead = /^\(?([a-j])[\).:\-]\s+/i.exec(v);
+    if (lead && has(lead[1].toLowerCase())) return lead[1].toLowerCase();
+    if (/^\d+$/.test(v) && Number(v) >= 1 && Number(v) <= options.length) return options[Number(v) - 1].key;
+    return null;
+  }
+
+  /** Rows the preview flags: they still import as drafts, but cannot be validated until fixed. */
+  readonly bulkIssueCount = computed(() => this.bulkParsed().filter(q => q._issues?.length).length);
+
+  /** How a parsed row's choices and answer read in the preview. */
+  bulkOptionsText(q: any): string {
+    return (q.options ?? []).map((o: any) => o.key.toUpperCase() + '. ' + o.text).join('   ');
+  }
+  bulkTypeLabel(t: string): string { return TYPE_LABEL[t] ?? t; }
+  bulkAnswerText(q: any): string {
+    const a = q.correct_answer;
+    if (Array.isArray(a)) return a.map((k: string) => k.toUpperCase()).join(', ');
+    if ((q.type === 'mcq') && typeof a === 'string' && a.length === 1) return a.toUpperCase();
+    return a === '' || a === null || a === undefined ? '' : String(a);
   }
 
   submitBulk(): void {
-    const questions = this.bulkParsed();
+    const questions = this.bulkParsed().map(({_issues, _row, ...q}) => q);
     if (!questions.length) { this.toast.error('Nothing to import, parse a CSV first.'); return; }
     if (!this.bulkTopicId()) { this.toast.error('Choose a default topic for rows without a topic_id.'); return; }
     this.bulkBusy.set(true);
@@ -249,14 +369,18 @@ export class QuestionBank {
   private parseCsv(text: string): string[][] {
     const rows: string[][] = [];
     let row: string[] = [], field = '', inQuotes = false;
-    const s = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+    const s = text.replace(/^\uFEFF/, '').replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+    // Cells copied straight from Excel arrive tab-separated; some regions save CSV with ";".
+    const firstLine = s.split('\n').find(l => l.trim()) ?? '';
+    const count = (ch: string) => firstLine.split(ch).length - 1;
+    const sep = count('\t') > count(',') && count('\t') >= count(';') ? '\t' : (count(';') > count(',') ? ';' : ',');
     for (let i = 0; i < s.length; i++) {
       const c = s[i];
       if (inQuotes) {
         if (c === '"') { if (s[i + 1] === '"') { field += '"'; i++; } else inQuotes = false; }
         else field += c;
       } else if (c === '"') inQuotes = true;
-      else if (c === ',') { row.push(field); field = ''; }
+      else if (c === sep) { row.push(field); field = ''; }
       else if (c === '\n') { row.push(field); rows.push(row); row = []; field = ''; }
       else field += c;
     }

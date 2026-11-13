@@ -16,3 +16,7 @@
   height: calc(100% + 0.75rem);
   background: var(--bs-border-color);
 }
+
+.bulk-preview { max-height: 22rem; overflow: auto; border: 1px solid var(--bs-border-color); border-radius: .5rem; }
+.bulk-preview thead th { position: sticky; top: 0; z-index: 1; }
+.bulk-cell { min-width: 9rem; max-width: 22rem; overflow-wrap: anywhere; }
