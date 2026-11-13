@@ -18,6 +18,7 @@ use App\Domain\Lifecycle;
 use App\Service\AuditLogger;
 use App\Service\LifecycleNotifier;
 use App\Service\LifecycleService;
+use App\Service\SubmittedWork;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
@@ -40,6 +41,7 @@ final class TopicsAction
         private readonly AuditLogger $audit,
         private readonly LifecycleService $lifecycle,
         private readonly LifecycleNotifier $notifier,
+        private readonly SubmittedWork $work,
     ) {
     }
 
@@ -139,6 +141,10 @@ final class TopicsAction
         if ($topic === null) {
             return Json::error($response, 'Topic not found.', 404);
         }
+        // Work learners have handed in is never deleted along with its parent.
+        if (($held = $this->work->refusal($topic)) !== null) {
+            return Json::error($response, $held, 409);
+        }
         $before = $topic->toArray();
         $this->em->remove($topic);
         $this->em->flush();
@@ -181,9 +187,14 @@ final class TopicsAction
             return Json::error($response, 'No ids provided.', 422);
         }
         $count = 0;
+        $kept = 0;
         foreach ($this->em->getRepository(Topic::class)->findBy(['id' => $ids]) as $topic) {
             if (!$this->canActWithin($request, $this->ownerOf($topic))) {
                 continue; // another school's record
+            }
+            if ($this->work->refusal($topic) !== null) {
+                $kept++; // holds work learners have handed in
+                continue;
             }
             $this->em->remove($topic);
             $count++;
@@ -191,7 +202,13 @@ final class TopicsAction
         $this->em->flush();
         $this->audit->log('topic.bulk_delete', $request->getAttribute('user'), 'Topic', implode(',', $ids), null, ['count' => $count]);
 
-        return Json::write($response, ['deleted' => $count]);
+        return Json::write($response, [
+            'deleted' => $count,
+            'kept' => $kept,
+            'message' => $kept > 0
+                ? sprintf('%d of the selected topics could not be deleted because learners have handed in work for %s. Archive %s instead.', $kept, $kept === 1 ? 'it' : 'them', $kept === 1 ? 'it' : 'them')
+                : null,
+        ]);
     }
 
     /**

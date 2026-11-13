@@ -13,6 +13,7 @@ use App\Domain\Entity\SchoolClass;
 use App\Domain\Entity\Subject;
 use App\Domain\Entity\User;
 use App\Service\AuditLogger;
+use App\Service\SubmittedWork;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
@@ -25,6 +26,7 @@ final class SubjectsAction
     public function __construct(
         private readonly EntityManagerInterface $em,
         private readonly AuditLogger $audit,
+        private readonly SubmittedWork $work,
     ) {
     }
 
@@ -86,14 +88,25 @@ final class SubjectsAction
         }
 
         $count = 0;
+        $kept = 0;
         foreach ($qb->getQuery()->getResult() as $subject) {
+            if ($this->work->refusal($subject) !== null) {
+                $kept++; // holds work learners have handed in
+                continue;
+            }
             $this->em->remove($subject);
             $count++;
         }
         $this->em->flush();
         $this->audit->log('subject.bulk_delete', $request->getAttribute('user'), 'Subject', implode(',', $ids), null, ['count' => $count]);
 
-        return Json::write($response, ['deleted' => $count]);
+        return Json::write($response, [
+            'deleted' => $count,
+            'kept' => $kept,
+            'message' => $kept > 0
+                ? sprintf('%d of the selected subjects could not be deleted because learners have handed in work for %s.', $kept, $kept === 1 ? 'it' : 'them')
+                : null,
+        ]);
     }
 
     private function create(Request $request, Response $response): Response
@@ -144,6 +157,10 @@ final class SubjectsAction
         $subject = $this->em->getRepository(Subject::class)->find($id);
         if ($subject === null || !$this->canActWithin($request, $subject->getInstitution())) {
             return Json::error($response, 'Subject not found.', 404);
+        }
+        // Work learners have handed in is never deleted along with its parent.
+        if (($held = $this->work->refusal($subject)) !== null) {
+            return Json::error($response, $held, 409);
         }
         $before = $subject->toArray();
         $this->em->remove($subject);

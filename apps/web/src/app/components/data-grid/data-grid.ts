@@ -216,7 +216,8 @@ export class DataGrid implements OnInit {
     if (!confirm('Delete this record? This action cannot be undone.')) return;
     this.api.delete(`${this.endpoint}?id=${row[this.idKey]}`, {confirm: false}).subscribe({
       next: () => { this.toast.success('Deleted'); this.afterMutation(); },
-      error: () => this.toast.error('Delete failed'),
+      // A refusal comes with its reason (for example, learners have handed in work for it).
+      error: (e) => this.toast.error(e?.error?.error || 'Delete failed', undefined, e?.error?.error ? {timeOut: 12000} : undefined),
     });
   }
 
@@ -225,8 +226,15 @@ export class DataGrid implements OnInit {
     if (ids.length === 0) return;
     if (!confirm(`Delete ${ids.length} selected record(s)? This cannot be undone.`)) return;
     this.api.post(`${this.endpoint}/bulk-delete`, {ids}).subscribe({
-      next: (res: any) => { this.toast.success(`Deleted ${res?.deleted ?? ids.length} record(s)`); this.clearSelection(); this.afterMutation(); },
-      error: () => this.toast.error('Bulk delete failed'),
+      next: (res: any) => {
+        const deleted = res?.deleted ?? ids.length;
+        if (deleted > 0) this.toast.success(`Deleted ${deleted} record(s)`);
+        // Some of the selection may have been kept, with the reason.
+        if (res?.message) this.toast.warning(res.message, 'Not deleted', {timeOut: 12000});
+        this.clearSelection();
+        this.afterMutation();
+      },
+      error: (e) => this.toast.error(e?.error?.error || 'Bulk delete failed'),
     });
   }
 

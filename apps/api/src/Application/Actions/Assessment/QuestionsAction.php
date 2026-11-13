@@ -17,6 +17,7 @@ use App\Domain\Lifecycle;
 use App\Service\AuditLogger;
 use App\Service\LifecycleNotifier;
 use App\Service\LifecycleService;
+use App\Service\SubmittedWork;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
@@ -38,6 +39,7 @@ final class QuestionsAction
         private readonly AuditLogger $audit,
         private readonly LifecycleService $lifecycle,
         private readonly LifecycleNotifier $notifier,
+        private readonly SubmittedWork $work,
     ) {
     }
 
@@ -200,6 +202,10 @@ final class QuestionsAction
         if ($q === null) {
             return Json::error($response, 'Question not found.', 404);
         }
+        // Work learners have handed in is never deleted along with its parent.
+        if (($held = $this->work->refusal($q)) !== null) {
+            return Json::error($response, $held, 409);
+        }
         $before = $q->toArray();
         $this->em->remove($q);
         $this->em->flush();
@@ -272,9 +278,14 @@ final class QuestionsAction
             return Json::error($response, 'No ids provided.', 422);
         }
         $count = 0;
+        $kept = 0;
         foreach ($this->em->getRepository(Question::class)->findBy(['id' => $ids]) as $q) {
             if (!$this->canActWithin($request, $this->ownerOf($q))) {
                 continue; // another school's record
+            }
+            if ($this->work->refusal($q) !== null) {
+                $kept++; // holds work learners have handed in
+                continue;
             }
             $this->em->remove($q);
             $count++;
@@ -282,7 +293,13 @@ final class QuestionsAction
         $this->em->flush();
         $this->audit->log('question.bulk_delete', $request->getAttribute('user'), 'Question', implode(',', $ids), null, ['count' => $count]);
 
-        return Json::write($response, ['deleted' => $count]);
+        return Json::write($response, [
+            'deleted' => $count,
+            'kept' => $kept,
+            'message' => $kept > 0
+                ? sprintf('%d of the selected questions could not be deleted because learners have handed in work for %s. Archive %s instead.', $kept, $kept === 1 ? 'it' : 'them', $kept === 1 ? 'it' : 'them')
+                : null,
+        ]);
     }
 
     private function applyFields(Question $q, array $body): void
