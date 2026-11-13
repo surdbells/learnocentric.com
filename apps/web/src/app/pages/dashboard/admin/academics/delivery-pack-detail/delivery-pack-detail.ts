@@ -5,6 +5,7 @@ import {DomSanitizer, SafeResourceUrl} from '@angular/platform-browser';
 import {ToastrService} from 'ngx-toastr';
 import {PageHeader} from '../../../../../common/layout/page-header/page-header';
 import {ApiService} from '../../../../../common/service/api.service';
+import {FileUrlService} from '../../../../../common/service/file-url.service';
 import {Icon} from '../../../../../common/icon/icon';
 import {RichText} from '../../../../../common/rich-editor/rich-text';
 import {StatRing, StatusBadge} from '../../../../../common/ui';
@@ -26,6 +27,7 @@ export class DeliveryPackDetail {
   private readonly api = inject(ApiService);
   private readonly toast = inject(ToastrService);
   private readonly sanitizer = inject(DomSanitizer);
+  private readonly files = inject(FileUrlService);
 
   readonly statusTones = STATUS_TONE;
 
@@ -36,6 +38,8 @@ export class DeliveryPackDetail {
    */
   readonly teacherGuideIsFile = computed<boolean>(() => {
     const v = (this.pack()?.teacher_guide ?? '') as string;
+    // The API says whether the guide is an uploaded file; older responses are sniffed.
+    if (typeof this.pack()?.teacher_guide_is_file === 'boolean') return this.pack().teacher_guide_is_file;
     return !!v && (/\/backend\/files/i.test(v) || /\.pdf($|\?|#)/i.test(v));
   });
 
@@ -43,8 +47,11 @@ export class DeliveryPackDetail {
   readonly teacherGuideUrl = computed<SafeResourceUrl | null>(() => {
     if (!this.teacherGuideIsFile()) return null;
     const v = this.pack().teacher_guide as string;
-    return this.sanitizer.bypassSecurityTrustResourceUrl(v + '#toolbar=0&navpanes=0');
+    return this.sanitizer.bypassSecurityTrustResourceUrl(this.files.resolve(v) + '#toolbar=0&navpanes=0');
   });
+
+  /** A stored file or link as an address the browser can open. */
+  fileHref(ref: string | null | undefined): string { return this.files.resolve(ref); }
   readonly materialKeys = [
     {key: 'teacher_guide', label: 'Teacher guide', icon: 'description'},
     {key: 'learner_note', label: 'Learner note', icon: 'menu_book'},

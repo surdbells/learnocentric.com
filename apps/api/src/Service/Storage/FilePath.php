@@ -37,7 +37,8 @@ final class FilePath
             return null;
         }
         // Our served route (query form: /backend/files?p=PATH, or legacy path form).
-        if (preg_match('#[?&]p=([^&]+)#', $v, $m) === 1) {
+        // Only our own route: an outside link may carry a "p" parameter of its own.
+        if (preg_match('#backend/files/?\?(?:[^\#]*&)?p=([^&\#]+)#', $v, $m) === 1) {
             return self::clean(urldecode($m[1]));
         }
         if (preg_match('#^/?backend/files/(.+)$#', $v, $m) === 1) {

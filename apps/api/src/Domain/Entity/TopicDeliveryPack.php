@@ -7,6 +7,7 @@ namespace App\Domain\Entity;
 use App\Domain\Entity\Concern\TimestampsTrait;
 use App\Domain\Lifecycle;
 use App\Domain\LifecycleAware;
+use App\Service\Storage\FilePath;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -64,9 +65,27 @@ class TopicDeliveryPack implements LifecycleAware
 
     public function getId(): ?int { return $this->id; }
     public function getTopic(): Topic { return $this->topic; }
-    public function setTeacherGuide(?string $v): void { $this->teacherGuide = $v; }
+    /**
+     * The teacher guide is either an uploaded file (stored as a bare path, like
+     * every other upload) or, on older packs, rich text.
+     */
+    public function setTeacherGuide(?string $v): void
+    {
+        $this->teacherGuide = ($v !== null && self::isFileReference($v)) ? FilePath::toPath($v) : $v;
+    }
+
+    /** True when the value is one uploaded file or link rather than written text. */
+    public static function isFileReference(string $v): bool
+    {
+        $v = trim($v);
+        if ($v === '' || preg_match('/\s|</', $v) === 1) {
+            return false;
+        }
+
+        return preg_match('#^(https?://|/?backend/files|/?uploads/|\d{4}/\d{2}/[0-9a-f]{8,}\.[a-z0-9]{2,5}$)#i', $v) === 1;
+    }
     public function setLearnerNote(?string $v): void { $this->learnerNote = $v; }
-    public function setVideoUrl(?string $v): void { $this->videoUrl = $v; }
+    public function setVideoUrl(?string $v): void { $this->videoUrl = FilePath::toPath($v); }
     public function getMedia(): array { return $this->media ?? []; }
     public function setMedia(?array $v): void
     {
@@ -75,7 +94,7 @@ class TopicDeliveryPack implements LifecycleAware
         foreach ($v as $item) {
             $url = trim((string) ($item['url'] ?? ''));
             if ($url === '') { continue; }
-            $clean[] = ['url' => $url, 'name' => trim((string) ($item['name'] ?? ''))];
+            $clean[] = ['url' => FilePath::toPath($url) ?? $url, 'name' => trim((string) ($item['name'] ?? ''))];
         }
         $this->media = $clean === [] ? null : $clean;
     }
@@ -98,10 +117,17 @@ class TopicDeliveryPack implements LifecycleAware
             'id' => $this->id,
             'topic_id' => $this->topic->getId(),
             'topic' => $this->topic->getTitle(),
-            'teacher_guide' => $this->teacherGuide,
+            // Uploaded files leave here as full addresses the browser can load
+            // from the API host; written text and outside links pass through.
+            'teacher_guide' => ($this->teacherGuide !== null && self::isFileReference($this->teacherGuide))
+                ? FilePath::toUrl($this->teacherGuide) : $this->teacherGuide,
+            'teacher_guide_is_file' => $this->teacherGuide !== null && self::isFileReference($this->teacherGuide),
             'learner_note' => $this->learnerNote,
-            'video_url' => $this->videoUrl,
-            'media' => $this->media ?? [],
+            'video_url' => FilePath::toUrl($this->videoUrl),
+            'media' => array_map(
+                static fn (array $m): array => ['url' => FilePath::toUrl((string) ($m['url'] ?? '')), 'name' => (string) ($m['name'] ?? '')],
+                $this->media ?? [],
+            ),
             'worked_examples' => $this->workedExamples,
             'parent_wording' => $this->parentWording,
             'status' => $this->status,

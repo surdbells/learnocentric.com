@@ -4,6 +4,7 @@ import {ActivatedRoute, Router, RouterLink} from '@angular/router';
 import {ToastrService} from 'ngx-toastr';
 import {Icon} from '../../../../../common/icon/icon';
 import {ApiService} from '../../../../../common/service/api.service';
+import {FileUrlService} from '../../../../../common/service/file-url.service';
 import {SkeletonLoader} from '../../../../../common/skeleton-loader/skeleton-loader';
 import {StatRing, TabBar, TabItem, StatusBadge, Tone} from '../../../../../common/ui';
 import {StripHtmlPipe} from '../../../../../common/pipes/strip-html.pipe';
@@ -22,6 +23,7 @@ import {StripHtmlPipe} from '../../../../../common/pipes/strip-html.pipe';
 })
 export class SubjectHub {
   private readonly api = inject(ApiService);
+  private readonly files = inject(FileUrlService);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly toast = inject(ToastrService);
@@ -89,8 +91,8 @@ export class SubjectHub {
   resourceHref(r: any): string {
     const raw = r?.url || r?.path || '';
     if (!raw) return '';
-    if (/^https?:\/\//i.test(raw)) return raw;              // external (e.g. YouTube/Vimeo)
-    return '/backend/files?p=' + raw.replace(/^\/+/, '');   // path-only stored file
+    if (/^https?:\/\//i.test(raw)) return raw;              // full address (our API host, or YouTube/Vimeo)
+    return this.files.resolve(raw);                          // a stored file, served by the API host
   }
 
   resourceIcon(type: string): string {

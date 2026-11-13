@@ -86,7 +86,10 @@
             <div class="ratio ratio-4x3 rounded overflow-hidden border">
               <iframe [src]="teacherGuideUrl()" title="Teacher guide"></iframe>
             </div>
-            <div class="form-text">View-only — not offered as a download.</div>
+            <div class="form-text">
+              View-only. If the guide does not appear here (some phones cannot show a PDF inside a page),
+              <a [href]="fileHref(pack().teacher_guide)" target="_blank" rel="noopener">open it in a new tab</a>.
+            </div>
           } @else {
             <app-rich-text [value]="pack().teacher_guide" />
           }
@@ -125,12 +128,12 @@
       <div class="card-body">
         <h6 class="fw-semibold mb-2"><app-icon name="video" [size]="16" class="text-body-secondary me-1" /> Media & resources</h6>
         @if (pack().video_url) {
-          <a class="d-inline-flex align-items-center gap-1 mb-2" [href]="pack().video_url" target="_blank" rel="noopener">
+          <a class="d-inline-flex align-items-center gap-1 mb-2" [href]="fileHref(pack().video_url)" target="_blank" rel="noopener">
             <app-icon name="play_circle" [size]="16" /> Lesson video
           </a>
         }
         @for (m of media(); track $index) {
-          <a class="d-flex align-items-center gap-2 py-1" [href]="m.url" target="_blank" rel="noopener">
+          <a class="d-flex align-items-center gap-2 py-1" [href]="fileHref(m.url)" target="_blank" rel="noopener">
             <app-icon name="folder" [size]="15" class="text-body-secondary" /> {{ m.name || m.url }}
           </a>
         }

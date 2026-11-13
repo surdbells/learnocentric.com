@@ -4,6 +4,7 @@ import {Router} from '@angular/router';
 import {ToastrService} from 'ngx-toastr';
 import {PageHeader} from '../../../../../common/layout/page-header/page-header';
 import {ApiService} from '../../../../../common/service/api.service';
+import {FileUrlService} from '../../../../../common/service/file-url.service';
 import {Icon} from '../../../../../common/icon/icon';
 import {MediaEmbed} from '../../../../../common/media-embed/media-embed';
 import {RichEditor} from '../../../../../common/rich-editor/rich-editor';
@@ -29,6 +30,7 @@ const LESSON_FLOW = [
 })
 export class Learn {
   private readonly api = inject(ApiService);
+  private readonly files = inject(FileUrlService);
   private readonly router = inject(Router);
   private readonly toast = inject(ToastrService);
 
@@ -131,8 +133,8 @@ export class Learn {
   lessonMedia(): { url: string; name?: string }[] {
     const l = this.lesson()?.lesson;
     if (!l) return [];
-    if (Array.isArray(l.media) && l.media.length) return l.media;
-    return l.video_url ? [{url: l.video_url, name: 'Lesson video'}] : [];
+    if (Array.isArray(l.media) && l.media.length) return l.media.map((m: any) => ({...m, url: this.files.resolve(m.url)}));
+    return l.video_url ? [{url: this.files.resolve(l.video_url), name: 'Lesson video'}] : [];
   }
 
   selectMedia(i: number): void { this.activeMediaIndex.set(i); }

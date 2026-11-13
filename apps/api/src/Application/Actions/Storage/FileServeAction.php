@@ -19,6 +19,13 @@ use Slim\Psr7\Stream;
  */
 final class FileServeAction
 {
+    private const BY_EXTENSION = [
+        'pdf' => 'application/pdf', 'png' => 'image/png', 'jpg' => 'image/jpeg', 'jpeg' => 'image/jpeg',
+        'gif' => 'image/gif', 'webp' => 'image/webp', 'svg' => 'image/svg+xml',
+        'mp4' => 'video/mp4', 'webm' => 'video/webm', 'mov' => 'video/quicktime',
+        'mp3' => 'audio/mpeg', 'wav' => 'audio/wav', 'm4a' => 'audio/mp4', 'ogg' => 'audio/ogg',
+    ];
+
     public function __construct(private readonly StorageService $storage)
     {
     }
@@ -41,8 +48,15 @@ final class FileServeAction
         $disposition = $request->getQueryParams()['download'] ?? null;
         $name = basename($path);
 
+        // Fall back on the extension when the server cannot sniff the type, so a
+        // PDF or video still opens in the page instead of downloading.
+        $mime = $this->storage->mimeType($path);
+        if ($mime === 'application/octet-stream' || $mime === 'text/plain') {
+            $mime = self::BY_EXTENSION[strtolower(pathinfo($path, PATHINFO_EXTENSION))] ?? $mime;
+        }
+
         $response = $response
-            ->withHeader('Content-Type', $this->storage->mimeType($path))
+            ->withHeader('Content-Type', $mime)
             ->withHeader('Cache-Control', 'private, max-age=86400')
             ->withBody($stream);
 
@@ -50,9 +64,10 @@ final class FileServeAction
         if ($size > 0) {
             $response = $response->withHeader('Content-Length', (string) $size);
         }
-        if ($disposition !== null) {
-            $response = $response->withHeader('Content-Disposition', 'attachment; filename="' . $name . '"');
-        }
+        $response = $response->withHeader(
+            'Content-Disposition',
+            ($disposition !== null ? 'attachment' : 'inline') . '; filename="' . $name . '"'
+        );
 
         return $response;
     }

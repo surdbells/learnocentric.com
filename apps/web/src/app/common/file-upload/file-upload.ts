@@ -2,6 +2,7 @@ import {Component, computed, EventEmitter, inject, input, Output, signal} from '
 import {HttpClient, HttpEventType} from '@angular/common/http';
 import {ToastrService} from 'ngx-toastr';
 import {Icon} from '../icon/icon';
+import {FileUrlService} from '../service/file-url.service';
 
 export interface UploadedFile {
   /** Backend-served reference (/backend/files?p=…), never a raw file URL. */
@@ -42,6 +43,7 @@ export class FileUpload {
   @Output() cleared = new EventEmitter<void>();
 
   private readonly http = inject(HttpClient);
+  private readonly files = inject(FileUrlService);
   private readonly toast = inject(ToastrService);
 
   progress = signal<number | null>(null);
@@ -125,7 +127,8 @@ export class FileUpload {
   }
 
   displayUrl(): string | null {
-    return this.current()?.url ?? this.value();
+    const ref = this.current()?.url ?? this.value();
+    return ref ? this.files.resolve(ref) : null;
   }
 
   displayName(): string {
