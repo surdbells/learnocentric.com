@@ -133,6 +133,12 @@ final class UserSettingsAction
         }
 
         // learner (student), the fullest personal preference set
+        // Sent by StudyReminders (announcements:dispatch), in the school's time zone.
+        $base['learning'] = [
+            'daily_reminder' => true,
+            'daily_reminder_time' => '19:00',
+            'weekly_summary' => true,
+        ];
         $base['appearance'] = [
             'theme' => 'system',
             'text_size' => 'medium',

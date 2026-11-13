@@ -51,6 +51,7 @@ $app->add(new SeedCommand($em, $container->get(PasswordService::class), $contain
 $app->add(new App\Console\DispatchAnnouncementsCommand(
     $container->get(App\Service\AnnouncementDispatcher::class),
     $container->get(App\Service\LiveClassReminders::class),
+    $container->get(App\Service\StudyReminders::class),
 ));
 
 $app->run();

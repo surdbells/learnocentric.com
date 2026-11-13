@@ -71,6 +71,13 @@ class User
     #[ORM\Column(name: 'email_verified_at', type: Types::DATETIME_IMMUTABLE, nullable: true)]
     private ?DateTimeImmutable $emailVerifiedAt = null;
 
+    /** School-local date the last daily study reminder / weekly summary went out (sent once per day / week). */
+    #[ORM\Column(name: 'study_reminder_on', type: Types::DATE_IMMUTABLE, nullable: true)]
+    private ?DateTimeImmutable $studyReminderOn = null;
+
+    #[ORM\Column(name: 'weekly_summary_on', type: Types::DATE_IMMUTABLE, nullable: true)]
+    private ?DateTimeImmutable $weeklySummaryOn = null;
+
     /** Home/contact address the user entered on their own profile. Private: never in list payloads. */
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $address = null;
@@ -171,6 +178,10 @@ class User
 
     public function isEmailVerified(): bool { return $this->emailVerifiedAt !== null; }
     public function markEmailVerified(): void { $this->emailVerifiedAt ??= new DateTimeImmutable(); }
+    public function getStudyReminderOn(): ?DateTimeImmutable { return $this->studyReminderOn; }
+    public function setStudyReminderOn(?DateTimeImmutable $v): void { $this->studyReminderOn = $v; }
+    public function getWeeklySummaryOn(): ?DateTimeImmutable { return $this->weeklySummaryOn; }
+    public function setWeeklySummaryOn(?DateTimeImmutable $v): void { $this->weeklySummaryOn = $v; }
     public function getAddress(): ?string { return $this->address; }
     public function setAddress(?string $v): void { $this->address = ($v === null || trim($v) === '') ? null : trim($v); }
 

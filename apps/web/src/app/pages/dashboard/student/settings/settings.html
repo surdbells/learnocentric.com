@@ -93,6 +93,36 @@
 
       <!-- Section cards grid -->
       <div class="row g-4">
+        <!-- Learning Preferences (sent by the platform's scheduled reminders) -->
+        <div class="col-md-6 col-xl-4">
+          <div id="sec-learning" class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+              <div class="fw-semibold mb-1">Learning Preferences</div>
+              <p class="text-body-secondary small mb-3">Reminders that help you keep going.</p>
+              <div class="setting-row">
+                <div>
+                  <div class="fw-medium">Daily Study Reminder</div>
+                  <div class="small text-body-secondary">A nudge at the time you choose</div>
+                </div>
+                <label class="switch"><input type="checkbox" [checked]="pref('learning','daily_reminder')" (change)="toggle('learning','daily_reminder')" /><span></span></label>
+              </div>
+              @if (pref('learning','daily_reminder')) {
+                <div class="setting-row">
+                  <label class="fw-medium" for="reminder_time">Reminder time</label>
+                  <input id="reminder_time" type="time" class="form-control form-control-sm w-auto" [ngModel]="pref('learning','daily_reminder_time')" (ngModelChange)="setValue('learning','daily_reminder_time',$event)" />
+                </div>
+              }
+              <div class="setting-row border-0">
+                <div>
+                  <div class="fw-medium">Weekly Progress Summary</div>
+                  <div class="small text-body-secondary">Every Monday morning, what you did last week</div>
+                </div>
+                <label class="switch"><input type="checkbox" [checked]="pref('learning','weekly_summary')" (change)="toggle('learning','weekly_summary')" /><span></span></label>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <!-- Notifications -->
         <div class="col-md-6 col-xl-4">
           <div id="sec-notifications" class="card border-0 shadow-sm h-100">

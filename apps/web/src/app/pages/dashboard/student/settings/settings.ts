@@ -48,6 +48,7 @@ export class StudentSettings implements OnInit {
 
   readonly menu: MenuItem[] = [
     {key: 'account', label: 'Account Settings', sub: 'Profile, personal info, password', icon: 'account_circle'},
+    {key: 'learning', label: 'Learning Preferences', sub: 'Daily and weekly study reminders', icon: 'tune'},
     {key: 'notifications', label: 'Notifications', sub: 'Email and live-class reminders', icon: 'notifications'},
     {key: 'privacy', label: 'Privacy & Security', sub: 'Privacy controls, data usage', icon: 'shield'},
     {key: 'appearance', label: 'Appearance', sub: 'Theme, text size, display', icon: 'palette'},
