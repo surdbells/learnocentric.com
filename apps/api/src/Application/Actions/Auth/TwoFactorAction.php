@@ -152,7 +152,7 @@ final class TwoFactorAction
         $this->audit->log('auth.login', $user, 'User', (string) $user->getId(), null, ['two_factor' => true]);
 
         return Json::write($response, [
-            'token' => $this->jwt->issueForUser($user),
+            'token' => $this->jwt->issueForUser($user, $this->settings->sessionSeconds()),
             'user' => $user->toArray(),
             'backup_codes_left' => count($user->getTotpBackupCodes()),
         ]);

@@ -24,8 +24,27 @@ use Doctrine\ORM\EntityManagerInterface;
  */
 final class ModuleAccess
 {
-    public function __construct(private readonly EntityManagerInterface $em)
+    /** Platform feature switches (Super Admin → System Settings) that turn a plan module off for everyone. */
+    private const FLAGGED = ['live_classes', 'portfolio', 'analytics'];
+
+    public function __construct(
+        private readonly EntityManagerInterface $em,
+        private readonly PlatformSettings $settings,
+    ) {
+    }
+
+    /**
+     * Remove modules the platform owner has switched off globally.
+     *
+     * @param string[] $modules
+     * @return string[]
+     */
+    private function withoutDisabled(array $modules): array
     {
+        return array_values(array_filter(
+            $modules,
+            fn (string $m) => !in_array($m, self::FLAGGED, true) || $this->settings->bool('feature_flags.' . $m)
+        ));
     }
 
     /** @return string[] module keys granted to this user's scope right now. */
@@ -62,12 +81,12 @@ final class ModuleAccess
 
         // Never subscribed → open trial. Assigned-but-expired → locked down.
         if ($sub === null) {
-            return $this->everSubscribed($institution) ? [] : SubscriptionPlan::MODULES;
+            return $this->everSubscribed($institution) ? [] : $this->withoutDisabled(SubscriptionPlan::MODULES);
         }
 
         $status = $sub->status();
         if ($status === Subscription::ACTIVE || $status === Subscription::GRACE) {
-            return $sub->getPlan()->getModules();
+            return $this->withoutDisabled($sub->getPlan()->getModules());
         }
         return [];
     }

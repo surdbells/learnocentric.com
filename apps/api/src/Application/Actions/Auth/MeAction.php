@@ -33,7 +33,11 @@ final class MeAction
             // Custom roles only: module => granted actions, enforced server-side
             // (RequirePermissionMiddleware); the client hides menu entries without "view".
             'role_matrix' => $this->settings->bool('security.rbac_enforce') ? $this->permissions->matrixFor($user->getRole()) : null,
-            'modules' => $this->modules->forUser($user),
+            // Plan modules, plus "messaging" while the platform owner has direct messaging on.
+            'modules' => array_merge(
+                $this->modules->forUser($user),
+                $this->settings->bool('feature_flags.messaging') ? ['messaging'] : []
+            ),
             'all_modules' => SubscriptionPlan::MODULES,
         ]);
     }

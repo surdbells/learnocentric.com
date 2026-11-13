@@ -19,6 +19,7 @@ final class ChangePasswordAction
         private readonly EntityManagerInterface $em,
         private readonly PasswordService $passwords,
         private readonly AuditLogger $audit,
+        private readonly \App\Service\PlatformSettings $settings,
     ) {
     }
 
@@ -38,8 +39,9 @@ final class ChangePasswordAction
         if (!$this->passwords->verify($current, $user->getPasswordHash())) {
             return Json::error($response, 'Your current password is incorrect.', 422);
         }
-        if (strlen($next) < 8) {
-            return Json::error($response, 'New password must be at least 8 characters.', 422);
+        $min = $this->settings->passwordMinLength();
+        if (strlen($next) < $min) {
+            return Json::error($response, "New password must be at least $min characters.", 422);
         }
         if ($next !== $confirm) {
             return Json::error($response, 'New password and confirmation do not match.', 422);

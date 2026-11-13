@@ -160,7 +160,7 @@ export class UserPreferenceMenu {
 
     { name: "Communication", icon: "forum", link: "parent/communication",
       children: [
-        { name: "Messages", link: "/parent/communication/messages" },
+        { name: "Messages", link: "/parent/communication/messages", module: "messaging" },
         { name: "Announcements", link: "/parent/communication/announcements" },
       ]
     },

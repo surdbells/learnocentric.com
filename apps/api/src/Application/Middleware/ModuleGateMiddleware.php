@@ -34,6 +34,8 @@ class ModuleGateMiddleware implements MiddlewareInterface
     private const MAP = [
         '/assessment/worksheet-submissions' => 'worksheets',
         '/assessment/worksheets' => 'worksheets',
+        '/assessment/submissions' => 'worksheets',
+        '/assessment/insights' => 'assessments',
         '/assessment/portfolio' => 'portfolio',
         '/assessment/questions' => 'assessments',
         '/assessment/assessments' => 'assessments',
@@ -47,12 +49,24 @@ class ModuleGateMiddleware implements MiddlewareInterface
         '/safeguarding' => 'safeguarding',
     ];
 
-    public function __construct(private readonly ModuleAccess $modules)
-    {
+    /** Direct messaging (not announcements), switched off platform-wide by the "messaging" feature flag. */
+    private const MESSAGING = ['/messaging/contacts', '/messaging/conversations', '/messaging/messages'];
+
+    public function __construct(
+        private readonly ModuleAccess $modules,
+        private readonly \App\Service\PlatformSettings $settings,
+    ) {
     }
 
     public function process(Request $request, Handler $handler): Response
     {
+        $path = preg_replace('#^/backend#', '', $request->getUri()->getPath()) ?? '';
+        foreach (self::MESSAGING as $prefix) {
+            if (($path === $prefix || str_starts_with($path, $prefix . '/')) && !$this->settings->bool('feature_flags.messaging')) {
+                return Json::error(new SlimResponse(), 'Messaging is switched off on this platform.', 403);
+            }
+        }
+
         $module = $this->moduleFor($request->getUri()->getPath());
         if ($module === null) {
             return $handler->handle($request);

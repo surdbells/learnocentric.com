@@ -114,7 +114,7 @@ final class RegisterAction
             ], 201);
         }
 
-        return Json::write($response, ['token' => $this->jwt->issueForUser($user), 'user' => $user->toArray()], 201);
+        return Json::write($response, ['token' => $this->jwt->issueForUser($user, $this->settings->sessionSeconds()), 'user' => $user->toArray()], 201);
     }
 
     /** GET /auth/join/{code}: which school a join code opens, or 404. */

@@ -33,6 +33,8 @@ class CorsMiddleware implements MiddlewareInterface
             ->withHeader('Access-Control-Allow-Headers', 'Authorization, Content-Type, Accept, X-Requested-With')
             ->withHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS')
             ->withHeader('Access-Control-Allow-Credentials', 'true')
+            // Lets the web app read the refreshed session token (sliding expiry).
+            ->withHeader('Access-Control-Expose-Headers', 'X-Session-Token')
             ->withHeader('Vary', 'Origin');
     }
 }

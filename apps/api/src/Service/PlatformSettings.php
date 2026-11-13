@@ -84,6 +84,43 @@ class PlatformSettings
         return (bool) $this->get($path, false);
     }
 
+    /** Minimum password length for every place a password is set (never below 6). */
+    public function passwordMinLength(): int
+    {
+        return max(6, (int) $this->get('security.password_min_length', 8));
+    }
+
+    /** How long a session lasts without activity, in seconds (5 minutes to 7 days). */
+    public function sessionSeconds(): int
+    {
+        return max(5, min(10080, (int) $this->get('security.session_timeout_minutes', 60))) * 60;
+    }
+
+    /**
+     * Why this user can't use the platform right now, or null if they can:
+     * maintenance mode (everyone but the platform owner) or the parent portal
+     * being switched off.
+     *
+     * @return array{0:int,1:string,2:string}|null [http status, code, message]
+     */
+    public function blockFor(\App\Domain\Entity\User $user): ?array
+    {
+        $role = $user->getRole()->effectiveCode();
+        if ($role === 'super_admin') {
+            return null;
+        }
+        if ($this->bool('general.maintenance_mode')) {
+            $msg = trim((string) $this->get('general.maintenance_message', ''));
+
+            return [503, 'maintenance', $msg !== '' ? $msg : 'The platform is down for maintenance. Please try again shortly.'];
+        }
+        if ($role === 'parent' && !$this->bool('feature_flags.parent_portal')) {
+            return [403, 'portal_disabled', 'The parent portal is currently switched off.'];
+        }
+
+        return null;
+    }
+
     public function save(array $data): PlatformSetting
     {
         $row = $this->row();

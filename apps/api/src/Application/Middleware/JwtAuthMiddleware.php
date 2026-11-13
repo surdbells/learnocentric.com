@@ -67,6 +67,11 @@ class JwtAuthMiddleware implements MiddlewareInterface
             return $this->unauthorized('User not found or inactive.');
         }
 
+        // Maintenance mode (everyone but the platform owner) or the parent portal switched off.
+        if (($block = $this->settings->blockFor($user)) !== null) {
+            return Json::write(new SlimResponse(), ['error' => $block[2], 'code' => $block[1]], $block[0]);
+        }
+
         if (self::mustEnrolTwoFactor($user, $this->settings)
             && !in_array(rtrim($request->getUri()->getPath(), '/'), self::SETUP_ALLOWED, true)) {
             return Json::write(new SlimResponse(), [
@@ -77,7 +82,18 @@ class JwtAuthMiddleware implements MiddlewareInterface
 
         $request = $request->withAttribute('user', $user)->withAttribute('jwt', $claims);
 
-        return $handler->handle($request);
+        $response = $handler->handle($request);
+
+        // Sliding session: while the user stays active, hand back a fresh token
+        // once the current one is past half its life. Idle for the whole
+        // "session timeout" and the token simply expires.
+        $ttl = (int) ($claims['ttl'] ?? 0);
+        $exp = (int) ($claims['exp'] ?? 0);
+        if ($ttl > 0 && $exp > 0 && ($exp - time()) < intdiv($ttl, 2)) {
+            $response = $response->withHeader('X-Session-Token', $this->jwt->issueForUser($user, $this->settings->sessionSeconds()));
+        }
+
+        return $response;
     }
 
     private function unauthorized(string $message): Response

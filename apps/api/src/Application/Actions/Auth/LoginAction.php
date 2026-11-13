@@ -40,6 +40,11 @@ final class LoginAction
             return Json::error($response, 'Incorrect email or password.', 401);
         }
 
+        // Maintenance mode / parent portal switched off: say so instead of signing in.
+        if (($block = $this->settings->blockFor($user)) !== null) {
+            return Json::write($response, ['error' => $block[2], 'code' => $block[1]], $block[0]);
+        }
+
         // Self-registered accounts must confirm their email first (only when we can actually email them).
         if (!$user->isEmailVerified()
             && $this->settings->bool('registration.require_email_verification')
@@ -59,7 +64,7 @@ final class LoginAction
             ]);
         }
 
-        $token = $this->jwt->issueForUser($user);
+        $token = $this->jwt->issueForUser($user, $this->settings->sessionSeconds());
         $this->audit->log('auth.login', $user, 'User', (string) $user->getId(), null, null, $this->ip($request));
 
         return Json::write($response, [

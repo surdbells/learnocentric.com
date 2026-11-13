@@ -20,14 +20,22 @@ class JwtService
     ) {
     }
 
-    public function issueForUser(User $user): string
+    /**
+     * @param int|null $ttlSeconds session length; defaults to JWT_TTL. Callers
+     *                             pass the platform's inactivity timeout, and
+     *                             the auth middleware re-issues the token while
+     *                             the user stays active (sliding expiry).
+     */
+    public function issueForUser(User $user, ?int $ttlSeconds = null): string
     {
         $now = time();
+        $ttl = $ttlSeconds ?? $this->ttl;
 
         return $this->encode([
             'iss' => $this->issuer,
             'iat' => $now,
-            'exp' => $now + $this->ttl,
+            'exp' => $now + $ttl,
+            'ttl' => $ttl,
             'userId' => $user->getId(),
             'email' => $user->getEmail(),
             'role' => $user->getRole()->effectiveCode(),
