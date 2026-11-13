@@ -84,6 +84,13 @@ class Announcement
     #[ORM\Column(name: 'recipient_count', type: Types::INTEGER, options: ['default' => 0])]
     private int $recipientCount = 0;
 
+    /** When the email channel was delivered (by the announcements:dispatch command); null = not yet. */
+    #[ORM\Column(name: 'emailed_at', type: Types::DATETIME_IMMUTABLE, nullable: true)]
+    private ?\DateTimeImmutable $emailedAt = null;
+
+    #[ORM\Column(name: 'emailed_count', type: Types::INTEGER, options: ['default' => 0])]
+    private int $emailedCount = 0;
+
     public function __construct(Institution $institution, ?User $author, string $title, string $body, string $audience = 'all')
     {
         $this->institution = $institution;
@@ -123,6 +130,10 @@ class Announcement
     public function setSentAt(?\DateTimeImmutable $v): void { $this->sentAt = $v; }
     public function getRecipientCount(): int { return $this->recipientCount; }
     public function setRecipientCount(int $v): void { $this->recipientCount = $v; }
+    public function wantsEmail(): bool { return (bool) ($this->channels['email'] ?? false); }
+    public function wantsParentCopy(): bool { return (bool) ($this->channels['parent_copy'] ?? false); }
+    public function getEmailedAt(): ?\DateTimeImmutable { return $this->emailedAt; }
+    public function markEmailed(int $count): void { $this->emailedAt = new \DateTimeImmutable(); $this->emailedCount = $count; }
 
     /** Roles that a given audience segment resolves to. */
     public static function rolesForAudience(string $audience): array
@@ -131,8 +142,8 @@ class Announcement
             'students', 'class' => ['student'],
             'teachers' => ['teacher'],
             'parents' => ['parent'],
-            'staff' => ['school_admin', 'tutor_admin', 'teacher'],
-            default => ['student', 'teacher', 'parent', 'school_admin', 'tutor_admin'],
+            'staff' => ['school_admin', 'tutor_admin', 'academic_lead', 'teacher'],
+            default => ['student', 'teacher', 'parent', 'school_admin', 'tutor_admin', 'academic_lead'],
         };
     }
 
@@ -154,6 +165,10 @@ class Announcement
             'scheduled_at' => $this->scheduledAt?->format(DATE_ATOM),
             'sent_at' => $this->sentAt?->format(DATE_ATOM),
             'recipient_count' => $this->recipientCount,
+            // Email channel: not_requested | queued (waiting for the dispatcher) | sent
+            'email_status' => !$this->wantsEmail() ? 'not_requested' : ($this->emailedAt !== null ? 'sent' : 'queued'),
+            'emailed_at' => $this->emailedAt?->format(DATE_ATOM),
+            'emailed_count' => $this->emailedCount,
             'author' => $this->author ? trim($this->author->getFirstName() . ' ' . $this->author->getLastName()) : 'School',
             'created_at' => $this->createdAt->format(DATE_ATOM),
             'updated_at' => $this->updatedAt->format(DATE_ATOM),

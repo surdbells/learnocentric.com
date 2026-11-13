@@ -72,10 +72,9 @@ final class UserSettingsAction
     private function defaultsFor(string $role): array
     {
         $base = [
+            // Every key here has a sender behind it (NotificationService / LiveClassReminders).
             'notifications' => [
-                'push' => true,
                 'email' => true,
-                'sms' => false,
                 'live_class_reminders' => true,
             ],
             'privacy' => [
@@ -91,12 +90,9 @@ final class UserSettingsAction
 
         if ($role === 'teacher') {
             $base['notifications'] = [
-                'assignment_alerts' => true,
-                'submission_reviews' => true,
                 'live_class_reminders' => true,
                 'message_notifications' => true,
-                'report_generation_alerts' => true,
-                'parent_communication' => true,
+                'email_alerts' => true,
             ];
             $base['grading'] = [
                 'default_scale' => 'percentage',
@@ -118,18 +114,12 @@ final class UserSettingsAction
         if (in_array($role, ['school_admin', 'tutor_admin'], true)) {
             $base['notifications'] = [
                 'email_alerts' => true,
-                'report_notifications' => true,
-                'parent_communication' => true,
+                'live_class_reminders' => true,
             ];
             return $base;
         }
 
         // learner (student), the fullest personal preference set
-        $base['learning'] = [
-            'daily_reminder' => true,
-            'daily_reminder_time' => '19:00',
-            'weekly_summary' => true,
-        ];
         $base['appearance'] = [
             'theme' => 'system',
             'text_size' => 'medium',

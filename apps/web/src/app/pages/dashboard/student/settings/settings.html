@@ -93,36 +93,6 @@
 
       <!-- Section cards grid -->
       <div class="row g-4">
-        <!-- Learning Preferences -->
-        <div class="col-md-6 col-xl-4">
-          <div id="sec-learning" class="card border-0 shadow-sm h-100">
-            <div class="card-body">
-              <div class="fw-semibold mb-1">Learning Preferences</div>
-              <p class="text-body-secondary small mb-3">Manage your learning experience.</p>
-              <div class="setting-row">
-                <div>
-                  <div class="fw-medium">Daily Study Reminder</div>
-                  <div class="small text-body-secondary">A nudge to keep your streak</div>
-                </div>
-                <label class="switch"><input type="checkbox" [checked]="pref('learning','daily_reminder')" (change)="toggle('learning','daily_reminder')" /><span></span></label>
-              </div>
-              @if (pref('learning','daily_reminder')) {
-                <div class="setting-row">
-                  <div class="fw-medium">Reminder time</div>
-                  <input type="time" class="form-control form-control-sm w-auto" [ngModel]="pref('learning','daily_reminder_time')" (ngModelChange)="setValue('learning','daily_reminder_time',$event)" />
-                </div>
-              }
-              <div class="setting-row border-0">
-                <div>
-                  <div class="fw-medium">Weekly Progress Summary</div>
-                  <div class="small text-body-secondary">Every Monday at 8:00 AM</div>
-                </div>
-                <label class="switch"><input type="checkbox" [checked]="pref('learning','weekly_summary')" (change)="toggle('learning','weekly_summary')" /><span></span></label>
-              </div>
-            </div>
-          </div>
-        </div>
-
         <!-- Notifications -->
         <div class="col-md-6 col-xl-4">
           <div id="sec-notifications" class="card border-0 shadow-sm h-100">
@@ -130,16 +100,8 @@
               <div class="fw-semibold mb-1">Notifications</div>
               <p class="text-body-secondary small mb-3">Choose how you want to be notified.</p>
               <div class="setting-row">
-                <div><div class="fw-medium">Push Notifications</div><div class="small text-body-secondary">Lessons, quizzes and updates</div></div>
-                <label class="switch"><input type="checkbox" [checked]="pref('notifications','push')" (change)="toggle('notifications','push')" /><span></span></label>
-              </div>
-              <div class="setting-row">
-                <div><div class="fw-medium">Email Notifications</div><div class="small text-body-secondary">Announcements and summaries</div></div>
+                <div><div class="fw-medium">Email Notifications</div><div class="small text-body-secondary">Announcements, feedback and reminders by email</div></div>
                 <label class="switch"><input type="checkbox" [checked]="pref('notifications','email')" (change)="toggle('notifications','email')" /><span></span></label>
-              </div>
-              <div class="setting-row">
-                <div><div class="fw-medium">SMS Notifications</div><div class="small text-body-secondary">Important alerts only</div></div>
-                <label class="switch"><input type="checkbox" [checked]="pref('notifications','sms')" (change)="toggle('notifications','sms')" /><span></span></label>
               </div>
               <div class="setting-row border-0">
                 <div><div class="fw-medium">Live Class Reminders</div><div class="small text-body-secondary">15 minutes before class starts</div></div>

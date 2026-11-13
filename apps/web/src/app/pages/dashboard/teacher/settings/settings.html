@@ -32,12 +32,9 @@
             <div class="card-body">
               <div class="sec-head"><span class="sec-num">2</span><app-icon name="notifications" [size]="18" /> Notification Preferences</div>
               <div class="mt-2">
-                <div class="setting-row"><span>Assignment Alerts</span><label class="switch"><input type="checkbox" [checked]="pref('notifications','assignment_alerts')" (change)="toggle('notifications','assignment_alerts')" /><span></span></label></div>
-                <div class="setting-row"><span>Submission Reviews</span><label class="switch"><input type="checkbox" [checked]="pref('notifications','submission_reviews')" (change)="toggle('notifications','submission_reviews')" /><span></span></label></div>
                 <div class="setting-row"><span>Live Class Reminders</span><label class="switch"><input type="checkbox" [checked]="pref('notifications','live_class_reminders')" (change)="toggle('notifications','live_class_reminders')" /><span></span></label></div>
                 <div class="setting-row"><span>Message Notifications</span><label class="switch"><input type="checkbox" [checked]="pref('notifications','message_notifications')" (change)="toggle('notifications','message_notifications')" /><span></span></label></div>
-                <div class="setting-row"><span>Report Generation Alerts</span><label class="switch"><input type="checkbox" [checked]="pref('notifications','report_generation_alerts')" (change)="toggle('notifications','report_generation_alerts')" /><span></span></label></div>
-                <div class="setting-row border-0"><span>Parent Communication</span><label class="switch"><input type="checkbox" [checked]="pref('notifications','parent_communication')" (change)="toggle('notifications','parent_communication')" /><span></span></label></div>
+                <div class="setting-row border-0"><span>Email me a copy</span><label class="switch"><input type="checkbox" [checked]="pref('notifications','email_alerts')" (change)="toggle('notifications','email_alerts')" /><span></span></label></div>
               </div>
             </div>
           </div>

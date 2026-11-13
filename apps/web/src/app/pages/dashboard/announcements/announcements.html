@@ -65,7 +65,7 @@
                       <tr class="ann-detail"><td colspan="7">
                         <div class="p-2">
                           <div class="small text-body-secondary mb-1">
-                            {{ audienceLabel(a) }}@if (a.subject) { · {{ a.subject }} } · {{ a.recipient_count }} recipient(s)
+                            {{ audienceLabel(a) }}@if (a.subject) { · {{ a.subject }} } · {{ a.recipient_count }} recipient(s)@if (a.email_status === 'sent') { · emailed to {{ a.emailed_count }} } @else if (a.email_status === 'queued' && a.status === 'sent') { · email queued }
                           </div>
                           <app-rich-text [value]="a.body" />
                           @if (a.attachment_url) { <a class="small d-inline-flex align-items-center gap-1 mt-2" [href]="a.attachment_url" target="_blank" rel="noopener"><app-icon name="attach_file" [size]="14" /> Attachment</a> }

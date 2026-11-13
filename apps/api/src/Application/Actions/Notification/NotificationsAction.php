@@ -15,8 +15,11 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 /** The current user's notification inbox. */
 final class NotificationsAction
 {
-    public function __construct(private readonly EntityManagerInterface $em)
-    {
+    public function __construct(
+        private readonly EntityManagerInterface $em,
+        private readonly \App\Service\AnnouncementDispatcher $dispatcher,
+        private readonly \App\Service\LiveClassReminders $reminders,
+    ) {
     }
 
     /** GET /notifications, recent notifications + unread count (?unread=1 to filter). */
@@ -25,6 +28,13 @@ final class NotificationsAction
         $user = $this->currentUser($request);
         $params = $request->getQueryParams();
         $limit = min(100, max(1, (int) ($params['limit'] ?? 30)));
+
+        // Scheduled announcements that have come due go out now, so they reach
+        // this inbox even where the cron job isn't set up.
+        if ($user->getInstitution() !== null) {
+            $this->dispatcher->sendDue($user->getInstitution());
+            $this->reminders->sendDue($user->getInstitution());
+        }
 
         $qb = $this->em->createQueryBuilder()->select('n')->from(Notification::class, 'n')
             ->where('n.user = :u')->setParameter('u', $user)

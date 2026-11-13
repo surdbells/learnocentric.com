@@ -19,7 +19,57 @@ final class NotificationService
     public function __construct(
         private readonly EntityManagerInterface $em,
         private readonly ZeptoMailer $mailer,
+        private readonly PlatformSettings $settings,
     ) {
+    }
+
+    /** Is email switched on for the platform and actually configured? */
+    public function emailAvailable(): bool
+    {
+        return $this->mailer->isConfigured() && $this->settings->bool('integrations.email_enabled');
+    }
+
+    /** The user's own "email me" preference (Settings → Notifications); on unless they turned it off. */
+    public function wantsEmail(User $user): bool
+    {
+        $n = $user->getPreferences()['notifications'] ?? [];
+
+        return (bool) ($n['email'] ?? $n['email_alerts'] ?? true);
+    }
+
+    /** Notification types a user can switch off, and the settings key that does it. */
+    private const CATEGORY_PREFS = [
+        'live_class' => 'live_class_reminders',
+        'message' => 'message_notifications',
+    ];
+
+    /** False only when the user explicitly turned this category off (Settings → Notifications). */
+    public function categoryEnabled(User $user, string $type): bool
+    {
+        $key = self::CATEGORY_PREFS[$type] ?? null;
+        if ($key === null) {
+            return true;
+        }
+
+        return ($user->getPreferences()['notifications'][$key] ?? true) !== false;
+    }
+
+    /** Email one user (no in-app record). Returns true if accepted for delivery. */
+    public function email(User $user, string $title, ?string $message = null): bool
+    {
+        if ($user->getEmail() === '' || !$this->emailAvailable() || !$this->wantsEmail($user)) {
+            return false;
+        }
+        try {
+            return $this->mailer->send(
+                ['address' => $user->getEmail(), 'name' => trim($user->getFirstName() . ' ' . $user->getLastName())],
+                $title,
+                $this->htmlBody($user, $title, $message),
+                $this->textBody($title, $message),
+            );
+        } catch (Throwable $e) {
+            return false; // best-effort
+        }
     }
 
     /**
@@ -31,19 +81,16 @@ final class NotificationService
         $notification = new Notification($user, $type, $title);
         $notification->setMessage($message);
         $notification->setLink($link);
+        // The user switched this kind of notification off in their settings:
+        // hand back an unsaved object so callers needn't special-case it.
+        if (!$this->categoryEnabled($user, $type)) {
+            return $notification;
+        }
         $this->em->persist($notification);
 
-        if ($sendEmail && $user->getEmail() !== '') {
-            try {
-                $this->mailer->send(
-                    ['address' => $user->getEmail(), 'name' => trim($user->getFirstName() . ' ' . $user->getLastName())],
-                    $title,
-                    $this->htmlBody($user, $title, $message),
-                    $this->textBody($title, $message),
-                );
-            } catch (Throwable $e) {
-                // best-effort, swallow so the triggering action still succeeds
-            }
+        if ($sendEmail) {
+            // Best-effort; honours the platform email switch and the user's preference.
+            $this->email($user, $title, $message);
         }
 
         return $notification;

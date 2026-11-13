@@ -199,6 +199,21 @@ Verify: `curl https://api.YOUR_DOMAIN/health` should return a JSON health payloa
 2. **SSL/TLS mode: Full (strict)**. Install a certificate on the origin — either
    aaPanel's Let's Encrypt (Website → SSL) or a Cloudflare **Origin Certificate**.
 
+### 1.9 Scheduled job (cron)
+
+One command does the timed work: it sends scheduled announcements when they fall
+due, delivers the **email** channel of announcements, and sends the "live class
+starts soon" reminders. Add it in aaPanel → **Cron** (Shell script, every 5
+minutes), running as the web user:
+
+```bash
+cd /www/wwwroot/api.YOUR_DOMAIN/apps/api && php bin/console.php announcements:dispatch >> var/log/cron.log 2>&1
+```
+
+Without the cron job, scheduled announcements and reminders still go out the next
+time someone in that school opens their notifications, but announcement **emails**
+are only ever sent by this command.
+
 ---
 
 ## 2. Frontend → Cloudflare Pages

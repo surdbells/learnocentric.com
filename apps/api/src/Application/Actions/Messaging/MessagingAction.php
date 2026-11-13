@@ -38,6 +38,7 @@ final class MessagingAction
         private readonly EntityManagerInterface $em,
         private readonly NotificationService $notifications,
         private readonly AuditLogger $audit,
+        private readonly \App\Service\AnnouncementDispatcher $dispatcher,
     ) {
     }
 
@@ -178,6 +179,8 @@ final class MessagingAction
         }
         $role = $user->getRole()->effectiveCode();
         $isStaff = in_array($role, self::STAFF, true);
+        // Safety net for schools without the cron job: send anything whose time has come.
+        $this->dispatcher->sendDue($institution);
         $all = $this->em->getRepository(Announcement::class)->findBy(['institution' => $institution], ['createdAt' => 'DESC']);
 
         if ($isStaff) {
@@ -193,9 +196,30 @@ final class MessagingAction
             return Json::write($response, array_map(static fn (Announcement $a) => $a->toArray(), array_values($rows)));
         }
 
-        // Learner/parent feed: only sent, audience-matched.
-        $visible = array_filter($all, static fn (Announcement $a) => $a->getStatus() === Announcement::SENT
-            && in_array($role, Announcement::rolesForAudience($a->getAudience()), true));
+        // Learner/parent feed: only sent, audience-matched. A parent also sees
+        // learner announcements that were copied to parents, for their own children.
+        $childClassIds = null;
+        $visible = array_filter($all, function (Announcement $a) use ($role, $user, &$childClassIds) {
+            if ($a->getStatus() !== Announcement::SENT) {
+                return false;
+            }
+            if (in_array($role, Announcement::rolesForAudience($a->getAudience()), true)) {
+                // A class announcement is only for learners enrolled in that class.
+                return $a->getAudience() !== 'class' || $a->getSchoolClass() === null
+                    || in_array($a->getSchoolClass()->getId(), $this->classIdsOf([$user]), true);
+            }
+            if ($role !== 'parent' || !$a->wantsParentCopy() || !in_array($a->getAudience(), ['students', 'class', 'all'], true)) {
+                return false;
+            }
+            if ($a->getAudience() !== 'class' || $a->getSchoolClass() === null) {
+                return true;
+            }
+            $childClassIds ??= $this->classIdsOf(array_map(
+                static fn (\App\Domain\Entity\GuardianLink $l) => $l->getStudent(),
+                $this->em->getRepository(\App\Domain\Entity\GuardianLink::class)->findBy(['guardian' => $user])
+            ));
+            return in_array($a->getSchoolClass()->getId(), $childClassIds, true);
+        });
 
         return Json::write($response, array_map(static fn (Announcement $a) => $a->toArray(), array_values($visible)));
     }
@@ -341,40 +365,26 @@ final class MessagingAction
             $a->setScheduledAt($scheduledAt);
             return;
         }
-        // Send now, in-app notifications only. The email / parent-copy channels
-        // are recorded on the announcement but dispatched by a mail queue (not
-        // synchronously per recipient, which would block on the mailer).
-        $recipients = $this->resolveRecipients($a);
-        foreach ($recipients as $r) {
-            $this->notifications->notify(
-                $r,
-                'announcement',
-                $a->getTitle(),
-                mb_strimwidth(strip_tags($a->getBody()), 0, 140, '…'),
-                '/notifications',
-                false,
-            );
-        }
-        $a->setStatus(Announcement::SENT);
-        $a->setSentAt(new DateTimeImmutable());
-        $a->setRecipientCount(count($recipients));
+        // Send now: in-app to the audience (and linked parents when "parent copy"
+        // is ticked). The email channel is delivered by announcements:dispatch.
+        $this->dispatcher->send($a);
     }
 
-    /** @return User[] */
-    private function resolveRecipients(Announcement $a): array
+    /**
+     * Ids of the classes the given learners are enrolled in.
+     *
+     * @param User[] $students
+     * @return int[]
+     */
+    private function classIdsOf(array $students): array
     {
-        $institution = $a->getInstitution();
-        if ($a->getAudience() === 'class' && $a->getSchoolClass() !== null) {
-            $rows = $this->em->createQueryBuilder()->select('st')->from(Enrollment::class, 'e')->join('e.student', 'st')
-                ->where('e.schoolClass = :c')->setParameter('c', $a->getSchoolClass())
-                ->getQuery()->getResult();
-            return $rows;
+        if ($students === []) {
+            return [];
         }
-        $roles = Announcement::rolesForAudience($a->getAudience());
-        return $this->em->createQueryBuilder()->select('u')->from(User::class, 'u')->join('u.role', 'r')
-            ->where('u.institution = :i')->andWhere('r.effectiveCode IN (:roles)')
-            ->setParameter('i', $institution)->setParameter('roles', $roles)
-            ->getQuery()->getResult();
+        $rows = $this->em->createQueryBuilder()->select('IDENTITY(e.schoolClass) AS cid')->from(Enrollment::class, 'e')
+            ->where('e.student IN (:s)')->setParameter('s', $students)->getQuery()->getScalarResult();
+
+        return array_values(array_unique(array_map(static fn (array $r) => (int) $r['cid'], $rows)));
     }
 
     private function canMessage(User $a, User $b): bool

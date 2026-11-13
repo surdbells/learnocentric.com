@@ -63,6 +63,13 @@ class LiveClass
     #[ORM\Column(length: 20)]
     private string $status = self::SCHEDULED;
 
+    /** When the "starts soon" reminder went out, so it is only sent once. */
+    #[ORM\Column(name: 'reminded_at', type: Types::DATETIME_IMMUTABLE, nullable: true)]
+    private ?\DateTimeImmutable $remindedAt = null;
+
+    public function getRemindedAt(): ?\DateTimeImmutable { return $this->remindedAt; }
+    public function markReminded(): void { $this->remindedAt = new \DateTimeImmutable(); }
+
     public function __construct(Subject $subject, string $title, \DateTimeImmutable $scheduledAt)
     {
         $this->subject = $subject;
@@ -82,7 +89,13 @@ class LiveClass
     public function getTitle(): string { return $this->title; }
     public function setTitle(string $v): void { $this->title = $v; }
     public function getScheduledAt(): \DateTimeImmutable { return $this->scheduledAt; }
-    public function setScheduledAt(\DateTimeImmutable $v): void { $this->scheduledAt = $v; }
+    public function setScheduledAt(\DateTimeImmutable $v): void
+    {
+        if ($v != $this->scheduledAt) {
+            $this->remindedAt = null; // rescheduled: remind again for the new time
+        }
+        $this->scheduledAt = $v;
+    }
     public function getDurationMinutes(): int { return $this->durationMinutes; }
     public function setDurationMinutes(int $v): void { $this->durationMinutes = max(5, $v); }
     public function getRoomName(): ?string { return $this->roomName; }

@@ -81,13 +81,13 @@
         <div class="col-md-4">
           <label class="deliver-opt" [class.on]="channels().email">
             <input type="checkbox" [ngModel]="channels().email" (ngModelChange)="setChannel('email', $event)" />
-            <app-icon name="mail" [size]="18" /> <span><b>Email</b><small class="d-block text-body-secondary">Queued to recipients</small></span>
+            <app-icon name="mail" [size]="18" /> <span><b>Email</b><small class="d-block text-body-secondary">Emailed within a few minutes of sending</small></span>
           </label>
         </div>
         <div class="col-md-4">
           <label class="deliver-opt" [class.on]="channels().parent_copy">
             <input type="checkbox" [ngModel]="channels().parent_copy" (ngModelChange)="setChannel('parent_copy', $event)" />
-            <app-icon name="family_restroom" [size]="18" /> <span><b>Parent Copy</b><small class="d-block text-body-secondary">Copy to parents/guardians</small></span>
+            <app-icon name="family_restroom" [size]="18" /> <span><b>Parent Copy</b><small class="d-block text-body-secondary">Also goes to learners' linked parents</small></span>
           </label>
         </div>
       </div>

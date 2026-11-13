@@ -48,5 +48,9 @@ $app->addCommands([
 
 // Application commands.
 $app->add(new SeedCommand($em, $container->get(PasswordService::class), $container->get(App\Service\AnswerGrader::class)));
+$app->add(new App\Console\DispatchAnnouncementsCommand(
+    $container->get(App\Service\AnnouncementDispatcher::class),
+    $container->get(App\Service\LiveClassReminders::class),
+));
 
 $app->run();
