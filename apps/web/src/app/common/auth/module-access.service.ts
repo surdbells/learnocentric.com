@@ -2,6 +2,7 @@ import {computed, inject, Injectable, signal} from '@angular/core';
 import {ApiService} from '../service/api.service';
 
 const MODULES_KEY = 'granted_modules';
+const MATRIX_KEY = 'role_matrix';
 
 /**
  * Tracks which gateable feature modules the signed-in user's institution may use
@@ -26,12 +27,46 @@ export class ModuleAccessService {
     return list === null ? true : list.includes(module);
   }
 
-  /** Fetch the granted modules for the current session and cache them. */
+  /**
+   * Custom-role permission matrix (module → granted actions), or null for
+   * system roles, which aren't narrowed. Mirrors RequirePermissionMiddleware.
+   */
+  private readonly _matrix = signal<Record<string, string[]> | null>(this.readMatrix());
+
+  /** True unless the user's custom role lacks "view" on every listed RBAC module. */
+  canView(perm: string | string[] | undefined | null): boolean {
+    if (!perm) return true;
+    const m = this._matrix();
+    if (m === null) return true;
+    const list = Array.isArray(perm) ? perm : [perm];
+    return list.some(p => (m[p] ?? []).includes('view'));
+  }
+
+  /** Fetch the granted modules (and custom-role matrix) for the current session and cache them. */
   refresh(): void {
-    this.api.get<{ modules?: string[] }>('/backend/auth/me').subscribe({
-      next: (res) => this.set(res?.modules ?? []),
+    this.api.get<{ modules?: string[]; role_matrix?: Record<string, string[]> | null }>('/backend/auth/me').subscribe({
+      next: (res) => { this.set(res?.modules ?? []); this.setMatrix(res?.role_matrix ?? null); },
       error: () => { /* leave cache as-is; backend still enforces */ },
     });
+  }
+
+  private setMatrix(m: Record<string, string[]> | null): void {
+    this._matrix.set(m);
+    if (typeof window !== 'undefined') {
+      try {
+        if (m === null) localStorage.removeItem(MATRIX_KEY); else localStorage.setItem(MATRIX_KEY, JSON.stringify(m));
+      } catch {}
+    }
+  }
+
+  private readMatrix(): Record<string, string[]> | null {
+    if (typeof window === 'undefined') return null;
+    try {
+      const raw = localStorage.getItem(MATRIX_KEY);
+      return raw ? JSON.parse(raw) : null;
+    } catch {
+      return null;
+    }
   }
 
   set(modules: string[]): void {
@@ -43,8 +78,9 @@ export class ModuleAccessService {
 
   clear(): void {
     this._modules.set(null);
+    this._matrix.set(null);
     if (typeof window !== 'undefined') {
-      try { localStorage.removeItem(MODULES_KEY); } catch {}
+      try { localStorage.removeItem(MODULES_KEY); localStorage.removeItem(MATRIX_KEY); } catch {}
     }
   }
 

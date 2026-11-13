@@ -399,6 +399,11 @@ final class LiveClassesAction
             return Json::error($response, 'Live class not found.', 404);
         }
         $isStaff = in_array($user->getRole()->effectiveCode(), self::STAFF, true);
+        // Only members of the class's own school may join (ids are guessable).
+        $mine = $user->getInstitution();
+        if ($mine !== null && $lc->getSubject()->getInstitution()->getId() !== $mine->getId()) {
+            return Json::error($response, 'Live class not found.', 404);
+        }
 
         // A class is only joinable once it is live (a channel is assigned). Before
         // that a learner should wait for the host to go live.

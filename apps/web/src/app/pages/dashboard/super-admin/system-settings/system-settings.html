@@ -104,7 +104,8 @@
           </div>
           <div class="form-check form-switch">
             <input class="form-check-input" type="checkbox" id="sec_rbac" [(ngModel)]="model.security.rbac_enforce" />
-            <label class="form-check-label" for="sec_rbac">Enforce role-based access control</label>
+            <label class="form-check-label" for="sec_rbac">Enforce custom-role permissions</label>
+            <div class="form-text">When on, a school's custom roles are limited to the modules ticked in their matrix. When off, they fall back to their base role. System roles are always enforced.</div>
           </div>
         </div>
       </div>

@@ -6,6 +6,8 @@ export interface IMenu {
   link: string;
   /** Gateable feature module this item needs; hidden when the plan doesn't grant it. */
   module?: string;
+  /** RBAC permission module(s); hidden when a custom role has "view" on none of them. */
+  perm?: string | string[];
   children?: IMenu[];
 }
 
@@ -22,42 +24,42 @@ export class UserPreferenceMenu {
   school_admin: IMenu[]= [
     { name: "Dashboard", icon: "dashboard", link: "/admin/main" },
 
-    { name: "School Setup", icon: "school_setup", link: "/admin/setup" },
+    { name: "School Setup", icon: "school_setup", link: "/admin/setup", perm: "academic_setup" },
 
     // Tabbed hub: Classes & Learners + Students + Enrollment on one page.
-    { name: "Classes & Learners", icon: "group", link: "/admin/classes-learners" },
+    { name: "Classes & Learners", icon: "group", link: "/admin/classes-learners", perm: ["academic_setup", "user"] },
 
-    { name: "Teachers & Staff", icon: "supervisor_account", link: "/admin/teachers" },
+    { name: "Teachers & Staff", icon: "supervisor_account", link: "/admin/teachers", perm: "user" },
 
     // Tabbed hub: Subjects, Topics, Lesson Content, Delivery Pack, Scheme of
     // Work, Scheme Coverage, Curriculum Map and Approval Queue on one page.
-    { name: "Subjects & Curriculum", icon: "subject", link: "/admin/subjects-curriculum" },
+    { name: "Subjects & Curriculum", icon: "subject", link: "/admin/subjects-curriculum", perm: ["academic_setup", "curriculum_pack", "delivery_pack"] },
 
-    { name: "Live Classes", icon: "video", link: "/admin/academics/live-classes", module: "live_classes" },
+    { name: "Live Classes", icon: "video", link: "/admin/academics/live-classes", module: "live_classes", perm: "live_class" },
 
     // Tabbed hub: Assessments, Question Bank, Worksheets, Portfolio, Gradebook.
-    { name: "Assessments & Gradebooks", icon: "grading", link: "/admin/assessments-gradebooks", module: "assessments" },
+    { name: "Assessments & Gradebooks", icon: "grading", link: "/admin/assessments-gradebooks", module: "assessments", perm: ["assessment", "gradebook", "worksheet", "portfolio"] },
 
     // Tabbed hub: Insights, Analytics, School Report, Report Cards.
-    { name: "Reports & Report Cards", icon: "insights", link: "/admin/reports" },
+    { name: "Reports & Report Cards", icon: "insights", link: "/admin/reports", perm: ["report", "gradebook"] },
 
-    { name: "Interventions", icon: "monitoring", link: "/admin/academics/interventions", module: "interventions" },
+    { name: "Interventions", icon: "monitoring", link: "/admin/academics/interventions", module: "interventions", perm: "intervention" },
 
     // Tabbed hub: Resources, Resource Viewer.
-    { name: "Resources", icon: "library_books", link: "/admin/resources-hub" },
+    { name: "Resources", icon: "library_books", link: "/admin/resources-hub", perm: "resource" },
 
     // Tabbed hub: Messages, Announcements.
     { name: "Communication", icon: "forum", link: "/admin/communication-hub" },
 
-    { name: "Calendar", icon: "calendar_month", link: "/admin/calendar" },
+    { name: "Calendar", icon: "calendar_month", link: "/admin/calendar", perm: "academic_setup" },
 
     { name: "Settings & Permissions", icon: "settings", link: "admin/management",
       children: [
-        { name: "School Profile", link: "/admin/management/school-profile" },
-        { name: "Settings", link: "/admin/management/settings" },
-        { name: "Billing", link: "/admin/management/billing" },
-        { name: "Safeguarding", link: "/admin/management/safeguarding", module: "safeguarding" },
-        { name: "Support", link: "/admin/management/support" },
+        { name: "School Profile", link: "/admin/management/school-profile", perm: "academic_setup" },
+        { name: "Settings", link: "/admin/management/settings", perm: "academic_setup" },
+        { name: "Billing", link: "/admin/management/billing", perm: "subscription" },
+        { name: "Safeguarding", link: "/admin/management/safeguarding", module: "safeguarding", perm: "safeguarding_case" },
+        { name: "Support", link: "/admin/management/support", perm: "support_ticket" },
       ]
     },
   ]
@@ -66,52 +68,52 @@ export class UserPreferenceMenu {
     { name: "Main", icon: "dashboard", link: "academy/main",
       children: [
         { name: "Dashboard", link: "/academy/main" },
-        { name: "Calendar", link: "/academy/calendar" },
+        { name: "Calendar", link: "/academy/calendar", perm: "academic_setup" },
       ]
     },
 
-    { name: "Students", icon: "local_library", link: "/academy/students/" },
+    { name: "Students", icon: "local_library", link: "/academy/students/", perm: "user" },
 
     { name: "Tutor", icon: "supervisor_account", link: "academy/teachers",
       children: [
-        { name: "Tutors", link: "/academy/tutors/" },
-        { name: "New Tutor", link: "/academy/tutors/new" }
+        { name: "Tutors", link: "/academy/tutors/", perm: "user" },
+        { name: "New Tutor", link: "/academy/tutors/new", perm: "user" }
       ]
     },
 
     { name: "Academics", icon: "school", link: "/academy/academics",
       children: [
-        { name: "Classes & Learners", link: "/academy/academics/classes-learners" },
-        { name: "Subjects", link: "/academy/academics/subjects" },
-        { name: "Lesson Content", link: "/academy/academics/lesson-content" },
-        { name: "Delivery Pack", link: "/academy/academics/delivery-pack" },
-        { name: "Scheme of Work", link: "/academy/academics/scheme-of-work" },
-        { name: "Scheme Coverage", link: "/academy/academics/scheme-coverage" },
-        { name: "Curriculum Map", link: "/academy/academics/curriculum-map" },
-        { name: "Approval Queue", link: "/academy/academics/approval-queue" },
-        { name: "Question Bank", link: "/academy/academics/question-bank", module: "assessments" },
-        { name: "Assessments", link: "/academy/academics/assessments", module: "assessments" },
-        { name: "Worksheets", link: "/academy/academics/worksheets", module: "worksheets" },
-        { name: "Portfolio", link: "/academy/academics/portfolio", module: "portfolio" },
-        { name: "Live Classes", link: "/academy/academics/live-classes", module: "live_classes" },
-        { name: "Gradebook", link: "/academy/academics/gradebook", module: "assessments" },
-        { name: "Insights", link: "/academy/academics/insights" },
-        { name: "Analytics", link: "/academy/academics/analytics", module: "analytics" },
-        { name: "Reports & Report Cards", link: "/academy/academics/school-report", module: "analytics" },
-        { name: "Report Cards", link: "/academy/academics/report-cards", module: "analytics" },
-        { name: "Interventions", link: "/academy/academics/interventions", module: "interventions" },
-        { name: "Resources", link: "/academy/academics/resources" },
-        { name: "Resource Viewer", link: "/academy/academics/resource-viewer" },
+        { name: "Classes & Learners", link: "/academy/academics/classes-learners", perm: ["academic_setup", "user"] },
+        { name: "Subjects", link: "/academy/academics/subjects", perm: "academic_setup" },
+        { name: "Lesson Content", link: "/academy/academics/lesson-content", perm: "curriculum_pack" },
+        { name: "Delivery Pack", link: "/academy/academics/delivery-pack", perm: "delivery_pack" },
+        { name: "Scheme of Work", link: "/academy/academics/scheme-of-work", perm: "curriculum_pack" },
+        { name: "Scheme Coverage", link: "/academy/academics/scheme-coverage", perm: "curriculum_pack" },
+        { name: "Curriculum Map", link: "/academy/academics/curriculum-map", perm: "curriculum_pack" },
+        { name: "Approval Queue", link: "/academy/academics/approval-queue", perm: ["curriculum_pack", "delivery_pack", "assessment"] },
+        { name: "Question Bank", link: "/academy/academics/question-bank", module: "assessments", perm: "assessment" },
+        { name: "Assessments", link: "/academy/academics/assessments", module: "assessments", perm: "assessment" },
+        { name: "Worksheets", link: "/academy/academics/worksheets", module: "worksheets", perm: "worksheet" },
+        { name: "Portfolio", link: "/academy/academics/portfolio", module: "portfolio", perm: "portfolio" },
+        { name: "Live Classes", link: "/academy/academics/live-classes", module: "live_classes", perm: "live_class" },
+        { name: "Gradebook", link: "/academy/academics/gradebook", module: "assessments", perm: "gradebook" },
+        { name: "Insights", link: "/academy/academics/insights", perm: "assessment" },
+        { name: "Analytics", link: "/academy/academics/analytics", module: "analytics", perm: "report" },
+        { name: "Reports & Report Cards", link: "/academy/academics/school-report", module: "analytics", perm: "report" },
+        { name: "Report Cards", link: "/academy/academics/report-cards", module: "analytics", perm: "gradebook" },
+        { name: "Interventions", link: "/academy/academics/interventions", module: "interventions", perm: "intervention" },
+        { name: "Resources", link: "/academy/academics/resources", perm: "resource" },
+        { name: "Resource Viewer", link: "/academy/academics/resource-viewer", perm: "resource" },
       ]
     },
 
     { name: "Management", icon: "tenancy", link: "academy/management",
       children: [
-        { name: "Academy Profile", link: "/academy/management/academy-profile" },
-        { name: "Settings", link: "/academy/management/settings" },
-        { name: "Billing", link: "/academy/management/billing" },
-        { name: "Safeguarding", link: "/academy/management/safeguarding", module: "safeguarding" },
-        { name: "Support", link: "/academy/management/support" },
+        { name: "Academy Profile", link: "/academy/management/academy-profile", perm: "academic_setup" },
+        { name: "Settings", link: "/academy/management/settings", perm: "academic_setup" },
+        { name: "Billing", link: "/academy/management/billing", perm: "subscription" },
+        { name: "Safeguarding", link: "/academy/management/safeguarding", module: "safeguarding", perm: "safeguarding_case" },
+        { name: "Support", link: "/academy/management/support", perm: "support_ticket" },
       ]
     },
 
@@ -163,15 +165,15 @@ export class UserPreferenceMenu {
     { name: "Dashboard", icon: "dashboard", link: "/teacher/main" },
 
     // Tabbed hubs, mirroring the admin consolidation.
-    { name: "My Classes", icon: "group", link: "/teacher/my-classes" },
-    { name: "Subjects & Curriculum", icon: "subject", link: "/teacher/subjects-curriculum" },
-    { name: "Assessments & Gradebooks", icon: "grading", link: "/teacher/assessments-gradebooks" },
-    { name: "Live Classes", icon: "video", link: "/teacher/academics/live-classes", module: "live_classes" },
-    { name: "Feedback & Questions", icon: "rate_review", link: "/teacher/feedback-questions" },
-    { name: "Reports & Analytics", icon: "insights", link: "/teacher/reports" },
-    { name: "Interventions", icon: "monitoring", link: "/teacher/academics/interventions", module: "interventions" },
-    { name: "Safeguarding", icon: "health_and_safety", link: "/teacher/academics/safeguarding", module: "safeguarding" },
-    { name: "Resources", icon: "library_books", link: "/teacher/resources-hub" },
+    { name: "My Classes", icon: "group", link: "/teacher/my-classes", perm: "academic_setup" },
+    { name: "Subjects & Curriculum", icon: "subject", link: "/teacher/subjects-curriculum", perm: ["academic_setup", "curriculum_pack", "delivery_pack"] },
+    { name: "Assessments & Gradebooks", icon: "grading", link: "/teacher/assessments-gradebooks", perm: ["assessment", "gradebook", "worksheet", "portfolio"] },
+    { name: "Live Classes", icon: "video", link: "/teacher/academics/live-classes", module: "live_classes", perm: "live_class" },
+    { name: "Feedback & Questions", icon: "rate_review", link: "/teacher/feedback-questions", perm: "assessment" },
+    { name: "Reports & Analytics", icon: "insights", link: "/teacher/reports", perm: ["report", "gradebook"] },
+    { name: "Interventions", icon: "monitoring", link: "/teacher/academics/interventions", module: "interventions", perm: "intervention" },
+    { name: "Safeguarding", icon: "health_and_safety", link: "/teacher/academics/safeguarding", module: "safeguarding", perm: "safeguarding_case" },
+    { name: "Resources", icon: "library_books", link: "/teacher/resources-hub", perm: "resource" },
     { name: "Communication", icon: "forum", link: "/teacher/communication-hub" },
     { name: "Settings", icon: "settings", link: "/teacher/settings-hub" },
   ]

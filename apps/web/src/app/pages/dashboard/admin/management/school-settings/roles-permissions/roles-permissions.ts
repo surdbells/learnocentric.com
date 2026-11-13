@@ -7,7 +7,7 @@ import {ApiService} from '../../../../../../common/service/api.service';
 
 declare const bootstrap: any;
 
-const ACTIONS = ['view', 'create', 'edit', 'approve', 'export', 'delete'] as const;
+const ACTIONS = ['view', 'create', 'edit', 'approve', 'export', 'delete', 'archive'] as const;
 type Matrix = Record<string, Record<string, boolean>>;
 
 /**
@@ -33,11 +33,16 @@ export class RolesPermissions {
   modules = signal<any[]>([]);
   stats = signal<any>({});
   busy = signal(false);
+  /** System staff roles a custom role can be built on. */
+  baseRoles = signal<{id: number; code: string; name: string}[]>([]);
+  /** Whether the platform currently enforces custom-role matrices. */
+  enforced = signal(true);
 
   // editor
   editing = signal<any | null>(null);       // role being edited (null = create)
   formName = signal('');
   formDesc = signal('');
+  formBase = signal<string>('');
   matrix = signal<Matrix>({});
   readOnly = signal(false);
 
@@ -55,6 +60,8 @@ export class RolesPermissions {
         this.roles.set(res?.data ?? []);
         this.modules.set(res?.permissions ?? []);
         this.stats.set(res?.stats ?? {});
+        this.baseRoles.set(res?.base_roles ?? []);
+        this.enforced.set(res?.enforced !== false);
         this.loading.set(false);
       },
       error: () => { this.loading.set(false); this.toast.error('Could not load roles'); },
@@ -82,8 +89,32 @@ export class RolesPermissions {
     this.readOnly.set(false);
     this.formName.set('');
     this.formDesc.set('');
-    this.matrix.set(this.blankMatrix());
+    const first = this.baseRoles()[0];
+    this.setBase(first ? String(first.id) : '');
     this.open('role_editor');
+  }
+
+  /**
+   * Pick the base role. When creating, the matrix starts from the base role's
+   * published permissions so the admin only has to switch things off.
+   */
+  setBase(id: string): void {
+    this.formBase.set(id);
+    if (this.editing()) return;
+    const base = this.roles().find(r => String(r.id) === id);
+    this.matrix.set(this.matrixFrom(base?.grants ?? {}));
+  }
+
+  baseName(): string {
+    return this.baseRoles().find(b => String(b.id) === this.formBase())?.name ?? 'the base role';
+  }
+
+  private matrixFrom(grants: Record<string, any>): Matrix {
+    const m = this.blankMatrix();
+    for (const [code, g] of Object.entries<any>(grants)) {
+      m[code] = {view: g.can_view, create: g.can_create, edit: g.can_edit, approve: g.can_approve, export: g.can_export, delete: g.can_delete, archive: g.can_archive};
+    }
+    return m;
   }
 
   openEdit(role: any, readOnly = false): void {
@@ -91,11 +122,8 @@ export class RolesPermissions {
     this.readOnly.set(readOnly || !role.editable);
     this.formName.set(role.name);
     this.formDesc.set(role.description ?? '');
-    const m = this.blankMatrix();
-    for (const [code, g] of Object.entries<any>(role.grants ?? {})) {
-      m[code] = {view: g.can_view, create: g.can_create, edit: g.can_edit, approve: g.can_approve, export: g.can_export, delete: g.can_delete};
-    }
-    this.matrix.set(m);
+    this.formBase.set(role.base_role_id ? String(role.base_role_id) : '');
+    this.matrix.set(this.matrixFrom(role.grants ?? {}));
     this.open('role_editor');
   }
 
@@ -110,12 +138,13 @@ export class RolesPermissions {
 
   save(): void {
     if (!this.formName().trim()) { this.toast.error('Give the role a name'); return; }
+    if (!this.formBase()) { this.toast.error('Choose which staff role this is built on'); return; }
     this.busy.set(true);
     const grants: any = {};
     for (const [code, acts] of Object.entries(this.matrix())) {
       if (Object.values(acts).some(Boolean)) grants[code] = acts;
     }
-    const body = {name: this.formName().trim(), description: this.formDesc().trim(), grants};
+    const body = {name: this.formName().trim(), description: this.formDesc().trim(), base_role_id: Number(this.formBase()), grants};
     const req = this.editing()
       ? this.api.put<any>(`/backend/school/roles/${this.editing().id}`, body)
       : this.api.post<any>('/backend/school/roles', body);

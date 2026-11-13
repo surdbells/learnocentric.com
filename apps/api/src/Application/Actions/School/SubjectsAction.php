@@ -123,7 +123,7 @@ final class SubjectsAction
     {
         $body = (array) $request->getParsedBody();
         $subject = $this->em->getRepository(Subject::class)->find((int) ($body['id'] ?? 0));
-        if ($subject === null) {
+        if ($subject === null || !$this->canActWithin($request, $subject->getInstitution())) {
             return Json::error($response, 'Subject not found.', 404);
         }
         $before = $subject->toArray();
@@ -142,7 +142,7 @@ final class SubjectsAction
     {
         $id = (int) ($request->getQueryParams()['id'] ?? 0);
         $subject = $this->em->getRepository(Subject::class)->find($id);
-        if ($subject === null) {
+        if ($subject === null || !$this->canActWithin($request, $subject->getInstitution())) {
             return Json::error($response, 'Subject not found.', 404);
         }
         $before = $subject->toArray();

@@ -60,6 +60,10 @@ final class EnrollmentsAction
         if ($student === null || $class === null) {
             return Json::error($response, 'Valid studentId and classId are required.', 422);
         }
+        // Both the class and the learner must belong to the caller's school.
+        if (!$this->canActWithin($request, $class->getInstitution()) || $student->getInstitution()?->getId() !== $class->getInstitution()->getId()) {
+            return Json::error($response, 'That learner or class is not in your school.', 404);
+        }
 
         $enrollment = new Enrollment($student, $class);
         $this->applyDate($enrollment, $body);
@@ -79,13 +83,13 @@ final class EnrollmentsAction
     {
         $body = (array) $request->getParsedBody();
         $enrollment = $this->em->getRepository(Enrollment::class)->find((int) ($body['id'] ?? 0));
-        if ($enrollment === null) {
+        if ($enrollment === null || !$this->canActWithin($request, $enrollment->getSchoolClass()->getInstitution())) {
             return Json::error($response, 'Enrollment not found.', 404);
         }
         $before = $enrollment->toArray();
         if (!empty($body['classId']) || !empty($body['class_id'])) {
             $class = $this->em->getRepository(SchoolClass::class)->find((int) ($body['classId'] ?? $body['class_id']));
-            if ($class !== null) {
+            if ($class !== null && $class->getInstitution()->getId() === $enrollment->getSchoolClass()->getInstitution()->getId()) {
                 $enrollment->setSchoolClass($class);
             }
         }
@@ -104,7 +108,7 @@ final class EnrollmentsAction
     {
         $id = (int) ($request->getQueryParams()['id'] ?? 0);
         $enrollment = $this->em->getRepository(Enrollment::class)->find($id);
-        if ($enrollment === null) {
+        if ($enrollment === null || !$this->canActWithin($request, $enrollment->getSchoolClass()->getInstitution())) {
             return Json::error($response, 'Enrollment not found.', 404);
         }
         $before = $enrollment->toArray();

@@ -286,39 +286,20 @@ class SeedCommand extends Command
     /** @param array<string,Role> $roles */
     private function seedGrants(array $roles): void
     {
-        $all = ['view' => true, 'create' => true, 'edit' => true, 'approve' => true, 'export' => true, 'delete' => true, 'archive' => true];
-        $rw = ['view' => true, 'create' => true, 'edit' => true];
-        $ro = ['view' => true];
-        $appr = ['view' => true, 'approve' => true, 'archive' => true]; // approver of governed content may also archive/take down
-
-        $matrix = [
-            Role::SCHOOL_ADMIN => [
-                'academic_setup' => $all, 'user' => $rw, 'curriculum_pack' => $ro, 'delivery_pack' => $appr,
-                'assessment' => $appr, 'gradebook' => ['view' => true, 'approve' => true, 'export' => true],
-                'report' => ['view' => true, 'export' => true], 'intervention' => $rw, 'resource' => $appr,
-                'live_class' => $ro, 'safeguarding_case' => $rw, 'subscription' => $ro,
-            ],
-            Role::TEACHER => [
-                'delivery_pack' => ['view' => true, 'create' => true, 'edit' => true], 'assessment' => $rw, 'worksheet' => $rw,
-                'portfolio' => ['view' => true, 'edit' => true], 'gradebook' => $rw, 'live_class' => $rw,
-                'resource' => ['view' => true, 'create' => true], 'report' => $ro, 'intervention' => $ro,
-            ],
-            Role::STUDENT => [
-                'delivery_pack' => $ro, 'assessment' => $ro, 'worksheet' => ['view' => true, 'create' => true],
-                'portfolio' => ['view' => true, 'create' => true], 'resource' => $ro, 'report' => $ro,
-            ],
-        ];
-        $matrix[Role::TUTOR_ADMIN] = $matrix[Role::SCHOOL_ADMIN];
-        $matrix[Role::ACADEMIC_LEAD] = $matrix[Role::SCHOOL_ADMIN];
-
+        // System-role grants are platform-defined (and enforced), so the seeder
+        // re-syncs them to the canonical matrix on every run.
         $repo = $this->em->getRepository(RolePermission::class);
-        foreach ($matrix as $roleCode => $grants) {
-            $role = $roles[$roleCode];
+        foreach (\App\Domain\SystemRoleMatrix::all() as $roleCode => $grants) {
+            $role = $roles[$roleCode] ?? null;
+            if ($role === null) {
+                continue;
+            }
+            foreach ($repo->findBy(['role' => $role]) as $old) {
+                $this->em->remove($old);
+            }
+            $this->em->flush();
             foreach ($grants as $permCode => $actions) {
-                $existing = $repo->findOneBy(['role' => $role, 'permissionCode' => $permCode]);
-                if ($existing === null) {
-                    $this->em->persist(new RolePermission($role, $permCode, $actions, $role->getScope()));
-                }
+                $this->em->persist(new RolePermission($role, $permCode, $actions, $role->getScope()));
             }
         }
         $this->em->flush();

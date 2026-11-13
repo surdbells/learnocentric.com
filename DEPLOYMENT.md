@@ -99,7 +99,6 @@ APP_URL=https://api.YOUR_DOMAIN
 CORS_ALLOWED_ORIGINS=https://YOUR_DOMAIN,https://www.YOUR_DOMAIN
 
 # Turn on table-driven RBAC only AFTER verifying the seeded grant matrix in staging.
-RBAC_ENFORCE=false
 
 DB_DRIVER=pdo_pgsql
 DB_HOST=127.0.0.1
@@ -266,8 +265,8 @@ Cloudflare Pages → your project → **Custom domains** → add `YOUR_DOMAIN`
 - [ ] No *"proxy class not found"* errors on pages with related data — confirms
       `orm:generate-proxies` ran (a symptom of skipping §1.5's proxy step).
 - [ ] Dashboards render with seeded data (no empty states from a missing seed).
-- [ ] (When ready) flip `RBAC_ENFORCE=true` in the API `.env` **after** verifying
-      the grant matrix in staging, then restart PHP.
+- [ ] Custom roles: RBAC enforcement is on by default (Super Admin → System Settings →
+      Security). Custom roles are narrowed by their permission matrix on every request.
 
 ---
 

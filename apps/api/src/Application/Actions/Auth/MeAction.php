@@ -18,6 +18,7 @@ final class MeAction
     public function __construct(
         private readonly PermissionService $permissions,
         private readonly ModuleAccess $modules,
+        private readonly \App\Service\PlatformSettings $settings,
     ) {
     }
 
@@ -29,6 +30,9 @@ final class MeAction
         return Json::write($response, [
             'user' => $user->toArray(),
             'permissions' => $this->permissions->grantsFor($user->getRole()),
+            // Custom roles only: module => granted actions, enforced server-side
+            // (RequirePermissionMiddleware); the client hides menu entries without "view".
+            'role_matrix' => $this->settings->bool('security.rbac_enforce') ? $this->permissions->matrixFor($user->getRole()) : null,
             'modules' => $this->modules->forUser($user),
             'all_modules' => SubscriptionPlan::MODULES,
         ]);

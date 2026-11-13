@@ -41,7 +41,10 @@
               <td><span class="badge bg-{{ levelTone(r.permission_level) }}-subtle text-{{ levelTone(r.permission_level) }}">{{ r.permission_level }}</span></td>
               <td>
                 @if (r.is_system) { <span class="badge bg-info-subtle text-info">System</span> }
-                @else { <span class="badge bg-success-subtle text-success">Custom</span> }
+                @else {
+                  <span class="badge bg-success-subtle text-success">Custom</span>
+                  @if (r.base_role_name) { <div class="small text-body-secondary mt-1">Built on {{ r.base_role_name }}</div> }
+                }
               </td>
               <td class="text-end text-nowrap">
                 <button type="button" class="btn btn-sm btn-outline-secondary" (click)="openEdit(r, !r.editable)" [title]="r.editable ? 'Edit permissions' : 'View permissions'">
@@ -62,7 +65,9 @@
   </div></div>
 
   <div class="small text-body-secondary mt-2">
-    <app-icon name="shield" [size]="14" /> System roles are shared across all schools and managed by the platform, so they're read-only here. Create custom roles for your school's own access levels.
+    <app-icon name="shield" [size]="14" /> System roles are shared across all schools and managed by the platform, so they're read-only here.
+    A custom role is built on a staff role and can only narrow it: its holders get the base role's access, limited to what you tick in its matrix.
+    @if (!enforced()) { <strong class="text-warning-emphasis">Enforcement is currently switched off by the platform, so custom-role matrices are not applied.</strong> }
   </div>
 }
 
@@ -79,6 +84,20 @@
         <input id="role_desc" class="form-control" [ngModel]="formDesc()" (ngModelChange)="formDesc.set($event)" [disabled]="readOnly()" placeholder="Short description" />
       </div>
     </div>
+
+    @if (!editing()?.is_system) {
+      <div class="mb-3">
+        <label class="form-label" for="role_base">Built on</label>
+        <select id="role_base" class="form-select" [ngModel]="formBase()" (ngModelChange)="setBase($event)" [disabled]="readOnly()">
+          <option value="" disabled>Choose a staff role…</option>
+          @for (b of baseRoles(); track b.id) { <option [value]="'' + b.id">{{ b.name }}</option> }
+        </select>
+        <div class="form-text">
+          Holders can do what a {{ baseName() }} can, but only in the modules and actions ticked below.
+          @if (!editing()) { The matrix starts from the {{ baseName() }} permissions. }
+        </div>
+      </div>
+    }
 
     <label class="form-label">Permissions</label>
     <div class="table-responsive matrix-wrap">
@@ -113,7 +132,7 @@
 <app-learno-modal [modalId]="'role_assign'" [modalAction]="'Assign staff to role'" [showBtn]="false">
   <div modalForm>
     @if (assignRole(); as role) {
-      <p class="text-body-secondary small">Assign a staff member to <strong>{{ role.name }}</strong>. Their access changes immediately.</p>
+      <p class="text-body-secondary small">Assign a staff member to <strong>{{ role.name }}</strong>. Their access changes from their next action; their menu updates the next time they sign in.</p>
       <label class="form-label" for="assign_user">Staff member</label>
       <select id="assign_user" class="form-select mb-3" [ngModel]="assignUserId()" (ngModelChange)="assignUserId.set($event)">
         <option value="">Choose a staff member…</option>

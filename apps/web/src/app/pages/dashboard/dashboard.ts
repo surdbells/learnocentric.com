@@ -56,10 +56,12 @@ export class Dashboard implements OnInit {
   private filterByModules(menu: IMenu[]): IMenu[] {
     return menu
       .map(group => {
+        const ok = (i: IMenu) => this.moduleAccess.has(i.module) && this.moduleAccess.canView(i.perm);
         if (!group.children?.length) {
-          return this.moduleAccess.has(group.module) ? group : null;
+          return ok(group) ? group : null;
         }
-        const children = group.children.filter(c => this.moduleAccess.has(c.module));
+        if (!this.moduleAccess.canView(group.perm)) return null;
+        const children = group.children.filter(ok);
         return children.length ? {...group, children} : null;
       })
       .filter((g): g is IMenu => g !== null);

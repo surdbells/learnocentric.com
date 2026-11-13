@@ -31,6 +31,39 @@ class PermissionService
         return $grant !== null && $grant->allows($action);
     }
 
+    /** Human label of a permission module, e.g. "Curriculum packs". */
+    public function label(string $permissionCode): string
+    {
+        $p = $this->em->getRepository(\App\Domain\Entity\Permission::class)->findOneBy(['code' => $permissionCode]);
+
+        return $p?->getDescription() ?? str_replace('_', ' ', $permissionCode);
+    }
+
+    /**
+     * Module → granted actions for a custom role, used by the client to hide
+     * menu entries the role can't open. Null for system roles (not narrowed).
+     *
+     * @return array<string,string[]>|null
+     */
+    public function matrixFor(Role $role): ?array
+    {
+        if ($role->isSystem()) {
+            return null;
+        }
+        $out = [];
+        foreach ($this->em->getRepository(RolePermission::class)->findBy(['role' => $role]) as $g) {
+            /** @var RolePermission $g */
+            $acts = [];
+            foreach (['view', 'create', 'edit', 'approve', 'export', 'delete', 'archive'] as $a) {
+                if ($g->allows($a)) {
+                    $acts[] = $a;
+                }
+            }
+            $out[$g->getPermissionCode()] = $acts;
+        }
+        return $out;
+    }
+
     /** @return array<int,array<string,mixed>> all grants for a role */
     public function grantsFor(Role $role): array
     {

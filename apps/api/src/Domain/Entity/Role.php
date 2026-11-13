@@ -111,6 +111,7 @@ class Role
             'institution_id' => $this->institution?->getId(),
             'description' => $this->description,
             'base_role' => $this->baseRole?->getCode(),
+            'base_role_id' => $this->baseRole?->getId(),
             'base_role_name' => $this->baseRole?->getName(),
             'effective_code' => $this->effectiveCode(),
         ];

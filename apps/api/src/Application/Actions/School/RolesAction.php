@@ -32,6 +32,7 @@ final class RolesAction
     public function __construct(
         private readonly EntityManagerInterface $em,
         private readonly AuditLogger $audit,
+        private readonly \App\Service\PlatformSettings $settings,
     ) {
     }
 
@@ -104,6 +105,8 @@ final class RolesAction
 
         return Json::write($response, [
             'data' => $rows,
+            'base_roles' => array_map(static fn (Role $r) => ['id' => $r->getId(), 'code' => $r->getCode(), 'name' => $r->getName()], $this->baseRoles($request)),
+            'enforced' => $this->settings->bool('security.rbac_enforce'),
             'permissions' => $this->modules(),
             'stats' => [
                 'total_roles' => count($rows),
@@ -129,9 +132,14 @@ final class RolesAction
         if ($name === '') {
             return Json::error($response, 'A role name is required.', 422);
         }
+        $base = $this->resolveBase($request, $body['base_role_id'] ?? null);
+        if ($base === null) {
+            return Json::error($response, 'Choose which staff role this role is built on.', 422);
+        }
         $code = $this->uniqueCode($institution, $name);
-        $role = new Role($code, $name, (string) ($body['scope'] ?? 'school'), false);
+        $role = new Role($code, $name, 'school', false);
         $role->setInstitution($institution);
+        $role->setBaseRole($base);
         $role->setDescription($this->str($body['description'] ?? null));
         $this->em->persist($role);
         $this->applyGrants($role, (array) ($body['grants'] ?? []));
@@ -158,6 +166,13 @@ final class RolesAction
         }
         if (array_key_exists('description', $body)) {
             $role->setDescription($this->str($body['description']));
+        }
+        if (array_key_exists('base_role_id', $body)) {
+            $base = $this->resolveBase($request, $body['base_role_id']);
+            if ($base === null) {
+                return Json::error($response, 'Choose which staff role this role is built on.', 422);
+            }
+            $role->setBaseRole($base);
         }
         if (array_key_exists('grants', $body)) {
             // Replace the grant set wholesale.
@@ -253,6 +268,39 @@ final class RolesAction
     }
 
     // --- helpers ---
+
+    /**
+     * System staff roles a custom role may be built on: teacher, academic lead,
+     * and the admin's own administrator role (never above the caller).
+     *
+     * @return Role[]
+     */
+    private function baseRoles(Request $request): array
+    {
+        /** @var User $user */
+        $user = $request->getAttribute('user');
+        $own = $user->getRole()->effectiveCode();
+        $codes = [Role::TEACHER, Role::ACADEMIC_LEAD];
+        if ($own === Role::SUPER_ADMIN) {
+            $inst = $this->resolveInstitution($request, $this->em);
+            $codes[] = $inst?->getType() === 'school' ? Role::SCHOOL_ADMIN : Role::TUTOR_ADMIN;
+        } else {
+            $codes[] = $own;
+        }
+        $roles = $this->em->getRepository(Role::class)->findBy(['code' => $codes, 'isSystem' => true]);
+        usort($roles, static fn (Role $a, Role $b) => array_search($a->getCode(), $codes, true) <=> array_search($b->getCode(), $codes, true));
+        return $roles;
+    }
+
+    private function resolveBase(Request $request, mixed $id): ?Role
+    {
+        foreach ($this->baseRoles($request) as $r) {
+            if ($r->getId() === (int) $id) {
+                return $r;
+            }
+        }
+        return null;
+    }
 
     /** Learner / guardian roles are never a school-staff assignment target. */
     private const NON_STAFF_ROLES = ['student', 'parent'];
