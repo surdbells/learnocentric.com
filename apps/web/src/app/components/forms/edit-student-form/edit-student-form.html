@@ -43,6 +43,7 @@
       </div>
     }
     @if (guardians()) { <app-student-guardians class="d-block mt-3" [studentId]="select()['id']" /> }
+    @if (teaching()) { <app-teacher-assignments class="d-block mt-3" [teacherId]="select()['id']" /> }
     <app-onboarding-record class="d-block mt-3" [userId]="select()['id']" />
   </div>
   <div class="modal-footer">

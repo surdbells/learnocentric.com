@@ -26,6 +26,16 @@
                 <div class="small text-body-secondary mt-1">{{ i.wrong }} of {{ i.attempts }}</div>
               </div>
             </div>
+            @if (i.misconception_tag || i.common_wrong_answer) {
+              <div class="mt-3 small">
+                @if (i.misconception_tag) {
+                  <div><span class="text-uppercase fw-semibold text-body-secondary">Likely misconception</span> <span class="badge bg-warning-subtle text-warning-emphasis ms-1">{{ i.misconception_tag }}</span></div>
+                }
+                @if (i.common_wrong_answer) {
+                  <div class="text-body-secondary mt-1">{{ i.matched_common_wrong }} of {{ i.wrong }} wrong answers gave the expected wrong answer “{{ i.common_wrong_answer }}”.</div>
+                }
+              </div>
+            }
             @if (i.misconceptions?.length) {
               <div class="mt-3">
                 <div class="small text-uppercase fw-semibold text-body-secondary mb-1">Known misconceptions</div>

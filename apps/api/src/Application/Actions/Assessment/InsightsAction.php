@@ -68,6 +68,11 @@ final class InsightsAction
                     'topic' => $topicData['title'],
                     'subject' => $topicData['subject'],
                     'misconceptions' => $topicData['misconceptions'] ?? null,
+                    // Captured with the question (bulk sheet): the misconception a
+                    // wrong answer usually reveals, and the wrong answer that signals it.
+                    'misconception_tag' => $question->getMisconceptionTag(),
+                    'common_wrong_answer' => $question->getCommonWrongAnswer(),
+                    'matched_common_wrong' => 0,
                     'attempts' => 0,
                     'wrong' => 0,
                 ];
@@ -75,6 +80,13 @@ final class InsightsAction
             $agg[$qid]['attempts']++;
             if ($answer->isCorrect() === false) {
                 $agg[$qid]['wrong']++;
+                // How many wrong answers were exactly the anticipated one (measured, not assumed).
+                $expected = $question->getCommonWrongAnswer();
+                $given = $answer->getResponse();
+                if ($expected !== null && is_scalar($given)
+                    && mb_strtolower(trim((string) $given)) === mb_strtolower(trim($expected))) {
+                    $agg[$qid]['matched_common_wrong']++;
+                }
             }
         }
 

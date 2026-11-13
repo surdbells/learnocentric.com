@@ -6,6 +6,7 @@ import {ToastrService} from 'ngx-toastr';
 import {ApiService} from '../../../common/service/api.service';
 import {StudentGuardians} from '../../admin/student-guardians/student-guardians';
 import {OnboardingRecord} from '../../admin/onboarding-record/onboarding-record';
+import {TeacherAssignments} from '../../admin/teacher-assignments/teacher-assignments';
 
 @Component({
   selector: 'app-edit-student-form',
@@ -15,7 +16,8 @@ import {OnboardingRecord} from '../../admin/onboarding-record/onboarding-record'
     ReactiveFormsModule,
     LearnoButton,
     StudentGuardians,
-    OnboardingRecord
+    OnboardingRecord,
+    TeacherAssignments
   ],
   templateUrl: './edit-student-form.html',
   styleUrl: './edit-student-form.css'
@@ -26,6 +28,8 @@ export class EditStudentForm {
   select = input<{ [key:string]: string }>({})
   /** Show the Parents & guardians panel (learners only; this form is reused for staff). */
   guardians = input(false);
+  /** Show the Teaching assignments panel (staff only). */
+  teaching = input(false);
 
   @Output() submitted = new EventEmitter<{ success: boolean }>();
   @ViewChild('closebtn', { static: false }) autoCloseBtn!: ElementRef<HTMLButtonElement>;

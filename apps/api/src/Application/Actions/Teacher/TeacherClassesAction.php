@@ -48,6 +48,11 @@ final class TeacherClassesAction
             $classes[$cid]['subjects'][$a->getSubject()->getName()] = true;
             $subjectIds[$a->getSubject()->getId()] = true;
         }
+        // Classes this teacher leads as class teacher count too, even with no subject assignment there.
+        foreach ($this->em->getRepository(\App\Domain\Entity\SchoolClass::class)->findBy(['classTeacher' => $me]) as $led) {
+            $classes[$led->getId()] ??= ['class' => $led, 'subjects' => []];
+            $classes[$led->getId()]['class_teacher'] = true;
+        }
 
         $rows = [];
         $allPercentages = [];
@@ -86,7 +91,8 @@ final class TeacherClassesAction
             $rows[] = [
                 'id' => $cid,
                 'label' => $class->getLabel(),
-                'subject' => implode(', ', array_keys($entry['subjects'])),
+                'subject' => implode(', ', array_keys($entry['subjects'])) ?: 'Class teacher',
+                'class_teacher' => !empty($entry['class_teacher']),
                 'learners' => $learners,
                 'average' => $stat['avg'] === null ? null : round((float) $stat['avg'], 1),
                 'attempts' => (int) $stat['c'],

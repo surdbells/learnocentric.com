@@ -39,7 +39,15 @@ final class TeacherStudentsAction
         $teacher = $request->getAttribute('user');
 
         $rows = [];
-        $classes = $this->em->getRepository(SchoolClass::class)->findBy(['classTeacher' => $teacher]);
+        // The teacher's classes: those they lead as class teacher plus those they are assigned to teach.
+        $byId = [];
+        foreach ($this->em->getRepository(SchoolClass::class)->findBy(['classTeacher' => $teacher]) as $c) {
+            $byId[$c->getId()] = $c;
+        }
+        foreach ($this->em->getRepository(\App\Domain\Entity\TeacherAssignment::class)->findBy(['teacher' => $teacher]) as $a) {
+            $byId[$a->getSchoolClass()->getId()] = $a->getSchoolClass();
+        }
+        $classes = array_values($byId);
         if ($classes !== []) {
             $enrollments = $this->em->createQueryBuilder()
                 ->select('e')->from(Enrollment::class, 'e')

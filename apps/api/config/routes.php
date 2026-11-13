@@ -149,6 +149,9 @@ return static function (App $app): void {
             $auth->post('/school/scheme-of-work/bulk-delete', SchemeOfWorkAction::class . ':bulkDelete');
             $auth->post('/school/scheme-of-work/{id:[0-9]+}/transition', SchemeOfWorkAction::class . ':transition');
             $auth->get('/school/scheme-of-work/{id:[0-9]+}/history', SchemeOfWorkAction::class . ':history');
+            $auth->get('/school/teacher-assignments', \App\Application\Actions\School\TeacherAssignmentsAction::class . ':list');
+            $auth->post('/school/teacher-assignments', \App\Application\Actions\School\TeacherAssignmentsAction::class . ':create');
+            $auth->delete('/school/teacher-assignments', \App\Application\Actions\School\TeacherAssignmentsAction::class . ':delete');
             $auth->get('/school/terms', TermsAction::class);
             $auth->get('/school/academic-calendar', \App\Application\Actions\School\AcademicCalendarAction::class . ':list');
             $auth->put('/school/academic-calendar/terms/{id:[0-9]+}', \App\Application\Actions\School\AcademicCalendarAction::class . ':updateTerm');

@@ -69,6 +69,7 @@ final class FeedbackAction
         $total = 0;
         $correct = 0;
         $byTopic = [];
+        $misconceptions = [];
         foreach ($answers as $a) {
             $isCorrect = $a->isCorrect();
             if ($isCorrect === null) {
@@ -81,7 +82,13 @@ final class FeedbackAction
             $byTopic[$tid] ??= ['topic' => $topic->getTitle(), 'total' => 0, 'correct' => 0];
             $byTopic[$tid]['total']++;
             $byTopic[$tid]['correct'] += $isCorrect ? 1 : 0;
+            // Misconceptions tagged on the questions this learner got wrong.
+            $tag = $a->getQuestion()->getMisconceptionTag();
+            if (!$isCorrect && $tag !== null) {
+                $misconceptions[$tag] = ($misconceptions[$tag] ?? 0) + 1;
+            }
         }
+        arsort($misconceptions);
 
         $accuracy = $total > 0 ? (int) round($correct / $total * 100) : null;
 
@@ -109,6 +116,12 @@ final class FeedbackAction
             'graded_assessments' => $attempts,
             'strongest' => $strongest,
             'weakest' => $weakest,
+            // Most frequent first: [{tag, count}], from the questions' misconception tags.
+            'misconceptions' => array_map(
+                static fn (string $tag, int $count) => ['tag' => $tag, 'count' => $count],
+                array_keys(array_slice($misconceptions, 0, 3, true)),
+                array_values(array_slice($misconceptions, 0, 3, true)),
+            ),
         ]);
     }
 

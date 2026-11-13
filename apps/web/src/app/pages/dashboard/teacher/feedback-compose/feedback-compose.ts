@@ -117,7 +117,11 @@ export class FeedbackCompose {
     if (s.weakest && !this.practiceNeeded().trim()) {
       this.practiceNeeded.set(`Needs more practice on ${s.weakest.topic} (${s.weakest.accuracy}% correct).`);
     }
-    this.autoNote.set(`Auto-filled from ${s.graded_assessments} graded assessment(s): ${acc}% accuracy across ${s.answered} answers. Override or add anything below.`);
+    // Misconceptions tagged on the questions this learner missed (from the question bank).
+    if (s.misconceptions?.length && !this.commonError().trim()) {
+      this.commonError.set(s.misconceptions.map((m: any) => m.tag).join('; '));
+    }
+    this.autoNote.set(`Auto-filled from ${s.graded_assessments} graded assessment(s): ${acc ?? '-'}% accuracy across ${s.answered} answers. Override or add anything below.`);
   }
 
   /** Pick a specific submission to view + pre-fill the feedback context. */

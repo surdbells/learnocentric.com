@@ -5,6 +5,7 @@
 <app-learno-modal [modalId]="'edit_teacher'" modalAction="Edit Teacher" [showBtn]="false">
   <app-edit-student-form
     [select]="selected()"
+    [teaching]="true"
     modalForm
     (submitted)="handleSuccessSubmit($event)"
   />
