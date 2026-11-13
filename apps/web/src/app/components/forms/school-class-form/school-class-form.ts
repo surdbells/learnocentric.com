@@ -34,6 +34,8 @@ export class SchoolClassForm {
     gradeLevel: new FormControl('', {nonNullable: true, validators: [Validators.required]}),
     section: new FormControl('', {nonNullable: true}),
     classTeacherId: new FormControl<number | null>(null),
+    // inactive = closed to new enrolments and hidden from teachers' class lists
+    status: new FormControl<'active' | 'inactive'>('active', {nonNullable: true}),
   })
   action = input<string>('');
 
@@ -58,13 +60,14 @@ export class SchoolClassForm {
 
     effect(() => {
       const s: any = this.select();
-      if (!s || !s['id']) { this.form.reset(); this.isEdit.set(false); return; }
+      if (!s || !s['id']) { this.form.reset({status: 'active'}); this.isEdit.set(false); return; }
 
-      this.form.reset();
+      this.form.reset({status: 'active'});
       this.form.patchValue({
         gradeLevel: s['grade_level'] ?? s['level'] ?? '',
         section: s['arm'] ?? s['section'] ?? '',
         classTeacherId: s['class_teacher_id'] ?? null,
+        status: s['status'] === 'inactive' ? 'inactive' : 'active',
       }, { emitEvent: false });
       this.isEdit.set(true);
     })

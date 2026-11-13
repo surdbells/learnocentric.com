@@ -64,6 +64,9 @@ final class EnrollmentsAction
         if (!$this->canActWithin($request, $class->getInstitution()) || $student->getInstitution()?->getId() !== $class->getInstitution()->getId()) {
             return Json::error($response, 'That learner or class is not in your school.', 404);
         }
+        if ($class->getStatus() === 'inactive') {
+            return Json::error($response, 'That class is inactive and takes no new enrolments. Reactivate it first.', 409);
+        }
 
         $enrollment = new Enrollment($student, $class);
         $this->applyDate($enrollment, $body);

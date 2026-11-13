@@ -316,6 +316,7 @@ return static function (App $app): void {
             $auth->get('/content/packages/{id:[0-9]+}/history', ContentPackagesAction::class . ':history');
             $auth->post('/content/assign', ContentPackagesAction::class . ':assign');
             $auth->get('/content/my-resources', ContentPackagesAction::class . ':myResources');
+            $auth->map(['GET', 'PUT'], '/content/my-resources/{id:[0-9]+}/progress', \App\Application\Actions\Content\ResourceProgressAction::class);
             $auth->get('/content/school-resources', SchoolResourcesAction::class . ':list');
             $auth->post('/content/school-resources', SchoolResourcesAction::class . ':create');
             $auth->delete('/content/school-resources', SchoolResourcesAction::class . ':delete');

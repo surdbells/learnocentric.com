@@ -125,6 +125,9 @@
                 <label class="form-check-label fw-medium" for="int_email">Email</label>
               </div>
               <input type="text" class="form-control" placeholder="Provider (e.g. SendGrid)" [(ngModel)]="model.integrations.email_provider" [disabled]="!model.integrations.email_enabled" />
+              @if (model.integrations.email_enabled && model._status && !model._status.email_configured) {
+                <div class="small text-danger mt-1">Email is switched on, but no mail credentials are set on the server, so nothing is being sent (password resets, verification, announcements).</div>
+              }
             </div>
             <div class="col-md-6">
               <div class="form-check form-switch mb-2">
@@ -132,6 +135,9 @@
                 <label class="form-check-label fw-medium" for="int_pay">Payments</label>
               </div>
               <input type="text" class="form-control" placeholder="Provider (e.g. Paystack)" [(ngModel)]="model.integrations.payment_provider" [disabled]="!model.integrations.payments_enabled" />
+              @if (model.integrations.payments_enabled && model._status && !model._status.payments_configured) {
+                <div class="small text-danger mt-1">Payments are switched on, but no Paystack key is set on the server, so schools cannot subscribe.</div>
+              }
             </div>
           </div>
         </div>

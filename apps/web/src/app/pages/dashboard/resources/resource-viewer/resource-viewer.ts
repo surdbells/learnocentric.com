@@ -87,26 +87,46 @@ export class ResourceViewer {
 
   onSelect(): void {
     const id = this.selectedId();
-    if (!id || !isPlatformBrowser(this.platformId)) { this.done.set(false); this.notes.set(''); return; }
-    this.done.set(localStorage.getItem(`resource_done_${id}`) === '1');
-    this.notes.set(localStorage.getItem(`resource_notes_${id}`) ?? '');
+    this.done.set(false); this.notes.set('');
+    if (!id || !isPlatformBrowser(this.platformId)) return;
+    // Progress and notes are kept on the server, so they follow the learner across devices.
+    this.api.get<any>(`/backend/content/my-resources/${id}/progress`).subscribe({
+      next: (p) => {
+        if (this.selectedId() !== id) return;
+        // One-time carry-over of anything an older version kept only in this browser.
+        const oldDone = localStorage.getItem(`resource_done_${id}`) === '1';
+        const oldNotes = localStorage.getItem(`resource_notes_${id}`) ?? '';
+        if (!p?.updated_at && (oldDone || oldNotes)) {
+          this.done.set(oldDone); this.notes.set(oldNotes);
+          this.saveProgress(id, {done: oldDone, notes: oldNotes});
+        } else {
+          this.done.set(!!p?.done); this.notes.set(p?.notes ?? '');
+        }
+        localStorage.removeItem(`resource_done_${id}`);
+        localStorage.removeItem(`resource_notes_${id}`);
+      },
+    });
   }
 
   toggleDone(): void {
     const id = this.selectedId();
-    if (!id || !isPlatformBrowser(this.platformId)) return;
+    if (!id) return;
     const next = !this.done();
     this.done.set(next);
-    if (next) localStorage.setItem(`resource_done_${id}`, '1');
-    else localStorage.removeItem(`resource_done_${id}`);
-    this.toast.success(next ? 'Marked as complete' : 'Marked as not complete');
+    this.saveProgress(id, {done: next}, next ? 'Marked as complete' : 'Marked as not complete', () => this.done.set(!next));
   }
 
   saveNotes(): void {
     const id = this.selectedId();
-    if (!id || !isPlatformBrowser(this.platformId)) return;
-    localStorage.setItem(`resource_notes_${id}`, this.notes());
-    this.toast.success('Notes saved');
+    if (!id) return;
+    this.saveProgress(id, {notes: this.notes()}, 'Notes saved');
+  }
+
+  private saveProgress(id: number, body: {done?: boolean; notes?: string}, message?: string, undo?: () => void): void {
+    this.api.put<any>(`/backend/content/my-resources/${id}/progress`, body).subscribe({
+      next: () => { if (message) this.toast.success(message); },
+      error: (e) => { undo?.(); this.toast.error(e?.error?.error || 'Could not save. Check your connection and try again.'); },
+    });
   }
 
   private youtubeId(url: string): string | null {

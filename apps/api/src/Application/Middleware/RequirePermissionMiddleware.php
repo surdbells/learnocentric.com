@@ -95,6 +95,7 @@ class RequirePermissionMiddleware implements MiddlewareInterface
         ['POST|PUT|DELETE', '#^/assessment/portfolio$#', false],
         ['GET', '#^/assessment/feedback/mine$#', false],
         ['POST', '#^/assessment/feedback/\d+/acknowledge$#', false],
+        ['GET|PUT', '#^/content/my-resources/\d+/progress$#', false],
         ['GET', '#^/live-classes/(upcoming|board)$#', false],
         ['POST', '#^/live-classes/\d+/join$#', false],
         ['GET', '#^/analytics/(children|student/\d+|report-card/\d+)$#', true],

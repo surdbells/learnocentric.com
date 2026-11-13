@@ -66,7 +66,14 @@ export class NewTeacher {
     this.api.get<any>('/backend/school/classes').subscribe({next: (r) => this.classes.set(Array.isArray(r) ? r : (r?.data ?? []))});
     this.api.get<any>('/backend/school/subjects').subscribe({next: (r) => this.subjects.set(Array.isArray(r) ? r : (r?.data ?? []))});
     const draft = localStorage.getItem(DRAFT_KEY);
-    if (draft) { try { this.form.patchValue(JSON.parse(draft)); } catch {} }
+    if (draft) {
+      try {
+        // Drafts saved by an older version may still contain the password: drop it.
+        const {password, ...safe} = JSON.parse(draft);
+        this.form.patchValue(safe);
+        if (password !== undefined) localStorage.setItem(DRAFT_KEY, JSON.stringify(safe));
+      } catch {}
+    }
   }
 
   onPhoto(f: UploadedFile): void { this.photoUrl.set(f.url); }
@@ -87,8 +94,10 @@ export class NewTeacher {
   readonly completeCount = computed(() => this.checklist().filter(c => c.done).length);
 
   saveDraft(): void {
-    localStorage.setItem(DRAFT_KEY, JSON.stringify(this.form.getRawValue()));
-    this.toast.success('Draft saved on this device');
+    // A draft stays in this browser, so it never holds the temporary password.
+    const {password, ...safe} = this.form.getRawValue();
+    localStorage.setItem(DRAFT_KEY, JSON.stringify(safe));
+    this.toast.success('Draft saved on this device (the password is not kept)');
   }
 
   submit(): void {

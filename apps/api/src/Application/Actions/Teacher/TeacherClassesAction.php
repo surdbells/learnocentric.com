@@ -59,6 +59,9 @@ final class TeacherClassesAction
         $totalLearners = 0;
         foreach ($classes as $cid => $entry) {
             $class = $entry['class'];
+            if ($class->getStatus() === 'inactive') {
+                continue; // closed classes drop out of the teacher's list
+            }
             $learners = (int) $this->em->getRepository(Enrollment::class)->count(['schoolClass' => $cid]);
             $totalLearners += $learners;
 

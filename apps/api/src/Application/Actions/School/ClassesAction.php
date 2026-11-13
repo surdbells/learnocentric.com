@@ -129,7 +129,7 @@ final class ClassesAction
         $before = $class->toArray();
         if (!empty($body['gradeLevel'])) { $class->setLevel((string) $body['gradeLevel']); }
         if (array_key_exists('section', $body)) { $class->setArm($body['section'] !== '' ? (string) $body['section'] : null); }
-        if (!empty($body['status'])) { $class->setStatus((string) $body['status']); }
+        if (in_array($body['status'] ?? null, ['active', 'inactive'], true)) { $class->setStatus($body['status']); }
         $this->applyClassTeacher($class, $body, $class->getInstitution());
         $this->em->flush();
 

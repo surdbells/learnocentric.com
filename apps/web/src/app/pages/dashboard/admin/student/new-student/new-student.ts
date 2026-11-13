@@ -63,7 +63,14 @@ export class NewStudent {
     this.form.valueChanges.subscribe(() => this.tick.update(v => v + 1));
     this.api.get<any>('/backend/school/classes').subscribe({next: (r) => this.classes.set(Array.isArray(r) ? r : (r?.data ?? []))});
     const draft = localStorage.getItem(DRAFT_KEY);
-    if (draft) { try { this.form.patchValue(JSON.parse(draft)); } catch {} }
+    if (draft) {
+      try {
+        // Drafts saved by an older version may still contain sensitive fields: drop them.
+        const {password, support, ...safe} = JSON.parse(draft);
+        this.form.patchValue(safe);
+        if (password !== undefined || support !== undefined) localStorage.setItem(DRAFT_KEY, JSON.stringify(safe));
+      } catch {}
+    }
   }
 
   onPhoto(f: UploadedFile): void { this.photoUrl.set(f.url); }
@@ -92,8 +99,11 @@ export class NewStudent {
   readonly completeCount = computed(() => this.checklist().filter(c => c.done).length);
 
   saveDraft(): void {
-    localStorage.setItem(DRAFT_KEY, JSON.stringify(this.form.getRawValue()));
-    this.toast.success('Draft saved on this device');
+    // A draft stays in this browser, so it never holds the temporary password
+    // or the learner's medical / support notes: those are typed again on return.
+    const {password, support, ...safe} = this.form.getRawValue();
+    localStorage.setItem(DRAFT_KEY, JSON.stringify(safe));
+    this.toast.success('Draft saved on this device (password and support notes are not kept)');
   }
 
   submit(): void {

@@ -8,6 +8,8 @@ use App\Application\Support\Guard;
 use App\Application\Support\Json;
 use App\Domain\Entity\User;
 use App\Service\AuditLogger;
+use App\Service\Billing\PaystackClient;
+use App\Service\Mailer\ZeptoMailer;
 use App\Service\PlatformSettings;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
@@ -23,6 +25,8 @@ final class SystemSettingsAction
     public function __construct(
         private readonly PlatformSettings $settings,
         private readonly AuditLogger $audit,
+        private readonly ZeptoMailer $mailer,
+        private readonly PaystackClient $paystack,
     ) {
     }
 
@@ -33,7 +37,22 @@ final class SystemSettingsAction
         }
         return strtoupper($request->getMethod()) === 'PUT'
             ? $this->update($request, $response)
-            : Json::write($response, $this->settings->all());
+            : Json::write($response, $this->withStatus($this->settings->all()));
+    }
+
+    /**
+     * Add what the server is actually able to do, so a switch that is on but
+     * has no credentials behind it is visible instead of failing silently.
+     *
+     * @param array<string,mixed> $settings
+     * @return array<string,mixed>
+     */
+    private function withStatus(array $settings): array
+    {
+        return $settings + ['_status' => [
+            'email_configured' => $this->mailer->isConfigured(),
+            'payments_configured' => $this->paystack->isConfigured(),
+        ]];
     }
 
     private function update(Request $request, Response $response): Response
@@ -110,6 +129,6 @@ final class SystemSettingsAction
         $row = $this->settings->save($current);
         $this->audit->log('platform.settings', $user, 'PlatformSetting', (string) $row->getId(), $before, $current);
 
-        return Json::write($response, $this->settings->all());
+        return Json::write($response, $this->withStatus($this->settings->all()));
     }
 }

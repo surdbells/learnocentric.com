@@ -17,6 +17,15 @@
         </select>
       </div>
 
+      <div class="col-md-12 mb-3">
+        <label class="form-label" for="classStatus">Status</label>
+        <select id="classStatus" class="form-select" formControlName="status">
+          <option value="active">Active</option>
+          <option value="inactive">Inactive (closed)</option>
+        </select>
+        <div class="form-text">An inactive class keeps its records but takes no new enrolments and leaves teachers' class lists.</div>
+      </div>
+
       <div class="col-12">
         <div class="alert alert-light border small mb-0">
           The class will be named from the level and arm — e.g. <strong>{{ previewName || 'JSS 1 A' }}</strong>. Use the arm for streams like A/B or Gold/Silver, not a subject.
