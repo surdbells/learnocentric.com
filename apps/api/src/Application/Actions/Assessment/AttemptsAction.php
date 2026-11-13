@@ -13,6 +13,7 @@ use App\Domain\Entity\Question;
 use App\Domain\Entity\User;
 use App\Domain\Lifecycle;
 use App\Application\Support\Json;
+use App\Application\Support\LearnerAccess;
 use App\Service\AnswerGrader;
 use App\Service\AuditLogger;
 use DateTimeImmutable;
@@ -26,6 +27,8 @@ use Psr\Http\Message\ServerRequestInterface as Request;
  */
 final class AttemptsAction
 {
+    use LearnerAccess;
+
     public function __construct(
         private readonly EntityManagerInterface $em,
         private readonly AnswerGrader $grader,
@@ -82,6 +85,11 @@ final class AttemptsAction
         $assessment = $this->em->getRepository(Assessment::class)->find((int) ($body['assessment_id'] ?? 0));
         if ($assessment === null) {
             return Json::error($response, 'Assessment not found.', 404);
+        }
+        // Only a learner of the assessment's school, in the class it is set for, may take it.
+        $block = $this->learnerBlock($student, $assessment->getSubject()->getInstitution(), $assessment->getSchoolClass(), 'assessment');
+        if ($block !== null) {
+            return Json::error($response, $block[0], $block[1]);
         }
         if ($assessment->getApprovalStatus() !== Lifecycle::PUBLISHED) {
             return Json::error($response, 'This assessment is not open for attempts.', 422);

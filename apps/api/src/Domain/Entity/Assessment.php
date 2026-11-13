@@ -90,6 +90,7 @@ class Assessment implements LifecycleAware
     public function getSubject(): Subject { return $this->subject; }
     public function getTopic(): ?Topic { return $this->topic; }
     public function setTopic(?Topic $v): void { $this->topic = $v; }
+    public function getSchoolClass(): ?SchoolClass { return $this->schoolClass; }
     public function setSchoolClass(?SchoolClass $v): void { $this->schoolClass = $v; }
     public function setTerm(?Term $v): void { $this->term = $v; }
     public function getTitle(): string { return $this->title; }

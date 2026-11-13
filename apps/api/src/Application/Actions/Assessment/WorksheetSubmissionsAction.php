@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Application\Actions\Assessment;
 
 use App\Application\Support\Json;
+use App\Application\Support\LearnerAccess;
 use App\Domain\Entity\Enrollment;
 use App\Domain\Entity\User;
 use App\Domain\Entity\Worksheet;
@@ -13,6 +14,7 @@ use App\Domain\Entity\WorksheetResponse;
 use App\Domain\Entity\WorksheetSubmission;
 use App\Domain\Lifecycle;
 use App\Service\AuditLogger;
+use App\Service\LifecycleService;
 use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Http\Message\ResponseInterface as Response;
@@ -22,6 +24,7 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 final class WorksheetSubmissionsAction
 {
     use \App\Application\Actions\School\ResolvesInstitution;
+    use LearnerAccess;
 
     private const STAFF = ['teacher', 'academic_lead', 'school_admin', 'tutor_admin', 'super_admin'];
 
@@ -29,6 +32,7 @@ final class WorksheetSubmissionsAction
         private readonly EntityManagerInterface $em,
         private readonly AuditLogger $audit,
         private readonly \App\Service\NotificationService $notify,
+        private readonly LifecycleService $lifecycle,
     ) {
     }
 
@@ -65,12 +69,9 @@ final class WorksheetSubmissionsAction
     public function submit(Request $request, Response $response, array $args): Response
     {
         $student = $this->currentUser($request);
-        $worksheet = $this->em->getRepository(Worksheet::class)->find((int) $args['id']);
-        if ($worksheet === null) {
-            return Json::error($response, 'Worksheet not found.', 404);
-        }
-        if ($worksheet->getApprovalStatus() !== Lifecycle::PUBLISHED) {
-            return Json::error($response, 'This worksheet is not open for submissions.', 422);
+        [$worksheet, $deny] = $this->worksheetForLearner($request, $response, (int) $args['id'], true);
+        if ($deny !== null) {
+            return $deny;
         }
         $body = (array) $request->getParsedBody();
         $questions = $this->em->getRepository(WorksheetQuestion::class)->findBy(['worksheet' => $worksheet]);
@@ -162,9 +163,9 @@ final class WorksheetSubmissionsAction
     public function solve(Request $request, Response $response, array $args): Response
     {
         $student = $this->currentUser($request);
-        $worksheet = $this->em->getRepository(Worksheet::class)->find((int) $args['id']);
-        if ($worksheet === null) {
-            return Json::error($response, 'Worksheet not found.', 404);
+        [$worksheet, $deny] = $this->worksheetForLearner($request, $response, (int) $args['id'], false);
+        if ($deny !== null) {
+            return $deny;
         }
         $submission = $this->em->getRepository(WorksheetSubmission::class)->findOneBy(['worksheet' => $worksheet, 'student' => $student]);
 
@@ -175,9 +176,9 @@ final class WorksheetSubmissionsAction
     public function save(Request $request, Response $response, array $args): Response
     {
         $student = $this->currentUser($request);
-        $worksheet = $this->em->getRepository(Worksheet::class)->find((int) $args['id']);
-        if ($worksheet === null) {
-            return Json::error($response, 'Worksheet not found.', 404);
+        [$worksheet, $deny] = $this->worksheetForLearner($request, $response, (int) $args['id'], true);
+        if ($deny !== null) {
+            return $deny;
         }
         $questions = $this->em->getRepository(WorksheetQuestion::class)->findBy(['worksheet' => $worksheet]);
         if ($questions === []) {
@@ -186,6 +187,11 @@ final class WorksheetSubmissionsAction
         $submission = $this->em->getRepository(WorksheetSubmission::class)->findOneBy(['worksheet' => $worksheet, 'student' => $student]);
         if ($submission !== null && $submission->getStatus() === WorksheetSubmission::GRADED) {
             return Json::error($response, 'This worksheet has already been graded.', 409);
+        }
+        // Once handed in, answers change only by submitting again (which re-marks
+        // them); a silent save would leave marks that no longer match the answers.
+        if ($submission !== null && $submission->getStatus() === WorksheetSubmission::SUBMITTED) {
+            return Json::error($response, 'You have already submitted this worksheet. Submit it again to change your answers.', 409);
         }
         if ($submission === null) {
             $submission = new WorksheetSubmission($worksheet, $student);
@@ -212,25 +218,55 @@ final class WorksheetSubmissionsAction
         if ($worksheet === null || !$this->canActWithin($request, $worksheet->getTopic()->getSubject()->getInstitution())) {
             return Json::error($response, 'Worksheet not found.', 404);
         }
+        // Same lock as the worksheet's own details: questions change only in draft or review.
+        if (!in_array($worksheet->getApprovalStatus(), LifecycleService::EDITABLE, true)) {
+            $guidance = $this->lifecycle->guidance(
+                $worksheet,
+                $this->currentUser($request),
+                'worksheet',
+                $worksheet->getTopic()->getSubject()->getInstitution(),
+                [],
+                'worksheet',
+            );
+
+            return Json::error($response, $guidance['edit_reason'] ?? 'This worksheet cannot be changed right now.', 409);
+        }
         $items = $request->getParsedBody()['questions'] ?? null;
         if (!is_array($items)) {
             return Json::error($response, 'Provide a "questions" array.', 422);
         }
-        // Replace existing questions.
+
+        // Update questions in place where the caller names them by id. Learners'
+        // answers hang off the question, so deleting and recreating every question
+        // (as this used to) erased the answers already given on a worksheet that is
+        // being revised. Only questions left out of the list are removed.
+        /** @var array<int, WorksheetQuestion> $existing */
+        $existing = [];
         foreach ($this->em->getRepository(WorksheetQuestion::class)->findBy(['worksheet' => $worksheet]) as $old) {
-            $this->em->remove($old);
+            $existing[(int) $old->getId()] = $old;
         }
-        $this->em->flush();
 
         $total = 0;
         $sectionPositions = [];
         $pos = 0;
+        $kept = [];
         foreach (array_values($items) as $item) {
+            if (!is_array($item)) {
+                continue;
+            }
             $prompt = trim((string) ($item['prompt'] ?? ''));
             if ($prompt === '') {
                 continue;
             }
-            $q = new WorksheetQuestion($worksheet, $prompt);
+            $id = (int) ($item['id'] ?? 0);
+            $q = ($id > 0 && isset($existing[$id]) && !isset($kept[$id])) ? $existing[$id] : null;
+            if ($q === null) {
+                $q = new WorksheetQuestion($worksheet, $prompt);
+                $this->em->persist($q);
+            } else {
+                $q->setPrompt($prompt);
+                $kept[$id] = true;
+            }
             $section = trim((string) ($item['section_label'] ?? '')) ?: null;
             if ($section !== null && !isset($sectionPositions[$section])) {
                 $sectionPositions[$section] = count($sectionPositions);
@@ -242,14 +278,20 @@ final class WorksheetSubmissionsAction
             $q->setOptions(is_array($item['options'] ?? null) ? array_values($item['options']) : null);
             $q->setCorrectAnswer(isset($item['correct_answer']) && $item['correct_answer'] !== '' ? (string) $item['correct_answer'] : null);
             $q->setMarks((int) ($item['marks'] ?? 1));
-            $this->em->persist($q);
             $total += $q->getMarks();
+        }
+        $removed = 0;
+        foreach ($existing as $id => $old) {
+            if (!isset($kept[$id])) {
+                $this->em->remove($old);
+                $removed++;
+            }
         }
         $worksheet->setTotalMarks(max(1, $total));
         $this->em->flush();
-        $this->audit->log('worksheet.questions.set', $request->getAttribute('user'), 'Worksheet', (string) $worksheet->getId(), null, ['count' => $pos, 'total_marks' => $total]);
+        $this->audit->log('worksheet.questions.set', $request->getAttribute('user'), 'Worksheet', (string) $worksheet->getId(), null, ['count' => $pos, 'removed' => $removed, 'total_marks' => $total]);
 
-        return Json::write($response, ['ok' => true, 'count' => $pos, 'total_marks' => $total]);
+        return Json::write($response, ['ok' => true, 'count' => $pos, 'removed' => $removed, 'total_marks' => $total]);
     }
 
     /** GET /assessment/worksheets/{id}/questions, staff fetch the worksheet's questions (with answers) for authoring. */
@@ -272,9 +314,9 @@ final class WorksheetSubmissionsAction
     public function mine(Request $request, Response $response, array $args): Response
     {
         $student = $this->currentUser($request);
-        $worksheet = $this->em->getRepository(Worksheet::class)->find((int) $args['id']);
-        if ($worksheet === null) {
-            return Json::error($response, 'Worksheet not found.', 404);
+        [$worksheet, $deny] = $this->worksheetForLearner($request, $response, (int) $args['id'], false);
+        if ($deny !== null) {
+            return $deny;
         }
         $submission = $this->em->getRepository(WorksheetSubmission::class)->findOneBy(['worksheet' => $worksheet, 'student' => $student]);
 
@@ -288,7 +330,7 @@ final class WorksheetSubmissionsAction
             return $guard;
         }
         $worksheet = $this->em->getRepository(Worksheet::class)->find((int) $args['id']);
-        if ($worksheet === null) {
+        if ($worksheet === null || !$this->canActWithin($request, $worksheet->getTopic()->getSubject()->getInstitution())) {
             return Json::error($response, 'Worksheet not found.', 404);
         }
         $subs = $this->em->getRepository(WorksheetSubmission::class)->findBy(['worksheet' => $worksheet], ['submittedAt' => 'DESC']);
@@ -311,6 +353,9 @@ final class WorksheetSubmissionsAction
         $submission = $this->em->getRepository(WorksheetSubmission::class)->find((int) $args['id']);
         if ($submission === null || !$this->canActWithin($request, $submission->getStudent()->getInstitution())) {
             return Json::error($response, 'Submission not found.', 404);
+        }
+        if ($submission->getStatus() === WorksheetSubmission::DRAFT) {
+            return Json::error($response, 'This learner has not submitted the worksheet yet, so it cannot be marked.', 409);
         }
         $body = (array) $request->getParsedBody();
         if (!isset($body['score']) || !is_numeric($body['score'])) {
@@ -402,6 +447,9 @@ final class WorksheetSubmissionsAction
         $submission = $this->em->getRepository(WorksheetSubmission::class)->find((int) $args['id']);
         if ($submission === null || !$this->canActWithin($request, $submission->getStudent()->getInstitution())) {
             return Json::error($response, 'Submission not found.', 404);
+        }
+        if ($submission->getStatus() === WorksheetSubmission::DRAFT) {
+            return Json::error($response, 'This learner has not submitted the worksheet yet, so it cannot be marked.', 409);
         }
         $worksheet = $submission->getWorksheet();
         $questions = [];
@@ -609,6 +657,48 @@ final class WorksheetSubmissionsAction
     }
 
     // --- helpers ---
+
+    /**
+     * The worksheet a learner is trying to open, or the refusal to send back.
+     *
+     * A learner reaches a worksheet only in their own school, for one of their
+     * classes, and while it is published. With $toWork false (reading rather
+     * than answering) a learner may still see a worksheet they have already
+     * handed in after it is taken down, and staff of the school may preview it.
+     *
+     * @return array{0: Worksheet|null, 1: Response|null}
+     */
+    private function worksheetForLearner(Request $request, Response $response, int $id, bool $toWork): array
+    {
+        $user = $this->currentUser($request);
+        $worksheet = $id > 0 ? $this->em->getRepository(Worksheet::class)->find($id) : null;
+        if ($worksheet === null) {
+            return [null, Json::error($response, 'Worksheet not found.', 404)];
+        }
+        $owner = $worksheet->getTopic()->getSubject()->getInstitution();
+
+        if (!$toWork && in_array($user->getRole()->effectiveCode(), self::STAFF, true)) {
+            return $this->canActWithin($request, $owner)
+                ? [$worksheet, null]
+                : [null, Json::error($response, 'Worksheet not found.', 404)];
+        }
+
+        $block = $this->learnerBlock($user, $owner, $worksheet->getSchoolClass(), 'worksheet');
+        if ($block !== null) {
+            return [null, Json::error($response, $block[0], $block[1])];
+        }
+        if ($worksheet->getApprovalStatus() !== Lifecycle::PUBLISHED) {
+            // "Handed in" means submitted or marked: an unfinished draft does not count.
+            $mine = $toWork ? null : $this->em->getRepository(WorksheetSubmission::class)
+                ->findOneBy(['worksheet' => $worksheet, 'student' => $user]);
+            $handedIn = $mine !== null && $mine->getStatus() !== WorksheetSubmission::DRAFT;
+            if (!$handedIn) {
+                return [null, Json::error($response, $toWork ? 'This worksheet is not open for submissions.' : 'Worksheet not found.', $toWork ? 422 : 404)];
+            }
+        }
+
+        return [$worksheet, null];
+    }
 
     private function currentUser(Request $request): User
     {

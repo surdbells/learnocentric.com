@@ -9,6 +9,8 @@ import {ApiService} from '../../../common/service/api.service';
 
 /** One question in the builder. `options` is newline-separated text, split for mcq on save. */
 interface QItem {
+  /** Set for a question already saved, so it is updated in place rather than recreated. */
+  id?: number;
   prompt: string;
   type: string;
   marks: number;
@@ -134,6 +136,7 @@ export class WorksheetForm {
           const label = (q.section_label ?? '').toString();
           if (!byLabel.has(label)) { byLabel.set(label, {label, questions: []}); order.push(label); }
           byLabel.get(label)!.questions.push({
+            id: q.id,
             prompt: q.prompt ?? '',
             type: q.type ?? 'numeric',
             marks: q.marks ?? 1,
@@ -179,6 +182,7 @@ export class WorksheetForm {
         const prompt = (q.prompt ?? '').trim();
         if (!prompt) continue;
         out.push({
+          id: q.id ?? null,
           prompt,
           section_label: (s.label ?? '').trim() || null,
           type: q.type,
