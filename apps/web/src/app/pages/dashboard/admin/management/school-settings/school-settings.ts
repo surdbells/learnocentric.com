@@ -12,6 +12,7 @@ import {RolesPermissions} from './roles-permissions/roles-permissions';
 import {AcademicCalendar} from './academic-calendar/academic-calendar';
 import {AuthService} from '../../../../../common/auth/auth.service';
 import {roleRoot} from '../../../../../common/auth/portal';
+import {BrandThemeService} from '../../../../../common/service/brand-theme.service';
 
 interface Band { grade: string; min: number; }
 
@@ -33,6 +34,7 @@ export class SchoolSettings {
   private readonly api = inject(ApiService);
   private readonly toast = inject(ToastrService);
   private readonly auth = inject(AuthService);
+  private readonly brandTheme = inject(BrandThemeService);
 
   /** '/admin' or '/academy', so links work for both school and academy admins. */
   readonly root = roleRoot(this.auth.getAuthSession()?.user?.role);
@@ -199,6 +201,8 @@ export class SchoolSettings {
     }).subscribe({
       next: ({profile, settings}) => {
         this.profile.set(profile ?? this.profile());
+        // The new brand colour themes the app straight away.
+        this.brandTheme.apply((profile ?? this.profile())?.brand_color ?? null);
         this.settings.set(settings ?? this.settings());
         this.bands.set(settings?.grading?.bands ?? bands);
         this.passMark.set(settings?.grading?.pass_mark ?? this.passMark());

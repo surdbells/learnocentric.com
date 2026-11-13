@@ -4,6 +4,7 @@ import {isPlatformBrowser} from '@angular/common';
 import {IMenu, UserPreferenceMenu} from '../../common/service/user-preference-menu';
 import {AuthUser} from '../../common/auth/auth.models';
 import {ModuleAccessService} from '../../common/auth/module-access.service';
+import {BrandThemeService} from '../../common/service/brand-theme.service';
 import {Sidenav} from '../../common/layout/sidenav/sidenav';
 import {Topbar} from '../../common/layout/topbar/topbar';
 
@@ -19,6 +20,7 @@ const COLLAPSE_KEY = 'sidebarCollapsed';
 export class Dashboard implements OnInit {
 
   private readonly moduleAccess = inject(ModuleAccessService);
+  private readonly brandTheme = inject(BrandThemeService);
   private readonly fullMenu = signal<IMenu[]>([]);
 
   /** Menu with items the current plan doesn't grant filtered out. */
@@ -40,6 +42,8 @@ export class Dashboard implements OnInit {
       const user: AuthUser = JSON.parse(localStorage.getItem('auth_user') || '{}');
       this.fullMenu.set(this.userPreferenceMenu[user.role] ?? []);
       this.alwaysOpenMenu.set(user.role === 'student');
+      // Re-apply the school's brand colour straight away (no green flash on reload).
+      this.brandTheme.restore();
       // Refresh granted modules so the menu reflects the school's current plan.
       this.moduleAccess.refresh();
     }

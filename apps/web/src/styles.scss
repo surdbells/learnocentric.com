@@ -57,9 +57,9 @@
   --bs-primary-border-subtle: var(--brand-100);
 
   --bs-link-color: var(--brand-700);
-  --bs-link-color-rgb: 30, 138, 46;
+  --bs-link-color-rgb: var(--brand-link-rgb, 30, 138, 46);
   --bs-link-hover-color: var(--brand-800);
-  --bs-link-hover-color-rgb: 25, 111, 39;
+  --bs-link-hover-color-rgb: var(--brand-link-hover-rgb, 25, 111, 39);
 
   --bs-focus-ring-color: rgba(var(--brand-rgb), 0.28);
 }
@@ -68,13 +68,13 @@
   --bs-primary: var(--brand-500);
   --bs-primary-rgb: var(--brand-rgb);
   --bs-primary-text-emphasis: var(--brand-300);
-  --bs-primary-bg-subtle: #123018;
-  --bs-primary-border-subtle: #1f5a2c;
+  --bs-primary-bg-subtle: var(--brand-dark-subtle, #123018);
+  --bs-primary-border-subtle: var(--brand-dark-border, #1f5a2c);
 
   --bs-link-color: var(--brand-400);
-  --bs-link-color-rgb: 92, 209, 103;
+  --bs-link-color-rgb: var(--brand-link-dark-rgb, 92, 209, 103);
   --bs-link-hover-color: var(--brand-300);
-  --bs-link-hover-color-rgb: 120, 213, 133;
+  --bs-link-hover-color-rgb: var(--brand-link-dark-hover-rgb, 120, 213, 133);
 
   --bs-focus-ring-color: rgba(var(--brand-rgb), 0.35);
 }
@@ -124,6 +124,49 @@
   --bs-btn-color: var(--brand-400);
   --bs-btn-hover-color: var(--brand-300);
 }
+
+/* -----------------------------------------------------------
+   Per-school brand (BrandThemeService sets data-brand + the --brand-* tokens).
+   The app uses Bootstrap "success" both as its accent (action buttons, card
+   icons, links) and as a status colour. Under a school's brand the ACCENT
+   uses follow the brand; status badges, alerts and text keep "success" green
+   so "passed" / "active" still read as such.
+   ----------------------------------------------------------- */
+:root[data-brand] .btn-success {
+  --bs-btn-color: #fff;
+  --bs-btn-bg: var(--brand-500);
+  --bs-btn-border-color: var(--brand-500);
+  --bs-btn-hover-color: #fff;
+  --bs-btn-hover-bg: var(--brand-600);
+  --bs-btn-hover-border-color: var(--brand-600);
+  --bs-btn-focus-shadow-rgb: var(--brand-rgb);
+  --bs-btn-active-color: #fff;
+  --bs-btn-active-bg: var(--brand-700);
+  --bs-btn-active-border-color: var(--brand-700);
+  --bs-btn-disabled-color: #fff;
+  --bs-btn-disabled-bg: var(--brand-500);
+  --bs-btn-disabled-border-color: var(--brand-500);
+}
+:root[data-brand] .btn-outline-success {
+  --bs-btn-color: var(--brand-700);
+  --bs-btn-border-color: var(--brand-500);
+  --bs-btn-hover-color: #fff;
+  --bs-btn-hover-bg: var(--brand-500);
+  --bs-btn-hover-border-color: var(--brand-500);
+  --bs-btn-focus-shadow-rgb: var(--brand-rgb);
+  --bs-btn-active-color: #fff;
+  --bs-btn-active-bg: var(--brand-600);
+  --bs-btn-active-border-color: var(--brand-600);
+  --bs-btn-disabled-color: var(--brand-500);
+  --bs-btn-disabled-border-color: var(--brand-500);
+}
+:root[data-brand][data-bs-theme="dark"] .btn-outline-success { --bs-btn-color: var(--brand-400); }
+:root[data-brand] .link-success { color: var(--brand-700) !important; }
+:root[data-brand] .link-success:hover { color: var(--brand-800) !important; }
+:root[data-brand][data-bs-theme="dark"] .link-success { color: var(--brand-400) !important; }
+/* accent icons (card headings, tiles) */
+:root[data-brand] app-icon.text-success { color: var(--brand-600) !important; }
+:root[data-brand][data-bs-theme="dark"] app-icon.text-success { color: var(--brand-400) !important; }
 
 /* Nav pills / tabs / list-group / pagination / progress / alerts / badges */
 .nav-pills {

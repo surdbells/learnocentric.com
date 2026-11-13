@@ -2,6 +2,7 @@ import {Component, computed, inject, input, OnInit, output, PLATFORM_ID, signal}
 import {isPlatformBrowser, Location} from '@angular/common';
 import {FormsModule} from '@angular/forms';
 import {Router, RouterLink} from '@angular/router';
+import {BrandThemeService} from '../../service/brand-theme.service';
 import {Subject} from 'rxjs';
 import {debounceTime, distinctUntilChanged, switchMap} from 'rxjs/operators';
 import {of} from 'rxjs';
@@ -37,6 +38,7 @@ export class Topbar implements OnInit {
 
   user = signal<AuthUser | null>(null);
   institution = signal<any | null>(null);
+  private readonly brandTheme = inject(BrandThemeService);
   /** Whether the currently-applied theme is dark (resolves 'system' against the OS). */
   isDark = signal(false);
 
@@ -111,7 +113,11 @@ export class Topbar implements OnInit {
   ngOnInit(): void {
     if (isPlatformBrowser(this.platformId) && this.user()?.institutionId) {
       this.apiSrv.get('/backend/admin/institutions/' + this.user()?.institutionId)
-        .subscribe(res => this.institution.set(res));
+        .subscribe((res: any) => {
+          this.institution.set(res);
+          // Theme the app in the school's brand colour (default green when none is set).
+          this.brandTheme.apply(res?.brand_color ?? null);
+        });
     }
   }
 
