@@ -104,7 +104,13 @@ final class ModuleAccess
             ['periodEnd' => 'DESC'],
             1,
         );
-        return $subs[0] ?? null;
+        $sub = $subs[0] ?? null;
+        // A renewal paid early begins when the term before it ends.
+        if ($sub !== null && $sub->rollOver()) {
+            $this->em->flush();
+        }
+
+        return $sub;
     }
 
     private function everSubscribed(Institution $institution): bool

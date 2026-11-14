@@ -47,10 +47,17 @@ export class SuperAdminPlans {
   form = new FormGroup({
     code: new FormControl('', {nonNullable: true, validators: [Validators.required]}),
     name: new FormControl('', {nonNullable: true, validators: [Validators.required]}),
-    priceNaira: new FormControl<number | null>(null, {validators: [Validators.required]}),
+    audience: new FormControl('school', {nonNullable: true}),
+    priceNaira: new FormControl<number | null>(null),
     interval: new FormControl('termly', {nonNullable: true}),
+    annualNaira: new FormControl<number | null>(null),
+    periodDays: new FormControl<number | null>(null),
+    isCustom: new FormControl(false, {nonNullable: true}),
     maxStudents: new FormControl<number | null>(null),
     maxTeachers: new FormControl<number | null>(null),
+    maxAdmins: new FormControl<number | null>(null),
+    storageGb: new FormControl<number | null>(null),
+    sortOrder: new FormControl<number>(0, {nonNullable: true}),
     features: new FormControl('', {nonNullable: true}),
     isActive: new FormControl(true, {nonNullable: true}),
   });
@@ -69,21 +76,25 @@ export class SuperAdminPlans {
 
   openCreate(): void {
     this.editing.set(null);
-    this.form.reset({interval: 'termly', isActive: true});
-    this.selectedModules.set(new Set());
+    this.form.reset({interval: 'termly', audience: 'school', isActive: false, isCustom: false, sortOrder: 0});
+    this.selectedModules.set(new Set(this.allModules.map(m => m.key)));
     this.form.get('code')!.enable();
     this.open();
   }
 
   openEdit(plan: any): void {
     this.editing.set(plan);
-    this.form.reset({interval: plan.interval, isActive: plan.is_active});
+    this.form.reset({interval: plan.interval, isActive: plan.is_active, audience: plan.audience ?? 'school', isCustom: !!plan.is_custom, sortOrder: plan.sort_order ?? 0});
     this.form.patchValue({
       code: plan.code,
       name: plan.name,
       priceNaira: plan.price_naira,
+      annualNaira: plan.annual_price_naira,
+      periodDays: plan.period_days,
       maxStudents: plan.max_students,
       maxTeachers: plan.max_teachers,
+      maxAdmins: plan.max_admins,
+      storageGb: plan.storage_gb,
       features: (plan.features ?? []).join('\n'),
     });
     this.selectedModules.set(new Set(plan.modules ?? []));
@@ -92,18 +103,25 @@ export class SuperAdminPlans {
   }
 
   save(): void {
-    if (this.form.get('name')!.invalid || this.form.get('priceNaira')!.invalid || (!this.editing() && this.form.get('code')!.invalid)) {
-      this.toast.error('Code, name and price are required');
+    const v = this.form.getRawValue();
+    if (this.form.get('name')!.invalid || (!this.editing() && this.form.get('code')!.invalid) || (!v.isCustom && !(Number(v.priceNaira) > 0))) {
+      this.toast.error('A code, a name and a price are required (a custom-quote plan needs no price)');
       return;
     }
-    const v = this.form.getRawValue();
     const body: any = {
       code: v.code,
       name: v.name,
-      price_kobo: Math.round((v.priceNaira ?? 0) * 100),
+      audience: v.audience,
+      price_kobo: Math.round((Number(v.priceNaira) || 0) * 100),
       interval: v.interval,
+      annual_price_kobo: v.annualNaira ? Math.round(Number(v.annualNaira) * 100) : null,
+      period_days: v.interval === 'cohort' ? (v.periodDays || null) : null,
+      is_custom: v.isCustom,
       max_students: v.maxStudents,
       max_teachers: v.maxTeachers,
+      max_admins: v.maxAdmins,
+      storage_gb: v.storageGb,
+      sort_order: Number(v.sortOrder) || 0,
       features: String(v.features || '').split('\n').map((f) => f.trim()).filter(Boolean),
       modules: [...this.selectedModules()],
       is_active: v.isActive,
@@ -123,10 +141,25 @@ export class SuperAdminPlans {
     });
   }
 
+  /** Put a draft plan on sale (or back on sale). */
+  publish(plan: any): void {
+    if (!confirm(`Put the ${plan.name} plan on sale? Organisations will be able to buy it from Billing at the prices shown.`)) return;
+    this.api.put('/backend/billing/plans', {id: plan.id, is_active: true}).subscribe({
+      next: () => { this.toast.success('Plan is on sale'); this.load(); },
+      error: (e) => this.toast.error(e?.error?.error || 'Could not update the plan'),
+    });
+  }
+
+  intervalLabel(i: string): string {
+    return ({termly: 'term', monthly: 'month', yearly: 'year', cohort: 'cohort'} as Record<string, string>)[i] ?? i;
+  }
+  audienceLabel(a: string): string { return a === 'academy' ? 'Academies' : 'Schools'; }
+  plansFor(audience: string): any[] { return this.plans().filter(p => (p.audience ?? 'school') === audience); }
+
   deactivate(plan: any): void {
-    if (!confirm(`Deactivate the ${plan.name} plan? Institutions already on it keep access.`)) return;
+    if (!confirm(`Take the ${plan.name} plan off sale? Organisations already on it keep it and can renew it; nobody new can buy it.`)) return;
     this.api.delete(`/backend/billing/plans?id=${plan.id}`, {confirm: false}).subscribe({
-      next: () => { this.toast.success('Plan deactivated'); this.load(); },
+      next: () => { this.toast.success('Plan taken off sale'); this.load(); },
       error: () => this.toast.error('Could not deactivate'),
     });
   }

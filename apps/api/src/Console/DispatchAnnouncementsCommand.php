@@ -25,6 +25,7 @@ final class DispatchAnnouncementsCommand extends Command
         private readonly AnnouncementDispatcher $dispatcher,
         private readonly \App\Service\LiveClassReminders $reminders,
         private readonly \App\Service\StudyReminders $study,
+        private readonly \App\Service\Billing\SubscriptionNotices $billing,
     ) {
         parent::__construct();
     }
@@ -35,9 +36,10 @@ final class DispatchAnnouncementsCommand extends Command
         [$announcements, $emails] = $this->dispatcher->emailPending();
         $reminded = $this->reminders->sendDue();
         [$daily, $weekly] = $this->study->sendDue();
+        $subscriptions = $this->billing->sendDue();
         $output->writeln(sprintf(
-            'Scheduled announcements sent: %d. Emailed: %d announcement(s), %d email(s). Live-class reminders: %d class(es). Study reminders: %d daily, %d weekly.',
-            $sent, $announcements, $emails, $reminded, $daily, $weekly
+            'Scheduled announcements sent: %d. Emailed: %d announcement(s), %d email(s). Live-class reminders: %d class(es). Study reminders: %d daily, %d weekly. Subscription notices: %d.',
+            $sent, $announcements, $emails, $reminded, $daily, $weekly, $subscriptions
         ));
 
         return Command::SUCCESS;

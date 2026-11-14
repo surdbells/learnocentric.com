@@ -26,6 +26,7 @@ final class UserProfileAction
         private readonly \App\Service\PasswordService $passwords,
         private readonly \App\Service\PlatformSettings $settings,
         private readonly \App\Service\SubmittedWork $work,
+        private readonly \App\Service\Billing\SubscriptionService $subscriptions,
     ) {
     }
 
@@ -62,7 +63,15 @@ final class UserProfileAction
         if (!empty($body['lastName'])) { $target->setLastName((string) $body['lastName']); }
         if (!empty($body['email'])) { $target->setEmail((string) $body['email']); }
         if (array_key_exists('phone', $body)) { $target->setPhone($body['phone'] !== null && $body['phone'] !== '' ? (string) $body['phone'] : null); }
-        if (array_key_exists('isActive', $body)) { $target->setStatus(filter_var($body['isActive'], FILTER_VALIDATE_BOOL) ? 'active' : 'suspended'); }
+        if (array_key_exists('isActive', $body)) {
+            $enable = filter_var($body['isActive'], FILTER_VALIDATE_BOOL);
+            // Re-enabling a login takes one of the plan's places again.
+            if ($enable && $target->getStatus() !== 'active' && $target->getInstitution() !== null
+                && ($full = $this->subscriptions->limitRefusal($target->getInstitution(), $target->getRole()->effectiveCode())) !== null) {
+                return Json::error($response, $full, 409);
+            }
+            $target->setStatus($enable ? 'active' : 'suspended');
+        }
         if (!empty($body['dateOfBirth'])) {
             try { $target->setDateOfBirth(new DateTimeImmutable((string) $body['dateOfBirth'])); } catch (Throwable) {}
         }

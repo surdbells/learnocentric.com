@@ -7,13 +7,16 @@ import {ModuleAccessService} from '../../common/auth/module-access.service';
 import {BrandThemeService} from '../../common/service/brand-theme.service';
 import {Sidenav} from '../../common/layout/sidenav/sidenav';
 import {Topbar} from '../../common/layout/topbar/topbar';
+import {RouterLink} from '@angular/router';
+import {roleRoot} from '../../common/auth/portal';
+import {Icon} from '../../common/icon/icon';
 
 const COLLAPSE_KEY = 'sidebarCollapsed';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [RouterOutlet, Sidenav, Topbar],
+  imports: [RouterOutlet, RouterLink, Sidenav, Topbar, Icon],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.css',
 })
@@ -29,6 +32,29 @@ export class Dashboard implements OnInit {
   /** Students get a fully-expanded, non-collapsible menu (all items always visible). */
   readonly alwaysOpenMenu = signal<boolean>(false);
 
+  /** Tutors, learners and parents whose school's subscription has ended see why, instead of pages that fail. */
+  readonly suspended = computed(() => !!this.moduleAccess.subscription()?.suspended);
+  readonly suspendedMessage = computed(() => this.moduleAccess.subscription()?.message ?? '');
+
+  /** For the people who pay: a short note when the subscription needs attention, with a link to Billing. */
+  readonly billingNotice = computed<{tone: string; text: string} | null>(() => {
+    const s = this.moduleAccess.subscription();
+    if (!s?.manages_billing) return null;
+    const day = (iso: string) => new Date(iso).toLocaleDateString(undefined, {day: 'numeric', month: 'long', year: 'numeric'});
+    if (s.status === 'grace') {
+      return {tone: 'warning', text: `Payment is due. The subscription was paid to ${day(s.paid_until)}; tutors and learners will be suspended after ${day(s.grace_until)} unless it is renewed.`};
+    }
+    if (s.status === 'expired' || s.status === 'cancelled') {
+      return {tone: 'danger', text: 'The subscription has ended, so tutors and learners cannot use the platform. Renew to restore their access at once; your records are kept.'};
+    }
+    if (s.renewal_stopped) {
+      return {tone: 'info', text: `Renewal is stopped. Access for tutors and learners ends on ${day(s.paid_until)}.`};
+    }
+    return null;
+  });
+  readonly billingLink = computed(() => roleRoot(this.role) + '/management/billing');
+  private role = '';
+
   /** Desktop rail collapse state (persisted). */
   collapsed = signal<boolean>(false);
   /** Mobile off-canvas drawer state. */
@@ -40,6 +66,7 @@ export class Dashboard implements OnInit {
   ) {
     if (isPlatformBrowser(platformId)) {
       const user: AuthUser = JSON.parse(localStorage.getItem('auth_user') || '{}');
+      this.role = user.role ?? '';
       this.fullMenu.set(this.userPreferenceMenu[user.role] ?? []);
       this.alwaysOpenMenu.set(user.role === 'student');
       // Re-apply the school's brand colour straight away (no green flash on reload).

@@ -42,6 +42,14 @@ class PlatformSettings
             // Custom roles' permission matrix is enforced on every route.
             'rbac_enforce' => true,
         ],
+        'billing' => [
+            // A plan's user limits stop another login being enabled once its places are used.
+            'enforce_user_limits' => true,
+            // Tutors and learners are suspended from day eight after the last paid day.
+            'suspend_after_grace' => true,
+            // Tax added to every order, as a percentage of the fee (0 shows no tax line).
+            'tax_percent' => 0,
+        ],
         'integrations' => [
             'email_enabled' => true,
             'email_provider' => 'ZeptoMail',

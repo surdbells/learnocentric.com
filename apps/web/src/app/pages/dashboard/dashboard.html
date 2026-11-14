@@ -18,7 +18,23 @@
 
     <main class="app-content">
       <div class="container-fluid">
-        <router-outlet />
+        @if (billingNotice(); as n) {
+          <div class="alert alert-{{ n.tone }} d-flex flex-wrap align-items-center justify-content-between gap-2 py-2 px-3 mb-3" role="status">
+            <span class="small">{{ n.text }}</span>
+            <a class="btn btn-sm btn-{{ n.tone === 'info' ? 'outline-primary' : n.tone }}" [routerLink]="billingLink()">Go to Billing</a>
+          </div>
+        }
+        @if (suspended()) {
+          <div class="card border-0 shadow-sm mx-auto my-4" style="max-width: 40rem">
+            <div class="card-body p-4 text-center">
+              <app-icon name="lock" [size]="32" class="text-body-secondary mb-2" />
+              <h5 class="fw-semibold mb-2">Access is paused</h5>
+              <p class="text-body-secondary mb-0">{{ suspendedMessage() }}</p>
+            </div>
+          </div>
+        } @else {
+          <router-outlet />
+        }
       </div>
     </main>
   </div>

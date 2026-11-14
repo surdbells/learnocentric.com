@@ -33,6 +33,7 @@ final class RolesAction
         private readonly EntityManagerInterface $em,
         private readonly AuditLogger $audit,
         private readonly \App\Service\PlatformSettings $settings,
+        private readonly \App\Service\Billing\SubscriptionService $subscriptions,
     ) {
     }
 
@@ -259,6 +260,12 @@ final class RolesAction
         // This blocks a school admin from elevating anyone to a platform role (e.g. Super Admin).
         if ($role->isSystem() && !$this->isAssignableSystemRole($role)) {
             return Json::error($response, 'That role cannot be assigned from here.', 403);
+        }
+        // Moving someone into a different counted group (say, teacher to administrator) needs a free place there.
+        if ($user->getStatus() === 'active'
+            && $this->subscriptions->categoryOf($role->effectiveCode()) !== $this->subscriptions->categoryOf($user->getRole()->effectiveCode())
+            && ($full = $this->subscriptions->limitRefusal($institution, $role->effectiveCode())) !== null) {
+            return Json::error($response, $full, 409);
         }
         $user->setRole($role);
         $this->em->flush();

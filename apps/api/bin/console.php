@@ -52,6 +52,7 @@ $app->add(new App\Console\DispatchAnnouncementsCommand(
     $container->get(App\Service\AnnouncementDispatcher::class),
     $container->get(App\Service\LiveClassReminders::class),
     $container->get(App\Service\StudyReminders::class),
+    $container->get(App\Service\Billing\SubscriptionNotices::class),
 ));
 
 $app->run();

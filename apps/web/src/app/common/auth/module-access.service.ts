@@ -18,6 +18,9 @@ export class ModuleAccessService {
   private readonly api = inject(ApiService);
   private readonly schoolPrefs = inject(SchoolPrefsService);
 
+  /** Where the organisation's subscription stands (from /auth/me), or null when it has none. */
+  readonly subscription = signal<any | null>(null);
+
   /** null = not yet loaded on this client (fail-open in the UI; backend still enforces). */
   private readonly _modules = signal<string[] | null>(this.readCache());
   readonly modules = computed(() => this._modules());
@@ -60,6 +63,7 @@ export class ModuleAccessService {
         this.setMatrix(res?.role_matrix ?? null);
         // The school's presentation preferences (time zone, date format, names, language).
         this.schoolPrefs.set(res?.school ?? null);
+        this.subscription.set(res?.subscription ?? null);
       },
       error: () => { /* leave cache as-is; backend still enforces */ },
     });

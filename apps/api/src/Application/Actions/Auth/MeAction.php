@@ -19,6 +19,7 @@ final class MeAction
         private readonly PermissionService $permissions,
         private readonly ModuleAccess $modules,
         private readonly \App\Service\PlatformSettings $settings,
+        private readonly \App\Service\Billing\SubscriptionService $subscriptions,
     ) {
     }
 
@@ -42,7 +43,33 @@ final class MeAction
             // How this user's school wants names, dates and classes presented
             // (School Settings); the web app applies these everywhere.
             'school' => $this->schoolPrefs($user),
+            // Where the organisation's subscription stands, so the app can warn the
+            // people who pay and tell tutors and learners when access is paused.
+            'subscription' => $this->subscriptionState($user),
         ]);
+    }
+
+    /** @return array<string,mixed>|null null for platform users and organisations with no subscription yet */
+    private function subscriptionState(User $user): ?array
+    {
+        $institution = $user->getInstitution();
+        $sub = $institution === null ? null : $this->subscriptions->current($institution);
+        if ($institution === null || $sub === null) {
+            return null;
+        }
+        $role = $user->getRole()->effectiveCode();
+        $suspended = $this->subscriptions->isSuspended($institution);
+
+        return [
+            'status' => $sub->status(),
+            'paid_until' => $sub->paidUntil()->format(DATE_ATOM),
+            'grace_until' => $sub->graceUntil()->format(DATE_ATOM),
+            'renewal_stopped' => $sub->isCancelAtPeriodEnd(),
+            // Tutors, learners and parents are the ones whose access is paused.
+            'suspended' => $suspended && in_array($role, ['teacher', 'student', 'parent'], true),
+            'message' => $suspended ? \App\Application\Middleware\SubscriptionGateMiddleware::message($institution->getName()) : null,
+            'manages_billing' => in_array($role, ['school_admin', 'tutor_admin'], true),
+        ];
     }
 
     /** @return array<string,mixed>|null null for platform users, who belong to no school */

@@ -3,51 +3,117 @@
 @if (loading()) {
   <div class="text-body-secondary p-4">Loading…</div>
 } @else {
-  <!-- Current subscription -->
+  <!-- Where the subscription stands -->
   <div class="card border-0 shadow-sm mb-4">
-    <div class="card-body d-flex align-items-center justify-content-between flex-wrap gap-3">
+    <div class="card-body">
+      <div class="d-flex align-items-start justify-content-between flex-wrap gap-3">
+        @if (sub(); as s) {
+          <div>
+            <div class="small text-body-secondary">Current plan</div>
+            <h5 class="fw-semibold mb-1">{{ s.plan }}
+              <span class="badge bg-{{ statusColor(status()) }}-subtle text-{{ statusColor(status()) }} ms-1">{{ statusLabel(status()) }}</span>
+            </h5>
+            <div class="small text-body-secondary">
+              Billed per {{ intervalLabel(s.interval) }} ·
+              @if (status() === 'active') {
+                paid until {{ s.paid_until | date:'mediumDate' }}
+                @if (s.days_left >= 0 && s.days_left <= 30) { ({{ s.days_left }} day{{ s.days_left === 1 ? '' : 's' }} left) }
+              } @else if (status() === 'grace') {
+                paid until {{ s.paid_until | date:'mediumDate' }}. Renew by {{ s.grace_until | date:'mediumDate' }} to keep tutor and learner access.
+              } @else {
+                ended {{ s.paid_until | date:'mediumDate' }}. Tutors and learners are suspended until you renew. Files and records are kept until {{ s.retention_until | date:'mediumDate' }}.
+              }
+            </div>
+          </div>
+        } @else {
+          <div>
+            <div class="small text-body-secondary">Current plan</div>
+            <h5 class="fw-semibold mb-1">No subscription yet</h5>
+            <div class="small text-body-secondary">Choose a plan below. Your account is activated as soon as the payment is verified.</div>
+          </div>
+        }
+        <div class="text-end">
+          <span class="badge fs-6" [class.bg-success]="state()?.has_access" [class.bg-danger]="!state()?.has_access">
+            {{ state()?.has_access ? 'Access active' : 'Access paused' }}
+          </span>
+          @if (!state()?.paystack_live) { <div class="small text-warning mt-1">Paystack test mode</div> }
+        </div>
+      </div>
+
       @if (sub(); as s) {
-        <div>
-          <div class="small text-body-secondary">Current plan</div>
-          <h5 class="fw-semibold mb-1">{{ s.plan }}
-            <span class="badge bg-{{ statusColor(s.status) }}-subtle text-{{ statusColor(s.status) }} text-capitalize ms-1">{{ s.status }}</span>
-          </h5>
-          <div class="small text-body-secondary">
-            @if (s.status === 'grace') {
-              Grace period, renew by {{ s.grace_until | date:'mediumDate' }} to keep access
-            } @else if (s.status === 'expired') {
-              Expired on {{ s.period_end | date:'mediumDate' }}, renew to restore access
-            } @else {
-              Renews on {{ s.period_end | date:'mediumDate' }}
+        <!-- Things waiting to happen, and the ways to change them -->
+        @if (s.paid_ahead; as n) {
+          <div class="alert alert-success small py-2 px-3 mt-3 mb-0" role="status">
+            Your next {{ intervalLabel(n.interval) }} on {{ n.plan }} is paid: {{ n.starts | date:'mediumDate' }} to {{ n.ends | date:'mediumDate' }}.
+          </div>
+        }
+        @if (s.pending_change; as c) {
+          <div class="alert alert-info small py-2 px-3 mt-3 mb-0 d-flex flex-wrap align-items-center justify-content-between gap-2" role="status">
+            <span>From your next renewal ({{ s.period_end | date:'mediumDate' }}) you will move to {{ c.plan }}, billed per {{ intervalLabel(c.interval) }}.</span>
+            <button type="button" class="btn btn-sm btn-outline-secondary" [disabled]="busy()" (click)="clearChange()">Keep current plan</button>
+          </div>
+        }
+        @if (s.renewal_stopped) {
+          <div class="alert alert-warning small py-2 px-3 mt-3 mb-0 d-flex flex-wrap align-items-center justify-content-between gap-2" role="status">
+            <span>Renewal is stopped. Access ends on {{ s.paid_until | date:'mediumDate' }}; files and records are kept until {{ s.retention_until | date:'mediumDate' }}.</span>
+            @if (status() === 'active') {
+              <button type="button" class="btn btn-sm btn-outline-primary" [disabled]="busy()" (click)="resumeRenewal()">Resume renewal</button>
             }
           </div>
-        </div>
-      } @else {
-        <div>
-          <div class="small text-body-secondary">Current plan</div>
-          <h5 class="fw-semibold mb-1">No active subscription</h5>
-          <div class="small text-body-secondary">Choose a plan below to get started.</div>
-        </div>
-      }
-      <div class="text-end">
-        <span class="badge fs-6" [class.bg-success]="hasAccess()" [class.bg-danger]="!hasAccess()">
-          {{ hasAccess() ? 'Access active' : 'No access' }}
-        </span>
-        @if (!paystackLive()) {
-          <div class="small text-warning mt-1">Paystack test mode</div>
         }
-      </div>
+        @if (status() === 'active' && !s.renewal_stopped && !s.paid_ahead) {
+          <div class="small text-body-secondary mt-3">
+            @if (state()?.renewal_open) {
+              Your renewal is open: choose <strong>Renew</strong> on your plan below.
+            } @else {
+              Renewal opens on {{ state()?.renewal_opens_on | date:'mediumDate' }}; you will be reminded seven days before the end of the term.
+            }
+            <button type="button" class="btn btn-link btn-sm p-0 ms-2 align-baseline" [disabled]="busy()" (click)="stopRenewal()">Stop renewal</button>
+          </div>
+        }
+      }
     </div>
   </div>
 
+  <!-- Users against the plan's limits -->
+  @if (sub()) {
+    <div class="card border-0 shadow-sm mb-4">
+      <div class="card-body">
+        <h6 class="fw-semibold mb-1">Users on your plan</h6>
+        <p class="small text-body-secondary mb-3">
+          Named users enabled for access are counted (parents are not). Disabling a login frees its place for a replacement.
+          @if (!state()?.limits_enforced) { Limits are currently not enforced by the platform. }
+        </p>
+        <div class="row g-3">
+          @for (u of usageRows(); track u.key) {
+            <div class="col-md-4">
+              <div class="d-flex justify-content-between small mb-1">
+                <span class="fw-medium">{{ u.label }}</span>
+                <span>{{ u.used | number }}@if (u.limit != null) { / {{ u.limit | number }} } @else { (no limit) }</span>
+              </div>
+              @if (u.limit != null) {
+                <div class="progress" style="height: 6px" role="progressbar" [attr.aria-label]="u.label + ' used'" [attr.aria-valuenow]="pct(u.used, u.limit)" aria-valuemin="0" aria-valuemax="100">
+                  <div class="progress-bar" [class.bg-danger]="u.used >= u.limit" [class.bg-warning]="u.used < u.limit && pct(u.used, u.limit) >= 90" [style.width.%]="pct(u.used, u.limit)"></div>
+                </div>
+              }
+            </div>
+          }
+        </div>
+        @if (state()?.storage_gb) {
+          <div class="small text-body-secondary mt-3">Your plan includes {{ state().storage_gb }} GB for your own uploaded files.</div>
+        }
+      </div>
+    </div>
+  }
+
   <!-- Content package assigned by the platform -->
-  @if (contentPackage(); as p) {
+  @if (state()?.content_package; as p) {
     <div class="card border-0 shadow-sm mb-4">
       <div class="card-body d-flex align-items-center justify-content-between flex-wrap gap-3">
         <div>
           <div class="small text-body-secondary">Content package</div>
           <h5 class="fw-semibold mb-1">{{ p.name }}
-            <span class="badge bg-secondary-subtle text-secondary ms-1">{{ titleCase((p.type || '').replaceAll('_', ' ')) }}</span>
+            <span class="badge bg-secondary-subtle text-secondary ms-1">{{ (p.type || '').replaceAll('_', ' ') }}</span>
             @if (p.expired) { <span class="badge bg-danger-subtle text-danger ms-1">Expired</span> }
           </h5>
           <div class="small text-body-secondary">
@@ -67,73 +133,86 @@
     </div>
   }
 
-  <!-- Pending payment confirm (test mode) -->
-  @if (pendingRef(); as ref) {
-    <div class="alert alert-info d-flex align-items-center justify-content-between flex-wrap gap-2">
-      <div>
-        <b>Test-mode checkout for {{ pendingPlan() }}.</b>
-        <span class="small">In production this opens Paystack; here, confirm to simulate a successful payment.</span>
-        <div class="small text-body-secondary">Ref: {{ ref }}</div>
-      </div>
-      <div class="d-flex gap-2">
-        <button type="button" class="btn btn-sm btn-primary" [disabled]="busy() === -1" (click)="completePayment()">Complete payment</button>
-        <button type="button" class="btn btn-sm btn-light" (click)="cancelPending()">Cancel</button>
-      </div>
-    </div>
-  }
-
   <!-- Plans -->
-  <h6 class="fw-semibold mb-3">Plans</h6>
+  <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
+    <h6 class="fw-semibold mb-0">Plans</h6>
+    @if (anyYearly()) {
+      <div class="btn-group btn-group-sm" role="group" aria-label="Billing period">
+        <button type="button" class="btn" [class.btn-primary]="period() === 'standard'" [class.btn-outline-primary]="period() !== 'standard'" (click)="period.set('standard')">Per term</button>
+        <button type="button" class="btn" [class.btn-primary]="period() === 'yearly'" [class.btn-outline-primary]="period() !== 'yearly'" (click)="period.set('yearly')">Per year</button>
+      </div>
+    }
+  </div>
+  @if (!plans().length) {
+    <div class="card border-0 shadow-sm p-4 text-center text-body-secondary mb-4">No plans are on sale at the moment. Please contact us.</div>
+  }
   <div class="row g-3 mb-4">
     @for (p of plans(); track p.id) {
-      <div class="col-md-4">
+      <div class="col-md-6 col-xl-3">
         <div class="card border-0 shadow-sm h-100" [class.border]="isCurrent(p)" [class.border-success]="isCurrent(p)">
           <div class="card-body d-flex flex-column">
-            <div class="d-flex justify-content-between align-items-start">
+            <div class="d-flex justify-content-between align-items-start gap-2">
               <h5 class="fw-semibold mb-0">{{ p.name }}</h5>
               @if (isCurrent(p)) { <span class="badge bg-success-subtle text-success">Current</span> }
             </div>
+            @if (p.description) { <div class="small text-body-secondary mt-1">{{ p.description }}</div> }
             <div class="my-2">
-              <span class="fs-3 fw-bold">₦{{ p.price_naira | number }}</span>
-              <span class="text-body-secondary small">/ {{ p.interval }}</span>
+              @if (p.is_custom) {
+                <span class="fs-4 fw-bold">Custom quote</span>
+              } @else {
+                <span class="fs-3 fw-bold">₦{{ cardPrice(p) | number }}</span>
+                <span class="text-body-secondary small">/ {{ intervalLabel(cardInterval(p)) }}</span>
+                @if (p.interval === 'cohort' && p.period_days) { <div class="small text-body-secondary">{{ p.period_days / 7 }} teaching weeks, paid before the start</div> }
+                @if (cardInterval(p) === 'yearly' && yearlySaving(p)) { <div class="small text-success">Saves {{ yearlySaving(p) }}% against paying each term</div> }
+                @if (period() === 'yearly' && cardInterval(p) !== 'yearly') { <div class="small text-body-secondary">Not offered per year</div> }
+              }
             </div>
-            <div class="small text-body-secondary mb-2">
-              {{ p.max_students ? p.max_students + ' students' : 'Unlimited students' }} ·
-              {{ p.max_teachers ? p.max_teachers + ' teachers' : 'Unlimited teachers' }}
-            </div>
+            <ul class="list-unstyled small text-body-secondary mb-2">
+              <li>{{ p.max_students != null ? (p.max_students | number) + ' learners' : (p.is_custom ? '1,000+ learners' : 'No learner limit') }}</li>
+              <li>{{ p.max_teachers != null ? p.max_teachers + (p.audience === 'academy' ? ' tutors' : ' teachers') : (p.is_custom ? 'Teachers agreed in contract' : 'No teacher limit') }}
+                · {{ p.max_admins != null ? p.max_admins + ' admin' + (p.max_admins === 1 ? '' : 's') : (p.is_custom ? 'admins agreed in contract' : 'no admin limit') }}</li>
+              @if (p.storage_gb) { <li>{{ p.storage_gb }} GB for your own files</li> }
+            </ul>
             <ul class="list-unstyled small flex-grow-1 mb-3">
               @for (f of p.features; track f) {
                 <li class="mb-1"><app-icon name="check" [size]="16" class="text-success" /> {{ f }}</li>
               }
             </ul>
-            <button type="button" class="btn btn-sm" [class.btn-primary]="!isCurrent(p)" [class.btn-outline-secondary]="isCurrent(p)"
-                    [disabled]="isCurrent(p) || busy() === p.id" (click)="subscribe(p)">
-              {{ isCurrent(p) ? 'Current plan' : 'Choose ' + p.name }}
-            </button>
+            @if (p.is_custom) {
+              <a class="btn btn-sm btn-outline-primary" routerLink="/contact">Contact us</a>
+            } @else {
+              <button type="button" class="btn btn-sm" [class.btn-primary]="!isCurrent(p) || status() !== 'active'" [class.btn-outline-primary]="isCurrent(p) && status() === 'active'"
+                      [disabled]="busy()" (click)="review(p)">
+                {{ buttonLabel(p) }}
+              </button>
+            }
           </div>
         </div>
       </div>
     }
   </div>
 
-  <!-- Invoices -->
-  <h6 class="fw-semibold mb-3">Invoices</h6>
+  <!-- Invoices and receipts -->
+  <h6 class="fw-semibold mb-3">Invoices and receipts</h6>
   @if (!invoices().length) {
     <div class="card border-0 shadow-sm p-4 text-center text-body-secondary">No invoices yet.</div>
   } @else {
     <div class="table-responsive card border-0 shadow-sm">
       <table class="table align-middle mb-0">
         <thead class="table-light">
-          <tr><th>Reference</th><th>Plan</th><th class="text-end">Amount</th><th class="text-center">Status</th><th>Date</th></tr>
+          <tr><th>Date</th><th>For</th><th>Period</th><th class="text-end">Amount</th><th class="text-center">Status</th><th></th></tr>
         </thead>
         <tbody>
           @for (t of invoices(); track t.id) {
             <tr>
-              <td class="font-monospace small">{{ t.reference }}</td>
-              <td>{{ t.plan }}</td>
-              <td class="text-end">₦{{ t.amount_naira | number }}</td>
-              <td class="text-center"><span class="badge bg-{{ invColor(t.status) }}-subtle text-{{ invColor(t.status) }} text-capitalize">{{ t.status }}</span></td>
-              <td class="small text-body-secondary">{{ (t.paid_at || t.created_at) | date:'medium' }}</td>
+              <td class="small text-nowrap">{{ (t.paid_at || t.created_at) | date:'mediumDate' }}</td>
+              <td>{{ kindLabel(t.kind) }}: {{ t.plan }}</td>
+              <td class="small text-body-secondary text-nowrap">
+                @if (t.details?.period_start) { {{ t.details.period_start | date:'mediumDate' }} to {{ t.details.period_end | date:'mediumDate' }} } @else { - }
+              </td>
+              <td class="text-end text-nowrap">₦{{ t.amount_naira | number:'1.0-2' }}</td>
+              <td class="text-center"><span class="badge bg-{{ invColor(t.status) }}-subtle text-{{ invColor(t.status) }}">{{ invLabel(t.status) }}</span></td>
+              <td class="text-end"><button type="button" class="btn btn-sm btn-link" (click)="viewInvoice(t)">{{ t.status === 'success' ? 'Receipt' : 'Invoice' }}</button></td>
             </tr>
           }
         </tbody>
@@ -141,3 +220,98 @@
     </div>
   }
 }
+
+<!-- The order, shown in full before anything is paid or changed -->
+<app-learno-modal [modalId]="'billing_order'" [modalAction]="'Review your order'" [showBtn]="false">
+  <div modalForm class="modal-body">
+    @if (order(); as q) {
+      <h6 class="fw-semibold mb-1">{{ kindLabel(q.kind) }}: {{ q.plan }}</h6>
+      @if (q.period_start) {
+        <div class="small text-body-secondary mb-3">Billed per {{ intervalLabel(q.interval) }} · covers {{ q.period_start | date:'mediumDate' }} to {{ q.period_end | date:'mediumDate' }}</div>
+      } @else if (q.effective_on) {
+        <div class="small text-body-secondary mb-3">Takes effect on {{ q.effective_on | date:'mediumDate' }}</div>
+      }
+
+      @if (q.lines?.length) {
+        <table class="table table-sm mb-3">
+          <tbody>
+            @for (l of q.lines; track $index) {
+              <tr><td class="small">{{ l.label }}</td><td class="text-end text-nowrap">₦{{ naira(l.amount_kobo) | number:'1.0-2' }}</td></tr>
+            }
+            @if (q.tax_kobo > 0) {
+              <tr><td class="small text-body-secondary">Subtotal</td><td class="text-end text-nowrap">₦{{ naira(q.subtotal_kobo) | number:'1.0-2' }}</td></tr>
+              <tr><td class="small text-body-secondary">Tax ({{ q.tax_percent }}%)</td><td class="text-end text-nowrap">₦{{ naira(q.tax_kobo) | number:'1.0-2' }}</td></tr>
+            }
+            <tr class="fw-semibold"><td>Total payable now</td><td class="text-end text-nowrap">₦{{ naira(q.total_kobo) | number:'1.0-2' }}</td></tr>
+          </tbody>
+        </table>
+      }
+      @for (n of q.notes; track $index) { <p class="small mb-2">{{ n }}</p> }
+      <p class="small text-body-secondary mb-0">
+        @if (q.pay_now) {
+          Nothing changes until the payment is verified. A receipt is issued straight away.
+        } @else {
+          Nothing is payable now.
+        }
+      </p>
+
+      @if (pendingRef(); as ref) {
+        <div class="alert alert-info small mt-3 mb-0">
+          <strong>Test-mode checkout.</strong> In production this opens Paystack; here, confirm to simulate a successful payment. Ref: {{ ref }}
+        </div>
+      }
+    }
+  </div>
+  <div modalForm class="modal-footer">
+    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+    @if (pendingRef()) {
+      <button type="button" class="btn btn-primary" [disabled]="busy()" (click)="completeTestPayment()">Complete test payment</button>
+    } @else if (order(); as q) {
+      <button type="button" class="btn btn-primary" [disabled]="busy()" (click)="placeOrder()">
+        {{ q.pay_now ? 'Pay ₦' + (naira(q.total_kobo) | number:'1.0-2') : 'Confirm change' }}
+      </button>
+    }
+  </div>
+</app-learno-modal>
+
+<!-- An invoice or receipt -->
+<app-learno-modal [modalId]="'billing_invoice'" [modalAction]="invoice()?.status === 'success' ? 'Receipt' : 'Invoice'" [showBtn]="false">
+  <div modalForm class="modal-body billing-doc">
+    @if (invoice(); as t) {
+      <div class="d-flex justify-content-between flex-wrap gap-2 mb-3">
+        <div>
+          <div class="fw-semibold">{{ t.institution }}</div>
+          <div class="small text-body-secondary">{{ kindLabel(t.kind) }}: {{ t.plan }}@if (t.interval) { , per {{ intervalLabel(t.interval) }} }</div>
+        </div>
+        <div class="text-end small">
+          <div>Reference <span class="font-monospace">{{ t.reference }}</span></div>
+          <div>Issued {{ t.created_at | date:'mediumDate' }}</div>
+          @if (t.paid_at) { <div class="text-success">Paid {{ t.paid_at | date:'medium' }}@if (t.channel) { by {{ t.channel }} }</div> }
+        </div>
+      </div>
+      @if (t.details?.period_start) {
+        <div class="small mb-2">Service period: {{ t.details.period_start | date:'mediumDate' }} to {{ t.details.period_end | date:'mediumDate' }}</div>
+      }
+      <table class="table table-sm mb-2">
+        <tbody>
+          @if (t.details?.lines?.length) {
+            @for (l of t.details.lines; track $index) {
+              <tr><td class="small">{{ l.label }}</td><td class="text-end text-nowrap">₦{{ naira(l.amount_kobo) | number:'1.0-2' }}</td></tr>
+            }
+          } @else {
+            <tr><td class="small">{{ t.plan }} plan</td><td class="text-end text-nowrap">₦{{ (t.amount_naira - t.tax_naira) | number:'1.0-2' }}</td></tr>
+          }
+          @if (t.tax_naira > 0) {
+            <tr><td class="small text-body-secondary">Tax</td><td class="text-end text-nowrap">₦{{ t.tax_naira | number:'1.0-2' }}</td></tr>
+          }
+          <tr class="fw-semibold"><td>Total</td><td class="text-end text-nowrap">₦{{ t.amount_naira | number:'1.0-2' }}</td></tr>
+        </tbody>
+      </table>
+      <div class="small text-body-secondary">Status: {{ invLabel(t.status) }}</div>
+    }
+  </div>
+  <div modalForm class="modal-footer">
+    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
+    <button type="button" class="btn btn-outline-primary" (click)="printInvoice()"><app-icon name="download" [size]="16" /> Print or save as PDF</button>
+  </div>
+</app-learno-modal>

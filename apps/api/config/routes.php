@@ -328,7 +328,12 @@ return static function (App $app): void {
             // Billing (Paystack), plan catalogue, subscribe/verify, invoices
             $auth->map(['GET', 'POST', 'PUT', 'DELETE'], '/billing/plans', PlansAction::class);
             $auth->get('/billing/subscription', BillingAction::class . ':current');
+            // What a plan choice costs and changes right now, shown in full before any payment.
+            $auth->post('/billing/quote', BillingAction::class . ':quote');
             $auth->post('/billing/subscribe', BillingAction::class . ':subscribe');
+            $auth->post('/billing/cancel-renewal', BillingAction::class . ':cancelRenewal');
+            $auth->post('/billing/resume-renewal', BillingAction::class . ':resumeRenewal');
+            $auth->post('/billing/clear-change', BillingAction::class . ':clearChange');
             $auth->post('/billing/verify', BillingAction::class . ':verify');
             $auth->get('/billing/transactions', BillingAction::class . ':transactions');
 
@@ -373,6 +378,6 @@ return static function (App $app): void {
             $auth->post('/support/tickets/{id:[0-9]+}/transition', SupportAction::class . ':transition');
 
             $auth->post('/upload', UploadAction::class);
-        })->add(RequirePermissionMiddleware::class)->add(ModuleGateMiddleware::class)->add(JwtAuthMiddleware::class);
+        })->add(RequirePermissionMiddleware::class)->add(ModuleGateMiddleware::class)->add(\App\Application\Middleware\SubscriptionGateMiddleware::class)->add(JwtAuthMiddleware::class);
     });
 };

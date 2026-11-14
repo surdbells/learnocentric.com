@@ -107,6 +107,18 @@ final class SystemSettingsAction
             }
         }
 
+        if (is_array($body['billing'] ?? null)) {
+            $bill = $body['billing'];
+            foreach (['enforce_user_limits', 'suspend_after_grace'] as $k) {
+                if (array_key_exists($k, $bill)) {
+                    $current['billing'][$k] = (bool) $bill[$k];
+                }
+            }
+            if (array_key_exists('tax_percent', $bill)) {
+                $current['billing']['tax_percent'] = round(max(0, min(100, (float) $bill['tax_percent'])), 2);
+            }
+        }
+
         if (is_array($body['integrations'] ?? null)) {
             $intg = $body['integrations'];
             foreach (['email_enabled', 'payments_enabled'] as $k) {

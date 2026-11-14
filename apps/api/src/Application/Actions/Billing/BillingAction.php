@@ -6,6 +6,7 @@ namespace App\Application\Actions\Billing;
 
 use App\Application\Actions\School\ResolvesInstitution;
 use App\Application\Support\Json;
+use App\Application\Support\Portal;
 use App\Domain\Entity\BillingTransaction;
 use App\Domain\Entity\Institution;
 use App\Domain\Entity\Subscription;
@@ -13,6 +14,7 @@ use App\Domain\Entity\SubscriptionPlan;
 use App\Domain\Entity\User;
 use App\Service\AuditLogger;
 use App\Service\Billing\PaystackClient;
+use App\Service\Billing\SubscriptionService;
 use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Http\Message\ResponseInterface as Response;
@@ -20,9 +22,12 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 use Throwable;
 
 /**
- * /backend/billing, an institution admin subscribes to a plan (Paystack
- * checkout), the payment is verified, and access is granted with a grace
- * window after each period (spec §17).
+ * /backend/billing, an organisation's administrator manages its subscription.
+ *
+ * Choosing a plan first produces an order (quote): what it is, the dates it
+ * covers and the one total payable. Payment goes through Paystack, and nothing
+ * is activated until the payment is verified. The rules themselves live in
+ * SubscriptionService.
  */
 final class BillingAction
 {
@@ -36,59 +41,110 @@ final class BillingAction
         private readonly PaystackClient $paystack,
         private readonly \App\Service\NotificationService $notify,
         private readonly \App\Service\PlatformSettings $settings,
+        private readonly SubscriptionService $subscriptions,
     ) {
     }
 
-    /** GET /billing/subscription, the institution's current subscription + access state. */
+    /** GET /billing/subscription, where the account stands: plan, dates, state, users against limits. */
     public function current(Request $request, Response $response): Response
     {
-        if (($guard = $this->adminGuard($request, $response)) !== null) {
-            return $guard;
+        [$institution, $deny] = $this->scope($request, $response);
+        if ($deny !== null) {
+            return $deny;
         }
-        $institution = $this->resolveInstitution($request, $this->em);
-        if ($institution === null) {
-            return Json::error($response, 'No institution in scope.', 422);
-        }
-        $sub = $this->currentSubscription($institution);
-        $status = $sub?->status() ?? 'none';
 
         // The content package the platform assigned to this school (type, price, term), if any.
         $package = $institution->getAssignedPackageId() !== null
             ? $this->em->getRepository(\App\Domain\Entity\ContentPackage::class)->find($institution->getAssignedPackageId())
             : null;
 
-        return Json::write($response, [
-            'subscription' => $sub?->toArray(),
-            'has_access' => in_array($status, [Subscription::ACTIVE, Subscription::GRACE], true),
+        return Json::write($response, $this->subscriptions->overview($institution) + [
             'paystack_live' => $this->paystack->isConfigured(),
             'content_package' => $package?->assignmentSummary($institution->getAssignedPackageAt()),
         ]);
     }
 
-    /** POST /billing/subscribe, start a Paystack transaction for { plan_id }. */
-    public function subscribe(Request $request, Response $response): Response
+    /** POST /billing/quote {plan_id, interval?}, the order for a plan choice, before anything is paid or changed. */
+    public function quote(Request $request, Response $response): Response
     {
-        if (($guard = $this->adminGuard($request, $response)) !== null) {
-            return $guard;
-        }
-        /** @var User $user */
-        $user = $request->getAttribute('user');
-        $institution = $this->resolveInstitution($request, $this->em);
-        if ($institution === null) {
-            return Json::error($response, 'No institution in scope.', 422);
-        }
-        if (($unavailable = $this->paymentsUnavailable($response)) !== null) {
-            return $unavailable;
+        [$institution, $deny] = $this->scope($request, $response);
+        if ($deny !== null) {
+            return $deny;
         }
         $body = (array) $request->getParsedBody();
         $plan = $this->em->getRepository(SubscriptionPlan::class)->find((int) ($body['plan_id'] ?? 0));
-        if ($plan === null || !$plan->isActive()) {
-            return Json::error($response, 'Choose an active plan.', 422);
+        if ($plan === null) {
+            return Json::error($response, 'Choose a plan.', 422);
+        }
+        $quote = $this->subscriptions->quote($institution, $plan, $this->interval($body));
+        if (!$quote['ok']) {
+            return Json::error($response, (string) $quote['error'], 422);
         }
 
+        return Json::write($response, $quote);
+    }
+
+    /**
+     * POST /billing/subscribe {plan_id, interval?}
+     *
+     * Places the order. When something is payable it starts a Paystack
+     * transaction for the total; when nothing is (a change that takes effect at
+     * the next renewal) it records the change and returns.
+     */
+    public function subscribe(Request $request, Response $response): Response
+    {
+        [$institution, $deny] = $this->scope($request, $response);
+        if ($deny !== null) {
+            return $deny;
+        }
+        /** @var User $user */
+        $user = $request->getAttribute('user');
+        $body = (array) $request->getParsedBody();
+        $plan = $this->em->getRepository(SubscriptionPlan::class)->find((int) ($body['plan_id'] ?? 0));
+        if ($plan === null) {
+            return Json::error($response, 'Choose a plan.', 422);
+        }
+        $quote = $this->subscriptions->quote($institution, $plan, $this->interval($body));
+        if (!$quote['ok']) {
+            return Json::error($response, (string) $quote['error'], 422);
+        }
+
+        // Nothing to pay: the change is noted and takes effect at the next renewal.
+        if (!$quote['pay_now']) {
+            $sub = $this->subscriptions->current($institution);
+            if ($sub === null) {
+                return Json::error($response, 'There is no subscription to change.', 422);
+            }
+            $sub->setPendingChange($plan, (string) $quote['interval']);
+            $this->em->flush();
+            $this->audit->log('billing.change_scheduled', $user, 'Subscription', (string) $sub->getId(), null, [
+                'plan' => $plan->getCode(), 'interval' => $quote['interval'], 'effective_on' => $quote['effective_on'],
+            ]);
+
+            return Json::write($response, ['scheduled' => true, 'quote' => $quote, 'subscription' => $sub->toArray()], 201);
+        }
+
+        if (($unavailable = $this->paymentsUnavailable($response)) !== null) {
+            return $unavailable;
+        }
+
+        $total = (int) $quote['total_kobo'];
         $reference = 'LEARNO-' . strtoupper(bin2hex(random_bytes(6)));
-        $txn = new BillingTransaction($institution, $plan, $reference, $plan->getPriceKobo());
+        $txn = new BillingTransaction($institution, $plan, $reference, $total);
         $txn->setInitiatedBy($user);
+        $txn->setKind((string) $quote['kind']);
+        $txn->setBillingInterval((string) $quote['interval']);
+        $txn->setTaxKobo((int) $quote['tax_kobo']);
+        $txn->setDetails([
+            'lines' => $quote['lines'],
+            'subtotal_kobo' => $quote['subtotal_kobo'],
+            'tax_percent' => $quote['tax_percent'],
+            'tax_kobo' => $quote['tax_kobo'],
+            'total_kobo' => $total,
+            'period_start' => $quote['period_start'],
+            'period_end' => $quote['period_end'],
+            'notes' => $quote['notes'],
+        ]);
         $this->em->persist($txn);
         $this->em->flush();
 
@@ -97,9 +153,9 @@ final class BillingAction
             try {
                 $data = $this->paystack->initializeTransaction(
                     $user->getEmail(),
-                    $plan->getPriceKobo(),
+                    $total,
                     $reference,
-                    ['institution_id' => $institution->getId(), 'plan_code' => $plan->getCode()]
+                    ['institution_id' => $institution->getId(), 'plan_code' => $plan->getCode(), 'kind' => $quote['kind'], 'interval' => $quote['interval']]
                 );
                 $authorizationUrl = $data['authorization_url'] ?? null;
             } catch (Throwable $e) {
@@ -108,18 +164,82 @@ final class BillingAction
                 return Json::error($response, 'Could not start the payment: ' . $e->getMessage(), 502);
             }
         }
-        $this->audit->log('billing.subscribe', $user, 'BillingTransaction', (string) $txn->getId(), null, ['plan' => $plan->getCode(), 'reference' => $reference]);
+        $this->audit->log('billing.subscribe', $user, 'BillingTransaction', (string) $txn->getId(), null, [
+            'plan' => $plan->getCode(), 'kind' => $quote['kind'], 'interval' => $quote['interval'], 'reference' => $reference, 'total_kobo' => $total,
+        ]);
 
         return Json::write($response, [
             'reference' => $reference,
             'authorization_url' => $authorizationUrl,
-            'amount_naira' => $plan->getPriceKobo() / 100,
+            'amount_naira' => $total / 100,
+            'quote' => $quote,
             // In dev (no Paystack key) the client shows a "Complete in test mode" button that calls /verify.
             'test_mode' => !$this->paystack->isConfigured(),
         ], 201);
     }
 
-    /** POST /billing/verify, confirm a payment by { reference } and activate the subscription. */
+    /** POST /billing/cancel-renewal, stop future renewal. Access continues to the last paid day. */
+    public function cancelRenewal(Request $request, Response $response): Response
+    {
+        [$institution, $deny] = $this->scope($request, $response);
+        if ($deny !== null) {
+            return $deny;
+        }
+        $sub = $this->subscriptions->current($institution);
+        if ($sub === null || $sub->status() !== Subscription::ACTIVE) {
+            return Json::error($response, 'There is no active subscription to cancel.', 422);
+        }
+        if ($sub->hasPaidAhead()) {
+            return Json::error($response, sprintf('The next term is already paid for, to %s, so there is no renewal to stop before then. For a refund of a duplicate or incorrect charge, please contact support.', $sub->paidUntil()->format('j F Y')), 422);
+        }
+        $sub->stopRenewal();
+        $this->em->flush();
+        $this->audit->log('billing.renewal_stopped', $request->getAttribute('user'), 'Subscription', (string) $sub->getId(), null, ['access_until' => $sub->paidUntil()->format(DATE_ATOM)]);
+
+        return Json::write($response, ['subscription' => $sub->toArray(), 'message' => sprintf(
+            'Renewal is stopped. Access continues until %s. Your files and learning records are kept until %s.',
+            $sub->paidUntil()->format('j F Y'),
+            $sub->retentionUntil()->format('j F Y'),
+        )]);
+    }
+
+    /** POST /billing/resume-renewal, undo a stopped renewal while the paid period is still running. */
+    public function resumeRenewal(Request $request, Response $response): Response
+    {
+        [$institution, $deny] = $this->scope($request, $response);
+        if ($deny !== null) {
+            return $deny;
+        }
+        $sub = $this->subscriptions->current($institution);
+        if ($sub === null || !$sub->isCancelAtPeriodEnd() || $sub->status() !== Subscription::ACTIVE) {
+            return Json::error($response, 'There is no stopped renewal to resume. If the paid period has ended, renew from the plans below.', 422);
+        }
+        $sub->resumeRenewal();
+        $this->em->flush();
+        $this->audit->log('billing.renewal_resumed', $request->getAttribute('user'), 'Subscription', (string) $sub->getId(), null, null);
+
+        return Json::write($response, ['subscription' => $sub->toArray()]);
+    }
+
+    /** POST /billing/clear-change, drop a plan change that was waiting for the next renewal. */
+    public function clearChange(Request $request, Response $response): Response
+    {
+        [$institution, $deny] = $this->scope($request, $response);
+        if ($deny !== null) {
+            return $deny;
+        }
+        $sub = $this->subscriptions->current($institution);
+        if ($sub === null || $sub->getPendingPlan() === null) {
+            return Json::error($response, 'There is no change waiting.', 422);
+        }
+        $sub->setPendingChange(null, null);
+        $this->em->flush();
+        $this->audit->log('billing.change_cleared', $request->getAttribute('user'), 'Subscription', (string) $sub->getId(), null, null);
+
+        return Json::write($response, ['subscription' => $sub->toArray()]);
+    }
+
+    /** POST /billing/verify, confirm a payment by { reference } and activate what was paid for. */
     public function verify(Request $request, Response $response): Response
     {
         if (($guard = $this->adminGuard($request, $response)) !== null) {
@@ -135,7 +255,7 @@ final class BillingAction
             return Json::error($response, 'That transaction is not for your institution.', 403);
         }
         if ($txn->getStatus() === BillingTransaction::SUCCESS) {
-            return Json::write($response, ['transaction' => $txn->toArray(), 'subscription' => $this->currentSubscription($txn->getInstitution())?->toArray()]);
+            return Json::write($response, ['transaction' => $txn->toArray(), 'subscription' => $this->subscriptions->current($txn->getInstitution())?->toArray()]);
         }
         if (($unavailable = $this->paymentsUnavailable($response)) !== null) {
             return $unavailable;
@@ -157,7 +277,7 @@ final class BillingAction
             return Json::error($response, $error, 402);
         }
 
-        return Json::write($response, ['transaction' => $txn->toArray(), 'subscription' => $this->currentSubscription($txn->getInstitution())?->toArray()]);
+        return Json::write($response, ['transaction' => $txn->toArray(), 'subscription' => $this->subscriptions->current($txn->getInstitution())?->toArray()]);
     }
 
     /**
@@ -188,9 +308,9 @@ final class BillingAction
     }
 
     /**
-     * Mark a transaction paid and activate the subscription, after checking the
-     * gateway really reports a successful charge for at least the plan price in
-     * naira. Idempotent. Returns an error message, or null on success.
+     * Mark a transaction paid and apply what it paid for, after checking the
+     * gateway really reports a successful charge for at least the order total
+     * in naira. Idempotent. Returns an error message, or null on success.
      */
     private function complete(BillingTransaction $txn, array $data, ?User $actor): ?string
     {
@@ -213,20 +333,26 @@ final class BillingAction
         $txn->setStatus(BillingTransaction::SUCCESS);
         $txn->setChannel((string) ($data['channel'] ?? 'card'));
         $txn->setPaidAt(new DateTimeImmutable());
-        $sub = $this->activate($txn->getInstitution(), $txn->getPlan());
+        $sub = $this->subscriptions->apply($txn);
 
         $recipient = $actor ?? $txn->getInitiatedBy();
         if ($recipient !== null) {
+            $plan = $txn->getPlan()->getName();
+            $amount = '₦' . number_format($txn->getAmountKobo() / 100, $txn->getAmountKobo() % 100 === 0 ? 0 : 2);
             $this->notify->notify(
                 $recipient,
                 'billing',
-                'Payment received, ' . $txn->getPlan()->getName() . ' plan',
-                'We received your payment of ₦' . number_format($txn->getAmountKobo() / 100) . '. Your subscription is active until ' . $sub->getPeriodEnd()->format('j M Y') . '.',
-                \App\Application\Support\Portal::link($recipient, '/management/billing'),
+                $txn->getKind() === 'upgrade' ? 'Payment received, upgraded to ' . $plan : 'Payment received, ' . $plan . ' plan',
+                $txn->getKind() === 'upgrade'
+                    ? sprintf('We received your payment of %s (receipt %s). The %s plan and its limits apply from now. Your term ends on %s.', $amount, $txn->getReference(), $plan, $sub->getPeriodEnd()->format('j M Y'))
+                    : sprintf('We received your payment of %s (receipt %s). Your subscription is paid until %s.', $amount, $txn->getReference(), $sub->paidUntil()->format('j M Y')),
+                Portal::link($recipient, '/management/billing'),
             );
         }
         $this->em->flush();
-        $this->audit->log('billing.paid', $actor, 'BillingTransaction', (string) $txn->getId(), null, ['reference' => $txn->getReference(), 'channel' => $data['channel'] ?? null]);
+        $this->audit->log('billing.paid', $actor, 'BillingTransaction', (string) $txn->getId(), null, [
+            'reference' => $txn->getReference(), 'channel' => $data['channel'] ?? null, 'kind' => $txn->getKind(), 'paid_until' => $sub->paidUntil()->format(DATE_ATOM),
+        ]);
 
         return null;
     }
@@ -248,15 +374,12 @@ final class BillingAction
         return null;
     }
 
-    /** GET /billing/transactions, invoice history for the institution. */
+    /** GET /billing/transactions, the organisation's invoices and receipts. */
     public function transactions(Request $request, Response $response): Response
     {
-        if (($guard = $this->adminGuard($request, $response)) !== null) {
-            return $guard;
-        }
-        $institution = $this->resolveInstitution($request, $this->em);
-        if ($institution === null) {
-            return Json::error($response, 'No institution in scope.', 422);
+        [$institution, $deny] = $this->scope($request, $response);
+        if ($deny !== null) {
+            return $deny;
         }
         $rows = $this->em->getRepository(BillingTransaction::class)->findBy(['institution' => $institution], ['createdAt' => 'DESC']);
 
@@ -265,34 +388,30 @@ final class BillingAction
 
     // --- helpers ---
 
-    private function currentSubscription(Institution $institution): ?Subscription
+    /** The billing period asked for, when one was. */
+    private function interval(array $body): ?string
     {
-        return $this->em->getRepository(Subscription::class)->findOneBy(['institution' => $institution], ['id' => 'DESC']);
+        $v = trim((string) ($body['interval'] ?? ''));
+
+        return $v === '' ? null : $v;
     }
 
-    /** Grant or extend the institution's subscription for one paid period. */
-    private function activate(Institution $institution, SubscriptionPlan $plan): Subscription
+    /**
+     * The organisation the caller manages billing for, or the refusal.
+     *
+     * @return array{0: Institution|null, 1: Response|null}
+     */
+    private function scope(Request $request, Response $response): array
     {
-        $now = new DateTimeImmutable();
-        $sub = $this->currentSubscription($institution);
-
-        if ($sub === null) {
-            $sub = new Subscription($institution, $plan, $now, $now->add($plan->periodInterval()));
-            $this->em->persist($sub);
-            return $sub;
+        if (($guard = $this->adminGuard($request, $response)) !== null) {
+            return [null, $guard];
+        }
+        $institution = $this->resolveInstitution($request, $this->em);
+        if ($institution === null) {
+            return [null, Json::error($response, 'No institution in scope.', 422)];
         }
 
-        $sub->setPlan($plan);
-        $sub->setCancelled(false);
-        if ($sub->getPeriodEnd() > $now) {
-            // still within the paid window (or renewing early) → stack onto the remaining time
-            $sub->setPeriodEnd($sub->getPeriodEnd()->add($plan->periodInterval()));
-        } else {
-            // lapsed → start a fresh period from today
-            $sub->setPeriodStart($now);
-            $sub->setPeriodEnd($now->add($plan->periodInterval()));
-        }
-        return $sub;
+        return [$institution, null];
     }
 
     private function adminGuard(Request $request, Response $response): ?Response

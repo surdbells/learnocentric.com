@@ -15,6 +15,7 @@ class AuthService
     public function __construct(
         private readonly EntityManagerInterface $em,
         private readonly PasswordService $passwords,
+        private readonly \App\Service\Billing\SubscriptionService $subscriptions,
     ) {
     }
 
@@ -64,6 +65,14 @@ class AuthService
             throw new RuntimeException("Unknown role: {$roleCode}");
         }
 
+        // The plan's user limits: a new login needs a free place of its kind.
+        $institution = !empty($data['institutionId'])
+            ? $this->em->getRepository(Institution::class)->find((int) $data['institutionId'])
+            : null;
+        if ($institution !== null && ($full = $this->subscriptions->limitRefusal($institution, $role->effectiveCode())) !== null) {
+            throw new RuntimeException($full);
+        }
+
         $user = new User($data['email'], $data['firstName'], $data['lastName'], $role);
         $user->setPasswordHash($this->passwords->hash($data['password']));
         $user->setPhone($data['phone'] ?? null);
@@ -73,8 +82,7 @@ class AuthService
             $user->markEmailVerified();
         }
 
-        if (!empty($data['institutionId'])) {
-            $institution = $this->em->getRepository(Institution::class)->find((int) $data['institutionId']);
+        if ($institution !== null) {
             $user->setInstitution($institution);
         }
 

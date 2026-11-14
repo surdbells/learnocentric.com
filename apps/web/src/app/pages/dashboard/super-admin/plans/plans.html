@@ -2,51 +2,100 @@
   <app-learno-button text="New Plan" icon="add" (clicked)="openCreate()"/>
 </app-page-header>
 
+<p class="text-body-secondary small mb-4">
+  A plan buys one organisation account and its user limits. Plans marked <strong>Draft</strong> are not on sale: organisations
+  cannot see or buy them until you put them on sale. Organisations already on a plan keep it and can renew it even after it is taken off sale.
+</p>
+
 <app-learno-modal [modalId]="'plan_form'" [modalAction]="editing() ? 'Edit Plan' : 'New Plan'" [showBtn]="false">
   <form modalForm [formGroup]="form" (ngSubmit)="save()">
     <div class="modal-body">
       <div class="row">
         <div class="col-lg-4 mb-3">
           <label class="form-label" for="pl_code">Code</label>
-          <input id="pl_code" type="text" class="form-control" formControlName="code" placeholder="e.g. premium"/>
+          <input id="pl_code" type="text" class="form-control" formControlName="code" placeholder="e.g. school_growth"/>
         </div>
-        <div class="col-lg-8 mb-3">
+        <div class="col-lg-5 mb-3">
           <label class="form-label" for="pl_name">Name</label>
           <input id="pl_name" type="text" class="form-control" formControlName="name"/>
         </div>
-        <div class="col-lg-4 mb-3">
-          <label class="form-label" for="pl_price">Price (₦)</label>
-          <input id="pl_price" type="number" class="form-control" formControlName="priceNaira"/>
-        </div>
-        <div class="col-lg-4 mb-3">
-          <label class="form-label" for="pl_interval">Interval</label>
-          <select id="pl_interval" class="form-select" formControlName="interval">
-            <option value="monthly">Monthly</option>
-            <option value="termly">Termly</option>
-            <option value="yearly">Yearly</option>
+        <div class="col-lg-3 mb-3">
+          <label class="form-label" for="pl_aud">Sold to</label>
+          <select id="pl_aud" class="form-select" formControlName="audience">
+            <option value="school">Schools</option>
+            <option value="academy">Academies</option>
           </select>
         </div>
-        <div class="col-lg-4 mb-3 d-flex align-items-end">
+
+        <div class="col-12 mb-3">
           <div class="form-check">
-            <input id="pl_active" type="checkbox" class="form-check-input" formControlName="isActive"/>
-            <label class="form-check-label" for="pl_active">Active (offered to institutions)</label>
+            <input id="pl_custom" type="checkbox" class="form-check-input" formControlName="isCustom"/>
+            <label class="form-check-label" for="pl_custom">Custom quote (agreed in a contract; shown to organisations but not bought online)</label>
           </div>
         </div>
-        <div class="col-lg-6 mb-3">
-          <label class="form-label" for="pl_maxs">Max students (blank = unlimited)</label>
-          <input id="pl_maxs" type="number" class="form-control" formControlName="maxStudents"/>
+
+        @if (!form.value.isCustom) {
+          <div class="col-lg-4 mb-3">
+            <label class="form-label" for="pl_interval">Standard billing period</label>
+            <select id="pl_interval" class="form-select" formControlName="interval">
+              <option value="termly">Term (4 months)</option>
+              <option value="monthly">Month</option>
+              <option value="yearly">Year</option>
+              <option value="cohort">Cohort (fixed number of days)</option>
+            </select>
+          </div>
+          <div class="col-lg-4 mb-3">
+            <label class="form-label" for="pl_price">Price per {{ intervalLabel(form.value.interval || 'termly') }} (₦)</label>
+            <input id="pl_price" type="number" min="0" class="form-control" formControlName="priceNaira"/>
+          </div>
+          @if (form.value.interval === 'cohort') {
+            <div class="col-lg-4 mb-3">
+              <label class="form-label" for="pl_days">Cohort length (days)</label>
+              <input id="pl_days" type="number" min="1" class="form-control" formControlName="periodDays" placeholder="42"/>
+            </div>
+          } @else if (form.value.interval !== 'yearly') {
+            <div class="col-lg-4 mb-3">
+              <label class="form-label" for="pl_annual">Annual price (₦, optional)</label>
+              <input id="pl_annual" type="number" min="0" class="form-control" formControlName="annualNaira" placeholder="Blank: not offered yearly"/>
+            </div>
+          }
+        }
+
+        <div class="col-lg-3 col-6 mb-3">
+          <label class="form-label" for="pl_maxs">Learners</label>
+          <input id="pl_maxs" type="number" min="0" class="form-control" formControlName="maxStudents" placeholder="No limit"/>
         </div>
-        <div class="col-lg-6 mb-3">
-          <label class="form-label" for="pl_maxt">Max teachers (blank = unlimited)</label>
-          <input id="pl_maxt" type="number" class="form-control" formControlName="maxTeachers"/>
+        <div class="col-lg-3 col-6 mb-3">
+          <label class="form-label" for="pl_maxt">Teachers / tutors</label>
+          <input id="pl_maxt" type="number" min="0" class="form-control" formControlName="maxTeachers" placeholder="No limit"/>
         </div>
-        <div class="col-lg-12 mb-3">
-          <label class="form-label" for="pl_feat">Features (one per line)</label>
+        <div class="col-lg-3 col-6 mb-3">
+          <label class="form-label" for="pl_maxa">Administrators</label>
+          <input id="pl_maxa" type="number" min="0" class="form-control" formControlName="maxAdmins" placeholder="No limit"/>
+        </div>
+        <div class="col-lg-3 col-6 mb-3">
+          <label class="form-label" for="pl_storage">Own file storage (GB)</label>
+          <input id="pl_storage" type="number" min="0" class="form-control" formControlName="storageGb" placeholder="Not set"/>
+        </div>
+        <div class="col-12 mb-3 small text-body-secondary">
+          User limits count named users enabled for access (parents are not counted). Disabling a login frees its place. Leave a limit blank for no limit.
+        </div>
+
+        <div class="col-lg-8 mb-3">
+          <label class="form-label" for="pl_feat">What is included (one per line)</label>
           <textarea id="pl_feat" class="form-control" rows="4" formControlName="features"></textarea>
+        </div>
+        <div class="col-lg-4 mb-3">
+          <label class="form-label" for="pl_order">Display order</label>
+          <input id="pl_order" type="number" class="form-control" formControlName="sortOrder"/>
+          <div class="form-check mt-3">
+            <input id="pl_active" type="checkbox" class="form-check-input" formControlName="isActive"/>
+            <label class="form-check-label" for="pl_active">On sale</label>
+          </div>
         </div>
         <div class="col-lg-12 mb-1">
           <label class="form-label d-block">Modules unlocked by this plan</label>
-          <div class="small text-body-secondary mb-2">Only the modules you tick are available to schools on this plan. Core tools (roster, curriculum authoring, learning, billing) are always included.</div>
+          <div class="small text-body-secondary mb-2">Only the modules you tick are available on this plan. Core tools (roster, curriculum authoring, learning, billing, safeguarding) are always included.</div>
           <div class="row g-2">
             @for (m of allModules; track m.key) {
               <div class="col-md-6">
@@ -73,42 +122,59 @@
 } @else if (!plans().length) {
   <div class="card border-0 shadow-sm p-5 text-center text-body-secondary">No plans yet. Click “New Plan”.</div>
 } @else {
-  <div class="row g-3">
-    @for (p of plans(); track p.id) {
-      <div class="col-md-4">
-        <div class="card border-0 shadow-sm h-100" [class.opacity-50]="!p.is_active">
-          <div class="card-body d-flex flex-column">
-            <div class="d-flex justify-content-between align-items-start">
-              <h5 class="fw-semibold mb-0">{{ p.name }}</h5>
-              <span class="badge" [class.bg-success-subtle]="p.is_active" [class.text-success]="p.is_active"
-                    [class.bg-secondary-subtle]="!p.is_active" [class.text-secondary]="!p.is_active">
-                {{ p.is_active ? 'Active' : 'Inactive' }}
-              </span>
-            </div>
-            <div class="small text-body-secondary">{{ p.code }}</div>
-            <div class="my-2"><span class="fs-4 fw-bold">₦{{ p.price_naira | number }}</span><span class="small text-body-secondary"> / {{ p.interval }}</span></div>
-            <div class="small text-body-secondary mb-2">
-              {{ p.max_students ? p.max_students + ' students' : 'Unlimited students' }} ·
-              {{ p.max_teachers ? p.max_teachers + ' teachers' : 'Unlimited teachers' }}
-            </div>
-            <div class="d-flex flex-wrap gap-1 mb-3">
-              @if (p.modules?.length) {
-                @for (m of p.modules; track m) {
-                  <span class="badge bg-primary-subtle text-primary fw-normal">{{ moduleLabel(m) }}</span>
-                }
-              } @else {
-                <span class="small text-body-secondary fst-italic">Core modules only</span>
-              }
-            </div>
-            <div class="mt-auto d-flex gap-2">
-              <button type="button" class="btn btn-sm btn-outline-primary" (click)="openEdit(p)">Edit</button>
-              @if (p.is_active) {
-                <button type="button" class="btn btn-sm btn-outline-danger" (click)="deactivate(p)">Deactivate</button>
-              }
+  @for (aud of ['school', 'academy']; track aud) {
+    @if (plansFor(aud).length) {
+      <h6 class="fw-semibold mb-3 mt-2">{{ audienceLabel(aud) }}</h6>
+      <div class="row g-3 mb-4">
+        @for (p of plansFor(aud); track p.id) {
+          <div class="col-md-6 col-xl-4">
+            <div class="card border-0 shadow-sm h-100">
+              <div class="card-body d-flex flex-column">
+                <div class="d-flex justify-content-between align-items-start gap-2">
+                  <h5 class="fw-semibold mb-0">{{ p.name }}</h5>
+                  <span class="badge" [class.bg-success-subtle]="p.is_active" [class.text-success]="p.is_active"
+                        [class.bg-secondary-subtle]="!p.is_active" [class.text-secondary]="!p.is_active">
+                    {{ p.is_active ? 'On sale' : 'Draft' }}
+                  </span>
+                </div>
+                <div class="small text-body-secondary">{{ p.code }}</div>
+                <div class="my-2">
+                  @if (p.is_custom) {
+                    <span class="fs-5 fw-bold">Custom quote</span>
+                  } @else {
+                    <span class="fs-4 fw-bold">₦{{ p.price_naira | number }}</span><span class="small text-body-secondary"> / {{ intervalLabel(p.interval) }}</span>
+                    @if (p.interval === 'cohort' && p.period_days) { <span class="small text-body-secondary"> ({{ p.period_days }} days)</span> }
+                    @if (p.annual_price_naira) { <div class="small text-body-secondary">₦{{ p.annual_price_naira | number }} / year</div> }
+                  }
+                </div>
+                <div class="small text-body-secondary mb-2">
+                  {{ p.max_students != null ? (p.max_students | number) + ' learners' : 'No learner limit' }} ·
+                  {{ p.max_teachers != null ? p.max_teachers + ' teachers' : 'no teacher limit' }} ·
+                  {{ p.max_admins != null ? p.max_admins + ' admins' : 'no admin limit' }}
+                  @if (p.storage_gb) { · {{ p.storage_gb }} GB own files }
+                </div>
+                <div class="d-flex flex-wrap gap-1 mb-3">
+                  @if (p.modules?.length) {
+                    @for (m of p.modules; track m) {
+                      <span class="badge bg-primary-subtle text-primary fw-normal">{{ moduleLabel(m) }}</span>
+                    }
+                  } @else {
+                    <span class="small text-body-secondary fst-italic">Core modules only</span>
+                  }
+                </div>
+                <div class="mt-auto d-flex gap-2">
+                  <button type="button" class="btn btn-sm btn-outline-primary" (click)="openEdit(p)">Edit</button>
+                  @if (p.is_active) {
+                    <button type="button" class="btn btn-sm btn-outline-danger" (click)="deactivate(p)">Take off sale</button>
+                  } @else {
+                    <button type="button" class="btn btn-sm btn-outline-success" (click)="publish(p)">Put on sale</button>
+                  }
+                </div>
+              </div>
             </div>
           </div>
-        </div>
+        }
       </div>
     }
-  </div>
+  }
 }
