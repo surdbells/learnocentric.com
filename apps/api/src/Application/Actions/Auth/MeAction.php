@@ -53,6 +53,16 @@ final class MeAction
     private function subscriptionState(User $user): ?array
     {
         $institution = $user->getInstitution();
+        if ($institution !== null && $institution->isAwaitingPayment()) {
+            return [
+                'status' => 'awaiting_payment',
+                'awaiting_payment' => true,
+                'suspended' => false,
+                'message' => null,
+                'manages_billing' => in_array($user->getRole()->effectiveCode(), ['school_admin', 'tutor_admin'], true),
+                'organisation' => $institution->getName(),
+            ];
+        }
         $sub = $institution === null ? null : $this->subscriptions->current($institution);
         if ($institution === null || $sub === null) {
             return null;

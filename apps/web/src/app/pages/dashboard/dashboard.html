@@ -24,7 +24,16 @@
             <a class="btn btn-sm btn-{{ n.tone === 'info' ? 'outline-primary' : n.tone }}" [routerLink]="billingLink()">Go to Billing</a>
           </div>
         }
-        @if (suspended()) {
+        @if (awaitingPayment() && !onBilling()) {
+          <div class="card border-0 shadow-sm mx-auto my-4" style="max-width: 42rem">
+            <div class="card-body p-4 text-center">
+              <app-icon name="credit_card" [size]="32" class="text-success mb-2" />
+              <h5 class="fw-semibold mb-2">Welcome to Learnocentric</h5>
+              <p class="text-body-secondary">Your account for {{ subscriptionOrg() }} is created. Choose a plan and complete the payment to open it; you can then set up classes, add teachers and invite learners.</p>
+              <a class="btn btn-success" [routerLink]="billingLink()">Choose a plan</a>
+            </div>
+          </div>
+        } @else if (suspended()) {
           <div class="card border-0 shadow-sm mx-auto my-4" style="max-width: 40rem">
             <div class="card-body p-4 text-center">
               <app-icon name="lock" [size]="32" class="text-body-secondary mb-2" />

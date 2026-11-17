@@ -76,7 +76,7 @@ final class SystemSettingsAction
             }
         }
 
-        if (is_array($body['registration'] ?? null)) {
+        if (is_array($body['registration'] ?? null)) { // includes allow_org_signup
             foreach (array_keys($defaults['registration']) as $k) {
                 if (array_key_exists($k, $body['registration'])) {
                     $current['registration'][$k] = (bool) $body['registration'][$k];

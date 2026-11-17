@@ -103,8 +103,8 @@
       <app-data-table
         [shouldShowCheckbox]="false"
         [shouldShowLogoorIcon]="true"
-        [tableHeads]="['Name', 'Type', 'Email', 'Phone']"
-        [dataFields]="['name', 'type', 'email', 'phone', 'id']"
+        [tableHeads]="['Name', 'Type', 'Email', 'Phone', 'Status']"
+        [dataFields]="['name', 'type', 'email', 'phone', 'statusLabel', 'id']"
         [tableRows]="filteredInstitutions()"
         [pageSize]="pageSize()"
         [currentPage]="currentPage()"

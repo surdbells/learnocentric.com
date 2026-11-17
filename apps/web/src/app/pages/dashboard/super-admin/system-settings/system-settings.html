@@ -112,6 +112,22 @@
       </div>
     </div>
 
+    <!-- Online sign-up for organisations -->
+    @if (model.registration) {
+      <div class="col-12">
+        <div class="card border-0 shadow-sm">
+          <div class="card-body">
+            <h6 class="fw-semibold mb-1"><app-icon name="add" [size]="18" class="me-1 text-body-secondary" /> Online sign-up for schools and academies</h6>
+            <div class="form-check form-switch mt-2">
+              <input class="form-check-input" type="checkbox" id="reg_org" [(ngModel)]="model.registration.allow_org_signup" />
+              <label class="form-check-label fw-medium" for="reg_org">Let schools and academies create their own account on the website</label>
+            </div>
+            <div class="small text-body-secondary">They pay before service begins: only Billing is open until the first payment is verified. A kind of organisation is offered sign-up only while it has a plan on sale. When it is off, the website sends them to Contact us.</div>
+          </div>
+        </div>
+      </div>
+    }
+
     <!-- Billing rules -->
     @if (model.billing) {
       <div class="col-12">

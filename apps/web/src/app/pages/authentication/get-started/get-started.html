@@ -1,0 +1,101 @@
+<div class="auth">
+  <aside class="auth-brand d-none d-lg-flex">
+    <div class="auth-brand-inner">
+      <img class="auth-brand-logo" src="images/logo/logowhite.png" alt="Learnocentric" />
+      <h2 class="auth-brand-title">Bring your school onto Learnocentric.</h2>
+      <p class="auth-brand-text">Create your account, choose a plan, and you are ready to set up classes, teachers and learners.</p>
+      <img class="auth-brand-art" src="images/pictureoverlay.png" alt="" />
+    </div>
+  </aside>
+
+  <main class="auth-form">
+    <div class="auth-card">
+      <img class="auth-card-logo d-lg-none" src="images/logo/logoblack.png" alt="Learnocentric" />
+
+      @if (loading()) {
+        <p class="text-body-secondary">Loading…</p>
+      } @else if (pendingEmail()) {
+        <h1 class="auth-title">Check your email</h1>
+        <div class="alert alert-success text-start mt-4">
+          We've sent a confirmation link to <strong>{{ pendingEmail() }}</strong>. Open it, then sign in to choose your plan and open your account.
+        </div>
+        <p class="small text-body-secondary">Nothing after a few minutes? Check your spam folder, or sign in with your email and password to have it sent again.</p>
+        <a routerLink="/login" class="btn btn-success w-100 mt-2">Go to sign in</a>
+      } @else if (!kinds().length) {
+        <h1 class="auth-title">Get started</h1>
+        <p class="text-body-secondary mt-3">Online sign-up isn't open at the moment. Tell us about your school and we'll set up your account with you.</p>
+        <a routerLink="/contact" class="btn btn-success w-100 mt-2">Contact us</a>
+      } @else {
+        <h1 class="auth-title">Create your {{ noun() }}'s account</h1>
+        <p class="text-body-secondary mb-4">You'll choose a plan next. Your account opens as soon as the payment is confirmed.</p>
+
+        <form [formGroup]="form" (ngSubmit)="submit()" class="text-start" novalidate>
+          @if (kinds().length > 1) {
+            <div class="mb-3">
+              <label class="form-label d-block" id="kind_label">We are a</label>
+              <div class="btn-group w-100" role="group" aria-labelledby="kind_label">
+                @for (k of kinds(); track k.value) {
+                  <input type="radio" class="btn-check" [id]="'kind_' + k.value" [value]="k.value" formControlName="type" />
+                  <label class="btn btn-outline-success" [for]="'kind_' + k.value">{{ k.label }}</label>
+                }
+              </div>
+            </div>
+          }
+
+          <div class="mb-3">
+            <label class="form-label" for="orgName">{{ noun() === 'academy' ? 'Academy' : 'School' }} name</label>
+            <input id="orgName" formControlName="organisationName" class="form-control form-control-lg" autocomplete="organization" />
+          </div>
+
+          <div class="row g-3 mb-3">
+            <div class="col-6">
+              <label class="form-label" for="firstName">Your first name</label>
+              <input id="firstName" formControlName="firstName" class="form-control form-control-lg" autocomplete="given-name" />
+            </div>
+            <div class="col-6">
+              <label class="form-label" for="lastName">Last name</label>
+              <input id="lastName" formControlName="lastName" class="form-control form-control-lg" autocomplete="family-name" />
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label" for="email">Work email</label>
+            <input id="email" type="email" formControlName="email" class="form-control form-control-lg" placeholder="you@yourschool.edu" autocomplete="email" />
+            <div class="form-text">You'll sign in with this as the {{ noun() }}'s administrator.</div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label" for="phone">Phone <span class="text-body-secondary fw-normal">(optional)</span></label>
+            <input id="phone" type="tel" formControlName="phone" class="form-control form-control-lg" autocomplete="tel" />
+          </div>
+
+          <div class="row g-3 mb-4">
+            <div class="col-sm-6">
+              <label class="form-label" for="password">Password</label>
+              <input id="password" type="password" formControlName="password" class="form-control form-control-lg" [placeholder]="'At least ' + minLength() + ' characters'" autocomplete="new-password" />
+            </div>
+            <div class="col-sm-6">
+              <label class="form-label" for="confirm">Confirm password</label>
+              <input id="confirm" type="password" formControlName="confirm" class="form-control form-control-lg" autocomplete="new-password" />
+            </div>
+          </div>
+
+          <!-- Honeypot: off-screen and skipped by keyboards and screen readers; only bots fill it. -->
+          <div aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden">
+            <label for="gs_website">Website</label>
+            <input id="gs_website" type="text" tabindex="-1" autocomplete="off" formControlName="website" />
+          </div>
+
+          <app-learno-button text="Create account" [isLoading]="isLoading()" />
+        </form>
+      }
+
+      <p class="small text-body-secondary text-center mt-4 mb-0">
+        Already have an account? <a routerLink="/login" class="fw-semibold">Sign in</a>
+      </p>
+      <p class="small text-body-secondary text-center mt-2 mb-0">
+        Joining a school as a learner or parent? <a routerLink="/register" class="fw-semibold">Use your join code</a>
+      </p>
+    </div>
+  </main>
+</div>

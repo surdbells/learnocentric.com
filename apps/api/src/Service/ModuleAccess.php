@@ -79,6 +79,10 @@ final class ModuleAccess
     {
         $sub = $this->currentSubscription($institution);
 
+        // Signed itself up and not yet paid → nothing until the first payment.
+        if ($institution->isAwaitingPayment()) {
+            return [];
+        }
         // Never subscribed → open trial. Assigned-but-expired → locked down.
         if ($sub === null) {
             return $this->everSubscribed($institution) ? [] : $this->withoutDisabled(SubscriptionPlan::MODULES);

@@ -25,6 +25,8 @@ class PlatformSettings
         'registration' => [
             // Master switch: schools can only open join-code sign-up when this is on.
             'allow_self_signup' => false,
+            // Schools and academies may sign themselves up on the public website (they pay before service begins).
+            'allow_org_signup' => true,
             'require_email_verification' => true,
         ],
         'feature_flags' => [

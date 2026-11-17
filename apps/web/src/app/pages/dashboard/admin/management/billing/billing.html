@@ -29,7 +29,10 @@
           <div>
             <div class="small text-body-secondary">Current plan</div>
             <h5 class="fw-semibold mb-1">No subscription yet</h5>
-            <div class="small text-body-secondary">Choose a plan below. Your account is activated as soon as the payment is verified.</div>
+            <div class="small text-body-secondary">
+              Choose a plan below. Your account is activated as soon as the payment is verified.
+              @if (state()?.awaiting_payment) { Until then, Billing is the only part of the account that is open. }
+            </div>
           </div>
         }
         <div class="text-end">

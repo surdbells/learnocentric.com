@@ -315,7 +315,7 @@ class SeedCommand extends Command
 
         // Both institution types: a regular school and a tutoring academy.
         $school = $this->ensureInstitution('GOF College', 'school', 'Lagos, Nigeria');
-        $academy = $this->ensureInstitution('Bright Minds Academy', 'academy', 'Abuja, Nigeria');
+        $academy = $this->ensureInstitution('Bright Minds Academy', 'tutoring_academy', 'Abuja, Nigeria');
 
         // [email, first, last, role, institution, phone]
         $accounts = [

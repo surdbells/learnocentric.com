@@ -7,7 +7,7 @@ import {ModuleAccessService} from '../../common/auth/module-access.service';
 import {BrandThemeService} from '../../common/service/brand-theme.service';
 import {Sidenav} from '../../common/layout/sidenav/sidenav';
 import {Topbar} from '../../common/layout/topbar/topbar';
-import {RouterLink} from '@angular/router';
+import {NavigationEnd, Router, RouterLink} from '@angular/router';
 import {roleRoot} from '../../common/auth/portal';
 import {Icon} from '../../common/icon/icon';
 
@@ -24,13 +24,23 @@ export class Dashboard implements OnInit {
 
   private readonly moduleAccess = inject(ModuleAccessService);
   private readonly brandTheme = inject(BrandThemeService);
+  private readonly router = inject(Router);
   private readonly fullMenu = signal<IMenu[]>([]);
 
   /** Menu with items the current plan doesn't grant filtered out. */
-  readonly menu = computed<IMenu[]>(() => this.filterByModules(this.fullMenu()));
+  readonly menu = computed<IMenu[]>(() => this.awaitingPayment()
+    // Before the first payment only Billing is open, so it is the only entry.
+    ? [{name: 'Billing', icon: 'credit_card', link: this.billingLink()}]
+    : this.filterByModules(this.fullMenu()));
 
   /** Students get a fully-expanded, non-collapsible menu (all items always visible). */
   readonly alwaysOpenMenu = signal<boolean>(false);
+
+  /** Signed up online and not paid yet: only Billing is open until the first payment is verified. */
+  readonly awaitingPayment = computed(() => !!this.moduleAccess.subscription()?.awaiting_payment);
+  private readonly url = signal('');
+  readonly onBilling = computed(() => this.url().includes('/management/billing'));
+  readonly subscriptionOrg = computed(() => this.moduleAccess.subscription()?.organisation ?? 'your organisation');
 
   /** Tutors, learners and parents whose school's subscription has ended see why, instead of pages that fail. */
   readonly suspended = computed(() => !!this.moduleAccess.subscription()?.suspended);
@@ -67,6 +77,8 @@ export class Dashboard implements OnInit {
     if (isPlatformBrowser(platformId)) {
       const user: AuthUser = JSON.parse(localStorage.getItem('auth_user') || '{}');
       this.role = user.role ?? '';
+      this.url.set(this.router.url);
+      this.router.events.subscribe(e => { if (e instanceof NavigationEnd) this.url.set(e.urlAfterRedirects); });
       this.fullMenu.set(this.userPreferenceMenu[user.role] ?? []);
       this.alwaysOpenMenu.set(user.role === 'student');
       // Re-apply the school's brand colour straight away (no green flash on reload).

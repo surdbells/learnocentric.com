@@ -116,6 +116,9 @@ final class SubscriptionService
      */
     public function limitRefusal(Institution $institution, string $effectiveRoleCode): ?string
     {
+        if ($institution->isAwaitingPayment() && $effectiveRoleCode !== $institution->adminRoleCode()) {
+            return 'Choose a plan and complete the payment under Billing first. You can add teachers and learners as soon as the account is open.';
+        }
         if (!$this->settings->bool('billing.enforce_user_limits')) {
             return null;
         }
@@ -175,7 +178,7 @@ final class SubscriptionService
         $status = $sub?->status($now);
         $current = $sub?->getPlan();
         $isCurrent = $current !== null && $current->getId() === $plan->getId();
-        $audience = $institution->getType() === 'academy' ? 'academy' : 'school';
+        $audience = $institution->isAcademy() ? 'academy' : 'school';
 
         $refuse = static fn (string $why): array => ['ok' => false, 'error' => $why];
 
@@ -313,6 +316,7 @@ final class SubscriptionService
         $kind = $txn->getBillingInterval() ?? $plan->getInterval();
         $sub = $this->current($institution, $now);
 
+        $institution->setAwaitingPayment(false);
         if ($sub === null) {
             $sub = new Subscription($institution, $plan, $now, $plan->periodEndFrom($now, $kind));
             $sub->setBillingInterval($kind);
@@ -377,7 +381,8 @@ final class SubscriptionService
             'renewal_open' => $sub !== null && $status === Subscription::ACTIVE && !$sub->hasPaidAhead() && $this->renewalOpen($sub, $now),
             'renewal_opens_on' => $sub !== null && $status === Subscription::ACTIVE
                 ? $sub->getPeriodEnd()->modify('-' . self::RENEWAL_WINDOW_DAYS . ' days')->format(DATE_ATOM) : null,
-            'audience' => $institution->getType() === 'academy' ? 'academy' : 'school',
+            'audience' => $institution->isAcademy() ? 'academy' : 'school',
+            'awaiting_payment' => $institution->isAwaitingPayment(),
             'tax_percent' => $this->taxPercent(),
         ];
     }
@@ -385,6 +390,9 @@ final class SubscriptionService
     /** Is tutor and learner access suspended for this organisation right now? */
     public function isSuspended(Institution $institution, ?DateTimeImmutable $now = null): bool
     {
+        if ($institution->isAwaitingPayment()) {
+            return true;
+        }
         if (!$this->settings->bool('billing.suspend_after_grace')) {
             return false;
         }

@@ -54,6 +54,14 @@ class Institution
     #[ORM\Column(name: 'self_signup', type: Types::BOOLEAN, options: ['default' => false])]
     private bool $selfSignup = false;
 
+    /** How the organisation came to the platform: "platform" (set up by the platform owner) or "self" (signed itself up). */
+    #[ORM\Column(name: 'signup_source', length: 20, options: ['default' => 'platform'])]
+    private string $signupSource = 'platform';
+
+    /** A self-signed-up organisation stays closed, except for billing, until its first payment is verified. */
+    #[ORM\Column(name: 'awaiting_payment', type: Types::BOOLEAN, options: ['default' => false])]
+    private bool $awaitingPayment = false;
+
     /** Code people enter on the public sign-up page; never the raw institution id. */
     #[ORM\Column(name: 'join_code', length: 16, unique: true, nullable: true)]
     private ?string $joinCode = null;
@@ -109,6 +117,17 @@ class Institution
     public function getAdminContact(): ?array { return $this->adminContact; }
     public function setAdminContact(?array $adminContact): void { $this->adminContact = $adminContact; }
     public function getStatus(): string { return $this->status; }
+
+    /** Academies are stored as "tutoring_academy"; older rows may say "academy". */
+    public function isAcademy(): bool { return in_array($this->type, ['tutoring_academy', 'academy'], true); }
+
+    /** The administrator role an organisation of this kind is run by. */
+    public function adminRoleCode(): string { return $this->isAcademy() ? Role::TUTOR_ADMIN : Role::SCHOOL_ADMIN; }
+
+    public function getSignupSource(): string { return $this->signupSource; }
+    public function setSignupSource(string $v): void { $this->signupSource = in_array($v, ['platform', 'self'], true) ? $v : 'platform'; }
+    public function isAwaitingPayment(): bool { return $this->awaitingPayment; }
+    public function setAwaitingPayment(bool $v): void { $this->awaitingPayment = $v; }
     public function setStatus(string $status): void { $this->status = $status; }
     public function getAssignedPackageId(): ?int { return $this->assignedPackageId; }
     public function setAssignedPackageId(?int $id): void
@@ -170,6 +189,8 @@ class Institution
             'assigned_package_id' => $this->assignedPackageId,
             'assigned_package_at' => $this->assignedPackageAt?->format(DATE_ATOM),
             'status' => $this->status,
+            'signup_source' => $this->signupSource,
+            'awaiting_payment' => $this->awaitingPayment,
             'created_at' => $this->createdAt->format(DATE_ATOM),
             'updated_at' => $this->updatedAt->format(DATE_ATOM),
         ];

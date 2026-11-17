@@ -34,6 +34,9 @@ final class SubscriptionGateMiddleware implements MiddlewareInterface
     /** What a suspended user can still reach: their own session, account and notifications. */
     private const ALLOWED = ['/auth/', '/notifications', '/school/profile', '/files'];
 
+    /** What the administrator of an organisation awaiting its first payment can reach. */
+    private const ALLOWED_BEFORE_PAYMENT = ['/auth/', '/notifications', '/files', '/billing/', '/admin/institutions/', '/support/'];
+
     public function __construct(private readonly SubscriptionService $subscriptions)
     {
     }
@@ -43,11 +46,29 @@ final class SubscriptionGateMiddleware implements MiddlewareInterface
         /** @var User|null $user */
         $user = $request->getAttribute('user');
         $institution = $user?->getInstitution();
-        if ($user === null || $institution === null || !in_array($user->getRole()->effectiveCode(), self::SUSPENDED_ROLES, true)) {
+        if ($user === null || $institution === null) {
+            return $handler->handle($request);
+        }
+        $path = preg_replace('#^/backend#', '', $request->getUri()->getPath()) ?? '';
+
+        // Signed up online and not paid yet: only billing is open, for everyone.
+        if ($institution->isAwaitingPayment()) {
+            foreach (self::ALLOWED_BEFORE_PAYMENT as $prefix) {
+                if (str_starts_with($path, $prefix)) {
+                    return $handler->handle($request);
+                }
+            }
+
+            return Json::write(new SlimResponse(), [
+                'error' => 'Choose a plan and complete the payment under Billing to open your account.',
+                'code' => 'awaiting_payment',
+            ], 402);
+        }
+
+        if (!in_array($user->getRole()->effectiveCode(), self::SUSPENDED_ROLES, true)) {
             return $handler->handle($request);
         }
 
-        $path = preg_replace('#^/backend#', '', $request->getUri()->getPath()) ?? '';
         foreach (self::ALLOWED as $prefix) {
             if (str_starts_with($path, $prefix)) {
                 return $handler->handle($request);

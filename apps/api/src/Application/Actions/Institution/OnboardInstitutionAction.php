@@ -77,7 +77,7 @@ final class OnboardInstitutionAction
                     'password' => $password,
                     'firstName' => $firstName,
                     'lastName' => $lastName,
-                    'role' => 'school_admin',
+                    'role' => $institution->adminRoleCode(),
                     'institutionId' => $institution->getId(),
                 ]);
             } catch (Throwable $e) {

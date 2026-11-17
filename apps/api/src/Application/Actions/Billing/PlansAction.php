@@ -40,7 +40,7 @@ final class PlansAction
         $user = $request->getAttribute('user');
         $institution = $user?->getInstitution();
         if (!$all && $institution !== null) {
-            $criteria['audience'] = $institution->getType() === 'academy' ? 'academy' : 'school';
+            $criteria['audience'] = $institution->isAcademy() ? 'academy' : 'school';
         }
         $plans = $this->em->getRepository(SubscriptionPlan::class)->findBy($criteria, ['audience' => 'DESC', 'sortOrder' => 'ASC', 'priceKobo' => 'ASC']);
         // The plan an organisation is already on stays listed so it can be renewed,

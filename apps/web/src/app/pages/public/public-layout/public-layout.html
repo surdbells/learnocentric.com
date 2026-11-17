@@ -12,7 +12,7 @@
       </nav>
       <div class="pub-header-cta">
         <a class="pub-btn pub-btn-ghost" routerLink="/login">Sign in</a>
-        <a class="pub-btn pub-btn-primary" routerLink="/contact">Get started</a>
+        <a class="pub-btn pub-btn-primary" routerLink="/get-started">Get started</a>
       </div>
       <button type="button" class="pub-burger" (click)="toggleMenu()"
               [attr.aria-expanded]="menuOpen()" aria-controls="pub-mobile-menu"
@@ -29,7 +29,7 @@
       <a routerLink="/contact" routerLinkActive="active" (click)="closeMenu()">Contact</a>
       <div class="pub-mobile-cta">
         <a class="pub-btn pub-btn-ghost" routerLink="/login" (click)="closeMenu()">Sign in</a>
-        <a class="pub-btn pub-btn-primary" routerLink="/contact" (click)="closeMenu()">Get started</a>
+        <a class="pub-btn pub-btn-primary" routerLink="/get-started" (click)="closeMenu()">Get started</a>
       </div>
     </nav>
   </header>
@@ -45,7 +45,8 @@
         <h2>Give every learner a clear path, and every school the full picture.</h2>
         <p>See LearnoCentric with your own curriculum and classes. Book a walkthrough, or sign in if you already have an account.</p>
         <div class="pub-hero-cta">
-          <a class="pub-btn pub-btn-lg pub-btn-white" routerLink="/contact">Request a demo</a>
+          <a class="pub-btn pub-btn-lg pub-btn-white" routerLink="/get-started">Create your school's account</a>
+          <a class="pub-btn pub-btn-lg pub-btn-outline-white" routerLink="/contact">Request a demo</a>
           <a class="pub-btn pub-btn-lg pub-btn-outline-white" routerLink="/login">Sign in</a>
         </div>
       </div>

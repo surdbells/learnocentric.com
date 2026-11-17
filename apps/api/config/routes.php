@@ -78,6 +78,9 @@ return static function (App $app): void {
         // Second sign-in step, authenticated by the short-lived challenge from /auth/login.
         $group->post('/auth/2fa/verify', \App\Application\Actions\Auth\TwoFactorAction::class . ':verify');
         $group->post('/auth/register', RegisterAction::class);
+        // Self onboarding: a school or academy signs itself up on the public website (pays before service begins).
+        $group->get('/auth/signup-options', \App\Application\Actions\Auth\OrganisationSignupAction::class . ':options');
+        $group->post('/auth/signup-organisation', \App\Application\Actions\Auth\OrganisationSignupAction::class);
         // Public "Contact us" form (honeypot + rate limited).
         $group->post('/contact', \App\Application\Actions\Support\ContactAction::class . ':submit');
         // Account recovery: each is authenticated by an emailed single-use token.

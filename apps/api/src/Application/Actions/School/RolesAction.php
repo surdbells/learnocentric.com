@@ -290,7 +290,7 @@ final class RolesAction
         $codes = [Role::TEACHER, Role::ACADEMIC_LEAD];
         if ($own === Role::SUPER_ADMIN) {
             $inst = $this->resolveInstitution($request, $this->em);
-            $codes[] = $inst?->getType() === 'school' ? Role::SCHOOL_ADMIN : Role::TUTOR_ADMIN;
+            $codes[] = $inst?->adminRoleCode() ?? Role::SCHOOL_ADMIN;
         } else {
             $codes[] = $own;
         }

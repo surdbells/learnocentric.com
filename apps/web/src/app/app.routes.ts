@@ -2,6 +2,7 @@ import { Routes } from '@angular/router';
 import {SignIn} from './pages/authentication/sign-in/sign-in';
 import {Register} from './pages/authentication/register/register';
 import {BillingCallback} from './pages/billing-callback/billing-callback';
+import {GetStarted} from './pages/authentication/get-started/get-started';
 import {TwoFactor} from './pages/account/two-factor/two-factor';
 import {AccountRecovery} from './pages/authentication/account-recovery/account-recovery';
 import {ParentProfile} from './pages/dashboard/parent/profile/parent-profile';
@@ -128,6 +129,7 @@ export const routes: Routes = [
   },
   { path: "login", component: SignIn, title: "Sign in | Learn-O'Centric" },
   { path: "register", component: Register, title: "Create account | Learn-O'Centric" },
+  { path: "get-started", component: GetStarted, title: "Create your school's account | Learn-O'Centric" },
   { path: "forgot-password", component: AccountRecovery, data: { mode: "forgot" }, title: "Forgot password | Learn-O'Centric" },
   { path: "reset-password", component: AccountRecovery, data: { mode: "reset" }, title: "Choose a new password | Learn-O'Centric" },
   { path: "verify-email", component: AccountRecovery, data: { mode: "verify" }, title: "Confirm your email | Learn-O'Centric" },
